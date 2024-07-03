@@ -16,7 +16,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.littletonrobotics.junction.Logger;
+import frc.robot.utils.MapleTimeUtils;
 
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
@@ -37,9 +37,8 @@ public class PhoenixOdometryThread extends Thread {
     private static PhoenixOdometryThread instance = null;
 
     public static PhoenixOdometryThread getInstance() {
-        if (instance == null) {
+        if (instance == null)
             instance = new PhoenixOdometryThread();
-        }
         return instance;
     }
 
@@ -50,9 +49,8 @@ public class PhoenixOdometryThread extends Thread {
 
     @Override
     public void start() {
-        if (timestampQueues.size() > 0) {
+        if (!timestampQueues.isEmpty())
             super.start();
-        }
     }
 
     public Queue<Double> registerSignal(ParentDevice device, StatusSignal<Double> signal) {
@@ -86,9 +84,7 @@ public class PhoenixOdometryThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            updateSignals();
-        }
+        while (true) updateSignals();
     }
 
     private void updateSignals() {
@@ -114,25 +110,25 @@ public class PhoenixOdometryThread extends Thread {
         // Save new data to queues
         Drive.odometryLock.lock();
         try {
-            double timestamp = Logger.getRealTimestamp() / 1e6;
-            double totalLatency = 0.0;
-            for (BaseStatusSignal signal : signals) {
-                totalLatency += signal.getTimestamp().getLatency();
-            }
-            if (signals.length > 0) {
-                timestamp -= totalLatency / signals.length;
-            }
+            final double timeStamp = estimateAverageTimeStamps(signals);
             for (int i = 0; i < signals.length; i++) {
                 queues.get(i).offer(signals[i].getValueAsDouble());
             }
             for (int i = 0; i < timestampQueues.size(); i++) {
-                timestampQueues.get(i).offer(timestamp);
+                timestampQueues.get(i).offer(timeStamp);
             }
         } finally {
             Drive.odometryLock.unlock();
         }
     }
 
-    private static void estimateAverageTimeStamps(BaseStatusSignal[] signals) {
+    private static double estimateAverageTimeStamps(BaseStatusSignal[] signals) {
+        double currentTime = MapleTimeUtils.getRealTimeSeconds(), totalLatency = 0;
+        for (BaseStatusSignal signal:signals)
+            totalLatency += signal.getTimestamp().getLatency();
+
+        if (signals.length == 0)
+            return currentTime;
+        return currentTime - totalLatency / signals.length;
     }
 }

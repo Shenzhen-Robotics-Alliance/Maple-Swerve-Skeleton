@@ -21,11 +21,11 @@ public class MapleTimeUtils {
         }
     }
 
-    public static double getTime() {
+    public static double getLogTimeSeconds() {
         return Logger.getTimestamp() / 1_000_000.0;
     }
 
-    public static double getRealTime() {
+    public static double getRealTimeSeconds() {
         return Logger.getRealTimestamp() / 1_000_000.0;
     }
 }

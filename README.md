@@ -13,8 +13,8 @@ High-Freq Odometry, Log-Replay, Vision Odometry, Auto-Alignment, Decisive Auto, 
 ## 🕹️Driving
 
 - **250HZ Odometer**, Time-Synchronized with CAN FD
-- **A Star Driving** 
-- **Skid Detection** inspired by [1690 online software session](https://youtu.be/N6ogT5DjGOk?feature=shared&t=1674) 
+- **A Star Driving**
+- **Skid Detection** inspired by [1690 online software session](https://youtu.be/N6ogT5DjGOk?feature=shared&t=1674)
 - **Drive Wheels Feedforward** with a Look-Up-Table.
 - **Acceleration Constraining** during TeleOp.
 - **Robot Configuration Storage** in JSON files.
@@ -29,7 +29,7 @@ High-Freq Odometry, Log-Replay, Vision Odometry, Auto-Alignment, Decisive Auto, 
 
 ## 📝Logging
 
-Built Upon [AdvantageKit](https://github.com/Mechanical-Advantage/AdvantageKit), everything is logged and recorded for after-match analysis
+Built Upon [AdvantageKit](https://github.com/Mechanical-Advantage/AdvantageKit), all sensor inputs are logged and recorded for after-match analysis.
 
 ## 👁️Vision
 
@@ -45,13 +45,13 @@ A complete match simulation, with physics, score-count, human-players and even o
 
 - **Uses Actual Robot Code** in the simulator. This means that you can tune Auto-Stages, PIDs, Auto-Scoring functions and more.  The simulator display robots through https://github.com/Mechanical-Advantage/AdvantageScope.
 - **Swerve-Drive Physics Simulation**, fine-tuned with experimental data measured in our training field, as well as real-life data gathered from real competitions this year.
-    
+
     ![physics simulation 2.gif](./media/physics_simulation_2.gif)
-    
+
 - **2D Rigid-Body Collision Simulation** for game-pieces and robots on field.  Using open source 2d physics engine https://github.com/dyn4j/dyn4j.
-    
+
     ![robot physics simulation.gif](./media/robot_physics_simulation.gif)
-    
+
 - **Opponent Robots Simulation** that can either be controlled by a gamepad to play defense or follow pre-stored cycle paths.
-    
+
     ![Untitled video - Made with Clipchamp.gif](./media/Untitled_video_-_Made_with_Clipchamp.gif)
