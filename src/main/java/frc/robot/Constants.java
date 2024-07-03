@@ -1,15 +1,6 @@
-// Copyright 2021-2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Original Source:
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot;
 
@@ -22,22 +13,14 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    public static final Mode currentMode = Mode.REAL;
+  public enum RobotMode {
+    /** Running on a real robot. */
+    REAL,
 
-    public enum Mode {
-        /**
-         * Running on a real robot.
-         */
-        REAL,
+    /** Running a physics simulator. */
+    SIM,
 
-        /**
-         * Running a physics simulator.
-         */
-        SIM,
-
-        /**
-         * Replaying from a log file.
-         */
-        REPLAY
-    }
+    /** Replaying from a log file. */
+    REPLAY
+  }
 }
