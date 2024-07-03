@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.subsystems.drive.OdometryThread;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -31,6 +33,17 @@ public final class Constants {
     }
 
     public static final class ChassisConfigs {
+        public enum ChassisType {
+            REV,
+            CTRE_ON_RIO,
+            CTRE_ON_CANIVORE
+        }
+        public static final ChassisType chassisType = ChassisType.CTRE_ON_CANIVORE;
+
         public static final String DEFAULT_CHASSIS_CANIVORE = "ChassisCanivore";
+
+        public static final int ODOMETRY_CACHE_CAPACITY = 20;
+        public static final double ODOMETRY_FREQUENCY = 250;
+        public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
     }
 }
