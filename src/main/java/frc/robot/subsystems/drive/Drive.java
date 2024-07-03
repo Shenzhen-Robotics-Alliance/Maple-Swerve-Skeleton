@@ -85,14 +85,10 @@ public class Drive extends SubsystemBase {
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> {
-                    Logger.recordOutput(
-                            "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-                });
+                (activePath) -> Logger.recordOutput(
+                        "Odometry/Trajectory", activePath.toArray(new Pose2d[0])));
         PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> {
-                    Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-                });
+                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
     }
 
     public void periodic() {
@@ -120,8 +116,7 @@ public class Drive extends SubsystemBase {
         }
 
         // Update odometry
-        double[] sampleTimestamps =
-                modules[0].getOdometryTimestamps(); // All signals are sampled together
+        double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
         int sampleCount = sampleTimestamps.length;
         for (int i = 0; i < sampleCount; i++) {
             // Read wheel positions and deltas from each module

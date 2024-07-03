@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 
 import java.util.Queue;
 
@@ -61,27 +62,27 @@ public class ModuleIOTalonFX implements ModuleIO {
     public ModuleIOTalonFX(int index) {
         switch (index) {
             case 0:
-                driveTalon = new TalonFX(3);
-                turnTalon = new TalonFX(4);
-                cancoder = new CANcoder(10);
+                driveTalon = new TalonFX(3, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                turnTalon = new TalonFX(4, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                cancoder = new CANcoder(10, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(3.3195344249845276); // MUST BE CALIBRATED
                 break;
             case 1:
-                driveTalon = new TalonFX(6);
-                turnTalon = new TalonFX(5);
-                cancoder = new CANcoder(11);
+                driveTalon = new TalonFX(6, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                turnTalon = new TalonFX(5, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                cancoder = new CANcoder(11, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(1.7564080021290591); // MUST BE CALIBRATED
                 break;
             case 2:
-                driveTalon = new TalonFX(1);
-                turnTalon = new TalonFX(2);
-                cancoder = new CANcoder(9);
+                driveTalon = new TalonFX(1, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                turnTalon = new TalonFX(2, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                cancoder = new CANcoder(9, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(0.34974761963792617); // MUST BE CALIBRATED
                 break;
             case 3:
-                driveTalon = new TalonFX(8);
-                turnTalon = new TalonFX(7);
-                cancoder = new CANcoder(12);
+                driveTalon = new TalonFX(8, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                turnTalon = new TalonFX(7, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                cancoder = new CANcoder(12, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(0.10737865515199488); // MUST BE CALIBRATED
                 break;
             default:

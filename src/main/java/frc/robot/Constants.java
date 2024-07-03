@@ -13,14 +13,24 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public enum RobotMode {
-    /** Running on a real robot. */
-    REAL,
+    public enum RobotMode {
+        /**
+         * Running on a real robot.
+         */
+        REAL,
 
-    /** Running a physics simulator. */
-    SIM,
+        /**
+         * Running a physics simulator.
+         */
+        SIM,
 
-    /** Replaying from a log file. */
-    REPLAY
-  }
+        /**
+         * Replaying from a log file.
+         */
+        REPLAY
+    }
+
+    public static final class ChassisConfigs {
+        public static final String DEFAULT_CHASSIS_CANIVORE = "ChassisCanivore";
+    }
 }
