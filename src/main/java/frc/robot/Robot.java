@@ -73,7 +73,9 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void robotPeriodic() {
-        if (this.isTest()) CommandScheduler.getInstance().run();
+        if (this.isTest())
+            return;
+        CommandScheduler.getInstance().run();
     }
 
     /**
@@ -98,9 +100,8 @@ public class Robot extends LoggedRobot {
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
-        if (autonomousCommand != null) {
+        if (autonomousCommand != null)
             autonomousCommand.schedule();
-        }
     }
 
     /**
