@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.utils.LocalADStarAK;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -31,7 +32,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
-public class Drive extends SubsystemBase {
+public class Drive extends MapleSubsystem {
     private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
     private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
     private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
@@ -63,6 +64,7 @@ public class Drive extends SubsystemBase {
             ModuleIO frModuleIO,
             ModuleIO blModuleIO,
             ModuleIO brModuleIO) {
+        super("Drive");
         this.gyroIO = gyroIO;
         modules[0] = new Module(flModuleIO, 0);
         modules[1] = new Module(frModuleIO, 1);
@@ -93,7 +95,13 @@ public class Drive extends SubsystemBase {
                 (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
     }
 
-    public void periodic() {
+    @Override
+    public void onReset() {
+
+    }
+
+    @Override
+    public void periodic(double dt, boolean enabled) {
         odometryThread.updateInputs(odometryThreadInputs);
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
         gyroIO.updateInputs(gyroInputs);
