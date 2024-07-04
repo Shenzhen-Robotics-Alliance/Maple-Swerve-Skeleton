@@ -31,6 +31,17 @@ public final class Constants {
     }
 
     public static final class ChassisConfigs {
+        public enum ChassisType {
+            REV,
+            CTRE_ON_RIO,
+            CTRE_ON_CANIVORE
+        }
+        public static final ChassisType chassisType = ChassisType.CTRE_ON_CANIVORE;
+
         public static final String DEFAULT_CHASSIS_CANIVORE = "ChassisCanivore";
+
+        public static final int ODOMETRY_CACHE_CAPACITY = 20;
+        public static final double ODOMETRY_FREQUENCY = 250;
+        public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
     }
 }

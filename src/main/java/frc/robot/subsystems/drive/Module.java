@@ -58,15 +58,8 @@ public class Module {
         setBrakeMode(true);
     }
 
-    /**
-     * Update inputs without running the rest of the periodic logic. This is useful since these
-     * updates need to be properly thread-locked.
-     */
-    public void updateInputs() {
-        io.updateInputs(inputs);
-    }
-
     public void periodic() {
+        io.updateInputs(inputs);
         Logger.processInputs("Drive/Module" + index, inputs);
 
         // On first cycle, reset relative turn encoder
@@ -99,9 +92,8 @@ public class Module {
         }
 
         // Calculate positions for odometry
-        int sampleCount = inputs.odometryTimestamps.length; // All signals are sampled together
-        odometryPositions = new SwerveModulePosition[sampleCount];
-        for (int i = 0; i < sampleCount; i++) {
+        odometryPositions = new SwerveModulePosition[inputs.odometryDrivePositionsRad.length];
+        for (int i = 0; i < odometryPositions.length; i++) {
             double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
             Rotation2d angle =
                     inputs.odometryTurnPositions[i].plus(
@@ -189,12 +181,5 @@ public class Module {
      */
     public SwerveModulePosition[] getOdometryPositions() {
         return odometryPositions;
-    }
-
-    /**
-     * Returns the timestamps of the samples received this cycle.
-     */
-    public double[] getOdometryTimestamps() {
-        return inputs.odometryTimestamps;
     }
 }

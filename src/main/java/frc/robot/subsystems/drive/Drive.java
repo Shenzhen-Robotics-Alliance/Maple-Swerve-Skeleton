@@ -22,13 +22,14 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.utils.LocalADStarAK;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.Arrays;
 
 public class Drive extends SubsystemBase {
     private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
@@ -38,7 +39,6 @@ public class Drive extends SubsystemBase {
             Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
-    static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -55,6 +55,8 @@ public class Drive extends SubsystemBase {
     private SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+    private final OdometryThread odometryThread;
+    private final OdometryThread.OdometryThreadInputs odometryThreadInputs;
     public Drive(
             GyroIO gyroIO,
             ModuleIO flModuleIO,
@@ -67,9 +69,9 @@ public class Drive extends SubsystemBase {
         modules[2] = new Module(blModuleIO, 2);
         modules[3] = new Module(brModuleIO, 3);
 
-        // Start threads (no-op for each if no signals have been created)
-        PhoenixOdometryThread.getInstance().start();
-        SparkMaxOdometryThread.getInstance().start();
+        this.odometryThread = OdometryThread.createInstance();
+        this.odometryThreadInputs = new OdometryThread.OdometryThreadInputs();
+        this.odometryThread.start();
 
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configureHolonomic(
@@ -92,16 +94,12 @@ public class Drive extends SubsystemBase {
     }
 
     public void periodic() {
-        odometryLock.lock(); // Prevents odometry updates while reading data
+        odometryThread.updateInputs(odometryThreadInputs);
+        Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
         gyroIO.updateInputs(gyroInputs);
-        for (var module : modules) {
-            module.updateInputs();
-        }
-        odometryLock.unlock();
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        for (var module : modules) {
+        for (var module : modules)
             module.periodic();
-        }
 
         // Stop moving when disabled
         if (DriverStation.isDisabled()) {
@@ -111,14 +109,11 @@ public class Drive extends SubsystemBase {
         }
         // Log empty setpoint states when disabled
         if (DriverStation.isDisabled()) {
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[]{});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[]{});
+            // Logger.recordOutput("SwerveStates/Setpoints");
+            // Logger.recordOutput("SwerveStates/SetpointsOptimized");
         }
 
-        // Update odometry
-        double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
-        int sampleCount = sampleTimestamps.length;
-        for (int i = 0; i < sampleCount; i++) {
+        for (int i = 0; i < odometryThreadInputs.measurementTimeStamps.length; i++) {
             // Read wheel positions and deltas from each module
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
             SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
@@ -143,7 +138,7 @@ public class Drive extends SubsystemBase {
             }
 
             // Apply update
-            poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+            poseEstimator.updateWithTime(odometryThreadInputs.measurementTimeStamps[i], rawGyroRotation, modulePositions);
         }
     }
 
