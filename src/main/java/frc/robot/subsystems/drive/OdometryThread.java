@@ -18,29 +18,33 @@ public class OdometryThread extends Thread {
     public static final class OdometryInput {
         private final Supplier<Double> supplier;
         private final Queue<Double> queue;
+        private double[] valuesSincePreviousPeriod = new double[0];
 
         public OdometryInput(Supplier<Double> signal) {
             this.supplier = signal;
             this.queue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         }
 
+        public double[] getValuesSincePreviousPeriod() {
+            return valuesSincePreviousPeriod;
+        }
     }
     private static final List<OdometryInput> registeredInputs = new ArrayList<>();
     private static final List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
-    public static Queue<Double> registerInput(Supplier<Double> supplier) {
+    public static OdometryInput registerInput(Supplier<Double> supplier) {
         final OdometryInput odometryInput = new OdometryInput(supplier);
         registeredInputs.add(odometryInput);
-        return odometryInput.queue;
+        return odometryInput;
     }
-    public static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
+    public static OdometryInput registerSignalInput(StatusSignal<Double> signal) {
         signal.setUpdateFrequency(Constants.ChassisConfigs.ODOMETRY_FREQUENCY, Constants.ChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
         final OdometryInput odometryInput = new OdometryInput(signal.asSupplier());
         registeredStatusSignals.add(signal);
-        return odometryInput.queue;
+        return odometryInput;
     }
 
     private static OdometryThread instance = null;
-    private static OdometryThread getInstance() {
+    public static OdometryThread getInstance() {
         if (instance == null)
             instance = new OdometryThread(
                     registeredInputs.toArray(new OdometryInput[0]),
@@ -52,7 +56,7 @@ public class OdometryThread extends Thread {
     private final OdometryInput[] odometryInputs;
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
-    private Double[] odometryTimeStamps = new Double[0];
+    private double[] odometryTimeStamps = new double[0];
     private final Lock odometryLock = new ReentrantLock();
     public OdometryThread(OdometryInput[] odometryInputs, BaseStatusSignal[] statusSignals) {
         this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
@@ -106,11 +110,24 @@ public class OdometryThread extends Thread {
         return currentTime - totalLatency / statusSignals.length;
     }
 
-    public static void pollOdometryTimeStampsDuringPreviousRobotPeriod() {
+    public static void fetchOdometryDataSincePreviousRobotPeriod() {
         if (instance != null && instance.isAlive())
-            instance.pollTimeStampsDuringPreviousRobotPeriod();
+            instance.fetchDataSincePreviousRobotPeriod();
     }
-    public void pollTimeStampsDuringPreviousRobotPeriod() {
-        this.odometryTimeStamps = timeStampsQueue.toArray(new Double[0]);
+    public void fetchDataSincePreviousRobotPeriod() {
+        odometryLock.lock();
+        this.odometryTimeStamps = mapQueueToArray(timeStampsQueue);
+        timeStampsQueue.clear();
+
+        for(OdometryInput odometryInput:odometryInputs) {
+            odometryInput.valuesSincePreviousPeriod = mapQueueToArray(odometryInput.queue);
+            odometryInput.queue.clear();
+        }
+
+        odometryLock.unlock();
+    }
+
+    private static double[] mapQueueToArray(Queue<Double> queue) {
+        return queue.stream().mapToDouble(value -> value).toArray();
     }
 }
