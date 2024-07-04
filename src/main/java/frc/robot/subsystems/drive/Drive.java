@@ -24,9 +24,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.LocalADStarAK;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,7 +35,6 @@ public class Drive extends SubsystemBase {
             Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
     private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
 
-    static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
@@ -68,8 +64,7 @@ public class Drive extends SubsystemBase {
         modules[3] = new Module(brModuleIO, 3);
 
         // Start threads (no-op for each if no signals have been created)
-        PhoenixOdometryThread.getInstance().start();
-        SparkMaxOdometryThread.getInstance().start();
+        OdometryThread.getInstance().start();
 
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configureHolonomic(
@@ -92,16 +87,11 @@ public class Drive extends SubsystemBase {
     }
 
     public void periodic() {
-        odometryLock.lock(); // Prevents odometry updates while reading data
+        OdometryThread.fetchOdometryDataSincePreviousRobotPeriod();
         gyroIO.updateInputs(gyroInputs);
-        for (var module : modules) {
-            module.updateInputs();
-        }
-        odometryLock.unlock();
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        for (var module : modules) {
+        for (var module : modules)
             module.periodic();
-        }
 
         // Stop moving when disabled
         if (DriverStation.isDisabled()) {
@@ -116,7 +106,7 @@ public class Drive extends SubsystemBase {
         }
 
         // Update odometry
-        double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // All signals are sampled together
+        double[] sampleTimestamps = new double[0]; // TODO
         int sampleCount = sampleTimestamps.length;
         for (int i = 0; i < sampleCount; i++) {
             // Read wheel positions and deltas from each module

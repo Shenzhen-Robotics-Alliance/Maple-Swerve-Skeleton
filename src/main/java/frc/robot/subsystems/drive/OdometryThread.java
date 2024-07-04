@@ -18,14 +18,14 @@ public class OdometryThread extends Thread {
     public static final class OdometryInput {
         private final Supplier<Double> supplier;
         private final Queue<Double> queue;
-        private double[] valuesSincePreviousPeriod = new double[0];
+        private Double[] valuesSincePreviousPeriod = new Double[0];
 
         public OdometryInput(Supplier<Double> signal) {
             this.supplier = signal;
             this.queue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         }
 
-        public double[] getValuesSincePreviousPeriod() {
+        public Double[] getValuesSincePreviousPeriod() {
             return valuesSincePreviousPeriod;
         }
     }
@@ -56,7 +56,7 @@ public class OdometryThread extends Thread {
     private final OdometryInput[] odometryInputs;
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
-    private double[] odometryTimeStamps = new double[0];
+    private Double[] timeStamps = new Double[0];
     private final Lock odometryLock = new ReentrantLock();
     public OdometryThread(OdometryInput[] odometryInputs, BaseStatusSignal[] statusSignals) {
         this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
@@ -72,6 +72,15 @@ public class OdometryThread extends Thread {
     public synchronized void start() {
         if (odometryInputs.length > 0)
             super.start();
+    }
+
+    public static Double[] getOdometryTimeStamps() {
+        if (instance == null || !instance.isAlive())
+            return new Double[0];
+        return instance.getTimeStamps();
+    }
+    private Double[] getTimeStamps() {
+        return timeStamps;
     }
 
     @Override
@@ -114,9 +123,9 @@ public class OdometryThread extends Thread {
         if (instance != null && instance.isAlive())
             instance.fetchDataSincePreviousRobotPeriod();
     }
-    public void fetchDataSincePreviousRobotPeriod() {
+    private void fetchDataSincePreviousRobotPeriod() {
         odometryLock.lock();
-        this.odometryTimeStamps = mapQueueToArray(timeStampsQueue);
+        this.timeStamps = mapQueueToArray(timeStampsQueue);
         timeStampsQueue.clear();
 
         for(OdometryInput odometryInput:odometryInputs) {
@@ -127,7 +136,7 @@ public class OdometryThread extends Thread {
         odometryLock.unlock();
     }
 
-    private static double[] mapQueueToArray(Queue<Double> queue) {
-        return queue.stream().mapToDouble(value -> value).toArray();
+    private static Double[] mapQueueToArray(Queue<Double> queue) {
+        return queue.toArray(new Double[0]);
     }
 }
