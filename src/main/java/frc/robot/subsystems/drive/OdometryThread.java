@@ -8,43 +8,35 @@ import frc.robot.utils.MapleTimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 public class OdometryThread extends Thread {
     public static final class OdometryInput {
-        private final Supplier<OptionalDouble> supplier;
+        private final Supplier<Double> supplier;
         private final Queue<Double> queue;
-        private double[] valuesSinceLastRobotPeriod;
 
-        public OdometryInput(Supplier<OptionalDouble> signal) {
+        public OdometryInput(Supplier<Double> signal) {
             this.supplier = signal;
             this.queue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
-            this.valuesSinceLastRobotPeriod = new double[0];
         }
 
-        public double[] getValuesSinceLastRobotPeriod() {
-            return valuesSinceLastRobotPeriod;
-        }
     }
     private static final List<OdometryInput> registeredInputs = new ArrayList<>();
     private static final List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
-    public static OdometryInput registerInput(Supplier<OptionalDouble> supplier) {
+    public static Queue<Double> registerInput(Supplier<Double> supplier) {
         final OdometryInput odometryInput = new OdometryInput(supplier);
         registeredInputs.add(odometryInput);
-        return odometryInput;
+        return odometryInput.queue;
     }
-    public static OdometryInput registerSignalInput(StatusSignal<Double> signal) {
+    public static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
         signal.setUpdateFrequency(Constants.ChassisConfigs.ODOMETRY_FREQUENCY, Constants.ChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
-        final OdometryInput odometryInput = new OdometryInput(() -> OptionalDouble.of(signal.getValue()));
+        final OdometryInput odometryInput = new OdometryInput(signal.asSupplier());
         registeredStatusSignals.add(signal);
-        return odometryInput;
-    }
-
-    private interface SignalBlocker {
-        void refreshSignalsAndBlockThread();
+        return odometryInput.queue;
     }
 
     private static OdometryThread instance = null;
@@ -57,27 +49,16 @@ public class OdometryThread extends Thread {
         return instance;
     }
 
-    private final SignalBlocker signalBlocker;
     private final OdometryInput[] odometryInputs;
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
+    private Double[] odometryTimeStamps = new Double[0];
+    private final Lock odometryLock = new ReentrantLock();
     public OdometryThread(OdometryInput[] odometryInputs, BaseStatusSignal[] statusSignals) {
         this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
 
         this.odometryInputs = odometryInputs;
         this.statusSignals = statusSignals;
-
-        this.signalBlocker = switch (Constants.ChassisConfigs.chassisType) {
-            case REV ->
-                    () -> MapleTimeUtils.delay(1.0/ Constants.ChassisConfigs.ODOMETRY_FREQUENCY);
-            case CTRE_ON_RIO ->
-                    () -> {
-                MapleTimeUtils.delay(1.0/ Constants.ChassisConfigs.ODOMETRY_FREQUENCY);
-                BaseStatusSignal.refreshAll();
-            };
-            case CTRE_ON_CANIVORE ->
-                    () -> BaseStatusSignal.waitForAll(Constants.ChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
-        };
 
         setName("OdometryThread");
         setDaemon(true);
@@ -95,10 +76,24 @@ public class OdometryThread extends Thread {
     }
 
     private void pollInputsInBackEnd() {
-        signalBlocker.refreshSignalsAndBlockThread();
-        timeStampsQueue.offer(estimateAverageTimeStamps());
+        refreshSignalsAndBlockThread();
 
-        // TODO: for each input poll the reading and cache them in the queue
+        odometryLock.lock();
+        timeStampsQueue.offer(estimateAverageTimeStamps());
+        for(OdometryInput odometryInput:odometryInputs)
+            odometryInput.queue.offer(odometryInput.supplier.get());
+        odometryLock.unlock();
+    }
+
+    private void refreshSignalsAndBlockThread() {
+        switch (Constants.ChassisConfigs.chassisType) {
+            case REV -> MapleTimeUtils.delay(1.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY);
+            case CTRE_ON_RIO -> {
+                MapleTimeUtils.delay(1.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY);
+                BaseStatusSignal.refreshAll();
+            }
+            case CTRE_ON_CANIVORE -> BaseStatusSignal.waitForAll(Constants.ChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
+        }
     }
 
     private double estimateAverageTimeStamps() {
@@ -111,13 +106,11 @@ public class OdometryThread extends Thread {
         return currentTime - totalLatency / statusSignals.length;
     }
 
-    public static void updateMainThreadCache() {
+    public static void pollOdometryTimeStampsDuringPreviousRobotPeriod() {
         if (instance != null && instance.isAlive())
-            instance.
+            instance.pollTimeStampsDuringPreviousRobotPeriod();
     }
-
-    private double[] odometryTimeStamps; // TODO cache odometry time stamps in main thread and get them whenever ready
-    public void updateMainThreadCache() {
-
+    public void pollTimeStampsDuringPreviousRobotPeriod() {
+        this.odometryTimeStamps = timeStampsQueue.toArray(new Double[0]);
     }
 }
