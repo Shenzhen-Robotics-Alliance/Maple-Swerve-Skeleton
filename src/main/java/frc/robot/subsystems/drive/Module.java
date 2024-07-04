@@ -10,10 +10,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Robot;
+import frc.robot.subsystems.MapleSubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class Module {
+public class Module extends MapleSubsystem {
     private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
     static final double ODOMETRY_FREQUENCY = 250.0;
 
@@ -30,6 +32,7 @@ public class Module {
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
     public Module(ModuleIO io, int index) {
+        super("Module" + index);
         this.io = io;
         this.index = index;
 
@@ -56,9 +59,17 @@ public class Module {
 
         turnFeedback.enableContinuousInput(-Math.PI, Math.PI);
         setBrakeMode(true);
+
+        CommandScheduler.getInstance().unregisterSubsystem(this);
     }
 
-    public void periodic() {
+    @Override
+    public void onReset() {
+
+    }
+
+    @Override
+    public void periodic(double dt, boolean enabled) {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module" + index, inputs);
 
