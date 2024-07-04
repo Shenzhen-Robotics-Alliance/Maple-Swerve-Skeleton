@@ -19,13 +19,12 @@ import java.util.Arrays;
 public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon = new Pigeon2(0, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
     private final StatusSignal<Double> yaw = pigeon.getYaw();
-    private final OdometryThread.OdometryInput yawPositionInput;
+    private final OdometryThreadReal.OdometryDoubleInput yawPositionInput;
     private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
 
     public GyroIOPigeon2() {
         pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
-        yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);
         yawVelocity.setUpdateFrequency(100.0);
         pigeon.optimizeBusUtilization();
         yawPositionInput = OdometryThread.registerSignalInput(pigeon.getYaw());

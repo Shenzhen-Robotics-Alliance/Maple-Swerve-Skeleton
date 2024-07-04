@@ -19,7 +19,6 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 import java.util.Arrays;
-import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -39,14 +38,14 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final CANcoder cancoder;
 
     private final StatusSignal<Double> drivePosition;
-    private final OdometryThread.OdometryInput drivePositionInput;
+    private final OdometryThreadReal.OdometryDoubleInput drivePositionInput;
     private final StatusSignal<Double> driveVelocity;
     private final StatusSignal<Double> driveAppliedVolts;
     private final StatusSignal<Double> driveCurrent;
 
     private final StatusSignal<Double> turnAbsolutePosition;
     private final StatusSignal<Double> turnPosition;
-    private final OdometryThread.OdometryInput turnPositionInput;
+    private final OdometryThreadReal.OdometryDoubleInput turnPositionInput;
     private final StatusSignal<Double> turnVelocity;
     private final StatusSignal<Double> turnAppliedVolts;
     private final StatusSignal<Double> turnCurrent;
@@ -116,8 +115,6 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnCurrent = turnTalon.getSupplyCurrent();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
-                Module.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
-        BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
                 driveVelocity,
                 driveAppliedVolts,
@@ -158,7 +155,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.odometryDrivePositionsRad = Arrays.stream(drivePositionInput.getValuesSincePreviousPeriod())
                 .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
                 .toArray();
-        inputs.odometryTurnPositions = Arrays.stream(drivePositionInput.getValuesSincePreviousPeriod())
+        inputs.odometryTurnPositions = Arrays.stream(turnPositionInput.getValuesSincePreviousPeriod())
                 .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
                 .toArray(Rotation2d[]::new);
     }

@@ -17,7 +17,6 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -25,8 +24,6 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 
 import java.util.Arrays;
-import java.util.OptionalDouble;
-import java.util.Queue;
 
 /**
  * Module IO implementation for SparkMax drive motor controller, SparkMax turn motor controller (NEO
@@ -51,8 +48,8 @@ public class ModuleIOSparkMax implements ModuleIO {
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder turnRelativeEncoder;
     private final AnalogInput turnAbsoluteEncoder;
-    private final OdometryThread.OdometryInput drivePositionInput;
-    private final OdometryThread.OdometryInput turnPositionInput;
+    private final OdometryThreadReal.OdometryDoubleInput drivePositionInput;
+    private final OdometryThreadReal.OdometryDoubleInput turnPositionInput;
 
     private final boolean isTurnMotorInverted = true;
     private final Rotation2d absoluteEncoderOffset;
