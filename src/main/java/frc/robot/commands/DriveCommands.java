@@ -13,6 +13,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.hal.simulation.REVPHDataJNI;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -62,17 +63,16 @@ public class DriveCommands {
                                     .getTranslation();
 
                     // Convert to field relative speeds & send command
-                    boolean isFlipped =
-                            DriverStation.getAlliance().isPresent()
-                                    && DriverStation.getAlliance().get() == Alliance.Red;
-                    drive.runVelocity(
-                            ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                                    omega * drive.getMaxAngularSpeedRadPerSec(),
-                                    isFlipped
-                                            ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                                            : drive.getRotation()));
+                    final Rotation2d driverStationFacing = switch (DriverStation.getAlliance().orElse(Alliance.Red)) {
+                        case Red -> new Rotation2d(Math.PI);
+                        case Blue -> new Rotation2d(0);
+                    };
+                    drive.runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+                            linearVelocity.getX() * drive.maxModuleVelocityMetersPerSec,
+                            linearVelocity.getY() * drive.maxModuleVelocityMetersPerSec,
+                            omega * drive.maxAngularVelocityRadPerSec,
+                            drive.getPose().getRotation().minus(driverStationFacing)
+                    ));
                 },
                 drive);
     }

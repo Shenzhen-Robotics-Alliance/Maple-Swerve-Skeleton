@@ -105,13 +105,13 @@ public class SwerveModule extends MapleSubsystem {
         io.setSteerPower(0);
         io.setDrivePower(0);
         io.setDriveBrakeMode(false);
-        io.setTurnBrakeMode(false);
+        io.setSteerBrakeMode(false);
     }
 
     @Override
     public void onEnable() {
         io.setDriveBrakeMode(true);
-        io.setTurnBrakeMode(true);
+        io.setSteerBrakeMode(true);
     }
 
     /**

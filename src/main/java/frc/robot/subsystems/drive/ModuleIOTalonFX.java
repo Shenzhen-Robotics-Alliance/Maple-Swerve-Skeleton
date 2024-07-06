@@ -10,28 +10,14 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.utils.Config.MapleConfigFile;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.Queue;
 
-/**
- * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
- * CANcoder
- *
- * <p>NOTE: This implementation should be used as a starting point and adapted to different hardware
- * configurations (e.g. If using an analog encoder, copy from "ModuleIOSparkMax")
- *
- * <p>To calibrate the absolute encoder offsets, point the modules straight (such that forward
- * motion on the drive motor will propel the robot forward) and copy the reported values from the
- * absolute encoders using AdvantageScope. These values are logged under
- * "/Drive/ModuleX/TurnAbsolutePositionRad"
- */
 public class ModuleIOTalonFX implements ModuleIO {
     private final String name;
     private final TalonFX driveTalon;
@@ -67,7 +53,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         steerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
         steerTalon.setInverted(moduleConfigs.getIntConfig("steeringMotorInverted") != 0);
-        setTurnBrakeMode(true);
+        setSteerBrakeMode(true);
 
         driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
         driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
@@ -81,13 +67,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         periodicallyRefreshedSignals = new BaseStatusSignal[]{
                 driveEncoderUngearedRevolutionsPerSecond,
-                driveMotorAppliedVoltage,
-                driveMotorCurrent,
+                driveMotorAppliedVoltage, driveMotorCurrent,
                 steerEncoderVelocityRevolutionsPerSecond,
-                steerMotorAppliedVolts,
-                steerMotorAppliedVolts,
-                steerMotorAppliedVolts,
-                steerMotorCurrent
+                steerMotorAppliedVolts, steerMotorCurrent
         };
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, periodicallyRefreshedSignals);
@@ -140,15 +122,11 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void setDriveBrakeMode(boolean enable) {
-        var config = new MotorOutputConfigs();
-        config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        driveTalon.getConfigurator().apply(config);
+        driveTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     }
 
     @Override
-    public void setTurnBrakeMode(boolean enable) {
-        var config = new MotorOutputConfigs();
-        config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        steerTalon.getConfigurator().apply(config);
+    public void setSteerBrakeMode(boolean enable) {
+        steerTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     }
 }

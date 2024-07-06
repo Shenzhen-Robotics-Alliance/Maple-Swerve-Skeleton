@@ -171,7 +171,7 @@ public class ModuleIOSparkMax implements ModuleIO {
     }
 
     @Override
-    public void setTurnBrakeMode(boolean enable) {
+    public void setSteerBrakeMode(boolean enable) {
         steerSparkMax.setIdleMode(enable ? IdleMode.kBrake : IdleMode.kCoast);
     }
 }

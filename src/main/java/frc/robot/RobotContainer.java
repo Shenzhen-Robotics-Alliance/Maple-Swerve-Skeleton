@@ -60,7 +60,7 @@ public class RobotContainer {
                          new GyroIOPigeon2(),
                          new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontLeft"), generalConfigBlock),
                          new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontRight"), generalConfigBlock),
-                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("backLeft"), generalConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackLeft"), generalConfigBlock),
                          new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackRight"), generalConfigBlock),
                          generalConfigBlock
                  );

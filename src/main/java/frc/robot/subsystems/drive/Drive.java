@@ -30,7 +30,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends MapleSubsystem {
-    private final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
+    public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
