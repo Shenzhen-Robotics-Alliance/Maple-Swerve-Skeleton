@@ -154,13 +154,13 @@ public class ModuleIOSparkMax implements ModuleIO {
     }
 
     @Override
-    public void setDriveVoltage(double volts) {
-        driveSparkMax.setVoltage(volts);
+    public void setDrivePower(double power) {
+        driveSparkMax.set(power);
     }
 
     @Override
-    public void setTurnVoltage(double volts) {
-        steerSparkMax.setVoltage(volts);
+    public void setSteerPower(double power) {
+        steerSparkMax.set(power);
     }
 
     @Override

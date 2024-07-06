@@ -21,16 +21,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.utils.LocalADStarAK;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.Arrays;
 
 public class Drive extends MapleSubsystem {
     private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
@@ -108,18 +103,6 @@ public class Drive extends MapleSubsystem {
         Logger.processInputs("Drive/Gyro", gyroInputs);
         for (var module : modules)
             module.periodic();
-
-        // Stop moving when disabled
-        if (DriverStation.isDisabled()) {
-            for (var module : modules) {
-                module.stop();
-            }
-        }
-        // Log empty setpoint states when disabled
-        if (DriverStation.isDisabled()) {
-            // Logger.recordOutput("SwerveStates/Setpoints");
-            // Logger.recordOutput("SwerveStates/SetpointsOptimized");
-        }
 
         for (int i = 0; i < odometryThreadInputs.measurementTimeStamps.length; i++) {
             // Read wheel positions and deltas from each module
@@ -200,7 +183,7 @@ public class Drive extends MapleSubsystem {
     private SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
-            states[i] = modules[i].getState();
+            states[i] = modules[i].getMeasuredState();
         }
         return states;
     }
@@ -211,7 +194,7 @@ public class Drive extends MapleSubsystem {
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
-            states[i] = modules[i].getPosition();
+            states[i] = modules[i].getLatestPosition();
         }
         return states;
     }

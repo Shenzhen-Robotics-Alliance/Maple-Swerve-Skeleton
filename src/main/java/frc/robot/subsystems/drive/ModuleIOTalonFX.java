@@ -9,7 +9,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -34,7 +33,7 @@ import java.util.Arrays;
  */
 public class ModuleIOTalonFX implements ModuleIO {
     private final TalonFX driveTalon;
-    private final TalonFX turnTalon;
+    private final TalonFX steerTalon;
     private final CANcoder cancoder;
 
     private final OdometryThreadReal.OdometryDoubleInput driveEncoderUngearedRevolutions;
@@ -57,25 +56,25 @@ public class ModuleIOTalonFX implements ModuleIO {
         switch (index) {
             case 0:
                 driveTalon = new TalonFX(3, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                turnTalon = new TalonFX(4, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                steerTalon = new TalonFX(4, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(10, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(3.3195344249845276); // MUST BE CALIBRATED
                 break;
             case 1:
                 driveTalon = new TalonFX(6, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                turnTalon = new TalonFX(5, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                steerTalon = new TalonFX(5, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(11, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(1.7564080021290591); // MUST BE CALIBRATED
                 break;
             case 2:
                 driveTalon = new TalonFX(1, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                turnTalon = new TalonFX(2, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                steerTalon = new TalonFX(2, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(9, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(0.34974761963792617); // MUST BE CALIBRATED
                 break;
             case 3:
                 driveTalon = new TalonFX(8, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                turnTalon = new TalonFX(7, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                steerTalon = new TalonFX(7, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(12, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(0.10737865515199488); // MUST BE CALIBRATED
                 break;
@@ -92,10 +91,8 @@ public class ModuleIOTalonFX implements ModuleIO {
         var turnConfig = new TalonFXConfiguration();
         turnConfig.CurrentLimits.SupplyCurrentLimit = 30.0;
         turnConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-        turnTalon.getConfigurator().apply(turnConfig);
+        steerTalon.getConfigurator().apply(turnConfig);
         setTurnBrakeMode(true);
-
-        cancoder.getConfigurator().apply(new CANcoderConfiguration());
 
         driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
         driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
@@ -104,8 +101,8 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         steerEncoderAbsolutePositionRevolutions = OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
         steerEncoderVelocityRevolutionsPerSecond = cancoder.getVelocity();
-        steerMotorAppliedVolts = turnTalon.getMotorVoltage();
-        steerMotorCurrent = turnTalon.getSupplyCurrent();
+        steerMotorAppliedVolts = steerTalon.getMotorVoltage();
+        steerMotorCurrent = steerTalon.getSupplyCurrent();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
@@ -116,7 +113,7 @@ public class ModuleIOTalonFX implements ModuleIO {
                 steerMotorAppliedVolts,
                 steerMotorCurrent);
         driveTalon.optimizeBusUtilization();
-        turnTalon.optimizeBusUtilization();
+        steerTalon.optimizeBusUtilization();
     }
 
     @Override
@@ -134,7 +131,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.driveMotorAppliedVolts = driveMotorAppliedVoltage.getValueAsDouble();
         inputs.driveMotorCurrentAmps = driveMotorCurrent.getValueAsDouble();
 
-        inputs.steerFacing = Rotation2d.fromRotations(steerEncoderAbsolutePositionRevolutions.getLatest());
+        inputs.steerFacing = getSteerFacingFromCANCoderReading(steerEncoderAbsolutePositionRevolutions.getLatest());
         inputs.steerVelocityRadPerSec = Units.rotationsToRadians(steerEncoderVelocityRevolutionsPerSecond.getValueAsDouble());
         inputs.steerMotorAppliedVolts = steerMotorAppliedVolts.getValueAsDouble();
         inputs.steerMotorCurrentAmps = steerMotorCurrent.getValueAsDouble();
@@ -143,18 +140,22 @@ public class ModuleIOTalonFX implements ModuleIO {
                 .mapToDouble((Double value) -> value / DRIVE_GEAR_RATIO)
                 .toArray();
         inputs.odometrySteerPositions = Arrays.stream(steerEncoderAbsolutePositionRevolutions.getValuesSincePreviousPeriod())
-                .map(Rotation2d::fromRotations)
+                .map(this::getSteerFacingFromCANCoderReading)
                 .toArray(Rotation2d[]::new);
     }
 
-    @Override
-    public void setDriveVoltage(double volts) {
-        driveTalon.setControl(new VoltageOut(volts));
+    private Rotation2d getSteerFacingFromCANCoderReading(double canCoderReadingRotations) {
+        return Rotation2d.fromRotations(canCoderReadingRotations).minus(absoluteEncoderOffset);
     }
 
     @Override
-    public void setTurnVoltage(double volts) {
-        turnTalon.setControl(new VoltageOut(volts));
+    public void setDrivePower(double power) {
+        driveTalon.set(power);
+    }
+
+    @Override
+    public void setSteerPower(double power) {
+       steerTalon.set(power);
     }
 
     @Override
@@ -170,6 +171,6 @@ public class ModuleIOTalonFX implements ModuleIO {
         var config = new MotorOutputConfigs();
         config.Inverted = isTurnMotorInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        turnTalon.getConfigurator().apply(config);
+        steerTalon.getConfigurator().apply(config);
     }
 }

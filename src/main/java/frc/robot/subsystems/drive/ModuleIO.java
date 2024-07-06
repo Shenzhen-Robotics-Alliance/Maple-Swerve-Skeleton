@@ -32,14 +32,16 @@ public interface ModuleIO {
     default void calibrate() {}
 
     /**
-     * Run the drive motor at the specified voltage.
+     * Run the drive motor at the specified percent output.
+     * @param power from -1 to 1, where 1 is the forward direction of the wheel
      */
-    default void setDriveVoltage(double volts) {}
+    default void setDrivePower(double power) {}
 
     /**
      * Run the turn motor at the specified voltage.
+     * @param power from -1 to 1, where 1 is counter-clockwise
      */
-    default void setTurnVoltage(double volts) {}
+    default void setSteerPower(double power) {}
 
     /**
      * Enable or disable brake mode on the drive motor.

@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
@@ -20,7 +19,7 @@ public class ModuleIOSim implements ModuleIO {
     private static final double LOOP_PERIOD_SECS = 0.02;
 
     private DCMotorSim driveSim = new DCMotorSim(DCMotor.getNEO(1), 6.75, 0.025);
-    private DCMotorSim turnSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
+    private DCMotorSim steerSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
 
     private double driveAppliedVolts = 0.0;
     private double steerAppliedVolts = 0.0;
@@ -28,31 +27,29 @@ public class ModuleIOSim implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         driveSim.update(LOOP_PERIOD_SECS);
-        turnSim.update(LOOP_PERIOD_SECS);
+        steerSim.update(LOOP_PERIOD_SECS);
 
         inputs.driveWheelFinalRevolutions = driveSim.getAngularPositionRad();
         inputs.driveWheelFinalVelocityRevolutionsPerSec = driveSim.getAngularVelocityRPM();
         inputs.driveMotorAppliedVolts = driveAppliedVolts;
         inputs.driveMotorCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
 
-        inputs.steerFacing = Rotation2d.fromRadians(turnSim.getAngularPositionRad());
-        inputs.steerVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
+        inputs.steerFacing = Rotation2d.fromRadians(steerSim.getAngularPositionRad());
+        inputs.steerVelocityRadPerSec = steerSim.getAngularVelocityRadPerSec();
         inputs.steerMotorAppliedVolts = steerAppliedVolts;
-        inputs.steerMotorCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());
+        inputs.steerMotorCurrentAmps = Math.abs(steerSim.getCurrentDrawAmps());
 
         inputs.odometryDriveWheelRevolutions = new double[]{inputs.driveWheelFinalRevolutions};
         inputs.odometrySteerPositions = new Rotation2d[]{inputs.steerFacing};
     }
 
     @Override
-    public void setDriveVoltage(double volts) {
-        driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-        driveSim.setInputVoltage(driveAppliedVolts);
+    public void setDrivePower(double power) {
+        driveSim.setInputVoltage(power * 12);
     }
 
     @Override
-    public void setTurnVoltage(double volts) {
-        steerAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-        turnSim.setInputVoltage(steerAppliedVolts);
+    public void setSteerPower(double power) {
+        steerSim.setInputVoltage(power * 12);
     }
 }
