@@ -37,22 +37,18 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final TalonFX turnTalon;
     private final CANcoder cancoder;
 
-    private final StatusSignal<Double> drivePosition;
-    private final OdometryThreadReal.OdometryDoubleInput drivePositionInput;
-    private final StatusSignal<Double> driveVelocity;
-    private final StatusSignal<Double> driveAppliedVolts;
-    private final StatusSignal<Double> driveCurrent;
+    private final OdometryThreadReal.OdometryDoubleInput driveEncoderUngearedRevolutions;
+    private final StatusSignal<Double> driveEncoderUngearedRevolutionsPerSecond;
+    private final StatusSignal<Double> driveMotorAppliedVoltage;
+    private final StatusSignal<Double> driveMotorCurrent;
 
-    private final StatusSignal<Double> turnAbsolutePosition;
-    private final StatusSignal<Double> turnPosition;
-    private final OdometryThreadReal.OdometryDoubleInput turnPositionInput;
-    private final StatusSignal<Double> turnVelocity;
-    private final StatusSignal<Double> turnAppliedVolts;
-    private final StatusSignal<Double> turnCurrent;
+    private final OdometryThreadReal.OdometryDoubleInput steerEncoderAbsolutePositionRevolutions;
+    private final StatusSignal<Double> steerEncoderVelocityRevolutionsPerSecond;
+    private final StatusSignal<Double> steerMotorAppliedVolts;
+    private final StatusSignal<Double> steerMotorCurrent;
 
     // Gear ratios for SDS MK4i L2, adjust as necessary
     private final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
-    private final double TURN_GEAR_RATIO = 150.0 / 7.0;
 
     private final boolean isTurnMotorInverted = true;
     private final Rotation2d absoluteEncoderOffset;
@@ -101,28 +97,24 @@ public class ModuleIOTalonFX implements ModuleIO {
 
         cancoder.getConfigurator().apply(new CANcoderConfiguration());
 
-        drivePosition = driveTalon.getPosition();
-        drivePositionInput = OdometryThread.registerSignalInput(driveTalon.getPosition());
-        driveVelocity = driveTalon.getVelocity();
-        driveAppliedVolts = driveTalon.getMotorVoltage();
-        driveCurrent = driveTalon.getSupplyCurrent();
+        driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
+        driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
+        driveMotorAppliedVoltage = driveTalon.getMotorVoltage();
+        driveMotorCurrent = driveTalon.getSupplyCurrent();
 
-        turnAbsolutePosition = cancoder.getAbsolutePosition();
-        turnPosition = turnTalon.getPosition();
-        turnPositionInput = OdometryThread.registerSignalInput(turnTalon.getPosition());
-        turnVelocity = turnTalon.getVelocity();
-        turnAppliedVolts = turnTalon.getMotorVoltage();
-        turnCurrent = turnTalon.getSupplyCurrent();
+        steerEncoderAbsolutePositionRevolutions = OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
+        steerEncoderVelocityRevolutionsPerSecond = cancoder.getVelocity();
+        steerMotorAppliedVolts = turnTalon.getMotorVoltage();
+        steerMotorCurrent = turnTalon.getSupplyCurrent();
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 50.0,
-                driveVelocity,
-                driveAppliedVolts,
-                driveCurrent,
-                turnAbsolutePosition,
-                turnVelocity,
-                turnAppliedVolts,
-                turnCurrent);
+                driveEncoderUngearedRevolutionsPerSecond,
+                driveMotorAppliedVoltage,
+                driveMotorCurrent,
+                steerEncoderVelocityRevolutionsPerSecond,
+                steerMotorAppliedVolts,
+                steerMotorCurrent);
         driveTalon.optimizeBusUtilization();
         turnTalon.optimizeBusUtilization();
     }
@@ -130,33 +122,28 @@ public class ModuleIOTalonFX implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         BaseStatusSignal.refreshAll(
-                drivePosition,
-                driveVelocity,
-                driveAppliedVolts,
-                driveCurrent,
-                turnAbsolutePosition,
-                turnPosition,
-                turnVelocity,
-                turnAppliedVolts,
-                turnCurrent);
+                driveEncoderUngearedRevolutionsPerSecond,
+                driveMotorAppliedVoltage,
+                driveMotorCurrent,
+                steerEncoderVelocityRevolutionsPerSecond,
+                steerMotorAppliedVolts,
+                steerMotorCurrent);
 
-        inputs.drivePositionRad = Units.rotationsToRadians(drivePosition.getValueAsDouble()) / DRIVE_GEAR_RATIO;
-        inputs.driveVelocityRadPerSec = Units.rotationsToRadians(driveVelocity.getValueAsDouble()) / DRIVE_GEAR_RATIO;
-        inputs.driveAppliedVolts = driveAppliedVolts.getValueAsDouble();
-        inputs.driveCurrentAmps = driveCurrent.getValueAsDouble();
+        inputs.driveWheelFinalRevolutions = driveEncoderUngearedRevolutions.getLatest() / DRIVE_GEAR_RATIO;
+        inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.rotationsToRadians(driveEncoderUngearedRevolutionsPerSecond.getValueAsDouble()) / DRIVE_GEAR_RATIO;
+        inputs.driveMotorAppliedVolts = driveMotorAppliedVoltage.getValueAsDouble();
+        inputs.driveMotorCurrentAmps = driveMotorCurrent.getValueAsDouble();
 
-        inputs.turnAbsolutePosition = Rotation2d.fromRotations(turnAbsolutePosition.getValueAsDouble())
-                .minus(absoluteEncoderOffset);
-        inputs.turnPosition = Rotation2d.fromRotations(turnPosition.getValueAsDouble() / TURN_GEAR_RATIO);
-        inputs.turnVelocityRadPerSec = Units.rotationsToRadians(turnVelocity.getValueAsDouble()) / TURN_GEAR_RATIO;
-        inputs.turnAppliedVolts = turnAppliedVolts.getValueAsDouble();
-        inputs.turnCurrentAmps = turnCurrent.getValueAsDouble();
+        inputs.steerFacing = Rotation2d.fromRotations(steerEncoderAbsolutePositionRevolutions.getLatest());
+        inputs.steerVelocityRadPerSec = Units.rotationsToRadians(steerEncoderVelocityRevolutionsPerSecond.getValueAsDouble());
+        inputs.steerMotorAppliedVolts = steerMotorAppliedVolts.getValueAsDouble();
+        inputs.steerMotorCurrentAmps = steerMotorCurrent.getValueAsDouble();
 
-        inputs.odometryDrivePositionsRad = Arrays.stream(drivePositionInput.getValuesSincePreviousPeriod())
-                .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+        inputs.odometryDriveWheelRevolutions = Arrays.stream(driveEncoderUngearedRevolutions.getValuesSincePreviousPeriod())
+                .mapToDouble((Double value) -> value / DRIVE_GEAR_RATIO)
                 .toArray();
-        inputs.odometryTurnPositions = Arrays.stream(turnPositionInput.getValuesSincePreviousPeriod())
-                .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
+        inputs.odometrySteerPositions = Arrays.stream(steerEncoderAbsolutePositionRevolutions.getValuesSincePreviousPeriod())
+                .map(Rotation2d::fromRotations)
                 .toArray(Rotation2d[]::new);
     }
 

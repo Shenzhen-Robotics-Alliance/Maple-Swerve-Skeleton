@@ -1,5 +1,6 @@
 // Original Source:
 // https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot.subsystems.drive;
 
@@ -9,25 +10,26 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
     @AutoLog
     class ModuleIOInputs {
-        public double drivePositionRad = 0.0;
-        public double driveVelocityRadPerSec = 0.0;
-        public double driveAppliedVolts = 0.0;
-        public double driveCurrentAmps = 0;
+        public double driveWheelFinalRevolutions = 0.0;
+        public double driveWheelFinalVelocityRevolutionsPerSec = 0.0;
+        public double driveMotorAppliedVolts = 0.0;
+        public double driveMotorCurrentAmps = 0;
 
-        public Rotation2d turnAbsolutePosition = new Rotation2d();
-        public Rotation2d turnPosition = new Rotation2d();
-        public double turnVelocityRadPerSec = 0.0;
-        public double turnAppliedVolts = 0.0;
-        public double turnCurrentAmps = 0.0;
+        public Rotation2d steerFacing = new Rotation2d();
+        public double steerVelocityRadPerSec = 0.0;
+        public double steerMotorAppliedVolts = 0.0;
+        public double steerMotorCurrentAmps = 0.0;
 
-        public double[] odometryDrivePositionsRad = new double[]{};
-        public Rotation2d[] odometryTurnPositions = new Rotation2d[]{};
+        public double[] odometryDriveWheelRevolutions = new double[]{};
+        public Rotation2d[] odometrySteerPositions = new Rotation2d[]{};
     }
 
     /**
      * Updates the set of loggable inputs.
      */
     void updateInputs(ModuleIOInputs inputs);
+
+    default void calibrate() {}
 
     /**
      * Run the drive motor at the specified voltage.

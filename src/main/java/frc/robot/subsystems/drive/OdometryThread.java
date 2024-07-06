@@ -32,9 +32,11 @@ public interface OdometryThread {
         private final Supplier<Double> supplier;
         private final Queue<Double> queue;
         private Double[] valuesSincePreviousPeriod = new Double[0];
+        private double latestValue;
 
         public OdometryDoubleInput(Supplier<Double> signal) {
             this.supplier = signal;
+            this.latestValue = 0;
             this.queue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         }
 
@@ -44,11 +46,16 @@ public interface OdometryThread {
 
         public void cacheInputToQueue() {
             queue.offer(supplier.get());
+            latestValue = supplier.get();
         }
 
         public void fetchQueueToArray() {
             valuesSincePreviousPeriod = mapQueueToArray(queue);
             queue.clear();
+        }
+
+        public double getLatest() {
+            return latestValue;
         }
     }
 
