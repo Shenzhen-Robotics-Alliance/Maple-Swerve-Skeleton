@@ -36,23 +36,16 @@ public abstract class MapleSubsystem extends SubsystemBase {
     }
     private static void enableSubsystems() {
         for (MapleSubsystem instance:instances)
-            if (!instance.updateDuringDisabled)
-                instance.onEnable();
+            instance.onEnable();
     }
 
     private static void disableSubsystems() {
         for (MapleSubsystem instance:instances)
-            if (!instance.updateDuringDisabled)
-                instance.onDisable();
+            instance.onDisable();
     }
 
-    private final boolean updateDuringDisabled;
     public MapleSubsystem(String name) {
-        this(name, false);
-    }
-    public MapleSubsystem(String name, boolean updateDuringDisabled) {
         super(name);
-        this.updateDuringDisabled = updateDuringDisabled;
         register(this);
     }
 

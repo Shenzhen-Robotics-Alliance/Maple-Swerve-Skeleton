@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.utils.LocalADStarAK;
 
@@ -97,13 +98,19 @@ public class Drive extends MapleSubsystem {
 
     @Override
     public void periodic(double dt, boolean enabled) {
+        long nanos = System.nanoTime();
         odometryThread.updateInputs(odometryThreadInputs);
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        for (var module : modules)
-            module.periodic();
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "OdometryUpdateCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
 
+        nanos = System.nanoTime();
+        for (var module : modules)
+            module.periodic(dt, enabled);
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "ModulesCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
+
+        Logger.recordOutput("/Odometry/timeStampsLength", odometryThreadInputs.measurementTimeStamps.length);
         for (int i = 0; i < odometryThreadInputs.measurementTimeStamps.length; i++) {
             // Read wheel positions and deltas from each module
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];

@@ -135,10 +135,10 @@ public class ModuleIOSparkMax implements ModuleIO {
         inputs.steerMotorCurrentAmps = steerSparkMax.getOutputCurrent();
 
         inputs.odometryDriveWheelRevolutions = Arrays.stream(drivePositionInput.getValuesSincePreviousPeriod())
-                .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+                .map(value -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
                 .toArray();
         inputs.odometrySteerPositions = Arrays.stream(turnPositionInput.getValuesSincePreviousPeriod())
-                .map((Double value) -> Rotation2d.fromRotations(value / STEER_GEAR_RATIO))
+                .mapToObj(value -> Rotation2d.fromRotations(value / STEER_GEAR_RATIO))
                 .toArray(Rotation2d[]::new);
     }
 

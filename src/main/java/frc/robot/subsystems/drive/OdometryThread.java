@@ -31,7 +31,7 @@ public interface OdometryThread {
     class OdometryDoubleInput {
         private final Supplier<Double> supplier;
         private final Queue<Double> queue;
-        private Double[] valuesSincePreviousPeriod = new Double[0];
+        private double[] valuesSincePreviousPeriod = new double[0];
         private double latestValue;
 
         public OdometryDoubleInput(Supplier<Double> signal) {
@@ -40,7 +40,7 @@ public interface OdometryThread {
             this.queue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         }
 
-        public Double[] getValuesSincePreviousPeriod() {
+        public double[] getValuesSincePreviousPeriod() {
             return valuesSincePreviousPeriod;
         }
 
@@ -50,7 +50,7 @@ public interface OdometryThread {
         }
 
         public void fetchQueueToArray() {
-            valuesSincePreviousPeriod = mapQueueToArray(queue);
+            valuesSincePreviousPeriod = mapQueueToDoubleArray(queue);
             queue.clear();
         }
 
@@ -74,10 +74,6 @@ public interface OdometryThread {
 
     static double[] mapQueueToDoubleArray(Queue<Double> queue) {
         return queue.stream().mapToDouble(value -> value).toArray();
-    }
-
-    static Double[] mapQueueToArray(Queue<Double> queue) {
-        return queue.toArray(new Double[0]);
     }
 
     static OdometryThread createInstance() {

@@ -47,13 +47,19 @@ public class Module extends MapleSubsystem {
 
     @Override
     public void periodic(double dt, boolean enabled) {
+        long nanos = System.nanoTime();
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module" + index, inputs);
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + " IO time", (System.nanoTime() - nanos) * 0.000001);
 
+        nanos = System.nanoTime();
         updateOdometryPositions();
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + " Odometry Time", (System.nanoTime() - nanos) * 0.000001);
 
+        nanos = System.nanoTime();
         if (enabled) runDriveOpenLoop();
         if (enabled) runSteerCloseLoop();
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + " Close Loop Time", (System.nanoTime() - nanos) * 0.000001);
     }
 
     private void updateOdometryPositions() {

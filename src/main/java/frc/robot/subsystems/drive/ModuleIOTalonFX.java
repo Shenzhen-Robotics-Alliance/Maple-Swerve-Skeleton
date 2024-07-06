@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
@@ -32,6 +33,7 @@ import java.util.Arrays;
  * "/Drive/ModuleX/TurnAbsolutePositionRad"
  */
 public class ModuleIOTalonFX implements ModuleIO {
+    private final int index;
     private final TalonFX driveTalon;
     private final TalonFX steerTalon;
     private final CANcoder cancoder;
@@ -53,33 +55,33 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final Rotation2d absoluteEncoderOffset;
 
     public ModuleIOTalonFX(int index) {
+        this.index = index;
         switch (index) {
-            case 0:
+            case 0 -> {
                 driveTalon = new TalonFX(3, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 steerTalon = new TalonFX(4, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(10, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(3.3195344249845276); // MUST BE CALIBRATED
-                break;
-            case 1:
+            }
+            case 1 -> {
                 driveTalon = new TalonFX(6, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 steerTalon = new TalonFX(5, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(11, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(1.7564080021290591); // MUST BE CALIBRATED
-                break;
-            case 2:
+            }
+            case 2 -> {
                 driveTalon = new TalonFX(1, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 steerTalon = new TalonFX(2, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(9, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(0.34974761963792617); // MUST BE CALIBRATED
-                break;
-            case 3:
+            }
+            case 3 -> {
                 driveTalon = new TalonFX(8, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 steerTalon = new TalonFX(7, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 cancoder = new CANcoder(12, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
                 absoluteEncoderOffset = new Rotation2d(0.10737865515199488); // MUST BE CALIBRATED
-                break;
-            default:
-                throw new RuntimeException("Invalid module index");
+            }
+            default -> throw new RuntimeException("Invalid module index");
         }
 
         var driveConfig = new TalonFXConfiguration();
@@ -136,12 +138,15 @@ public class ModuleIOTalonFX implements ModuleIO {
         inputs.steerMotorAppliedVolts = steerMotorAppliedVolts.getValueAsDouble();
         inputs.steerMotorCurrentAmps = steerMotorCurrent.getValueAsDouble();
 
+        long nanos = System.nanoTime();
         inputs.odometryDriveWheelRevolutions = Arrays.stream(driveEncoderUngearedRevolutions.getValuesSincePreviousPeriod())
-                .mapToDouble((Double value) -> value / DRIVE_GEAR_RATIO)
+                .map(value -> value / DRIVE_GEAR_RATIO)
                 .toArray();
         inputs.odometrySteerPositions = Arrays.stream(steerEncoderAbsolutePositionRevolutions.getValuesSincePreviousPeriod())
-                .map(this::getSteerFacingFromCANCoderReading)
+                .mapToObj(this::getSteerFacingFromCANCoderReading)
                 .toArray(Rotation2d[]::new);
+
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + " Odometry IO Stream CPU TimeMS", (System.nanoTime() - nanos) * 0.000001);
     }
 
     private Rotation2d getSteerFacingFromCANCoderReading(double canCoderReadingRotations) {
