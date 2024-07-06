@@ -67,6 +67,10 @@ public class MapleConfigFile {
                                 + "' since there is already a double config with the same name");
             intConfigs.put(configName, value);
         }
+
+        public String getBlockName() {
+            return this.blockName;
+        }
     }
 
     private final Map<String, ConfigBlock> configBlocks = new HashMap<>();

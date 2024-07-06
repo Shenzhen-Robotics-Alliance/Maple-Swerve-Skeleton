@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.robot.tests.WheelsCalibrationCTRE;
+import edu.wpi.first.math.util.Units;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 
 /**
@@ -61,8 +61,8 @@ public final class Constants {
         public static final double DEFAULT_GEAR_RATIO = 6.12;
         public static final double DEFAULT_WHEEL_RADIUS_METERS = 0.051; // 2 inch
         public static final double DEFAULT_BUMPER_WIDTH_METERS = 0.876; // 34.5 inch
-        public static final double DEFAULT_LEFT_RIGHT_WHEELS_DISTANCE_METERS = 0.53;
-        public static final double DEFAULT_FRONT_BACK_WHEELS_DISTANCE_METERS = 0.53;
+        public static final double DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS = 0.53;
+        public static final double DEFAULT_VERTICAL_WHEELS_MARGIN_METERS = 0.53;
         public static final double DEFAULT_BUMPER_LENGTH_METERS = 0.876; // 34.5 inch
         public static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 4.172; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
         public static final double DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND = 10.184; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
@@ -111,5 +111,6 @@ public final class Constants {
         );
         public static final double STEERING_CURRENT_LIMIT = 20;
         public static final double DRIVING_CURRENT_LIMIT = 60;
+        public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
     }
 }

@@ -15,12 +15,10 @@ import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 import org.littletonrobotics.junction.Logger;
 
-public class Module extends MapleSubsystem {
-    private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
-
+public class SwerveModule extends MapleSubsystem {
     private final ModuleIO io;
+    private final String name;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
-    private final int index;
 
     private final SimpleMotorFeedforward driveOpenLoop;
     private final MapleSimplePIDController turnCloseLoop;
@@ -28,10 +26,10 @@ public class Module extends MapleSubsystem {
     private double speedSetpoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
-    public Module(ModuleIO io, int index) {
-        super("Module" + index);
+    public SwerveModule(ModuleIO io, String name) {
+        super("Module-" + name);
         this.io = io;
-        this.index = index;
+        this.name = name;
 
         driveOpenLoop = new SimpleMotorFeedforward(0.1, 0.13);
         turnCloseLoop = new MapleSimplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig, 0);
@@ -47,7 +45,7 @@ public class Module extends MapleSubsystem {
 
     public void fetchOdometryInputs() {
         io.updateInputs(inputs);
-        Logger.processInputs("Drive/Module" + index, inputs);
+        Logger.processInputs("Drive/Module-" + name, inputs);
     }
 
     @Override
@@ -82,7 +80,7 @@ public class Module extends MapleSubsystem {
                         CURRENT_STEER_FACING_TO_DESIRED_FACING_DIFFERENCE
                 ),
                 adjustSpeedSetpoint = speedSetpoint * DESIRED_VELOCITY_PROJECTION_RATIO_TO_CURRENT_STEER_FACING,
-                velocitySetPointRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
+                velocitySetPointRadPerSec = adjustSpeedSetpoint / Constants.SwerveModuleConfigs.WHEEL_RADIUS;
         io.setDrivePower(driveOpenLoop.calculate(velocitySetPointRadPerSec));
     }
 
@@ -96,6 +94,10 @@ public class Module extends MapleSubsystem {
         speedSetpoint = optimizedState.speedMetersPerSecond;
 
         return optimizedState;
+    }
+
+    public SwerveModuleState requestXFormationSetpoint() {
+        return requestSetPoint(new SwerveModuleState()); // TODO write this method
     }
 
     @Override
@@ -131,7 +133,7 @@ public class Module extends MapleSubsystem {
     }
 
     private double toDrivePositionMeters(double driveWheelRevolutions) {
-        return Units.rotationsToRadians(driveWheelRevolutions) * WHEEL_RADIUS;
+        return Units.rotationsToRadians(driveWheelRevolutions) * Constants.SwerveModuleConfigs.WHEEL_RADIUS;
     }
 
     /**

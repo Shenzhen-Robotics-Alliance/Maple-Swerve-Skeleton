@@ -79,8 +79,8 @@ public class WheelsCalibrationCTRE implements UnitTest {
         configBlock.putDoubleConfig("wheelRadiusMeters", Constants.ChassisDefaultConfigs.DEFAULT_WHEEL_RADIUS_METERS);
         configBlock.putDoubleConfig("bumperWidthMeters", Constants.ChassisDefaultConfigs.DEFAULT_BUMPER_WIDTH_METERS);
         configBlock.putDoubleConfig("bumperLengthMeters", Constants.ChassisDefaultConfigs.DEFAULT_BUMPER_LENGTH_METERS);
-        configBlock.putDoubleConfig("leftRightWheelsDistanceMeters", Constants.ChassisDefaultConfigs.DEFAULT_LEFT_RIGHT_WHEELS_DISTANCE_METERS);
-        configBlock.putDoubleConfig("frontBackWheelsDistanceMeters", Constants.ChassisDefaultConfigs.DEFAULT_FRONT_BACK_WHEELS_DISTANCE_METERS);
+        configBlock.putDoubleConfig("horizontalWheelsMarginMeters", Constants.ChassisDefaultConfigs.DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS);
+        configBlock.putDoubleConfig("verticalWheelsMarginMeters", Constants.ChassisDefaultConfigs.DEFAULT_VERTICAL_WHEELS_MARGIN_METERS);
         configBlock.putDoubleConfig("maxVelocityMetersPerSecond", Constants.ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND);
         configBlock.putDoubleConfig("maxAccelerationMetersPerSecondSquared", Constants.ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND);
         configBlock.putDoubleConfig("maxAngularVelocityRadiansPerSecond", Math.toRadians(Constants.ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND));
