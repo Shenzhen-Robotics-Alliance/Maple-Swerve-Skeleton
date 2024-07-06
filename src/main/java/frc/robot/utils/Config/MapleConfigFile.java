@@ -1,4 +1,4 @@
-package frc.robot.utils.ConfigHelpers;
+package frc.robot.utils.Config;
 
 import edu.wpi.first.wpilibj.Filesystem;
 

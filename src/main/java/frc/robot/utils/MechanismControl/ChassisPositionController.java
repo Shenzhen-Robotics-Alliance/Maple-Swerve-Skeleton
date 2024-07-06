@@ -1,4 +1,4 @@
-package frc.robot.utils.MechanismControlHelpers; // package
+package frc.robot.utils.MechanismControl; // package
                                                  // frc.robot.Helpers.MechanismControlHelpers;
 //
 // import frc.robot.Helpers.MathHelpers.Vector2D;

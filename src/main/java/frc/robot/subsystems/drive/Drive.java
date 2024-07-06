@@ -29,12 +29,12 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends MapleSubsystem {
-    private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
+    private static final double MAX_MODULE_VELOCITY = Units.feetToMeters(14.5);
     private static final double TRACK_WIDTH_X = Units.inchesToMeters(25.0);
     private static final double TRACK_WIDTH_Y = Units.inchesToMeters(25.0);
     private static final double DRIVE_BASE_RADIUS =
             Math.hypot(TRACK_WIDTH_X / 2.0, TRACK_WIDTH_Y / 2.0);
-    private static final double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / DRIVE_BASE_RADIUS;
+    private static final double MAX_ANGULAR_SPEED = MAX_MODULE_VELOCITY / DRIVE_BASE_RADIUS;
 
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -78,10 +78,8 @@ public class Drive extends MapleSubsystem {
                 () -> kinematics.toChassisSpeeds(getModuleStates()),
                 this::runVelocity,
                 new HolonomicPathFollowerConfig(
-                        MAX_LINEAR_SPEED, DRIVE_BASE_RADIUS, new ReplanningConfig()),
-                () ->
-                        DriverStation.getAlliance().isPresent()
-                                && DriverStation.getAlliance().get() == Alliance.Red,
+                        MAX_MODULE_VELOCITY, DRIVE_BASE_RADIUS, new ReplanningConfig()),
+                () -> DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red),
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
@@ -121,10 +119,8 @@ public class Drive extends MapleSubsystem {
     }
 
     private void modulesPeriodic(double dt, boolean enabled) {
-        long nanos = System.nanoTime();
         for (var module : modules)
             module.periodic(dt, enabled);
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/ModulesTotalCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
     }
 
     private void feedOdometryDataToPositionEstimator() {
@@ -167,13 +163,13 @@ public class Drive extends MapleSubsystem {
         // Calculate module setpoints
         ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_LINEAR_SPEED);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, MAX_MODULE_VELOCITY);
 
         // Send setpoints to modules
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
             // The module returns the optimized state, useful for logging
-            optimizedSetpointStates[i] = modules[i].runSetpoint(setpointStates[i]);
+            optimizedSetpointStates[i] = modules[i].requestSetPoint(setpointStates[i]);
         }
 
         // Log setpoint states
@@ -260,7 +256,7 @@ public class Drive extends MapleSubsystem {
      * Returns the maximum linear speed in meters per sec.
      */
     public double getMaxLinearSpeedMetersPerSec() {
-        return MAX_LINEAR_SPEED;
+        return MAX_MODULE_VELOCITY;
     }
 
     /**

@@ -57,27 +57,27 @@ public class ModuleIOTalonFX implements ModuleIO {
         this.index = index;
         switch (index) {
             case 0 -> {
-                driveTalon = new TalonFX(3, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                steerTalon = new TalonFX(4, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                cancoder = new CANcoder(10, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                driveTalon = new TalonFX(3, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                steerTalon = new TalonFX(4, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                cancoder = new CANcoder(10, Constants.ChassisConfigs.CHASSIS_CANBUS);
                 absoluteEncoderOffset = new Rotation2d(3.3195344249845276); // MUST BE CALIBRATED
             }
             case 1 -> {
-                driveTalon = new TalonFX(6, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                steerTalon = new TalonFX(5, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                cancoder = new CANcoder(11, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                driveTalon = new TalonFX(6, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                steerTalon = new TalonFX(5, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                cancoder = new CANcoder(11, Constants.ChassisConfigs.CHASSIS_CANBUS);
                 absoluteEncoderOffset = new Rotation2d(1.7564080021290591); // MUST BE CALIBRATED
             }
             case 2 -> {
-                driveTalon = new TalonFX(1, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                steerTalon = new TalonFX(2, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                cancoder = new CANcoder(9, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                driveTalon = new TalonFX(1, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                steerTalon = new TalonFX(2, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                cancoder = new CANcoder(9, Constants.ChassisConfigs.CHASSIS_CANBUS);
                 absoluteEncoderOffset = new Rotation2d(0.34974761963792617); // MUST BE CALIBRATED
             }
             case 3 -> {
-                driveTalon = new TalonFX(8, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                steerTalon = new TalonFX(7, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
-                cancoder = new CANcoder(12, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+                driveTalon = new TalonFX(8, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                steerTalon = new TalonFX(7, Constants.ChassisConfigs.CHASSIS_CANBUS);
+                cancoder = new CANcoder(12, Constants.ChassisConfigs.CHASSIS_CANBUS);
                 absoluteEncoderOffset = new Rotation2d(0.10737865515199488); // MUST BE CALIBRATED
             }
             default -> throw new RuntimeException("Invalid module index");

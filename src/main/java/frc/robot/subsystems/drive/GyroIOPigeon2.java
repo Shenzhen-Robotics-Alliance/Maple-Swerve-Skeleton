@@ -11,14 +11,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
-import java.util.Arrays;
 import java.util.Queue;
 
 /**
  * IO implementation for Pigeon2
  */
 public class GyroIOPigeon2 implements GyroIO {
-    private final Pigeon2 pigeon = new Pigeon2(0, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
+    private final Pigeon2 pigeon = new Pigeon2(0, Constants.ChassisConfigs.CHASSIS_CANBUS);
     private final StatusSignal<Double> yaw = pigeon.getYaw();
     private final Queue<Double> yawPositionInput;
     private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();

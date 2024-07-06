@@ -12,7 +12,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
-import frc.robot.utils.MechanismControlHelpers.MapleSimplePIDController;
+import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 import org.littletonrobotics.junction.Logger;
 
 public class Module extends MapleSubsystem {
@@ -46,22 +46,16 @@ public class Module extends MapleSubsystem {
     }
 
     public void fetchOdometryInputs() {
-        long nanos = System.nanoTime();
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module" + index, inputs);
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + "/IO time", (System.nanoTime() - nanos) * 0.000001);
     }
 
     @Override
     public void periodic(double dt, boolean enabled) {
-        long nanos = System.nanoTime();
         updateOdometryPositions();
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + "/Odometry Time", (System.nanoTime() - nanos) * 0.000001);
 
-        nanos = System.nanoTime();
         if (enabled) runDriveOpenLoop();
         if (enabled) runSteerCloseLoop();
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + "/Close Loop Time", (System.nanoTime() - nanos) * 0.000001);
     }
 
     private void updateOdometryPositions() {
@@ -95,12 +89,9 @@ public class Module extends MapleSubsystem {
     /**
      * Runs the module with the specified setpoint state. Returns the optimized state.
      */
-    public SwerveModuleState runSetpoint(SwerveModuleState state) {
-        // Optimize state based on current angle
-        // Controllers run in "periodic" when the setpoint is not null
+    public SwerveModuleState requestSetPoint(SwerveModuleState state) {
         var optimizedState = SwerveModuleState.optimize(state, getSteerFacing());
 
-        // Update setpoints, controllers run in "periodic"
         angleSetpoint = optimizedState.angle;
         speedSetpoint = optimizedState.speedMetersPerSecond;
 
