@@ -1,22 +1,11 @@
-// Copyright 2021-2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Original Source:
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 /**
@@ -30,42 +19,37 @@ public class ModuleIOSim implements ModuleIO {
     private static final double LOOP_PERIOD_SECS = 0.02;
 
     private DCMotorSim driveSim = new DCMotorSim(DCMotor.getNEO(1), 6.75, 0.025);
-    private DCMotorSim turnSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
+    private DCMotorSim steerSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
 
-    private final Rotation2d turnAbsoluteInitPosition = new Rotation2d(Math.random() * 2.0 * Math.PI);
     private double driveAppliedVolts = 0.0;
-    private double turnAppliedVolts = 0.0;
+    private double steerAppliedVolts = 0.0;
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         driveSim.update(LOOP_PERIOD_SECS);
-        turnSim.update(LOOP_PERIOD_SECS);
+        steerSim.update(LOOP_PERIOD_SECS);
 
-        inputs.drivePositionRad = driveSim.getAngularPositionRad();
-        inputs.driveVelocityRadPerSec = driveSim.getAngularVelocityRadPerSec();
-        inputs.driveAppliedVolts = driveAppliedVolts;
-        inputs.driveCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
+        inputs.driveWheelFinalRevolutions = driveSim.getAngularPositionRad();
+        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveSim.getAngularVelocityRPM();
+        inputs.driveMotorAppliedVolts = driveAppliedVolts;
+        inputs.driveMotorCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
 
-        inputs.turnAbsolutePosition =
-                new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
-        inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
-        inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
-        inputs.turnAppliedVolts = turnAppliedVolts;
-        inputs.turnCurrentAmps = Math.abs(turnSim.getCurrentDrawAmps());
+        inputs.steerFacing = Rotation2d.fromRadians(steerSim.getAngularPositionRad());
+        inputs.steerVelocityRadPerSec = steerSim.getAngularVelocityRadPerSec();
+        inputs.steerMotorAppliedVolts = steerAppliedVolts;
+        inputs.steerMotorCurrentAmps = Math.abs(steerSim.getCurrentDrawAmps());
 
-        inputs.odometryDrivePositionsRad = new double[]{inputs.drivePositionRad};
-        inputs.odometryTurnPositions = new Rotation2d[]{inputs.turnPosition};
+        inputs.odometryDriveWheelRevolutions = new double[]{inputs.driveWheelFinalRevolutions};
+        inputs.odometrySteerPositions = new Rotation2d[]{inputs.steerFacing};
     }
 
     @Override
-    public void setDriveVoltage(double volts) {
-        driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-        driveSim.setInputVoltage(driveAppliedVolts);
+    public void setDrivePower(double power) {
+        driveSim.setInputVoltage(power * 12);
     }
 
     @Override
-    public void setTurnVoltage(double volts) {
-        turnAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-        turnSim.setInputVoltage(turnAppliedVolts);
+    public void setSteerPower(double power) {
+        steerSim.setInputVoltage(power * 12);
     }
 }

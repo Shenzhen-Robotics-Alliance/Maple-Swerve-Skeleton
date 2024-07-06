@@ -1,15 +1,6 @@
-// Copyright 2021-2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Original Source:
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot.subsystems.drive;
 
@@ -22,8 +13,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Constants;
 
-import java.util.Arrays;
+import java.util.Queue;
 
 /**
  * Module IO implementation for SparkMax drive motor controller, SparkMax turn motor controller (NEO
@@ -40,124 +32,137 @@ import java.util.Arrays;
 public class ModuleIOSparkMax implements ModuleIO {
     // Gear ratios for SDS MK4i L2, adjust as necessary
     private static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
-    private static final double TURN_GEAR_RATIO = 150.0 / 7.0;
+    private static final double STEER_GEAR_RATIO = 150.0 / 7.0;
 
     private final CANSparkMax driveSparkMax;
-    private final CANSparkMax turnSparkMax;
+    private final CANSparkMax steerSparkMax;
 
     private final RelativeEncoder driveEncoder;
-    private final RelativeEncoder turnRelativeEncoder;
+    private final RelativeEncoder steerRelativeEncoder;
     private final AnalogInput turnAbsoluteEncoder;
-    private final OdometryThreadReal.OdometryDoubleInput drivePositionInput;
-    private final OdometryThreadReal.OdometryDoubleInput turnPositionInput;
+    private final Queue<Double> drivePositionInput;
+    private final Queue<Double> steerRelativeEncoderPositionUngeared;
 
     private final boolean isTurnMotorInverted = true;
     private final Rotation2d absoluteEncoderOffset;
 
     public ModuleIOSparkMax(int index) {
         switch (index) {
-            case 0:
+            case 0 -> {
                 driveSparkMax = new CANSparkMax(1, MotorType.kBrushless);
-                turnSparkMax = new CANSparkMax(2, MotorType.kBrushless);
+                steerSparkMax = new CANSparkMax(2, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(0);
                 absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
-                break;
-            case 1:
+            }
+            case 1 -> {
                 driveSparkMax = new CANSparkMax(3, MotorType.kBrushless);
-                turnSparkMax = new CANSparkMax(4, MotorType.kBrushless);
+                steerSparkMax = new CANSparkMax(4, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(1);
                 absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
-                break;
-            case 2:
+            }
+            case 2 -> {
                 driveSparkMax = new CANSparkMax(5, MotorType.kBrushless);
-                turnSparkMax = new CANSparkMax(6, MotorType.kBrushless);
+                steerSparkMax = new CANSparkMax(6, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(2);
                 absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
-                break;
-            case 3:
+            }
+            case 3 -> {
                 driveSparkMax = new CANSparkMax(7, MotorType.kBrushless);
-                turnSparkMax = new CANSparkMax(8, MotorType.kBrushless);
+                steerSparkMax = new CANSparkMax(8, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(3);
                 absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
-                break;
-            default:
-                throw new RuntimeException("Invalid module index");
+            }
+            default -> throw new RuntimeException("Invalid module index");
         }
 
         driveSparkMax.restoreFactoryDefaults();
-        turnSparkMax.restoreFactoryDefaults();
+        steerSparkMax.restoreFactoryDefaults();
 
         driveSparkMax.setCANTimeout(250);
-        turnSparkMax.setCANTimeout(250);
+        steerSparkMax.setCANTimeout(250);
 
         driveEncoder = driveSparkMax.getEncoder();
-        turnRelativeEncoder = turnSparkMax.getEncoder();
+        steerRelativeEncoder = steerSparkMax.getEncoder();
 
-        turnSparkMax.setInverted(isTurnMotorInverted);
+        steerSparkMax.setInverted(isTurnMotorInverted);
         driveSparkMax.setSmartCurrentLimit(40);
-        turnSparkMax.setSmartCurrentLimit(30);
+        steerSparkMax.setSmartCurrentLimit(30);
         driveSparkMax.enableVoltageCompensation(12.0);
-        turnSparkMax.enableVoltageCompensation(12.0);
+        steerSparkMax.enableVoltageCompensation(12.0);
 
         driveEncoder.setPosition(0.0);
         driveEncoder.setMeasurementPeriod(10);
         driveEncoder.setAverageDepth(2);
 
-        turnRelativeEncoder.setPosition(0.0);
-        turnRelativeEncoder.setMeasurementPeriod(10);
-        turnRelativeEncoder.setAverageDepth(2);
+        steerRelativeEncoder.setPosition(0.0);
+        steerRelativeEncoder.setMeasurementPeriod(10);
+        steerRelativeEncoder.setAverageDepth(2);
 
         driveSparkMax.setCANTimeout(0);
-        turnSparkMax.setCANTimeout(0);
+        steerSparkMax.setCANTimeout(0);
 
         driveSparkMax.setPeriodicFramePeriod(
-                PeriodicFrame.kStatus2, (int) (1000.0 / Module.ODOMETRY_FREQUENCY));
-        turnSparkMax.setPeriodicFramePeriod(
-                PeriodicFrame.kStatus2, (int) (1000.0 / Module.ODOMETRY_FREQUENCY));
+                PeriodicFrame.kStatus2,
+                (int) (1000.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY)
+        );
+        steerSparkMax.setPeriodicFramePeriod(
+                PeriodicFrame.kStatus2,
+                (int) (1000.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY)
+        );
         this.drivePositionInput = OdometryThread.registerInput(driveEncoder::getPosition);
-        this.turnPositionInput = OdometryThread.registerInput(turnRelativeEncoder::getPosition);
+        this.steerRelativeEncoderPositionUngeared = OdometryThread.registerInput(steerRelativeEncoder::getPosition);
 
         driveSparkMax.burnFlash();
-        turnSparkMax.burnFlash();
+        steerSparkMax.burnFlash();
     }
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        inputs.drivePositionRad =
-                Units.rotationsToRadians(driveEncoder.getPosition()) / DRIVE_GEAR_RATIO;
-        inputs.driveVelocityRadPerSec =
-                Units.rotationsPerMinuteToRadiansPerSecond(driveEncoder.getVelocity()) / DRIVE_GEAR_RATIO;
-        inputs.driveAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
-        inputs.driveCurrentAmps = driveSparkMax.getOutputCurrent();
+        inputs.driveWheelFinalRevolutions = driveEncoder.getPosition() / DRIVE_GEAR_RATIO;
+        final double RPM_TO_REVOLUTIONS_PER_SECOND = 1.0/60.0;
+        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveEncoder.getVelocity() / DRIVE_GEAR_RATIO
+                * RPM_TO_REVOLUTIONS_PER_SECOND;
 
-        inputs.turnAbsolutePosition =
-                new Rotation2d(
-                        turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V() * 2.0 * Math.PI)
-                        .minus(absoluteEncoderOffset);
-        inputs.turnPosition =
-                Rotation2d.fromRotations(turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO);
-        inputs.turnVelocityRadPerSec =
-                Units.rotationsPerMinuteToRadiansPerSecond(turnRelativeEncoder.getVelocity())
-                        / TURN_GEAR_RATIO;
-        inputs.turnAppliedVolts = turnSparkMax.getAppliedOutput() * turnSparkMax.getBusVoltage();
-        inputs.turnCurrentAmps = turnSparkMax.getOutputCurrent();
+        inputs.driveMotorAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
+        inputs.driveMotorCurrentAmps = driveSparkMax.getOutputCurrent();
 
-        inputs.odometryDrivePositionsRad = Arrays.stream(drivePositionInput.getValuesSincePreviousPeriod())
-                .mapToDouble((Double value) -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+        inputs.steerFacing = Rotation2d.fromRotations(steerRelativeEncoder.getPosition() / STEER_GEAR_RATIO).minus(steerRelativePositionEncoderOffset);
+        inputs.steerVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(
+                steerRelativeEncoder.getVelocity() / STEER_GEAR_RATIO
+        );
+
+        inputs.steerMotorAppliedVolts = steerSparkMax.getAppliedOutput() * steerSparkMax.getBusVoltage();
+        inputs.steerMotorCurrentAmps = steerSparkMax.getOutputCurrent();
+
+        inputs.odometryDriveWheelRevolutions = drivePositionInput.stream()
+                .mapToDouble(value -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
                 .toArray();
-        inputs.odometryTurnPositions = Arrays.stream(turnPositionInput.getValuesSincePreviousPeriod())
-                .map((Double value) -> Rotation2d.fromRotations(value / TURN_GEAR_RATIO))
+        drivePositionInput.clear();
+        inputs.odometrySteerPositions = steerRelativeEncoderPositionUngeared.stream()
+                .map(value -> Rotation2d.fromRotations(value / STEER_GEAR_RATIO).minus(steerRelativePositionEncoderOffset))
                 .toArray(Rotation2d[]::new);
+        steerRelativeEncoderPositionUngeared.clear();
+    }
+
+    private Rotation2d steerRelativePositionEncoderOffset = new Rotation2d();
+    @Override
+    public void calibrate() {
+        final Rotation2d steerActualFacing = Rotation2d.fromRotations(
+                turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V()
+                ).minus(absoluteEncoderOffset);
+        final Rotation2d relativeEncoderReportedFacing = Rotation2d.fromRotations(steerRelativeEncoder.getPosition() / STEER_GEAR_RATIO);
+        /* reported - offset = actual, so offset = reported - actual */
+        steerRelativePositionEncoderOffset = relativeEncoderReportedFacing.minus(steerActualFacing);
     }
 
     @Override
-    public void setDriveVoltage(double volts) {
-        driveSparkMax.setVoltage(volts);
+    public void setDrivePower(double power) {
+        driveSparkMax.set(power);
     }
 
     @Override
-    public void setTurnVoltage(double volts) {
-        turnSparkMax.setVoltage(volts);
+    public void setSteerPower(double power) {
+        steerSparkMax.set(power);
     }
 
     @Override
@@ -167,6 +172,6 @@ public class ModuleIOSparkMax implements ModuleIO {
 
     @Override
     public void setTurnBrakeMode(boolean enable) {
-        turnSparkMax.setIdleMode(enable ? IdleMode.kBrake : IdleMode.kCoast);
+        steerSparkMax.setIdleMode(enable ? IdleMode.kBrake : IdleMode.kCoast);
     }
 }

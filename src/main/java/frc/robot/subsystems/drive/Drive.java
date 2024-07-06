@@ -21,16 +21,12 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.utils.LocalADStarAK;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.Arrays;
 
 public class Drive extends MapleSubsystem {
     private static final double MAX_LINEAR_SPEED = Units.feetToMeters(14.5);
@@ -42,6 +38,7 @@ public class Drive extends MapleSubsystem {
 
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final OdometryThreadInputsAutoLogged odometryThreadInputs;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
 
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
@@ -57,7 +54,6 @@ public class Drive extends MapleSubsystem {
             new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
     private final OdometryThread odometryThread;
-    private final OdometryThread.OdometryThreadInputs odometryThreadInputs;
     public Drive(
             GyroIO gyroIO,
             ModuleIO flModuleIO,
@@ -72,7 +68,7 @@ public class Drive extends MapleSubsystem {
         modules[3] = new Module(brModuleIO, 3);
 
         this.odometryThread = OdometryThread.createInstance();
-        this.odometryThreadInputs = new OdometryThread.OdometryThreadInputs();
+        this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 
         // Configure AutoBuilder for PathPlanner
@@ -102,25 +98,37 @@ public class Drive extends MapleSubsystem {
 
     @Override
     public void periodic(double dt, boolean enabled) {
+        fetchOdometryInputs();
+        modulesPeriodic(dt, enabled);
+        feedOdometryDataToPositionEstimator();
+    }
+
+    private void fetchOdometryInputs() {
+        long nanos = System.nanoTime();
+
+        odometryThread.lockOdometry();
         odometryThread.updateInputs(odometryThreadInputs);
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
+
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
+
         for (var module : modules)
-            module.periodic();
+            module.fetchOdometryInputs();
 
-        // Stop moving when disabled
-        if (DriverStation.isDisabled()) {
-            for (var module : modules) {
-                module.stop();
-            }
-        }
-        // Log empty setpoint states when disabled
-        if (DriverStation.isDisabled()) {
-            // Logger.recordOutput("SwerveStates/Setpoints");
-            // Logger.recordOutput("SwerveStates/SetpointsOptimized");
-        }
+        odometryThread.unlockOdometry();
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/OdometryFetchCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
+    }
 
+    private void modulesPeriodic(double dt, boolean enabled) {
+        long nanos = System.nanoTime();
+        for (var module : modules)
+            module.periodic(dt, enabled);
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/ModulesTotalCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
+    }
+
+    private void feedOdometryDataToPositionEstimator() {
+        Logger.recordOutput("/Odometry/timeStampsLength", odometryThreadInputs.measurementTimeStamps.length);
         for (int i = 0; i < odometryThreadInputs.measurementTimeStamps.length; i++) {
             // Read wheel positions and deltas from each module
             SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
@@ -200,7 +208,7 @@ public class Drive extends MapleSubsystem {
     private SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++) {
-            states[i] = modules[i].getState();
+            states[i] = modules[i].getMeasuredState();
         }
         return states;
     }
@@ -211,7 +219,7 @@ public class Drive extends MapleSubsystem {
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
-            states[i] = modules[i].getPosition();
+            states[i] = modules[i].getLatestPosition();
         }
         return states;
     }

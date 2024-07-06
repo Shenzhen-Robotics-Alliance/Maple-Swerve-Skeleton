@@ -14,8 +14,8 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     private final OdometryThread.OdometryDoubleInput[] odometryDoubleInputs;
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
-    private final Lock odometryLock = new ReentrantLock();
-    public OdometryThreadReal(OdometryThread.OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
+    private final Lock lock = new ReentrantLock();
+    protected OdometryThreadReal(OdometryThread.OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
         this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         this.odometryDoubleInputs = odometryDoubleInputs;
         this.statusSignals = statusSignals;
@@ -39,11 +39,11 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     private void odometryPeriodic() {
         refreshSignalsAndBlockThread();
 
-        odometryLock.lock();
+        lock.lock();
         timeStampsQueue.offer(estimateAverageTimeStamps());
         for(OdometryThread.OdometryDoubleInput odometryDoubleInput : odometryDoubleInputs)
             odometryDoubleInput.cacheInputToQueue();
-        odometryLock.unlock();
+        lock.unlock();
     }
 
     private void refreshSignalsAndBlockThread() {
@@ -69,15 +69,21 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
         return currentTime - totalLatency / statusSignals.length;
     }
 
+
     @Override
     public void updateInputs(OdometryThreadInputs inputs) {
-        odometryLock.lock();
-        inputs.measurementTimeStamps = OdometryThread.mapQueueToDoubleArray(timeStampsQueue);
-        timeStampsQueue.clear();
+        inputs.measurementTimeStamps = new double[timeStampsQueue.size()];
+        for (int i = 0; i < inputs.measurementTimeStamps.length && !timeStampsQueue.isEmpty(); i++)
+            inputs.measurementTimeStamps[i] = timeStampsQueue.poll();
+    }
 
-        for(OdometryThread.OdometryDoubleInput odometryDoubleInput : odometryDoubleInputs)
-            odometryDoubleInput.fetchQueueToArray();
+    @Override
+    public void lockOdometry() {
+        lock.lock();
+    }
 
-        odometryLock.unlock();
+    @Override
+    public void unlockOdometry() {
+        lock.unlock();
     }
 }
