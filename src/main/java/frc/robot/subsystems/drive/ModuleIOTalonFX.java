@@ -6,7 +6,6 @@ package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -18,7 +17,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.Arrays;
+import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -38,12 +37,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final TalonFX steerTalon;
     private final CANcoder cancoder;
 
-    private final OdometryThreadReal.OdometryDoubleInput driveEncoderUngearedRevolutions;
+    private final Queue<Double> driveEncoderUngearedRevolutions;
     private final StatusSignal<Double> driveEncoderUngearedRevolutionsPerSecond;
     private final StatusSignal<Double> driveMotorAppliedVoltage;
     private final StatusSignal<Double> driveMotorCurrent;
 
-    private final OdometryThreadReal.OdometryDoubleInput steerEncoderAbsolutePositionRevolutions;
+    private final Queue<Double> steerEncoderAbsolutePositionRevolutions;
     private final StatusSignal<Double> steerEncoderVelocityRevolutionsPerSecond;
     private final StatusSignal<Double> steerMotorAppliedVolts;
     private final StatusSignal<Double> steerMotorCurrent;
@@ -128,25 +127,33 @@ public class ModuleIOTalonFX implements ModuleIO {
                 steerMotorAppliedVolts,
                 steerMotorCurrent);
 
-        inputs.driveWheelFinalRevolutions = driveEncoderUngearedRevolutions.getLatest() / DRIVE_GEAR_RATIO;
+        long nanos = System.nanoTime();
+        inputs.odometryDriveWheelRevolutions = driveEncoderUngearedRevolutions.stream()
+                .mapToDouble(value -> value / DRIVE_GEAR_RATIO)
+                .toArray();
+        driveEncoderUngearedRevolutions.clear();
+        inputs.odometrySteerPositions = steerEncoderAbsolutePositionRevolutions.stream()
+                .map(this::getSteerFacingFromCANCoderReading)
+                .toArray(Rotation2d[]::new);
+        steerEncoderAbsolutePositionRevolutions.clear();
+
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + "/Odometry IO Stream CPU TimeMS", (System.nanoTime() - nanos) * 0.000001);
+
+        nanos = System.nanoTime();
+
+        if (inputs.odometryDriveWheelRevolutions.length > 0)
+            inputs.driveWheelFinalRevolutions = inputs.odometryDriveWheelRevolutions[inputs.odometryDriveWheelRevolutions.length-1];
+
         inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.rotationsToRadians(driveEncoderUngearedRevolutionsPerSecond.getValueAsDouble()) / DRIVE_GEAR_RATIO;
         inputs.driveMotorAppliedVolts = driveMotorAppliedVoltage.getValueAsDouble();
         inputs.driveMotorCurrentAmps = driveMotorCurrent.getValueAsDouble();
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + "/Drive IO CPU TimeMS", (System.nanoTime() - nanos) * 0.000001);
 
-        inputs.steerFacing = getSteerFacingFromCANCoderReading(steerEncoderAbsolutePositionRevolutions.getLatest());
+        if (inputs.odometrySteerPositions.length > 0)
+            inputs.steerFacing = inputs.odometrySteerPositions[inputs.odometrySteerPositions.length-1];
         inputs.steerVelocityRadPerSec = Units.rotationsToRadians(steerEncoderVelocityRevolutionsPerSecond.getValueAsDouble());
         inputs.steerMotorAppliedVolts = steerMotorAppliedVolts.getValueAsDouble();
         inputs.steerMotorCurrentAmps = steerMotorCurrent.getValueAsDouble();
-
-        long nanos = System.nanoTime();
-        inputs.odometryDriveWheelRevolutions = Arrays.stream(driveEncoderUngearedRevolutions.getValuesSincePreviousPeriod())
-                .map(value -> value / DRIVE_GEAR_RATIO)
-                .toArray();
-        inputs.odometrySteerPositions = Arrays.stream(steerEncoderAbsolutePositionRevolutions.getValuesSincePreviousPeriod())
-                .mapToObj(this::getSteerFacingFromCANCoderReading)
-                .toArray(Rotation2d[]::new);
-
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Module" + index + " Odometry IO Stream CPU TimeMS", (System.nanoTime() - nanos) * 0.000001);
     }
 
     private Rotation2d getSteerFacingFromCANCoderReading(double canCoderReadingRotations) {

@@ -50,7 +50,7 @@ public final class Constants {
 
         public static final String DEFAULT_CHASSIS_CANIVORE = "ChassisCanivore";
 
-        public static final int ODOMETRY_CACHE_CAPACITY = 20;
+        public static final int ODOMETRY_CACHE_CAPACITY = 10;
         public static final double ODOMETRY_FREQUENCY = 250;
         public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
     }

@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants;
 
-import java.util.Arrays;
+import java.util.Queue;
 
 /**
  * Module IO implementation for SparkMax drive motor controller, SparkMax turn motor controller (NEO
@@ -40,8 +40,8 @@ public class ModuleIOSparkMax implements ModuleIO {
     private final RelativeEncoder driveEncoder;
     private final RelativeEncoder steerRelativeEncoder;
     private final AnalogInput turnAbsoluteEncoder;
-    private final OdometryThreadReal.OdometryDoubleInput drivePositionInput;
-    private final OdometryThreadReal.OdometryDoubleInput turnPositionInput;
+    private final Queue<Double> drivePositionInput;
+    private final Queue<Double> steerRelativeEncoderPositionUngeared;
 
     private final boolean isTurnMotorInverted = true;
     private final Rotation2d absoluteEncoderOffset;
@@ -110,7 +110,7 @@ public class ModuleIOSparkMax implements ModuleIO {
                 (int) (1000.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY)
         );
         this.drivePositionInput = OdometryThread.registerInput(driveEncoder::getPosition);
-        this.turnPositionInput = OdometryThread.registerInput(steerRelativeEncoder::getPosition);
+        this.steerRelativeEncoderPositionUngeared = OdometryThread.registerInput(steerRelativeEncoder::getPosition);
 
         driveSparkMax.burnFlash();
         steerSparkMax.burnFlash();
@@ -134,12 +134,14 @@ public class ModuleIOSparkMax implements ModuleIO {
         inputs.steerMotorAppliedVolts = steerSparkMax.getAppliedOutput() * steerSparkMax.getBusVoltage();
         inputs.steerMotorCurrentAmps = steerSparkMax.getOutputCurrent();
 
-        inputs.odometryDriveWheelRevolutions = Arrays.stream(drivePositionInput.getValuesSincePreviousPeriod())
-                .map(value -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+        inputs.odometryDriveWheelRevolutions = drivePositionInput.stream()
+                .mapToDouble(value -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
                 .toArray();
-        inputs.odometrySteerPositions = Arrays.stream(turnPositionInput.getValuesSincePreviousPeriod())
-                .mapToObj(value -> Rotation2d.fromRotations(value / STEER_GEAR_RATIO))
+        drivePositionInput.clear();
+        inputs.odometrySteerPositions = steerRelativeEncoderPositionUngeared.stream()
+                .map(value -> Rotation2d.fromRotations(value / STEER_GEAR_RATIO).minus(steerRelativePositionEncoderOffset))
                 .toArray(Rotation2d[]::new);
+        steerRelativeEncoderPositionUngeared.clear();
     }
 
     private Rotation2d steerRelativePositionEncoderOffset = new Rotation2d();

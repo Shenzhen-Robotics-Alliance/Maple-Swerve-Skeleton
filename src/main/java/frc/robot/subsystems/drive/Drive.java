@@ -38,6 +38,7 @@ public class Drive extends MapleSubsystem {
 
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final OdometryThreadInputsAutoLogged odometryThreadInputs;
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
 
     private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
@@ -53,7 +54,6 @@ public class Drive extends MapleSubsystem {
             new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
     private final OdometryThread odometryThread;
-    private final OdometryThread.OdometryThreadInputs odometryThreadInputs;
     public Drive(
             GyroIO gyroIO,
             ModuleIO flModuleIO,
@@ -68,7 +68,7 @@ public class Drive extends MapleSubsystem {
         modules[3] = new Module(brModuleIO, 3);
 
         this.odometryThread = OdometryThread.createInstance();
-        this.odometryThreadInputs = new OdometryThread.OdometryThreadInputs();
+        this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 
         // Configure AutoBuilder for PathPlanner
@@ -98,18 +98,36 @@ public class Drive extends MapleSubsystem {
 
     @Override
     public void periodic(double dt, boolean enabled) {
+        fetchOdometryInputs();
+        modulesPeriodic(dt, enabled);
+        feedOdometryDataToPositionEstimator();
+    }
+
+    private void fetchOdometryInputs() {
         long nanos = System.nanoTime();
+
+        odometryThread.lockOdometry();
         odometryThread.updateInputs(odometryThreadInputs);
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
+
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "OdometryUpdateCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
 
-        nanos = System.nanoTime();
+        for (var module : modules)
+            module.fetchOdometryInputs();
+
+        odometryThread.unlockOdometry();
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/OdometryFetchCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
+    }
+
+    private void modulesPeriodic(double dt, boolean enabled) {
+        long nanos = System.nanoTime();
         for (var module : modules)
             module.periodic(dt, enabled);
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "ModulesCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
+        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/ModulesTotalCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
+    }
 
+    private void feedOdometryDataToPositionEstimator() {
         Logger.recordOutput("/Odometry/timeStampsLength", odometryThreadInputs.measurementTimeStamps.length);
         for (int i = 0; i < odometryThreadInputs.measurementTimeStamps.length; i++) {
             // Read wheel positions and deltas from each module

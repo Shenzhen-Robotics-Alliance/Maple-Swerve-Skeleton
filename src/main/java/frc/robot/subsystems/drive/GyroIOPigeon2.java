@@ -12,6 +12,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 
 import java.util.Arrays;
+import java.util.Queue;
 
 /**
  * IO implementation for Pigeon2
@@ -19,7 +20,7 @@ import java.util.Arrays;
 public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon = new Pigeon2(0, Constants.ChassisConfigs.DEFAULT_CHASSIS_CANIVORE);
     private final StatusSignal<Double> yaw = pigeon.getYaw();
-    private final OdometryThreadReal.OdometryDoubleInput yawPositionInput;
+    private final Queue<Double> yawPositionInput;
     private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
 
     public GyroIOPigeon2() {
@@ -36,8 +37,9 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
-        inputs.odometryYawPositions = Arrays.stream(
-                yawPositionInput.getValuesSincePreviousPeriod()
-        ).mapToObj(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
+        inputs.odometryYawPositions = yawPositionInput.stream()
+                .map(Rotation2d::fromDegrees)
+                .toArray(Rotation2d[]::new);
+        yawPositionInput.clear();
     }
 }
