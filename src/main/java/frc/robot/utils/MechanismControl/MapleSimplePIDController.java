@@ -1,7 +1,7 @@
-package frc.robot.utils.MechanismControlHelpers;
+package frc.robot.utils.MechanismControl;
 
-import frc.robot.utils.MathHelpers.AngleHelpers;
-import frc.robot.utils.MathHelpers.LookUpTable;
+import frc.robot.utils.Math.AngleHelpers;
+import frc.robot.utils.Math.LookUpTable;
 import org.littletonrobotics.junction.Logger;
 
 /**

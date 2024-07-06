@@ -14,7 +14,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
+import frc.robot.utils.Config.MapleConfigFile;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
+import java.io.IOException;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,23 +38,31 @@ public class RobotContainer {
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
-    public RobotContainer() {
+    public RobotContainer(String chassisName) {
+        final MapleConfigFile chassisCalibrationFile;
+        try {
+            chassisCalibrationFile = MapleConfigFile.fromDeployedConfig("ChassisWheelsCalibration", chassisName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        final MapleConfigFile.ConfigBlock generalConfigBlock = chassisCalibrationFile.getBlock("GeneralInformation");
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
 //                drive = new Drive(
-//                        new GyroIOPigeon2(false),
+//                        new GyroIOPigeon2(),
 //                        new ModuleIOSparkMax(0),
 //                        new ModuleIOSparkMax(1),
 //                        new ModuleIOSparkMax(2),
 //                        new ModuleIOSparkMax(3)
 //                );
                  drive = new Drive(
-                    new GyroIOPigeon2(),
-                    new ModuleIOTalonFX(0),
-                    new ModuleIOTalonFX(1),
-                    new ModuleIOTalonFX(2),
-                    new ModuleIOTalonFX(3)
+                         new GyroIOPigeon2(),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontLeft"), generalConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontRight"), generalConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackLeft"), generalConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackRight"), generalConfigBlock),
+                         generalConfigBlock
                  );
             }
 
@@ -62,7 +73,8 @@ public class RobotContainer {
                         new ModuleIOSim(),
                         new ModuleIOSim(),
                         new ModuleIOSim(),
-                        new ModuleIOSim()
+                        new ModuleIOSim(),
+                        generalConfigBlock
                 );
             }
 
@@ -73,7 +85,8 @@ public class RobotContainer {
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
-                        (inputs) -> {}
+                        (inputs) -> {},
+                        generalConfigBlock
                 );
             }
         }
@@ -97,7 +110,7 @@ public class RobotContainer {
                         () -> -controller.getLeftY(),
                         () -> -controller.getLeftX(),
                         () -> -controller.getRightX()));
-        controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        controller.x().onTrue(Commands.runOnce(drive::requestStopWithX, drive));
         controller.b().onTrue(Commands.runOnce(() -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())), drive).ignoringDisable(true));
     }
 

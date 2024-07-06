@@ -51,5 +51,5 @@ public interface ModuleIO {
     /**
      * Enable or disable brake mode on the turn motor.
      */
-    default void setTurnBrakeMode(boolean enable) {}
+    default void setSteerBrakeMode(boolean enable) {}
 }

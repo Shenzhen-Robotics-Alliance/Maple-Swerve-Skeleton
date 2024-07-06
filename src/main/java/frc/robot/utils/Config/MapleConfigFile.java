@@ -1,4 +1,4 @@
-package frc.robot.utils.ConfigHelpers;
+package frc.robot.utils.Config;
 
 import edu.wpi.first.wpilibj.Filesystem;
 
@@ -35,14 +35,14 @@ public class MapleConfigFile {
         public double getDoubleConfig(String name) throws NullPointerException {
             if (!doubleConfigs.containsKey(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: " + name + ", config: " + name + ", type: double");
+                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: double");
             return doubleConfigs.get(name);
         }
 
         public int getIntConfig(String name) throws NullPointerException {
             if (!intConfigs.containsKey(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: " + name + ", config: " + name + ", type: int");
+                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: int");
             return intConfigs.get(name);
         }
 
@@ -66,6 +66,10 @@ public class MapleConfigFile {
                                 + blockName
                                 + "' since there is already a double config with the same name");
             intConfigs.put(configName, value);
+        }
+
+        public String getBlockName() {
+            return this.blockName;
         }
     }
 

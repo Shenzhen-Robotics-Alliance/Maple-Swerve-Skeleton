@@ -1,4 +1,4 @@
-package frc.robot.utils.MathHelpers;
+package frc.robot.utils.Math;
 
 public class LookUpTable {
     public final double[] xValues;

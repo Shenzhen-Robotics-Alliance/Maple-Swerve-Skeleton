@@ -1,4 +1,4 @@
-package frc.robot.utils.MathHelpers;
+package frc.robot.utils.Math;
 
 public final class StatisticsHelpers {
     public static double getMean(double[] dataSet) {

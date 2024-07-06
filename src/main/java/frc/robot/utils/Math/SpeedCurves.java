@@ -1,4 +1,4 @@
-package frc.robot.utils.MathHelpers; // package frc.robot.Helpers.MathHelpers;
+package frc.robot.utils.Math; // package frc.robot.Helpers.MathHelpers;
 //
 /// *
 // * https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function
