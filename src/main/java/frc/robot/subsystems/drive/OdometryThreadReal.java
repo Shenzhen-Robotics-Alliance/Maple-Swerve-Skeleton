@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import frc.robot.Constants;
+import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.MapleTimeUtils;
 
 import java.util.Queue;
@@ -15,7 +16,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
     private final Lock lock = new ReentrantLock();
-    protected OdometryThreadReal(OdometryThread.OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
+    public OdometryThreadReal(OdometryThread.OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
         this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         this.odometryDoubleInputs = odometryDoubleInputs;
         this.statusSignals = statusSignals;

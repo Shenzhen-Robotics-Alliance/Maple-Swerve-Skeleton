@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
+import frc.robot.subsystems.drive.IO.ModuleIOSim;
+import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.utils.Config.MapleConfigFile;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 

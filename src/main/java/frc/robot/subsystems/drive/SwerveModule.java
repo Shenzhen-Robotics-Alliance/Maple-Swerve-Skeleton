@@ -12,6 +12,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
+import frc.robot.subsystems.drive.IO.ModuleIO;
+import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 import org.littletonrobotics.junction.Logger;
 

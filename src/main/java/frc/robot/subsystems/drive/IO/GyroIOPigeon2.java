@@ -1,7 +1,7 @@
 // Original Source:
 // https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.IO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;

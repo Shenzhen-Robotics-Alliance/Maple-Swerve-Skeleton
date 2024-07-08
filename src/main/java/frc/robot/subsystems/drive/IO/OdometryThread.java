@@ -1,9 +1,10 @@
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.IO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.subsystems.drive.OdometryThreadReal;
 import org.littletonrobotics.junction.AutoLog;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public interface OdometryThread {
 
     @AutoLog
     class OdometryThreadInputs {
-        double[] measurementTimeStamps = new double[0];
+        public double[] measurementTimeStamps = new double[0];
     }
 
     void updateInputs(OdometryThreadInputs inputs);
