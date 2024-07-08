@@ -43,7 +43,7 @@ public class SwerveModule extends MapleSubsystem {
         speedSetpoint = 0;
     }
 
-    public void fetchOdometryInputs() {
+    public void updateOdometryInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module-" + name, inputs);
     }
@@ -52,8 +52,10 @@ public class SwerveModule extends MapleSubsystem {
     public void periodic(double dt, boolean enabled) {
         updateOdometryPositions();
 
-        if (enabled) runDriveOpenLoop();
-        if (enabled) runSteerCloseLoop();
+        if (enabled) {
+            runDriveOpenLoop();
+            runSteerCloseLoop();
+        }
     }
 
     private void updateOdometryPositions() {
