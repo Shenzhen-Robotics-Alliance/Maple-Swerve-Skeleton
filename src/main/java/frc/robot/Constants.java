@@ -43,6 +43,11 @@ public final class Constants {
 
     public static final class DriveConfigs {
         public static final double nonUsageTimeResetWheels = 1;
+
+        public static final double deadBandWhenOtherAxisEmpty = 0.02;
+        public static final double deadBandWhenOtherAxisFull = 0.1;
+        public static final double linearSpeedInputExponent = 1.6;
+        public static final double rotationSpeedInputExponent = 2;
     }
 
     public static final class SwerveDriveConfigs {

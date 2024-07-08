@@ -107,9 +107,10 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        drive.setDefaultCommand(
-                drive.joystickDrive(MapleJoystickDriveInput.leftHandedJoystick(controller), true)
-        );
+        drive.setDefaultCommand(drive.joystickDrive(
+                MapleJoystickDriveInput.leftHandedJoystick(controller),
+                true
+        ));
         controller.b().onTrue(Commands.runOnce(() -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())), drive).ignoringDisable(true));
     }
 
