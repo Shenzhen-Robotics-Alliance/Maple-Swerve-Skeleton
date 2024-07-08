@@ -18,7 +18,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
@@ -101,7 +100,10 @@ public class Drive extends MapleSubsystem {
     public void periodic(double dt, boolean enabled) {
         fetchOdometryInputs();
         modulesPeriodic(dt, enabled);
-        feedOdometryDataToPositionEstimator();
+
+        Logger.recordOutput("/Odometry/timeStampsLength", odometryThreadInputs.measurementTimeStamps.length);
+        for (int timeStampIndex = 0; timeStampIndex < odometryThreadInputs.measurementTimeStamps.length; timeStampIndex++)
+            feedSingleOdometryDataToPositionEstimator(timeStampIndex);
     }
 
     private void fetchOdometryInputs() {
@@ -111,11 +113,11 @@ public class Drive extends MapleSubsystem {
         odometryThread.updateInputs(odometryThreadInputs);
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
 
+        for (var module : swerveModules)
+            module.updateOdometryInputs();
+
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-
-        for (var module : swerveModules)
-            module.fetchOdometryInputs();
 
         odometryThread.unlockOdometry();
         Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/OdometryFetchCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
@@ -126,35 +128,57 @@ public class Drive extends MapleSubsystem {
             module.periodic(dt, enabled);
     }
 
-    private void feedOdometryDataToPositionEstimator() { // TODO make this look prettier
-        Logger.recordOutput("/Odometry/timeStampsLength", odometryThreadInputs.measurementTimeStamps.length);
-        for (int i = 0; i < odometryThreadInputs.measurementTimeStamps.length; i++) {
-            // Read wheel positions and deltas from each module
-            SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-            SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-            for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-                modulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[i];
-                moduleDeltas[moduleIndex] =
-                        new SwerveModulePosition(
-                                modulePositions[moduleIndex].distanceMeters
-                                        - lastModulePositions[moduleIndex].distanceMeters,
-                                modulePositions[moduleIndex].angle);
-                lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
-            }
+    private void feedSingleOdometryDataToPositionEstimator(int timeStampIndex) {
+        final SwerveModulePosition[] modulePositions = getModulesPosition(timeStampIndex),
+                moduleDeltas = getModulesDelta(modulePositions);
 
-            // Update gyro angle
-            if (gyroInputs.connected) {
-                // Use the real gyro angle
-                rawGyroRotation = gyroInputs.odometryYawPositions[i];
-            } else {
-                // Use the angle delta from the kinematics and module deltas
-                Twist2d twist = kinematics.toTwist2d(moduleDeltas);
-                rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-            }
+        if (!updateRobotFacingWithGyroReading(timeStampIndex))
+            updateRobotFacingWithOdometry(moduleDeltas);
 
-            // Apply update
-            poseEstimator.updateWithTime(odometryThreadInputs.measurementTimeStamps[i], rawGyroRotation, modulePositions);
+        poseEstimator.updateWithTime(
+                odometryThreadInputs.measurementTimeStamps[timeStampIndex],
+                rawGyroRotation,
+                modulePositions
+        );
+    }
+
+    private SwerveModulePosition[] getModulesPosition(int timeStampIndex) {
+        SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[swerveModules.length];
+        for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++)
+            swerveModulePositions[moduleIndex] = swerveModules[moduleIndex].getOdometryPositions()[timeStampIndex];
+        return swerveModulePositions;
+    }
+
+    private SwerveModulePosition[] getModulesDelta(SwerveModulePosition[] freshModulesPosition) {
+        SwerveModulePosition[] deltas = new SwerveModulePosition[swerveModules.length];
+        for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+            final double deltaDistanceMeters = freshModulesPosition[moduleIndex].distanceMeters
+                    - lastModulePositions[moduleIndex].distanceMeters;
+            deltas[moduleIndex] = new SwerveModulePosition(deltaDistanceMeters, freshModulesPosition[moduleIndex].angle);
+            lastModulePositions[moduleIndex] = freshModulesPosition[moduleIndex];
         }
+        return deltas;
+    }
+
+    /**
+     * updates the robot facing using the reading from the gyro
+     * @param timeStampIndex the index of the time stamp
+     * @return whether the update is success
+     * */
+    private boolean updateRobotFacingWithGyroReading(int timeStampIndex) {
+        if (!gyroInputs.connected)
+            return false;
+        rawGyroRotation = gyroInputs.odometryYawPositions[timeStampIndex];
+        return true;
+    }
+
+    /**
+     * updates the robot facing using the reading from the gyro
+     * @param modulesDelta the delta of the swerve modules calculated from the odometry
+     * */
+    private void updateRobotFacingWithOdometry(SwerveModulePosition[] modulesDelta) {
+        Twist2d twist = kinematics.toTwist2d(modulesDelta);
+        rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
     }
 
     /**

@@ -78,6 +78,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         if (this.isTest())
             return;
+
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
     }
