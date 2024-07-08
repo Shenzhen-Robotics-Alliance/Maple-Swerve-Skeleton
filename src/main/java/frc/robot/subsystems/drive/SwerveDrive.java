@@ -4,11 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,30 +13,28 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
+import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.Config.MapleConfigFile;
-import frc.robot.utils.LocalADStarAK;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends MapleSubsystem {
+public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
     public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
     private final SwerveModule[] swerveModules;
 
+    private final Translation2d[] MODULE_TRANSLATIONS;
     private final SwerveDriveKinematics kinematics;
     private Rotation2d rawGyroRotation;
     private final SwerveModulePosition[] lastModulePositions;
     private final SwerveDrivePoseEstimator poseEstimator;
 
     private final OdometryThread odometryThread;
-    public Drive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
+    public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
         super("Drive");
         this.gyroIO = gyroIO;
         this.rawGyroRotation = new Rotation2d();
@@ -58,7 +51,7 @@ public class Drive extends MapleSubsystem {
 
         this.maxModuleVelocityMetersPerSec = generalConfigBlock.getDoubleConfig("maxVelocityMetersPerSecond");
         this.maxAngularVelocityRadPerSec = generalConfigBlock.getDoubleConfig("maxAngularVelocityRadiansPerSecond");
-        final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
+        this.MODULE_TRANSLATIONS = new Translation2d[] {
                 new Translation2d(horizontalWheelsMarginMeters / 2, verticalWheelsMarginMeters / 2), // FL
                 new Translation2d(horizontalWheelsMarginMeters / 2, -verticalWheelsMarginMeters / 2), // FR
                 new Translation2d(-horizontalWheelsMarginMeters / 2, verticalWheelsMarginMeters / 2), // BL
@@ -68,27 +61,11 @@ public class Drive extends MapleSubsystem {
         lastModulePositions = new SwerveModulePosition[] {new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()};
         this.poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
 
+        configHolonomicPathPlannerAutoBuilder(driveBaseRadius);
+
         this.odometryThread = OdometryThread.createInstance();
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
-
-
-        AutoBuilder.configureHolonomic(
-                this::getPose,
-                this::setPose,
-                () -> kinematics.toChassisSpeeds(getModuleStates()),
-                this::runVelocity,
-                new HolonomicPathFollowerConfig(maxModuleVelocityMetersPerSec, driveBaseRadius, new ReplanningConfig()),
-                () -> DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red),
-                this
-        );
-        Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]))
-        );
-        PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
-        );
     }
 
     @Override
@@ -107,8 +84,6 @@ public class Drive extends MapleSubsystem {
     }
 
     private void fetchOdometryInputs() {
-        long nanos = System.nanoTime();
-
         odometryThread.lockOdometry();
         odometryThread.updateInputs(odometryThreadInputs);
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs);
@@ -120,7 +95,6 @@ public class Drive extends MapleSubsystem {
         Logger.processInputs("Drive/Gyro", gyroInputs);
 
         odometryThread.unlockOdometry();
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + "Drive/OdometryFetchCPUTimeMS", (System.nanoTime()-nanos) * 0.000001);
     }
 
     private void modulesPeriodic(double dt, boolean enabled) {
@@ -181,43 +155,39 @@ public class Drive extends MapleSubsystem {
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
     }
 
-    /**
-     * Runs the drive at the desired velocity.
-     *
-     * @param speeds Speeds in meters/sec
-     */
-    public void runVelocity(ChassisSpeeds speeds) {
-        // Calculate module setpoints
-        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+    @Override
+    public void runRawChassisSpeeds(ChassisSpeeds speeds) {
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxModuleVelocityMetersPerSec);
 
         // Send setpoints to modules
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++) {
-            // The module returns the optimized state, useful for logging
-            optimizedSetpointStates[i] = swerveModules[i].requestSetPoint(setpointStates[i]);
-        }
+        for (int i = 0; i < 4; i++)
+            optimizedSetpointStates[i] = swerveModules[i].runSetPoint(setpointStates[i]);
 
-        // Log setpoint states
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
         Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
     }
 
-    /**
-     * Stops the drive.
-     */
+    @Override
     public void stop() {
-        runVelocity(new ChassisSpeeds());
+        Rotation2d[] swerveHeadings = new Rotation2d[swerveModules.length];
+        for (int i = 0; i < swerveHeadings.length; i++)
+            swerveHeadings[i] = new Rotation2d();
+        kinematics.resetHeadings(swerveHeadings);
+        HolonomicDrive.super.stop();
     }
 
     /**
-     * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
-     * return to their normal orientations the next time a nonzero velocity is requested.
+     * Locks the chassis and turns the modules to an X formation to resist movement.
+     * The lock will be cancelled the next time a nonzero velocity is requested.
      */
-    public void requestStopWithX() {
-        for (SwerveModule swerveModule:swerveModules)
-            swerveModule.requestXFormationSetpoint();
+    public void lockChassisWithXFormation() {
+        Rotation2d[] swerveHeadings = new Rotation2d[swerveModules.length];
+        for (int i = 0; i < swerveHeadings.length; i++)
+            swerveHeadings[i] = MODULE_TRANSLATIONS[i].getAngle();
+        kinematics.resetHeadings(swerveHeadings);
+        HolonomicDrive.super.stop();
     }
 
     /**
@@ -225,8 +195,8 @@ public class Drive extends MapleSubsystem {
      */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
-        SwerveModuleState[] states = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++)
+        SwerveModuleState[] states = new SwerveModuleState[swerveModules.length];
+        for (int i = 0; i < states.length; i++)
             states[i] = swerveModules[i].getMeasuredState();
         return states;
     }
@@ -235,33 +205,31 @@ public class Drive extends MapleSubsystem {
      * Returns the module positions (turn angles and drive positions) for all of the modules.
      */
     private SwerveModulePosition[] getModulePositions() {
-        SwerveModulePosition[] states = new SwerveModulePosition[4];
-        for (int i = 0; i < 4; i++)
+        SwerveModulePosition[] states = new SwerveModulePosition[swerveModules.length];
+        for (int i = 0; i < states.length; i++)
             states[i] = swerveModules[i].getLatestPosition();
         return states;
     }
 
-    /**
-     * Returns the current odometry pose.
-     */
-    @AutoLogOutput(key = "Odometry/Robot")
+    @Override
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
-    /**
-     * Resets the current odometry pose.
-     */
+    @Override
     public void setPose(Pose2d pose) {
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
-    /**
-     * Adds a vision measurement to the pose estimator.
-     *
-     * @param visionPose The pose of the robot as measured by the vision camera.
-     * @param timestamp  The timestamp of the vision measurement in seconds.
-     */
+    @Override
+    public ChassisSpeeds getMeasuredChassisSpeeds() {
+        return kinematics.toChassisSpeeds(getModuleStates());
+    }
+
+    @Override public double getChassisMaxLinearVelocity() {return maxModuleVelocityMetersPerSec;}
+    @Override public double getChassisMaxAngularVelocity() {return maxAngularVelocityRadPerSec;}
+
+    @Override
     public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
         poseEstimator.addVisionMeasurement(visionPose, timestamp);
     }

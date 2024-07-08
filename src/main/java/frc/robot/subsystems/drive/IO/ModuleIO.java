@@ -2,7 +2,7 @@
 // https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;

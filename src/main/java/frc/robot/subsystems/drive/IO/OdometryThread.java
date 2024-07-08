@@ -1,9 +1,10 @@
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.IO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.subsystems.drive.OdometryThreadReal;
 import org.littletonrobotics.junction.AutoLog;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public interface OdometryThread {
 
         public OdometryDoubleInput(Supplier<Double> signal) {
             this.supplier = signal;
-            this.queue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
+            this.queue = new ArrayBlockingQueue<>(Constants.SwerveDriveConfigs.ODOMETRY_CACHE_CAPACITY);
         }
 
         public void cacheInputToQueue() {
@@ -30,7 +31,7 @@ public interface OdometryThread {
     List<OdometryDoubleInput> registeredInputs = new ArrayList<>();
     List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
     static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
-        signal.setUpdateFrequency(Constants.ChassisConfigs.ODOMETRY_FREQUENCY, Constants.ChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
+        signal.setUpdateFrequency(Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY, Constants.SwerveDriveConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
         registeredStatusSignals.add(signal);
         return registerInput(signal.asSupplier());
     }
@@ -51,7 +52,7 @@ public interface OdometryThread {
 
     @AutoLog
     class OdometryThreadInputs {
-        double[] measurementTimeStamps = new double[0];
+        public double[] measurementTimeStamps = new double[0];
     }
 
     void updateInputs(OdometryThreadInputs inputs);

@@ -41,13 +41,22 @@ public final class Constants {
                 SYSTEM_PERFORMANCE_PATH = "SystemPerformance/";
     }
 
-    public static final class ChassisConfigs {
-        public enum ChassisType {
+    public static final class DriveConfigs {
+        public static final double nonUsageTimeResetWheels = 1;
+
+        public static final double deadBandWhenOtherAxisEmpty = 0.02;
+        public static final double deadBandWhenOtherAxisFull = 0.1;
+        public static final double linearSpeedInputExponent = 1.6;
+        public static final double rotationSpeedInputExponent = 2;
+    }
+
+    public static final class SwerveDriveConfigs {
+        public enum SwerveDriveType {
             REV,
             CTRE_ON_RIO,
             CTRE_ON_CANIVORE
         }
-        public static final ChassisType chassisType = ChassisType.CTRE_ON_CANIVORE;
+        public static final SwerveDriveType SWERVE_DRIVE_TYPE = SwerveDriveType.CTRE_ON_CANIVORE;
 
         public static final String CHASSIS_CANBUS = "ChassisCanivore";
 
@@ -103,10 +112,10 @@ public final class Constants {
 
         public static final MapleSimplePIDController.SimplePIDProfile steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDProfile(
                 0.9,
-                Math.toRadians(65),
-                0.02,
-                Math.toRadians(1.5),
-                0.05,
+                Math.toRadians(75),
+                0,
+                0,
+                0,
                 true
         );
         public static final double STEERING_CURRENT_LIMIT = 20;

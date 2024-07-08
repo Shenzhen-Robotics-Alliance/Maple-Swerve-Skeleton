@@ -2,7 +2,7 @@
 // https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.IO;
 
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -103,11 +103,11 @@ public class ModuleIOSparkMax implements ModuleIO {
 
         driveSparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2,
-                (int) (1000.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY)
+                (int) (1000.0 / Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY)
         );
         steerSparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2,
-                (int) (1000.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY)
+                (int) (1000.0 / Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY)
         );
         this.drivePositionInput = OdometryThread.registerInput(driveEncoder::getPosition);
         this.steerRelativeEncoderPositionUngeared = OdometryThread.registerInput(steerRelativeEncoder::getPosition);

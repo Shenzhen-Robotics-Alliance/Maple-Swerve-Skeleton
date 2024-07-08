@@ -2,11 +2,10 @@
 // https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
-package frc.robot.subsystems.drive;
+package frc.robot.subsystems.drive.IO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -37,9 +36,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     public ModuleIOTalonFX(MapleConfigFile.ConfigBlock moduleConfigs, MapleConfigFile.ConfigBlock generalConfigs) {
         this.name = moduleConfigs.getBlockName();
-        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.ChassisConfigs.CHASSIS_CANBUS);
-        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.ChassisConfigs.CHASSIS_CANBUS);
-        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.ChassisConfigs.CHASSIS_CANBUS);
+        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
         absoluteEncoderOffset = new Rotation2d(moduleConfigs.getDoubleConfig("steeringEncoderReadingAtOrigin")); // MUST BE CALIBRATED
 
         var driveConfig = new TalonFXConfiguration();
