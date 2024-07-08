@@ -27,7 +27,7 @@ import java.io.IOException;
  */
 public class RobotContainer {
     // Subsystems
-    private final Drive drive;
+    private final SwerveDrive drive;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -56,7 +56,7 @@ public class RobotContainer {
 //                        new ModuleIOSparkMax(2),
 //                        new ModuleIOSparkMax(3)
 //                );
-                 drive = new Drive(
+                 drive = new SwerveDrive(
                          new GyroIOPigeon2(),
                          new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontLeft"), generalConfigBlock),
                          new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontRight"), generalConfigBlock),
@@ -68,7 +68,7 @@ public class RobotContainer {
 
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
-                drive = new Drive(
+                drive = new SwerveDrive(
                         (inputs) -> {},
                         new ModuleIOSim(),
                         new ModuleIOSim(),
@@ -80,7 +80,7 @@ public class RobotContainer {
 
             default -> {
                 // Replayed robot, disable IO implementations
-                drive = new Drive(
+                drive = new SwerveDrive(
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},

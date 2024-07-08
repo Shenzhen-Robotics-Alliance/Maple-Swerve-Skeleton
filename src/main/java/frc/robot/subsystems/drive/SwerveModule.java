@@ -35,12 +35,16 @@ public class SwerveModule extends MapleSubsystem {
         turnCloseLoop = new MapleSimplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig, 0);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);
+
+        io.setDriveBrakeMode(true);
+        io.setSteerBrakeMode(true);
     }
 
     @Override
     public void onReset() {
         angleSetpoint = new Rotation2d();
         speedSetpoint = 0;
+        onDisable();
     }
 
     public void updateOdometryInputs() {
@@ -51,11 +55,6 @@ public class SwerveModule extends MapleSubsystem {
     @Override
     public void periodic(double dt, boolean enabled) {
         updateOdometryPositions();
-
-        if (enabled) {
-            runDriveOpenLoop();
-            runSteerCloseLoop();
-        }
     }
 
     private void updateOdometryPositions() {
@@ -89,31 +88,31 @@ public class SwerveModule extends MapleSubsystem {
     /**
      * Runs the module with the specified setpoint state. Returns the optimized state.
      */
-    public SwerveModuleState requestSetPoint(SwerveModuleState state) {
+    public SwerveModuleState runSetPoint(SwerveModuleState state) {
         var optimizedState = SwerveModuleState.optimize(state, getSteerFacing());
 
         angleSetpoint = optimizedState.angle;
         speedSetpoint = optimizedState.speedMetersPerSecond;
 
+        runDriveOpenLoop();
+        runSteerCloseLoop();
+
         return optimizedState;
     }
 
     public SwerveModuleState requestXFormationSetpoint() {
-        return requestSetPoint(new SwerveModuleState()); // TODO write this method
+        return runSetPoint(new SwerveModuleState()); // TODO write this method
     }
 
     @Override
     public void onDisable() {
         io.setSteerPower(0);
         io.setDrivePower(0);
-        io.setDriveBrakeMode(false);
-        io.setSteerBrakeMode(false);
     }
 
     @Override
     public void onEnable() {
-        io.setDriveBrakeMode(true);
-        io.setSteerBrakeMode(true);
+
     }
 
     /**

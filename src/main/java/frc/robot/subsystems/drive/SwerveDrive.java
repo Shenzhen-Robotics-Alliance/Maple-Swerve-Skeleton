@@ -28,7 +28,7 @@ import frc.robot.utils.LocalADStarAK;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends MapleSubsystem {
+public class SwerveDrive extends MapleSubsystem {
     public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -41,7 +41,7 @@ public class Drive extends MapleSubsystem {
     private final SwerveDrivePoseEstimator poseEstimator;
 
     private final OdometryThread odometryThread;
-    public Drive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
+    public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
         super("Drive");
         this.gyroIO = gyroIO;
         this.rawGyroRotation = new Rotation2d();
@@ -194,10 +194,9 @@ public class Drive extends MapleSubsystem {
 
         // Send setpoints to modules
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++) {
-            // The module returns the optimized state, useful for logging
-            optimizedSetpointStates[i] = swerveModules[i].requestSetPoint(setpointStates[i]);
-        }
+        for (int i = 0; i < 4; i++)
+            optimizedSetpointStates[i] = swerveModules[i].runSetPoint(setpointStates[i]);
+
 
         // Log setpoint states
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
