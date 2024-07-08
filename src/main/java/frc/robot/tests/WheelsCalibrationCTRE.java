@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.utils.Config.MapleConfigFile;
-import frc.robot.utils.Math.AngleHelpers;
+import frc.robot.utils.MapleMaths.Angles;
 
 import static frc.robot.Constants.WheelCalibrationConfigs.WheelToBeCalibrated;
 
@@ -68,7 +68,7 @@ public class WheelsCalibrationCTRE implements UnitTest {
     }
 
     private double getCanCoderReadingRadian(CANcoder canCoder) {
-        return AngleHelpers.simplifyAngle(canCoder.getAbsolutePosition().getValue() * Math.PI * 2);
+        return Angles.simplifyAngle(canCoder.getAbsolutePosition().getValue() * Math.PI * 2);
     }
 
     private void writeConfigurationFile() {

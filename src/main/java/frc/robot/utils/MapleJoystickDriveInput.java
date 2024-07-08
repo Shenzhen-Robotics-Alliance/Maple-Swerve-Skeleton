@@ -6,7 +6,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
-import frc.robot.utils.Math.LookUpTable;
+import frc.robot.utils.MapleMaths.CommonMath;
 
 import java.util.function.DoubleSupplier;
 
@@ -71,7 +71,7 @@ public class MapleJoystickDriveInput {
      * @param otherAxisValue the value of the other axis on the stick
      * */
     private static double applySmartDeadBand(double axisValue, double otherAxisValue) {
-        final double deadBand = LookUpTable.linearInterpretationWithBounding(
+        final double deadBand = CommonMath.linearInterpretationWithBounding(
                 0, Constants.DriveConfigs.deadBandWhenOtherAxisEmpty,
                 1, Constants.DriveConfigs.deadBandWhenOtherAxisFull,
                 Math.abs(otherAxisValue)
