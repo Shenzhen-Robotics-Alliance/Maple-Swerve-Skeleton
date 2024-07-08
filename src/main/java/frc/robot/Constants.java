@@ -41,13 +41,17 @@ public final class Constants {
                 SYSTEM_PERFORMANCE_PATH = "SystemPerformance/";
     }
 
-    public static final class ChassisConfigs {
-        public enum ChassisType {
+    public static final class DriveConfigs {
+        public static final double nonUsageTimeResetWheels = 1;
+    }
+
+    public static final class SwerveDriveConfigs {
+        public enum SwerveDriveType {
             REV,
             CTRE_ON_RIO,
             CTRE_ON_CANIVORE
         }
-        public static final ChassisType chassisType = ChassisType.CTRE_ON_CANIVORE;
+        public static final SwerveDriveType SWERVE_DRIVE_TYPE = SwerveDriveType.CTRE_ON_CANIVORE;
 
         public static final String CHASSIS_CANBUS = "ChassisCanivore";
 

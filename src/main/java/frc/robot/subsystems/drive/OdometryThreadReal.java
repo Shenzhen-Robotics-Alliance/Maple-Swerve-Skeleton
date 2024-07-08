@@ -17,7 +17,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     private final Queue<Double> timeStampsQueue;
     private final Lock lock = new ReentrantLock();
     public OdometryThreadReal(OdometryThread.OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
-        this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.ChassisConfigs.ODOMETRY_CACHE_CAPACITY);
+        this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.SwerveDriveConfigs.ODOMETRY_CACHE_CAPACITY);
         this.odometryDoubleInputs = odometryDoubleInputs;
         this.statusSignals = statusSignals;
 
@@ -48,15 +48,15 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     }
 
     private void refreshSignalsAndBlockThread() {
-        switch (Constants.ChassisConfigs.chassisType) {
+        switch (Constants.SwerveDriveConfigs.SWERVE_DRIVE_TYPE) {
             case REV ->
-                    MapleTimeUtils.delay(1.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY);
+                    MapleTimeUtils.delay(1.0 / Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY);
             case CTRE_ON_RIO -> {
-                MapleTimeUtils.delay(1.0 / Constants.ChassisConfigs.ODOMETRY_FREQUENCY);
+                MapleTimeUtils.delay(1.0 / Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY);
                 BaseStatusSignal.refreshAll();
             }
             case CTRE_ON_CANIVORE ->
-                    BaseStatusSignal.waitForAll(Constants.ChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
+                    BaseStatusSignal.waitForAll(Constants.SwerveDriveConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
         }
     }
 

@@ -36,9 +36,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     public ModuleIOTalonFX(MapleConfigFile.ConfigBlock moduleConfigs, MapleConfigFile.ConfigBlock generalConfigs) {
         this.name = moduleConfigs.getBlockName();
-        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.ChassisConfigs.CHASSIS_CANBUS);
-        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.ChassisConfigs.CHASSIS_CANBUS);
-        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.ChassisConfigs.CHASSIS_CANBUS);
+        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
         absoluteEncoderOffset = new Rotation2d(moduleConfigs.getDoubleConfig("steeringEncoderReadingAtOrigin")); // MUST BE CALIBRATED
 
         var driveConfig = new TalonFXConfiguration();
