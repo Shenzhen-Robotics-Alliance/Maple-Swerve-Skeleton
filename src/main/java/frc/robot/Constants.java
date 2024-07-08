@@ -112,10 +112,10 @@ public final class Constants {
 
         public static final MapleSimplePIDController.SimplePIDProfile steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDProfile(
                 0.9,
-                Math.toRadians(65),
-                0.02,
-                Math.toRadians(1.5),
-                0.05,
+                Math.toRadians(75),
+                0,
+                0,
+                0,
                 true
         );
         public static final double STEERING_CURRENT_LIMIT = 20;

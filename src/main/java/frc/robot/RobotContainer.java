@@ -111,7 +111,11 @@ public class RobotContainer {
                 MapleJoystickDriveInput.leftHandedJoystick(controller),
                 true
         ));
-        controller.b().onTrue(Commands.runOnce(() -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())), drive).ignoringDisable(true));
+        controller.b().onTrue(Commands.runOnce(
+                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                drive
+                ).ignoringDisable(true)
+        );
     }
 
     /**

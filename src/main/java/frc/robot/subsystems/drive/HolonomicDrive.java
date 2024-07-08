@@ -19,6 +19,8 @@ import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public interface HolonomicDrive extends Subsystem {
     /**
      * runs a ChassisSpeeds without doing any pre-processing
@@ -116,11 +118,10 @@ public interface HolonomicDrive extends Subsystem {
      * */
     default Command joystickDrive(MapleJoystickDriveInput input, boolean useFieldCentric) {
         final Timer nonSpeedTimer = new Timer();
-        nonSpeedTimer.start();
-        return Commands.run(() -> joystickDrivePeriodic(input, useFieldCentric, nonSpeedTimer))
-                .beforeStarting(nonSpeedTimer::start)
-                .until(() -> nonSpeedTimer.get() > Constants.DriveConfigs.nonUsageTimeResetWheels)
-                .finallyDo(this::stop);
+        return Commands.run(
+                () -> joystickDrivePeriodic(input, useFieldCentric, nonSpeedTimer),
+                this
+        ).beforeStarting(nonSpeedTimer::start);
     }
 
     default void joystickDrivePeriodic(MapleJoystickDriveInput input, boolean fieldCentricModeOn, Timer nonSpeedTimer) {
@@ -129,6 +130,11 @@ public interface HolonomicDrive extends Subsystem {
         );
         if (!isZero(driveStationCentricSpeed))
             nonSpeedTimer.reset();
+
+        if (nonSpeedTimer.hasElapsed(Constants.DriveConfigs.nonUsageTimeResetWheels)) {
+            stop();
+            return;
+        }
 
         if (fieldCentricModeOn)
             runDriverStationCentricChassisSpeeds(driveStationCentricSpeed);
