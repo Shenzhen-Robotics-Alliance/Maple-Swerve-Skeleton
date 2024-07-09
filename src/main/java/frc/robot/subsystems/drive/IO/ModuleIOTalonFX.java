@@ -96,7 +96,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         if (inputs.odometrySteerPositions.length > 0)
             inputs.steerFacing = inputs.odometrySteerPositions[inputs.odometrySteerPositions.length-1];
 
-        inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.rotationsToRadians(driveEncoderUngearedRevolutionsPerSecond.getValueAsDouble()) / DRIVE_GEAR_RATIO;
+        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveEncoderUngearedRevolutionsPerSecond.getValueAsDouble() / DRIVE_GEAR_RATIO;
         inputs.driveMotorAppliedVolts = driveMotorAppliedVoltage.getValueAsDouble();
         inputs.driveMotorCurrentAmps = driveMotorCurrent.getValueAsDouble();
 
