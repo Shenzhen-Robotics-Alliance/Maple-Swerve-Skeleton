@@ -48,6 +48,11 @@ public final class Constants {
         public static final double deadBandWhenOtherAxisFull = 0.1;
         public static final double linearSpeedInputExponent = 1.6;
         public static final double rotationSpeedInputExponent = 2;
+
+        /** the amount of time that the chassis needs to accelerate to the maximum linear velocity */
+        public static final double linearAccelerationSmoothOutSeconds = 0.2;
+        /** the amount of time that the chassis needs to accelerate to the maximum angular velocity */
+        public static final double angularAccelerationSmoothOutSeconds = 0.2;
     }
 
     public static final class SwerveDriveConfigs {
