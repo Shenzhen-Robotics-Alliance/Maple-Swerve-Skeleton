@@ -1,4 +1,4 @@
-package frc.robot.utils.Math; // package frc.robot.Helpers.MathHelpers;
+package frc.robot.utils.MapleMaths; // package frc.robot.Helpers.MathHelpers;
 //
 /// **
 // * Bézier curve with four points

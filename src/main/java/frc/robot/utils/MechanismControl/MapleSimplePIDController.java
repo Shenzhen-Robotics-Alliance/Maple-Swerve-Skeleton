@@ -1,7 +1,6 @@
 package frc.robot.utils.MechanismControl;
 
-import frc.robot.utils.Math.AngleHelpers;
-import frc.robot.utils.Math.LookUpTable;
+import frc.robot.utils.MapleMaths.Angles;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -32,7 +31,7 @@ public class MapleSimplePIDController implements SingleDimensionMechanismControl
                 mechanismPosition + mechanismVelocity * profile.mechanismDecelerationTime,
                 error =
                         profile.isMechanismInCycle
-                                ? AngleHelpers.getActualDifference(mechanismPositionWithDerivative, desiredPosition)
+                                ? Angles.getActualDifference(mechanismPositionWithDerivative, desiredPosition)
                                 : desiredPosition - mechanismPositionWithDerivative;
         if (Math.abs(error) < profile.errorTolerance) return 0;
         final double

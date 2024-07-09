@@ -1,6 +1,6 @@
-package frc.robot.utils.Math;
+package frc.robot.utils.MapleMaths;
 
-public class AngleHelpers {
+public class Angles {
     /**
      * simplify an angle into the range 0-360 degrees
      *

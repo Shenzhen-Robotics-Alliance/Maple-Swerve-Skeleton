@@ -1,6 +1,6 @@
-package frc.robot.utils.Math;
+package frc.robot.utils.MapleMaths;
 
-public final class StatisticsHelpers {
+public final class Statistics {
     public static double getMean(double[] dataSet) {
         double sum = 0;
         for (double data : dataSet) sum += data;
