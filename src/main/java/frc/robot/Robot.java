@@ -4,9 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.MapleSubsystem;
+import frc.robot.tests.UnitTest;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -15,9 +17,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
-    private static final Constants.RobotMode JAVA_SIM_MODE = Constants.RobotMode.REPLAY;
-    public static final Constants.RobotMode CURRENT_ROBOT_MODE =
-            isReal() ? Constants.RobotMode.REAL : JAVA_SIM_MODE;
+    private static final Constants.RobotMode JAVA_SIM_MODE = Constants.RobotMode.SIM;
+    public static final Constants.RobotMode CURRENT_ROBOT_MODE = isReal() ? Constants.RobotMode.REAL : JAVA_SIM_MODE;
     private Command autonomousCommand;
     private RobotContainer robotContainer;
 
@@ -134,10 +135,14 @@ public class Robot extends LoggedRobot {
     /**
      * This function is called once when test mode is enabled.
      */
+    private UnitTest unitTest = null;
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
+        if (unitTest==null)
+            unitTest = robotContainer.getUnitTest();
+        unitTest.testStart();
     }
 
     /**
@@ -145,6 +150,9 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void testPeriodic() {
+        if (unitTest==null)
+            return;
+        unitTest.testPeriodic();
     }
 
     /**

@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +17,8 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
+import frc.robot.tests.InterpolationTableTest;
+import frc.robot.tests.UnitTest;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -126,5 +129,10 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.get();
+    }
+
+
+    public UnitTest getUnitTest() {
+        return new InterpolationTableTest();
     }
 }
