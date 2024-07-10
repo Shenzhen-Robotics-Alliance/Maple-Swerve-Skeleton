@@ -1,3 +1,4 @@
+// By 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/ and ChatGPT
 package frc.robot.utils.Config;
 
 import edu.wpi.first.wpilibj.Filesystem;
@@ -19,7 +20,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class MapleConfigFile { // TODO: add support for string configs
+public class MapleConfigFile {
     private final String configType;
     private final String configName;
 
@@ -27,6 +28,7 @@ public class MapleConfigFile { // TODO: add support for string configs
         private final String blockName;
         private final Map<String, Double> doubleConfigs = new HashMap<>();
         private final Map<String, Integer> intConfigs = new HashMap<>();
+        private final Map<String, String> stringConfigs = new HashMap<>();
 
         private ConfigBlock(String blockName) {
             this.blockName = blockName;
@@ -46,26 +48,44 @@ public class MapleConfigFile { // TODO: add support for string configs
             return intConfigs.get(name);
         }
 
+        public String getStringConfig(String name) throws NullPointerException {
+            if (!stringConfigs.containsKey(name))
+                throw new NullPointerException(
+                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: string");
+            return stringConfigs.get(name);
+        }
+
         public void putDoubleConfig(String configName, double value) throws IllegalArgumentException {
-            if (intConfigs.containsKey(configName))
+            if (intConfigs.containsKey(configName) || stringConfigs.containsKey(configName))
                 throw new IllegalArgumentException(
                         "Cannot put double config '"
                                 + configName
                                 + "' to block '"
                                 + blockName
-                                + "' since there is already an int config with the same name");
+                                + "' since there is already an int or string config with the same name");
             doubleConfigs.put(configName, value);
         }
 
         public void putIntConfig(String configName, int value) throws IllegalArgumentException {
-            if (doubleConfigs.containsKey(configName))
+            if (doubleConfigs.containsKey(configName) || stringConfigs.containsKey(configName))
                 throw new IllegalArgumentException(
                         "Cannot put int config '"
                                 + configName
                                 + "' to block '"
                                 + blockName
-                                + "' since there is already a double config with the same name");
+                                + "' since there is already a double or string config with the same name");
             intConfigs.put(configName, value);
+        }
+
+        public void putStringConfig(String configName, String value) throws IllegalArgumentException {
+            if (doubleConfigs.containsKey(configName) || intConfigs.containsKey(configName))
+                throw new IllegalArgumentException(
+                        "Cannot put string config '"
+                                + configName
+                                + "' to block '"
+                                + blockName
+                                + "' since there is already a double or int config with the same name");
+            stringConfigs.put(configName, value);
         }
 
         public String getBlockName() {
@@ -149,10 +169,16 @@ public class MapleConfigFile { // TODO: add support for string configs
         String type = configElement.getAttribute("type");
         String value = configElement.getTextContent();
 
-        if (type.equals("double")) {
-            block.doubleConfigs.put(configTag, Double.parseDouble(value));
-        } else if (type.equals("int")) {
-            block.intConfigs.put(configTag, Integer.parseInt(value));
+        switch (type) {
+            case "double":
+                block.doubleConfigs.put(configTag, Double.parseDouble(value));
+                break;
+            case "int":
+                block.intConfigs.put(configTag, Integer.parseInt(value));
+                break;
+            case "string":
+                block.stringConfigs.put(configTag, value);
+                break;
         }
     }
 
@@ -160,7 +186,6 @@ public class MapleConfigFile { // TODO: add support for string configs
         try {
             saveConfigToUSB();
         } catch (IOException ignored) {
-            ignored.printStackTrace();
         }
     }
 
@@ -181,14 +206,13 @@ public class MapleConfigFile { // TODO: add support for string configs
         }
     }
 
-    private static void writeConfigBlocks(MapleConfigFile config, FileWriter writer)
-            throws IOException {
+    private static void writeConfigBlocks(MapleConfigFile config, FileWriter writer) throws IOException {
         for (String blockName : config.configBlocksOrder) {
-            System.out.println("block name: " + blockName);
-            final ConfigBlock block = config.configBlocks.get(blockName);
+            ConfigBlock block = config.configBlocks.get(blockName);
             writer.write("    <" + block.blockName + ">\n");
             writeDoubleConfigs(block, writer);
             writeIntConfigs(block, writer);
+            writeStringConfigs(block, writer);
             writer.write("    </" + block.blockName + ">\n");
         }
     }
@@ -212,6 +236,19 @@ public class MapleConfigFile { // TODO: add support for string configs
                     "        <"
                             + entry.getKey()
                             + " type=\"int\">"
+                            + entry.getValue()
+                            + "</"
+                            + entry.getKey()
+                            + ">\n");
+        }
+    }
+
+    private static void writeStringConfigs(ConfigBlock block, FileWriter writer) throws IOException {
+        for (Map.Entry<String, String> entry : block.stringConfigs.entrySet()) {
+            writer.write(
+                    "        <"
+                            + entry.getKey()
+                            + " type=\"string\">"
                             + entry.getValue()
                             + "</"
                             + entry.getKey()
