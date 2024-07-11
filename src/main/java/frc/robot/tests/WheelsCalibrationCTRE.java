@@ -10,6 +10,8 @@ import frc.robot.Constants;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.Angles;
 
+import java.io.IOException;
+
 import static frc.robot.Constants.WheelCalibrationConfigs.WheelToBeCalibrated;
 
 public class WheelsCalibrationCTRE implements UnitTest {
@@ -72,6 +74,7 @@ public class WheelsCalibrationCTRE implements UnitTest {
     }
 
     private void writeConfigurationFile() {
+        System.out.println("writing configs to usb");
         if (finished) return;
         final MapleConfigFile.ConfigBlock configBlock = calibrationFile.getBlock("GeneralInformation");
         configBlock.putIntConfig("gyroPort", Constants.ChassisDefaultConfigs.DEFAULT_GYRO_PORT);
@@ -88,7 +91,11 @@ public class WheelsCalibrationCTRE implements UnitTest {
         for (WheelToBeCalibrated wheelToBeCalibrated:Constants.WheelCalibrationConfigs.wheelsToBeCalibrated)
             saveConfigurationForCurrentWheel(wheelToBeCalibrated);
 
-        calibrationFile.saveConfigToUSBSafe();
+        try {
+            calibrationFile.saveConfigToUSB();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         finished = true;
     }
 

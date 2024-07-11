@@ -33,6 +33,10 @@ public final class Constants {
         REPLAY
     }
 
+    public static final String chassisConfigName =
+            "6433-2024-OffSeason";
+            // "5516-2024-OnSeason";
+
     public static final class LogConfigs {
         // avoid typos
         public static final String
@@ -50,9 +54,9 @@ public final class Constants {
         public static final double rotationSpeedInputExponent = 2;
 
         /** the amount of time that the chassis needs to accelerate to the maximum linear velocity */
-        public static final double linearAccelerationSmoothOutSeconds = 0.2;
+        public static final double linearAccelerationSmoothOutSeconds = 0.1;
         /** the amount of time that the chassis needs to accelerate to the maximum angular velocity */
-        public static final double angularAccelerationSmoothOutSeconds = 0.2;
+        public static final double angularAccelerationSmoothOutSeconds = 0.1;
     }
 
     public static final class SwerveDriveConfigs {
@@ -104,22 +108,21 @@ public final class Constants {
             }
         }
         public static final WheelToBeCalibrated[] wheelsToBeCalibrated = new WheelToBeCalibrated[] {
-                new WheelToBeCalibrated("FrontLeft", 3, 4, 10),
-                new WheelToBeCalibrated("FrontRight", 6, 5, 11),
-                new WheelToBeCalibrated("BackLeft", 1, 2, 9),
-                new WheelToBeCalibrated("BackRight", 8, 7, 12)
+                new WheelToBeCalibrated("FrontLeft", 1, 2, 1),
+                new WheelToBeCalibrated("FrontRight", 3, 4, 2),
+                new WheelToBeCalibrated("BackLeft", 5, 6, 3),
+                new WheelToBeCalibrated("BackRight", 7, 8, 4)
         };
     }
 
     public static final class SwerveModuleConfigs {
-        public static final double MINIMUM_USAGE_SPEED_METERS_PER_SECOND = ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND * 0.03;
         public static final double NON_USAGE_TIME_RESET_SWERVE = 0.5;
 
         public static final MapleSimplePIDController.SimplePIDProfile steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDProfile(
-                0.9,
-                Math.toRadians(75),
-                0,
-                0,
+                1,
+                Math.toRadians(90),
+                0.01,
+                Math.toRadians(1.5),
                 0,
                 true
         );
