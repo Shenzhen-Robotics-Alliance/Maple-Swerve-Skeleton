@@ -26,8 +26,6 @@ public class InterpolatedMotorFeedForward extends SimpleMotorFeedforward {
                 "motorPower",
                 Math.abs(velocity)
         );
-        Logger.recordOutput("/MotorFeedForward/" + name + "/required velocity", velocity);
-        Logger.recordOutput("/MotorFeedForward/" + name + "/corresponding power (mag)", motorPowerMagnitude);
         return Math.copySign(motorPowerMagnitude, velocity);
     }
 

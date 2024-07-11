@@ -24,8 +24,8 @@ public class SwerveModule extends MapleSubsystem {
 
     private final InterpolatedMotorFeedForward driveOpenLoop;
     private final MapleSimplePIDController turnCloseLoop;
-    private Rotation2d angleSetpoint;
-    private double speedSetpoint;
+    private Rotation2d steerAbsoluteFacingSetPoint;
+    private double speedSetPointMetersPerSec;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
     public SwerveModule(ModuleIO io, String name) {
@@ -48,8 +48,8 @@ public class SwerveModule extends MapleSubsystem {
 
     @Override
     public void onReset() {
-        angleSetpoint = new Rotation2d();
-        speedSetpoint = 0;
+        steerAbsoluteFacingSetPoint = new Rotation2d();
+        speedSetPointMetersPerSec = 0;
         onDisable();
     }
 
@@ -73,7 +73,7 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private void runSteerCloseLoop() {
-        turnCloseLoop.setDesiredPosition(angleSetpoint.getRadians());
+        turnCloseLoop.setDesiredPosition(steerAbsoluteFacingSetPoint.getRadians());
         io.setSteerPower(turnCloseLoop.getMotorPower(
                 getSteerVelocityRadPerSec(),
                 getSteerFacing().getRadians()
@@ -82,13 +82,14 @@ public class SwerveModule extends MapleSubsystem {
 
     private void runDriveOpenLoop() {
         final double
-                CURRENT_STEER_FACING_TO_DESIRED_FACING_DIFFERENCE = angleSetpoint.minus(getSteerFacing()).getRadians(),
+                CURRENT_STEER_FACING_TO_DESIRED_FACING_DIFFERENCE = steerAbsoluteFacingSetPoint.minus(getSteerFacing()).getRadians(),
                 DESIRED_VELOCITY_PROJECTION_RATIO_TO_CURRENT_STEER_FACING = Math.cos(
                         CURRENT_STEER_FACING_TO_DESIRED_FACING_DIFFERENCE
                 ),
-                adjustSpeedSetpoint = speedSetpoint * DESIRED_VELOCITY_PROJECTION_RATIO_TO_CURRENT_STEER_FACING,
-                velocitySetPointRadPerSec = adjustSpeedSetpoint / Constants.SwerveModuleConfigs.WHEEL_RADIUS;
-        io.setDrivePower(driveOpenLoop.calculate(velocitySetPointRadPerSec));
+                adjustSpeedSetpointMetersPerSec = speedSetPointMetersPerSec * DESIRED_VELOCITY_PROJECTION_RATIO_TO_CURRENT_STEER_FACING;
+        Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/required velocity", adjustSpeedSetpointMetersPerSec);
+        Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/corresponding power (mag)", driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
+        io.setDrivePower(driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
     }
 
     /**
@@ -97,8 +98,8 @@ public class SwerveModule extends MapleSubsystem {
     public SwerveModuleState runSetPoint(SwerveModuleState state) {
         var optimizedState = SwerveModuleState.optimize(state, getSteerFacing());
 
-        angleSetpoint = optimizedState.angle;
-        speedSetpoint = optimizedState.speedMetersPerSecond;
+        steerAbsoluteFacingSetPoint = optimizedState.angle;
+        speedSetPointMetersPerSec = optimizedState.speedMetersPerSecond;
 
         runDriveOpenLoop();
         runSteerCloseLoop();
