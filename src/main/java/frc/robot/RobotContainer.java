@@ -7,7 +7,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,7 +54,7 @@ public class RobotContainer {
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
-//                drive = new Drive(
+//                drive = new SwerveDrive(
 //                        new GyroIOPigeon2(),
 //                        new ModuleIOSparkMax(0),
 //                        new ModuleIOSparkMax(1),
