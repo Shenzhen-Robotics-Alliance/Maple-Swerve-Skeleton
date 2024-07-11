@@ -59,7 +59,7 @@ public class MapleJoystickDriveInput {
                 rotationalSpeedDeadBanded = applySmartDeadBand(rotationSpeedRaw, 0),
                 rotationalSpeedScaledMagnitude = Math.abs(Math.pow(
                         rotationalSpeedDeadBanded, Constants.DriveConfigs.rotationSpeedInputExponent
-                ));
+                )) * maxAngularVelocityRadPerSec;
         return Math.copySign(rotationalSpeedScaledMagnitude, rotationSpeedRaw);
     }
 
