@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -14,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
+import frc.robot.utils.MechanismControl.InterpolatedMotorFeedForward;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 import org.littletonrobotics.junction.Logger;
 
@@ -22,7 +22,7 @@ public class SwerveModule extends MapleSubsystem {
     private final String name;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
 
-    private final SimpleMotorFeedforward driveOpenLoop;
+    private final InterpolatedMotorFeedForward driveOpenLoop;
     private final MapleSimplePIDController turnCloseLoop;
     private Rotation2d angleSetpoint;
     private double speedSetpoint;
@@ -33,7 +33,11 @@ public class SwerveModule extends MapleSubsystem {
         this.io = io;
         this.name = name;
 
-        driveOpenLoop = new SimpleMotorFeedforward(0.1, 0.13);
+        driveOpenLoop = new InterpolatedMotorFeedForward(
+                "DriveWheelOpenLoop",
+                new double[] {0, 1},
+                new double[] {0, 5.2}
+        );
         turnCloseLoop = new MapleSimplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig, 0);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);
@@ -100,10 +104,6 @@ public class SwerveModule extends MapleSubsystem {
         runSteerCloseLoop();
 
         return optimizedState;
-    }
-
-    public SwerveModuleState requestXFormationSetpoint() {
-        return runSetPoint(new SwerveModuleState()); // TODO write this method
     }
 
     @Override

@@ -6,7 +6,7 @@
         <overallGearRatio type="double">6.12</overallGearRatio>
         <wheelRadiusMeters type="double">0.051</wheelRadiusMeters>
         <bumperWidthMeters type="double">0.876</bumperWidthMeters>
-        <maxVelocityMetersPerSecond type="double">4.172</maxVelocityMetersPerSecond>
+        <maxVelocityMetersPerSecond type="double">4.8</maxVelocityMetersPerSecond>
         <bumperLengthMeters type="double">0.876</bumperLengthMeters>
 
         <horizontalWheelsMarginMeters type="double">0.53</horizontalWheelsMarginMeters>
