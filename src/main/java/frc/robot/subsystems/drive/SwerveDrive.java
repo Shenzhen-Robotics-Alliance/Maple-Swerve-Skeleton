@@ -211,6 +211,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
         return states;
     }
 
+    @AutoLogOutput(key="Odometry/RobotPosition")
     @Override
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();

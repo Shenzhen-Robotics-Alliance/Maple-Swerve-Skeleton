@@ -35,7 +35,6 @@ public interface HolonomicDrive extends Subsystem {
     /**
      * Returns the current odometry Pose.
      */
-    @AutoLogOutput(key = "Odometry/Robot")
     Pose2d getPose();
 
     /**
