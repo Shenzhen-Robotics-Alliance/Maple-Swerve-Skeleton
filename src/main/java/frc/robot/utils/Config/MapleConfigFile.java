@@ -21,8 +21,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class MapleConfigFile {
-    private final String configType;
-    private final String configName;
+    public final String configType;
+    public final String configName;
 
     public static final class ConfigBlock {
         private final String blockName;

@@ -1,0 +1,18 @@
+<InterpolatedMotorFeedForward>
+    <info>
+        <interpolatedVariablesCount type="int">1</interpolatedVariablesCount>
+        <length type="int">2</length>
+    </info>
+
+    <variable0>
+        <name type="string">motorVelocity</name>
+        <sample0 type="double">0</sample0>
+        <sample1 type="double">4.8</sample1>
+    </variable0>
+
+    <variable1>
+        <name type="string">motorPower</name>
+        <sample0 type="double">0</sample0>
+        <sample1 type="double">1</sample1>
+    </variable1>
+</InterpolatedMotorFeedForward>

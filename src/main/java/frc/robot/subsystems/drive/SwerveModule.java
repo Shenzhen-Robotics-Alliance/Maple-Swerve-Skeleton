@@ -33,11 +33,7 @@ public class SwerveModule extends MapleSubsystem {
         this.io = io;
         this.name = name;
 
-        driveOpenLoop = new InterpolatedMotorFeedForward(
-                "DriveWheelOpenLoop",
-                new double[] {0, 1},
-                new double[] {0, 5.2}
-        );
+        driveOpenLoop = InterpolatedMotorFeedForward.fromDeployedDirectory("DrivingMotorOpenLoop");
         turnCloseLoop = new MapleSimplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig, 0);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);

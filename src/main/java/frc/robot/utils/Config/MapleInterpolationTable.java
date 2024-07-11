@@ -5,13 +5,12 @@ package frc.robot.utils.Config;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class MapleInterpolationTable {
-    private final String tableName;
+    public final String tableName;
     private final Variable independentVariable;
     private final Map<String, Variable> interpolatedVariables;
 
@@ -27,20 +26,34 @@ public class MapleInterpolationTable {
         }
 
         public void initializeTuningPanelOnDashboard() {
-//            if (Objects.equals(tableName, "Unknown"))
-//                return;
-//            SmartDashboard.putNumberArray("InterpolationTables/" + tableName + "/" + variableName, values);
+            if (Objects.equals(tableName, "Unknown"))
+                return;
+            SmartDashboard.putNumberArray("InterpolationTables/" + tableName + "/" + variableName, values);
         }
 
         public void updateValuesFromDashboard() {
             if (Objects.equals(tableName, "Unknown"))
                 return;
 
-            final double[] updatedValues = SmartDashboard.getNumberArray("InterpolationTables/" + tableName + "/" + variableName, values);
+            final double[] updatedValues = SmartDashboard.getNumberArray("InterpolationTables/" + tableName + "/" + variableName, new double[]{});
             if (updatedValues.length != values.length)
                 return;
-
             System.arraycopy(updatedValues, 0, values, 0, values.length);
+        }
+
+        public void toBlock(MapleConfigFile.ConfigBlock block) {
+            block.putStringConfig("name", variableName);
+            for (int i = 0; i < values.length; i++)
+                block.putDoubleConfig("sample"+i, values[i]);
+        }
+
+        public static Variable fromBlock(MapleConfigFile.ConfigBlock block, int length) {
+            final String name = block.getStringConfig("name");
+            final double[] values = new double[length];
+            for (int i = 0; i < length; i++)
+                values[i] = block.getDoubleConfig("sample"+i);
+
+            return new Variable(name, values);
         }
     }
     public MapleInterpolationTable(String name, Variable independentVariable, Variable... interpolatedVariables) {
@@ -92,12 +105,27 @@ public class MapleInterpolationTable {
 
     public MapleConfigFile toConfigFile(String configType) {
         final MapleConfigFile configFile = new MapleConfigFile(configType, tableName);
-        // TODO write this part
+
+        final MapleConfigFile.ConfigBlock infoBlock = configFile.getBlock("info");
+        infoBlock.putIntConfig("interpolatedVariablesCount", interpolatedVariables.size());
+        infoBlock.putIntConfig("length", independentVariable.values.length);
+        independentVariable.toBlock(configFile.getBlock("variable0"));
+        int i = 1;
+        for (Variable interpolatedVariable:interpolatedVariables.values())
+            interpolatedVariable.toBlock(configFile.getBlock("variable" + (i++)));
+
         return configFile;
     }
 
-    public static MapleInterpolationTable fromDeployDirectory(String configType, String name) throws IOException {
-        final MapleConfigFile configFile = MapleConfigFile.fromDeployedConfig(configType, name);
-        return new MapleInterpolationTable(name, null); // TODO: write this part
+    public static MapleInterpolationTable fromConfigFile(MapleConfigFile configFile) {
+        final MapleConfigFile.ConfigBlock infoBlock = configFile.getBlock("info");
+        final int interpolatedVariablesCount = infoBlock.getIntConfig("interpolatedVariablesCount"),
+                length = infoBlock.getIntConfig("length");
+
+        final Variable independentVariable = Variable.fromBlock(configFile.getBlock("variable0"), length);
+        final Variable[] interpolateVariables = new Variable[interpolatedVariablesCount];
+        for (int i = 0; i < interpolatedVariablesCount; i++)
+            interpolateVariables[i] = Variable.fromBlock(configFile.getBlock("variable"+(i+1)), length);
+        return new MapleInterpolationTable(configFile.configName, independentVariable, interpolateVariables); // TODO: write this part
     }
 }

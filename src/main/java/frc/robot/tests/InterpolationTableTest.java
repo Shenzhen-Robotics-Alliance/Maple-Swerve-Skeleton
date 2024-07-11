@@ -1,29 +1,33 @@
 package frc.robot.tests;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.Config.MapleInterpolationTable;
+
+import java.io.IOException;
 
 public class InterpolationTableTest implements UnitTest {
     private final MapleInterpolationTable testTable;
     public InterpolationTableTest() {
-        testTable = new MapleInterpolationTable(
-                "testTable",
-                new MapleInterpolationTable.Variable("x", 1, 2, 3, 4),
-                new MapleInterpolationTable.Variable("y", 2, 3, 4, 5)
-        );
+        try {
+            testTable = MapleInterpolationTable.fromConfigFile(MapleConfigFile.fromDeployedConfig("InterpolatedMotorFeedForward", "DrivingMotorOpenLoop"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void testStart() {
-        SmartDashboard.putNumber("InterpolationTables/testValueX", 1.0);
+        SmartDashboard.putNumber("InterpolationTables/testValueVelocity", 1.0);
     }
 
     @Override
     public void testPeriodic() {
-        final double x = SmartDashboard.getNumber("InterpolationTables/testValueX", 1.0);
+        assert testTable != null;
+        final double vel = SmartDashboard.getNumber("InterpolationTables/testValueVelocity", 1.0);
         SmartDashboard.putNumber(
-                "InterpolationTables/testOutPutY",
-                testTable.interpolateVariable("y", x)
+                "InterpolationTables/testOutPutPower",
+                testTable.interpolateVariable("motorPower", vel)
         );
     }
 }
