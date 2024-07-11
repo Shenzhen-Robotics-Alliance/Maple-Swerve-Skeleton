@@ -5,6 +5,7 @@ package frc.robot.utils.Config;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -46,8 +47,11 @@ public class MapleInterpolationTable {
         this.tableName = name;
         this.independentVariable = independentVariable;
         this.interpolatedVariables = new HashMap<>();
-        for (Variable variable:interpolatedVariables)
+        for (Variable variable:interpolatedVariables) {
             this.interpolatedVariables.put(variable.variableName, variable);
+            if (variable.values.length != independentVariable.values.length)
+                throw new RuntimeException("interpolated variable " + variable.variableName + " has length " + variable.values.length + " which does not match the independent variable");
+        }
 
         initDashboardTunings();
     }
@@ -65,8 +69,6 @@ public class MapleInterpolationTable {
         return getInterpolatingDoubleTreeMap(independentVariable, interpolatedVariable, new InterpolatingDoubleTreeMap());
     }
     private static InterpolatingDoubleTreeMap getInterpolatingDoubleTreeMap(Variable independentVariable, Variable interpolatedVariable, InterpolatingDoubleTreeMap targetMap) {
-        if (interpolatedVariable.values.length != independentVariable.values.length)
-            throw new IllegalArgumentException("interpolated variable " + interpolatedVariable.variableName + "does match the independent variable " + independentVariable.variableName + " in length");
         targetMap.clear();
         for (int i = 0; i < independentVariable.values.length; i++)
             targetMap.put(independentVariable.values[i], interpolatedVariable.values[i]);
@@ -81,8 +83,9 @@ public class MapleInterpolationTable {
         independentVariable.updateValuesFromDashboard();
         interpolatedVariable.updateValuesFromDashboard();
 
-        final InterpolatingDoubleTreeMap interpolatingDoubleTreeMap =
-                getInterpolatingDoubleTreeMap(independentVariable, interpolatedVariables.get(interpolatedVariableName));
+        final InterpolatingDoubleTreeMap interpolatingDoubleTreeMap = getInterpolatingDoubleTreeMap(
+                independentVariable, interpolatedVariable
+        );
 
         return interpolatingDoubleTreeMap.get(independentVariableValue);
     }
@@ -91,5 +94,10 @@ public class MapleInterpolationTable {
         final MapleConfigFile configFile = new MapleConfigFile(configType, tableName);
         // TODO write this part
         return configFile;
+    }
+
+    public static MapleInterpolationTable fromDeployDirectory(String configType, String name) throws IOException {
+        final MapleConfigFile configFile = MapleConfigFile.fromDeployedConfig(configType, name);
+        return new MapleInterpolationTable(name, null); // TODO: write this part
     }
 }
