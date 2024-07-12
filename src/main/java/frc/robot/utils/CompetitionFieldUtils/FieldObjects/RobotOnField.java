@@ -1,4 +1,4 @@
-package frc.robot.utils.CompetitionFieldUtils.FieldObjects.Crescendo2024;
+package frc.robot.utils.CompetitionFieldUtils.FieldObjects;
 
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 
