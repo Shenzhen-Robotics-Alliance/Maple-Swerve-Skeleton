@@ -69,7 +69,7 @@ public class MapleCompetitionField {
         return originalSet;
     }
 
-    public void displayObjectsToDashboardAndTelemetry() {
+    public void updateObjectsToDashboardAndTelemetry() {
         for (String typeName: objectsOnFieldWithGivenType.keySet()) {
             final Set<ObjectOnField> objects = objectsOnFieldWithGivenType.get(typeName);
             dashboardField2d.getObject(typeName).setPoses(getPose2ds(objects));

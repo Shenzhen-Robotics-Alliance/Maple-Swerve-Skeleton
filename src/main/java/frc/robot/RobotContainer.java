@@ -16,6 +16,7 @@ import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
+import frc.robot.tests.FieldDisplayTest;
 import frc.robot.tests.InterpolationTableTest;
 import frc.robot.tests.UnitTest;
 import frc.robot.utils.Config.MapleConfigFile;
@@ -132,6 +133,6 @@ public class RobotContainer {
 
 
     public UnitTest getUnitTest() {
-        return new InterpolationTableTest();
+        return new FieldDisplayTest();
     }
 }
