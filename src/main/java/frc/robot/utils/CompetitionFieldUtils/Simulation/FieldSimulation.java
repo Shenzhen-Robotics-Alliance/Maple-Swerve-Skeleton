@@ -12,4 +12,7 @@ public abstract class FieldSimulation {
     public FieldSimulation(MapleCompetitionField competitionField) {
         this.competitionField = competitionField;
     }
+
+    // TODO: test the holonomic chassis simulation here
+    //  add collision map class and initialize it in crescendo 2024 field
 }

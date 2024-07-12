@@ -20,7 +20,6 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.utils.LocalADStarAK;
 import frc.robot.utils.MapleJoystickDriveInput;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,15 +36,21 @@ public interface HolonomicDrive extends Subsystem {
      */
     Pose2d getPose();
 
+    default Rotation2d getFacing() {return getPose().getRotation(); }
+
     /**
      * Resets the current odometry Pose to a given Pose
      */
     void setPose(Pose2d currentPose);
 
     /**
-     * @return the measured(actual) velocities of the chassis
+     * @return the measured(actual) velocities of the chassis, robot-relative
      * */
-    ChassisSpeeds getMeasuredChassisSpeeds();
+    ChassisSpeeds getMeasuredChassisSpeedsRobotRelative();
+
+    default ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getMeasuredChassisSpeedsRobotRelative(), getFacing());
+    }
 
     double getChassisMaxLinearVelocity();
     double getChassisMaxAngularVelocity();
@@ -100,7 +105,7 @@ public interface HolonomicDrive extends Subsystem {
         AutoBuilder.configureHolonomic(
                 this::getPose,
                 this::setPose,
-                this::getMeasuredChassisSpeeds,
+                this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricChassisSpeeds,
                 new HolonomicPathFollowerConfig(getChassisMaxLinearVelocity(), driveBaseRadius, new ReplanningConfig()),
                 () -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red),

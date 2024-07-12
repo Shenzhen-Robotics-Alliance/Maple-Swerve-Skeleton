@@ -1,7 +1,6 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.HolonomicDrive;
@@ -17,7 +16,7 @@ import org.dyn4j.geometry.Vector2;
  * simulates the behavior of holonomic chassis
  * the chassis will have a collision space
  * */
-public abstract class HolonomicChassisSimulation extends Body {
+public abstract class HolonomicChassisSimulation extends Body implements HolonomicDrive {
     public final RobotProfile profile;
     public HolonomicChassisSimulation(RobotProfile profile) {
         this.profile = profile;
@@ -34,21 +33,31 @@ public abstract class HolonomicChassisSimulation extends Body {
         super.setAngularDamping(profile.angularDamping);
     }
 
-    public void setRobotPose(Pose2d robotPose) {
+    @Override
+    public void setPose(Pose2d robotPose) {
         super.transform.set(GeometryConvertor.toDyn4jTransform(robotPose));
     }
 
-    public void setRobotSpeeds(ChassisSpeeds chassisSpeeds) {
-        super.setLinearVelocity(GeometryConvertor.toDyn4jLinearVelocity(chassisSpeeds));
-        super.setAngularVelocity(chassisSpeeds.omegaRadiansPerSecond);
+    /**
+     * sets the robot's speeds to a given chassis speeds
+     * the robot's speeds will jump to the given speeds in a tick
+     * this is different from runRawChassisSpeeds(), which applies forces on the chassis and accelerates smoothly according to physics
+     * */
+    protected void setRobotSpeeds(ChassisSpeeds givenSpeeds) {
+        super.setLinearVelocity(GeometryConvertor.toDyn4jLinearVelocity(givenSpeeds));
+        super.setAngularVelocity(givenSpeeds.omegaRadiansPerSecond);
     }
 
-    protected void simulateChassisBehaviorRobotRelative(ChassisSpeeds desiredChassisSpeedsRobotRelative) {
+    @Override
+    public void runRawChassisSpeeds(ChassisSpeeds desiredChassisSpeedsRobotRelative) {
         simulateChassisBehavior(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getFacing()));
     }
 
     protected void simulateChassisBehavior(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
-        super.setAtRest(HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative) && HolonomicDrive.isZero(getChassisSpeedsFieldRelative()));
+        super.setAtRest(
+                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
+                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
+        );
 
         final Vector2 desiredLinearMotionPercent = GeometryConvertor.toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative).multiply(1/ profile.robotMaxVelocity);
         simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
@@ -91,22 +100,32 @@ public abstract class HolonomicChassisSimulation extends Body {
             super.setAngularVelocity(0);
     }
 
+    @Override
     public Pose2d getPose() {
         return GeometryConvertor.toWpilibPose2d(getTransform());
     }
 
-    public Rotation2d getFacing() {
-        return getPose().getRotation();
+    @Override
+    public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
+        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getFacing());
     }
 
-    public ChassisSpeeds getChassisSpeedsFieldRelative() {
+    @Override
+    public ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
         return GeometryConvertor.toWpilibChassisSpeeds(getLinearVelocity(), getAngularVelocity());
     }
 
-    public ChassisSpeeds getChassisSpeedsRobotRelative() {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(getChassisSpeedsFieldRelative(), getFacing());
+    @Override
+    public double getChassisMaxLinearVelocity() {
+        return profile.robotMaxVelocity;
     }
 
+    @Override
+    public double getChassisMaxAngularVelocity() {
+        return profile.maxAngularVelocity;
+    }
+
+    @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {}
 
     public static final class RobotProfile {
         public final double
@@ -127,15 +146,26 @@ public abstract class HolonomicChassisSimulation extends Body {
             this(
                     chassisGeneralInformation.getDoubleConfig("maxVelocityMetersPerSecond"),
                     chassisGeneralInformation.getDoubleConfig("maxAccelerationMetersPerSecondSquared"),
-                    Constants.RobotPhysicsSimulationConfigs.FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ,
                     chassisGeneralInformation.getDoubleConfig("maxAngularVelocityRadiansPerSecond"),
-                    Constants.RobotPhysicsSimulationConfigs.MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ,
-                    Constants.RobotPhysicsSimulationConfigs.TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC,
                     chassisGeneralInformation.getDoubleConfig("robotMassInSimulation"),
                     chassisGeneralInformation.getDoubleConfig("bumperWidthMeters"),
                     chassisGeneralInformation.getDoubleConfig("bumperLengthMeters")
             );
         }
+
+        public RobotProfile(double robotMaxVelocity, double robotMaxAcceleration, double maxAngularVelocity, double robotMass, double width, double height) {
+            this(
+                    robotMaxVelocity,
+                    robotMaxAcceleration,
+                    Constants.RobotPhysicsSimulationConfigs.FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ,
+                    maxAngularVelocity,
+                    Constants.RobotPhysicsSimulationConfigs.MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ,
+                    Constants.RobotPhysicsSimulationConfigs.TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC,
+                    robotMass,
+                    width, height
+            );
+        }
+
         public RobotProfile(double robotMaxVelocity, double robotMaxAcceleration, double floorFrictionAcceleration, double maxAngularVelocity, double maxAngularAcceleration, double timeChassisStopsRotating, double robotMass, double width, double height) {
             this.robotMaxVelocity = robotMaxVelocity;
             this.robotMaxAcceleration = robotMaxAcceleration;
