@@ -19,6 +19,7 @@ import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.tests.FieldDisplayTest;
 import frc.robot.tests.InterpolationTableTest;
 import frc.robot.tests.UnitTest;
+import frc.robot.tests.WheelsCalibrationCTRE;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -44,10 +45,10 @@ public class RobotContainer {
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
-    public RobotContainer(String chassisName) {
+    public RobotContainer() {
         final MapleConfigFile chassisCalibrationFile;
         try {
-            chassisCalibrationFile = MapleConfigFile.fromDeployedConfig("ChassisWheelsCalibration", chassisName);
+            chassisCalibrationFile = MapleConfigFile.fromDeployedConfig("ChassisWheelsCalibration", Constants.chassisConfigName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -133,6 +134,6 @@ public class RobotContainer {
 
 
     public UnitTest getUnitTest() {
-        return new FieldDisplayTest();
+      return new FieldDisplayTest();
     }
 }

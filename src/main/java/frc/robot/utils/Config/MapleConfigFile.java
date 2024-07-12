@@ -190,7 +190,7 @@ public class MapleConfigFile {
     }
 
     public void saveConfigToUSB() throws IOException {
-        File usbDir = new File("/media/sda1");
+        File usbDir = new File("/U/");
         if (!usbDir.exists()) {
             throw new IOException("No USB connected");
         }
