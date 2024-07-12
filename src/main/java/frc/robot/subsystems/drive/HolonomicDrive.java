@@ -1,4 +1,4 @@
-// By 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
+// By 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/ under MIT License
 
 package frc.robot.subsystems.drive;
 
