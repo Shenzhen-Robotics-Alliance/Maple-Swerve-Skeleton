@@ -8,6 +8,7 @@
         <bumperWidthMeters type="double">0.876</bumperWidthMeters>
         <maxVelocityMetersPerSecond type="double">4.8</maxVelocityMetersPerSecond>
         <bumperLengthMeters type="double">0.876</bumperLengthMeters>
+        <robotMassInSimulation type="double">60</robotMassInSimulation>
 
         <horizontalWheelsMarginMeters type="double">0.53</horizontalWheelsMarginMeters>
         <verticalWheelsMarginMeters type="double">0.53</verticalWheelsMarginMeters>

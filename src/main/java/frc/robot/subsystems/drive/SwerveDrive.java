@@ -223,7 +223,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
     }
 
     @Override
-    public ChassisSpeeds getMeasuredChassisSpeeds() {
+    public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 

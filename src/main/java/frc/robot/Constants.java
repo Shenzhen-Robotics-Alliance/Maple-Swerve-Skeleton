@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 
 /**
@@ -45,6 +49,11 @@ public final class Constants {
                 SYSTEM_PERFORMANCE_PATH = "SystemPerformance/";
     }
 
+    public static final class CrescendoField2024Constants {
+        public static final double FIELD_WIDTH = 16.54;
+        public static final double FIELD_HEIGHT = 8.21;
+    }
+
     public static final class DriveConfigs {
         public static final double nonUsageTimeResetWheels = 1;
 
@@ -78,10 +87,8 @@ public final class Constants {
         public static final int DEFAULT_GYRO_PORT = 0;
         public static final double DEFAULT_GEAR_RATIO = 6.12;
         public static final double DEFAULT_WHEEL_RADIUS_METERS = 0.051; // 2 inch
-        public static final double DEFAULT_BUMPER_WIDTH_METERS = 0.876; // 34.5 inch
         public static final double DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS = 0.53;
         public static final double DEFAULT_VERTICAL_WHEELS_MARGIN_METERS = 0.53;
-        public static final double DEFAULT_BUMPER_LENGTH_METERS = 0.876; // 34.5 inch
         public static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 4.172; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
         public static final double DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND = 10.184; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
         public static final double DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND = 540;
@@ -129,5 +136,45 @@ public final class Constants {
         public static final double STEERING_CURRENT_LIMIT = 20;
         public static final double DRIVING_CURRENT_LIMIT = 60;
         public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+    }
+
+    public static final class RobotPhysicsSimulationConfigs {
+        public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
+        public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
+        public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;
+        public static final double DEFAULT_ROBOT_MASS = 60;
+        public static final double DEFAULT_BUMPER_WIDTH_METERS = 0.876; // 34.5 inch
+        public static final double DEFAULT_BUMPER_LENGTH_METERS = 0.876; // 34.5 inch
+
+        /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
+        public static final double ROBOT_BUMPER_COEFFICIENT_OF_FRICTION = 0.85;
+        /* https://en.wikipedia.org/wiki/Coefficient_of_restitution */
+        public static final double ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION = 0.05;
+    }
+
+    public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {
+        if (isSidePresentedAsRed())
+            return rotationAtBlueSide.rotateBy(Rotation2d.fromRotations(0.5));
+        return rotationAtBlueSide;
+    }
+
+    public static Translation2d toCurrentAllianceTranslation(Translation2d translationAtBlueSide) {
+        if (isSidePresentedAsRed())
+            return new Translation2d(
+                    CrescendoField2024Constants.FIELD_WIDTH - translationAtBlueSide.getX(),
+                    translationAtBlueSide.getY()
+            );
+        return translationAtBlueSide;
+    }
+
+    public static Pose2d toCurrentAlliancePose(Pose2d poseAtBlueSide) {
+        return new Pose2d(
+                toCurrentAllianceTranslation(poseAtBlueSide.getTranslation()),
+                toCurrentAllianceRotation(poseAtBlueSide.getRotation())
+        );
+    }
+
+    private static boolean isSidePresentedAsRed() {
+        return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red);
     }
 }
