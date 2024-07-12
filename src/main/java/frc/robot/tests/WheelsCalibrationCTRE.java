@@ -88,6 +88,8 @@ public class WheelsCalibrationCTRE implements UnitTest {
         configBlock.putDoubleConfig("maxAccelerationMetersPerSecondSquared", Constants.ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND);
         configBlock.putDoubleConfig("maxAngularVelocityRadiansPerSecond", Math.toRadians(Constants.ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND));
 
+        configBlock.putDoubleConfig("robotMassInSimulation", Constants.RobotPhysicsSimulationConfigs.DEFAULT_ROBOT_MASS);
+
         for (WheelToBeCalibrated wheelToBeCalibrated:Constants.WheelCalibrationConfigs.wheelsToBeCalibrated)
             saveConfigurationForCurrentWheel(wheelToBeCalibrated);
 

@@ -130,4 +130,16 @@ public final class Constants {
         public static final double DRIVING_CURRENT_LIMIT = 60;
         public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
     }
+
+    public static final class RobotPhysicsSimulationConfigs {
+        public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
+        public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
+        public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;
+        public static final double DEFAULT_ROBOT_MASS = 60;
+
+        /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
+        public static final double ROBOT_BUMPER_COEFFICIENT_OF_FRICTION = 0.9;
+        /* https://en.wikipedia.org/wiki/Coefficient_of_restitution */
+        public static final double ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION = 0.05;
+    }
 }

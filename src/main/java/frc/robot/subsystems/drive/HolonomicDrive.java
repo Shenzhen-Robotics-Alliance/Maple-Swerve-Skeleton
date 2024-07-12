@@ -153,7 +153,7 @@ public interface HolonomicDrive extends Subsystem {
             runRobotCentricChassisSpeeds(currentChassisSpeedsTargetDriverStationCentric.get());
     }
 
-    private boolean isZero(ChassisSpeeds chassisSpeeds) {
+    static boolean isZero(ChassisSpeeds chassisSpeeds) {
         return chassisSpeeds.omegaRadiansPerSecond == 0 && chassisSpeeds.vxMetersPerSecond == 0 && chassisSpeeds.vyMetersPerSecond == 0;
     }
 
