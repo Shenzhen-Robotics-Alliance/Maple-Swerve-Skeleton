@@ -22,8 +22,11 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     public HolonomicChassisSimulation(RobotProfile profile) {
         this.profile = profile;
 
+        /* the bumper needs to be rotated 90 degrees */
+        final double WIDTH_IN_WORLD_REFERENCE = profile.height,
+                HEIGHT_IN_WORLD_REFERENCE = profile.width;
         super.addFixture(
-                Geometry.createRectangle(profile.width, profile.height),
+                Geometry.createRectangle(WIDTH_IN_WORLD_REFERENCE, HEIGHT_IN_WORLD_REFERENCE),
                 profile.robotMass / (profile.height * profile.width),
                 Constants.RobotPhysicsSimulationConfigs.ROBOT_BUMPER_COEFFICIENT_OF_FRICTION,
                 Constants.RobotPhysicsSimulationConfigs.ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION
