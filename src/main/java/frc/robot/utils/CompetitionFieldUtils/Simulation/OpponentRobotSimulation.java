@@ -34,7 +34,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     private final int id;
 
     /**
-     *
+     * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
     public OpponentRobotSimulation(int id) {
         super(opponentRobotProfile);

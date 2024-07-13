@@ -1,38 +1,56 @@
 package frc.robot.utils.CompetitionFieldUtils.FieldObjects;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.util.Units;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
+import org.dyn4j.geometry.Geometry;
 
 public final class Crescendo2024FieldObjects {
-    public interface NoteOnField extends MapleCompetitionField.ObjectOn2dField {
-        double NOTE_HEIGHT_METERS = 0.05, NOTE_SQUEEZED_METERS = 0.005;
-        @Override
-        default String getTypeName() {
-            return "Note";
-        }
+     private static final double
+            NOTE_HEIGHT = Units.inchesToMeters(2),
+            NOTE_DIAMETER = Units.inchesToMeters(14);
 
-        @Override
-        default Pose3d getPose3d() {
-            final Pose2d pose2d = getPose2d();
-            final Translation3d translation3d = new Translation3d(
-                    pose2d.getX(),
-                    pose2d.getY(),
-                    NOTE_HEIGHT_METERS/2 - NOTE_SQUEEZED_METERS
-            );
-            return new Pose3d(translation3d, new Rotation3d());
-        }
-    }
-
-    public static class NoteOnFieldStatic implements NoteOnField {
-        private final Pose2d pose2d;
+    /**
+     * a static note on field
+     * it can be displayed
+     * but do not have collision space in simulation
+     * */
+    public static class NoteOnFieldStatic implements GamePieceOnField {
+        private final Translation2d initialPosition;
 
         public NoteOnFieldStatic(Translation2d initialPosition) {
-            this.pose2d = new Pose2d(initialPosition, new Rotation2d());
+            this.initialPosition = initialPosition;
         }
 
         @Override
         public Pose2d getPose2d() {
-            return pose2d;
+            return new Pose2d(initialPosition, new Rotation2d());
+        }
+
+        @Override
+        public String getTypeName() {
+            return "Note";
+        }
+
+        @Override
+        public double getGamePieceHeight() {
+            return NOTE_HEIGHT;
+        }
+    }
+
+    public static class NoteOnFieldSimulated extends GamePieceInSimulation {
+        public NoteOnFieldSimulated(Translation2d initialPosition) {
+            super(initialPosition, Geometry.createCircle(NOTE_DIAMETER/2));
+        }
+
+        @Override
+        public double getGamePieceHeight() {
+            return NOTE_HEIGHT;
+        }
+
+        @Override
+        public String getTypeName() {
+            return "Note";
         }
     }
 

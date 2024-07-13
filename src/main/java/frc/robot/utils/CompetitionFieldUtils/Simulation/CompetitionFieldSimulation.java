@@ -3,6 +3,7 @@ package frc.robot.utils.CompetitionFieldUtils.Simulation;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Robot;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.GamePieceInSimulation;
 import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
@@ -43,6 +44,11 @@ public abstract class CompetitionFieldSimulation {
     public void addRobot(HolonomicChassisSimulation chassisSimulation) {
         this.physicsWorld.addBody(chassisSimulation);
         this.competitionField.addObject(chassisSimulation);
+    }
+
+    public void addGamePiece(GamePieceInSimulation gamePieceInSimulation) {
+        this.physicsWorld.addBody(gamePieceInSimulation);
+        this.competitionField.addObject(gamePieceInSimulation);
     }
 
     public MapleCompetitionField getCompetitionField() {

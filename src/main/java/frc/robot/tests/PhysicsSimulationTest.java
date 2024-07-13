@@ -2,7 +2,9 @@ package frc.robot.tests;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.Crescendo2024FieldObjects;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 
@@ -23,5 +25,9 @@ public class PhysicsSimulationTest implements UnitTest {
     public void testPeriodic() {
         opponentRobotSimulation.testDrivingPhysicsWithJoystick(xboxController);
         fieldSimulation.updateSimulationWorld();
+        if (xboxController.getAButton())
+            fieldSimulation.addGamePiece(new Crescendo2024FieldObjects.NoteOnFieldSimulated(
+                    new Translation2d(3, 3)
+            ));
     }
 }
