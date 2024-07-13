@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.HolonomicDrive;
-import frc.robot.utils.Config.MapleConfigFile;
 import org.ejml.simple.UnsupportedOperation;
 
 public class OpponentRobotSimulation extends HolonomicChassisSimulation implements HolonomicDrive {
@@ -25,9 +24,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         super.setSimulationWorldPose(currentPose);
     }
 
-    @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
-        throw new UnsupportedOperation("an opponent robot does not support vision measurement");
-    }
+    @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {throw new UnsupportedOperation("an opponent robot does not support vision measurement"); }
 
     public enum Behavior {
         JOYSTICK_CONTROL,
