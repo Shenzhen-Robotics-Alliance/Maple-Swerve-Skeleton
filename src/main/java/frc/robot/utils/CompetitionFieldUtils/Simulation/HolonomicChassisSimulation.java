@@ -3,8 +3,7 @@ package frc.robot.utils.CompetitionFieldUtils.Simulation;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.HolonomicDrive;
-import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
 import org.dyn4j.dynamics.Body;
@@ -14,10 +13,10 @@ import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 
 /**
- * simulates the behavior of holonomic chassis
- * the chassis will have a collision space
+ * simulates the physics behavior of holonomic chassis,
+ * with respect to its collision space, friction and motor propelling forces
  * */
-public abstract class HolonomicChassisSimulation extends Body implements RobotOnField {
+public abstract class HolonomicChassisSimulation extends Body implements RobotOnFieldDisplay {
     public final RobotProfile profile;
     public HolonomicChassisSimulation(RobotProfile profile) {
         this.profile = profile;

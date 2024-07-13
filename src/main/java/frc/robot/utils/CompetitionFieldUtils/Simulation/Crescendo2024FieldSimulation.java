@@ -3,17 +3,23 @@ package frc.robot.utils.CompetitionFieldUtils.Simulation;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 
 import static frc.robot.Constants.CrescendoField2024Constants.*;
 
+/**
+ * field simulation for 2024 competition
+ * */
 public class Crescendo2024FieldSimulation extends CompetitionFieldSimulation {
-    public Crescendo2024FieldSimulation(RobotOnField robot) {
+    public Crescendo2024FieldSimulation(RobotOnFieldDisplay robot) {
         super(robot, new CrescendoFieldObstaclesMap());
     }
 
     // TODO: notes simulation and match simulation
 
+    /**
+     * the obstacles on the 2024 competition field
+     * */
     public static final class CrescendoFieldObstaclesMap extends FieldObstaclesMap {
         public CrescendoFieldObstaclesMap() {
             super();

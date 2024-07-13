@@ -3,7 +3,12 @@ package frc.robot.utils.CompetitionFieldUtils.FieldObjects;
 import edu.wpi.first.math.geometry.*;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 
-public interface GamePieceOnField extends MapleCompetitionField.ObjectOn2dField {
+/**
+ * displays a game piece on field to Advantage Scope
+ * since game pieces MUST be displayed as 3d objects in Advantage Scope
+ * we have to convert the 2d pose of the game piece to a 3d pose
+ * */
+public interface GamePieceOnFieldDisplay extends MapleCompetitionField.Object2dOnFieldDisplay {
     @Override
     default Pose3d getPose3d() {
         final Pose2d pose2d = getPose2d();

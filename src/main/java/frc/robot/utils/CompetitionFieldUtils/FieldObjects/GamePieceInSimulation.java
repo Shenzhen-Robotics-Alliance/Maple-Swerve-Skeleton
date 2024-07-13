@@ -8,7 +8,13 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.MassType;
 
-public abstract class GamePieceInSimulation extends Body implements GamePieceOnField {
+/**
+ * simulates the behavior of gamepiece on field.
+ * game pieces HAVE collision spaces.
+ * they can also be "grabbed" by an Intake Simulation
+ * the game piece will also be displayed on advantage scope (once registered in CompetitionFieldSimulation)
+ * */
+public abstract class GamePieceInSimulation extends Body implements GamePieceOnFieldDisplay {
     /**
      * for convenience, we assume all game pieces have the following properties
      * */
