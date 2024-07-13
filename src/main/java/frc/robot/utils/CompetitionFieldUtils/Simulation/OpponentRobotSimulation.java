@@ -9,6 +9,13 @@ import frc.robot.subsystems.drive.HolonomicDrive;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.ejml.simple.UnsupportedOperation;
 
+/**
+ * simulates an opponent robot on field
+ * in physics, the opponent robot behaves just the same as our own robot, it also follows the Holonomic Chassis Physics
+ * the difference is, opponent robots are not controlled by the main gamepad
+ * it is either controlled by another gamepad to simulate a defense robot
+ * or can follow pre-generated paths to simulate opponent robots who are doing cycles
+ * */
 public class OpponentRobotSimulation extends HolonomicChassisSimulation implements HolonomicDrive {
     public enum Behavior {
         JOYSTICK_CONTROL,
@@ -34,7 +41,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     private final int id;
 
     /**
-     *
+     * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
     public OpponentRobotSimulation(int id) {
         super(opponentRobotProfile);

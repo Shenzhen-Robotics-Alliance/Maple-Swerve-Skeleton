@@ -4,26 +4,26 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
 
 /**
- * stores and displays a competition field
+ * this class stores and displays a competition field
  * that includes the robot, the opponent robots and game pieces on field
  * notice that this class only stores and displays the field information to dashboard/advantage scope
  * it does not update the field status
  * the field should be updated either by the vision system during a real competition or by the Maple Physics Simulation during a simulated competition
  * */
 public class MapleCompetitionField {
-    public interface ObjectOnField {
+    public interface ObjectOnFieldDisplay {
         String getTypeName();
         Pose3d getPose3d();
         default boolean on2dField() {return false; }
     }
 
-    public interface ObjectOn2dField extends ObjectOnField {
+    public interface Object2dOnFieldDisplay extends ObjectOnFieldDisplay {
         Pose2d getPose2d();
         @Override
         String getTypeName();
@@ -36,24 +36,24 @@ public class MapleCompetitionField {
         default boolean on2dField() {return true; }
     }
 
-    private final Map<String, Set<ObjectOnField>> objectsOnFieldWithGivenType;
-    private final RobotOnField mainRobot;
+    private final Map<String, Set<ObjectOnFieldDisplay>> objectsOnFieldWithGivenType;
+    private final RobotOnFieldDisplay mainRobot;
     private final Field2d dashboardField2d;
-    public MapleCompetitionField(RobotOnField mainRobot) {
+    public MapleCompetitionField(RobotOnFieldDisplay mainRobot) {
         this.mainRobot = mainRobot;
         objectsOnFieldWithGivenType = new HashMap<>();
         dashboardField2d = new Field2d();
         SmartDashboard.putData("Field", dashboardField2d);
     }
 
-    public ObjectOnField addObject(ObjectOnField object) {
+    public ObjectOnFieldDisplay addObject(ObjectOnFieldDisplay object) {
         if (!objectsOnFieldWithGivenType.containsKey(object.getTypeName()))
             objectsOnFieldWithGivenType.put(object.getTypeName(), new HashSet<>());
         objectsOnFieldWithGivenType.get(object.getTypeName()).add(object);
         return object;
     }
 
-    public ObjectOnField deleteObject(ObjectOnField object) {
+    public ObjectOnFieldDisplay deleteObject(ObjectOnFieldDisplay object) {
         if (!objectsOnFieldWithGivenType.containsKey(object.getTypeName()))
             return null;
         if (objectsOnFieldWithGivenType.get(object.getTypeName()).remove(object))
@@ -61,17 +61,17 @@ public class MapleCompetitionField {
         return null;
     }
 
-    public Set<ObjectOnField> clearObjectsWithGivenType(String typeName) {
+    public Set<ObjectOnFieldDisplay> clearObjectsWithGivenType(String typeName) {
         if (!objectsOnFieldWithGivenType.containsKey(typeName))
             return new HashSet<>();
-        final Set<ObjectOnField> originalSet = objectsOnFieldWithGivenType.get(typeName);
+        final Set<ObjectOnFieldDisplay> originalSet = objectsOnFieldWithGivenType.get(typeName);
         objectsOnFieldWithGivenType.put(typeName, new HashSet<>());
         return originalSet;
     }
 
     public void updateObjectsToDashboardAndTelemetry() {
         for (String typeName: objectsOnFieldWithGivenType.keySet()) {
-            final Set<ObjectOnField> objects = objectsOnFieldWithGivenType.get(typeName);
+            final Set<ObjectOnFieldDisplay> objects = objectsOnFieldWithGivenType.get(typeName);
             dashboardField2d.getObject(typeName).setPoses(getPose2ds(objects));
             Logger.recordOutput("/Field/" + typeName, getPose3ds(objects));
         }
@@ -80,16 +80,16 @@ public class MapleCompetitionField {
         Logger.recordOutput("/Field/Robot", mainRobot.getPose2d());
     }
 
-    private static List<Pose2d> getPose2ds(Set<ObjectOnField> objects) {
+    private static List<Pose2d> getPose2ds(Set<ObjectOnFieldDisplay> objects) {
         final List<Pose2d> pose2dList = new ArrayList<>();
 
-        for (ObjectOnField object:objects)
+        for (ObjectOnFieldDisplay object:objects)
             if (object.on2dField())
                 pose2dList.add(object.getPose3d().toPose2d());
         return pose2dList;
     }
 
-    private static Pose3d[] getPose3ds(Set<ObjectOnField> objects) {
-        return objects.stream().map(ObjectOnField::getPose3d).toArray(Pose3d[]::new);
+    private static Pose3d[] getPose3ds(Set<ObjectOnFieldDisplay> objects) {
+        return objects.stream().map(ObjectOnFieldDisplay::getPose3d).toArray(Pose3d[]::new);
     }
 }

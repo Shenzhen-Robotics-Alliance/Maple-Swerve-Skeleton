@@ -4,17 +4,18 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.utils.CompetitionFieldUtils.FieldObjects.Crescendo2024FieldObjects;
-import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 
 public class FieldDisplayTest implements UnitTest {
-    private final MapleCompetitionField field = new MapleCompetitionField(() -> new Pose2d(3, 3, new Rotation2d()));
+    private MapleCompetitionField field;
     @Override
     public void testStart() {
-        final RobotOnField robot1 = () -> new Pose2d(4, 4, new Rotation2d()),
-                robot2 = () -> new Pose2d(4, 5, new Rotation2d());
-        field.addObject(robot1);
-        field.addObject(robot2);
+        final RobotOnFieldDisplay mainRobot = () -> new Pose2d(4, 4, new Rotation2d()),
+                anotherRobot = () -> new Pose2d(4, 5, new Rotation2d());
+        field = new MapleCompetitionField(mainRobot);
+        field.addObject(anotherRobot);
+
         field.addObject(new Crescendo2024FieldObjects.NoteOnFieldStatic(new Translation2d( 2, 1)));
     }
 
