@@ -2,6 +2,8 @@ package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.Robot;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
 import org.dyn4j.dynamics.Body;
@@ -9,6 +11,8 @@ import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
+import org.dyn4j.world.PhysicsWorld;
+import org.dyn4j.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +21,32 @@ import java.util.List;
  * the class that simulates the physical behavior of all the objects on field
  * should only be created during a robot simulation (not in real or replay mode)
  * */
-public abstract class FieldSimulation {
+public abstract class CompetitionFieldSimulation {
+    private final World<Body> physicsWorld;
     private final MapleCompetitionField competitionField;
-    private final FieldObstaclesMap obstaclesMap;
 
-    public FieldSimulation(MapleCompetitionField competitionField, FieldObstaclesMap obstaclesMap) {
-        this.competitionField = competitionField;
-        this.obstaclesMap = obstaclesMap;
+    public CompetitionFieldSimulation(RobotOnField mainRobot, FieldObstaclesMap obstaclesMap) {
+        this.competitionField = new MapleCompetitionField(mainRobot);
+
+        this.physicsWorld = new World<>();
+        this.physicsWorld.setGravity(PhysicsWorld.ZERO_GRAVITY);
+        for (Body obstacle: obstaclesMap.obstacles)
+            this.physicsWorld.addBody(obstacle);
+    }
+
+    public void updateSimulationWorld() {
+        this.physicsWorld.step(1, Robot.defaultPeriodSecs);
+
+        competitionField.updateObjectsToDashboardAndTelemetry();
+    }
+
+    public void addRobot(HolonomicChassisSimulation chassisSimulation) {
+        this.physicsWorld.addBody(chassisSimulation);
+        this.competitionField.addObject(chassisSimulation);
+    }
+
+    public MapleCompetitionField getCompetitionField() {
+        return competitionField;
     }
 
     /**

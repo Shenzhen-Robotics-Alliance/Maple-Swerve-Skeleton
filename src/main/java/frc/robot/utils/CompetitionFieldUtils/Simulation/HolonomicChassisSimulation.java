@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.HolonomicDrive;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
 import org.dyn4j.dynamics.Body;
@@ -16,7 +17,7 @@ import org.dyn4j.geometry.Vector2;
  * simulates the behavior of holonomic chassis
  * the chassis will have a collision space
  * */
-public abstract class HolonomicChassisSimulation extends Body {
+public abstract class HolonomicChassisSimulation extends Body implements RobotOnField {
     public final RobotProfile profile;
     public HolonomicChassisSimulation(RobotProfile profile) {
         this.profile = profile;
@@ -52,10 +53,11 @@ public abstract class HolonomicChassisSimulation extends Body {
     }
 
     protected void simulateChassisBehavior(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
-        super.setAtRest(
-                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
-                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
-        );
+        //        super.setAtRest(
+//                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
+//                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
+//        );
+        super.setAtRest(false);
 
         final Vector2 desiredLinearMotionPercent = GeometryConvertor.toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative).multiply(1/ profile.robotMaxVelocity);
         simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
@@ -96,6 +98,11 @@ public abstract class HolonomicChassisSimulation extends Body {
             super.applyTorque(Math.copySign(frictionalTorqueMagnitude, -super.getAngularVelocity()));
         else
             super.setAngularVelocity(0);
+    }
+
+    @Override
+    public Pose2d getPose2d() {
+        return getPose();
     }
 
     public Pose2d getPose() {

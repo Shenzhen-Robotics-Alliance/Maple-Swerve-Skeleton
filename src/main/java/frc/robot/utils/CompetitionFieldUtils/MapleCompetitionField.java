@@ -37,10 +37,10 @@ public class MapleCompetitionField {
     }
 
     private final Map<String, Set<ObjectOnField>> objectsOnFieldWithGivenType;
-    private final RobotOnField robot;
+    private final RobotOnField mainRobot;
     private final Field2d dashboardField2d;
-    public MapleCompetitionField(RobotOnField robot) {
-        this.robot = robot;
+    public MapleCompetitionField(RobotOnField mainRobot) {
+        this.mainRobot = mainRobot;
         objectsOnFieldWithGivenType = new HashMap<>();
         dashboardField2d = new Field2d();
         SmartDashboard.putData("Field", dashboardField2d);
@@ -76,8 +76,8 @@ public class MapleCompetitionField {
             Logger.recordOutput("/Field/" + typeName, getPose3ds(objects));
         }
 
-        dashboardField2d.setRobotPose(robot.getPose2d());
-        Logger.recordOutput("/Field/Robot", robot.getPose2d());
+        dashboardField2d.setRobotPose(mainRobot.getPose2d());
+        Logger.recordOutput("/Field/Robot", mainRobot.getPose2d());
     }
 
     private static List<Pose2d> getPose2ds(Set<ObjectOnField> objects) {
