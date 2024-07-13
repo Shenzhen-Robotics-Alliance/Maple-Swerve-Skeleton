@@ -143,8 +143,8 @@ public final class Constants {
         public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
         public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;
         public static final double DEFAULT_ROBOT_MASS = 60;
-        public static final double DEFAULT_BUMPER_WIDTH_METERS = 0.876; // 34.5 inch
-        public static final double DEFAULT_BUMPER_LENGTH_METERS = 0.876; // 34.5 inch
+        public static final double DEFAULT_BUMPER_WIDTH_METERS = Units.inchesToMeters(34.5);
+        public static final double DEFAULT_BUMPER_LENGTH_METERS = Units.inchesToMeters(36);
 
         /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
         public static final double ROBOT_BUMPER_COEFFICIENT_OF_FRICTION = 0.85;

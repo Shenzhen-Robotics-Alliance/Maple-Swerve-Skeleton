@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
 import frc.robot.subsystems.drive.HolonomicDrive;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnField;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
 import org.dyn4j.dynamics.Body;
@@ -16,13 +17,16 @@ import org.dyn4j.geometry.Vector2;
  * simulates the behavior of holonomic chassis
  * the chassis will have a collision space
  * */
-public abstract class HolonomicChassisSimulation extends Body implements HolonomicDrive {
+public abstract class HolonomicChassisSimulation extends Body implements RobotOnField {
     public final RobotProfile profile;
     public HolonomicChassisSimulation(RobotProfile profile) {
         this.profile = profile;
 
+        /* the bumper needs to be rotated 90 degrees */
+        final double WIDTH_IN_WORLD_REFERENCE = profile.height,
+                HEIGHT_IN_WORLD_REFERENCE = profile.width;
         super.addFixture(
-                Geometry.createRectangle(profile.width, profile.height),
+                Geometry.createRectangle(WIDTH_IN_WORLD_REFERENCE, HEIGHT_IN_WORLD_REFERENCE),
                 profile.robotMass / (profile.height * profile.width),
                 Constants.RobotPhysicsSimulationConfigs.ROBOT_BUMPER_COEFFICIENT_OF_FRICTION,
                 Constants.RobotPhysicsSimulationConfigs.ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION
@@ -33,8 +37,7 @@ public abstract class HolonomicChassisSimulation extends Body implements Holonom
         super.setAngularDamping(profile.angularDamping);
     }
 
-    @Override
-    public void setPose(Pose2d robotPose) {
+    public void setSimulationWorldPose(Pose2d robotPose) {
         super.transform.set(GeometryConvertor.toDyn4jTransform(robotPose));
     }
 
@@ -48,16 +51,16 @@ public abstract class HolonomicChassisSimulation extends Body implements Holonom
         super.setAngularVelocity(givenSpeeds.omegaRadiansPerSecond);
     }
 
-    @Override
     public void runRawChassisSpeeds(ChassisSpeeds desiredChassisSpeedsRobotRelative) {
-        simulateChassisBehavior(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getFacing()));
+        simulateChassisBehavior(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getPose().getRotation()));
     }
 
     protected void simulateChassisBehavior(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
-        super.setAtRest(
-                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
-                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
-        );
+        //        super.setAtRest(
+//                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
+//                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
+//        );
+        super.setAtRest(false);
 
         final Vector2 desiredLinearMotionPercent = GeometryConvertor.toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative).multiply(1/ profile.robotMaxVelocity);
         simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
@@ -101,31 +104,29 @@ public abstract class HolonomicChassisSimulation extends Body implements Holonom
     }
 
     @Override
+    public Pose2d getPose2d() {
+        return getPose();
+    }
+
     public Pose2d getPose() {
         return GeometryConvertor.toWpilibPose2d(getTransform());
     }
 
-    @Override
     public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getFacing());
+        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getPose().getRotation());
     }
 
-    @Override
     public ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
         return GeometryConvertor.toWpilibChassisSpeeds(getLinearVelocity(), getAngularVelocity());
     }
 
-    @Override
     public double getChassisMaxLinearVelocity() {
         return profile.robotMaxVelocity;
     }
 
-    @Override
     public double getChassisMaxAngularVelocity() {
         return profile.maxAngularVelocity;
     }
-
-    @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {}
 
     public static final class RobotProfile {
         public final double
