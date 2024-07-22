@@ -6,6 +6,7 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,12 +43,16 @@ public interface OdometryThread {
     }
 
     static OdometryThread createInstance() {
-        if (Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.REAL)
-            return new OdometryThreadReal(
+        return switch (Robot.CURRENT_ROBOT_MODE) {
+            case REAL -> new OdometryThreadReal(
                     registeredInputs.toArray(new OdometryDoubleInput[0]),
                     registeredStatusSignals.toArray(new BaseStatusSignal[0])
             );
-        return inputs -> {};
+            case SIM ->
+                inputs -> inputs.measurementTimeStamps = new double[]{Logger.getTimestamp()};
+            case REPLAY ->
+                    inputs -> {};
+        };
     }
 
     @AutoLog

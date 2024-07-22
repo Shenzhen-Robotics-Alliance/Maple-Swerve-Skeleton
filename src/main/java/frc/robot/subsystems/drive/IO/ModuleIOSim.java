@@ -6,7 +6,9 @@ package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Robot;
 
 /**
  * Physics sim implementation of module IO.
@@ -16,8 +18,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
  * approximation for the behavior of the module.
  */
 public class ModuleIOSim implements ModuleIO {
-    private static final double LOOP_PERIOD_SECS = 0.02;
-
     private DCMotorSim driveSim = new DCMotorSim(DCMotor.getNEO(1), 6.75, 0.025);
     private DCMotorSim steerSim = new DCMotorSim(DCMotor.getNEO(1), 150.0 / 7.0, 0.004);
 
@@ -26,11 +26,11 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        driveSim.update(LOOP_PERIOD_SECS);
-        steerSim.update(LOOP_PERIOD_SECS);
+        driveSim.update(Robot.defaultPeriodSecs);
+        steerSim.update(Robot.defaultPeriodSecs);
 
-        inputs.driveWheelFinalRevolutions = driveSim.getAngularPositionRad();
-        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveSim.getAngularVelocityRPM();
+        inputs.driveWheelFinalRevolutions = Units.radiansToRotations(driveSim.getAngularPositionRad());
+        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveSim.getAngularVelocityRPM() / 60.0;
         inputs.driveMotorAppliedVolts = driveAppliedVolts;
         inputs.driveMotorCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());
 

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
@@ -34,7 +35,8 @@ public class RobotContainer {
     private final SwerveDrive drive;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    private final CommandXboxController driverController = new CommandXboxController(0),
+            operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
@@ -108,12 +110,13 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        drive.setDefaultCommand(drive.joystickDrive(
-                MapleJoystickDriveInput.leftHandedJoystick(controller),
-                true
+        drive.setDefaultCommand(new JoystickDrive(
+                MapleJoystickDriveInput.leftHandedJoystick(driverController),
+                () -> true,
+                drive
         ));
-        controller.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
-        controller.b().onTrue(Commands.runOnce(
+        driverController.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
+        driverController.b().onTrue(Commands.runOnce(
                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                 drive
                 ).ignoringDisable(true)

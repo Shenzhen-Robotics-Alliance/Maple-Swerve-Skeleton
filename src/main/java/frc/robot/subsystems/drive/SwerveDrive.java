@@ -20,7 +20,7 @@ import frc.robot.utils.Config.MapleConfigFile;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
+public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
     public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -175,7 +175,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
         for (int i = 0; i < swerveHeadings.length; i++)
             swerveHeadings[i] = new Rotation2d();
         kinematics.resetHeadings(swerveHeadings);
-        HolonomicDrive.super.stop();
+        HolonomicDriveSubsystem.super.stop();
     }
 
     /**
@@ -187,7 +187,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
         for (int i = 0; i < swerveHeadings.length; i++)
             swerveHeadings[i] = MODULE_TRANSLATIONS[i].getAngle();
         kinematics.resetHeadings(swerveHeadings);
-        HolonomicDrive.super.stop();
+        HolonomicDriveSubsystem.super.stop();
     }
 
     /**
