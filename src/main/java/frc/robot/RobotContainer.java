@@ -18,6 +18,8 @@ import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.tests.*;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -40,6 +42,9 @@ public class RobotContainer {
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
+
+    // Simulation
+    private Crescendo2024FieldSimulation fieldSimulation = null;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -74,14 +79,22 @@ public class RobotContainer {
 
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
+                final ModuleIOSim
+                        frontLeft = new ModuleIOSim(),
+                        frontRight = new ModuleIOSim(),
+                        backLeft = new ModuleIOSim(),
+                        backRight = new ModuleIOSim();
                 drive = new SwerveDrive(
                         (inputs) -> {},
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
+                        frontLeft, frontRight, backLeft, backRight,
                         generalConfigBlock
                 );
+                fieldSimulation = new Crescendo2024FieldSimulation(new SwerveDriveSimulation(
+                        generalConfigBlock,
+                        frontLeft, frontRight, backLeft, backRight,
+                        drive.kinematics,
+                        new Pose2d()
+                ));
             }
 
             default -> {
@@ -135,5 +148,10 @@ public class RobotContainer {
 
     public UnitTest getUnitTest() {
       return new PhysicsSimulationTest();
+    }
+
+    public void updateSimulationWorld() {
+        if (fieldSimulation != null)
+            fieldSimulation.updateSimulationWorld();
     }
 }

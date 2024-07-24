@@ -11,7 +11,7 @@ import static frc.robot.Constants.CrescendoField2024Constants.*;
  * field simulation for 2024 competition
  * */
 public class Crescendo2024FieldSimulation extends CompetitionFieldSimulation {
-    public Crescendo2024FieldSimulation(RobotOnFieldDisplay robot) {
+    public Crescendo2024FieldSimulation(HolonomicChassisSimulation robot) {
         super(robot, new CrescendoFieldObstaclesMap());
     }
 

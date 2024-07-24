@@ -2,9 +2,9 @@ package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+
 import frc.robot.Robot;
 import frc.robot.utils.CompetitionFieldUtils.FieldObjects.GamePieceInSimulation;
-import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
 import org.dyn4j.dynamics.Body;
@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static frc.robot.Constants.RobotPhysicsSimulationConfigs.*;
+
 /**
  * this class simulates the physical behavior of all the objects on field
  * should only be created during a robot simulation (not in real or replay mode)
@@ -27,11 +29,12 @@ import java.util.Set;
 public abstract class CompetitionFieldSimulation {
     private final World<Body> physicsWorld;
     private final MapleCompetitionField competitionField;
+    private final HolonomicChassisSimulation robot;
     private final Set<GamePieceInSimulation> gamePieces; // TODO: intake simulation
 
-    public CompetitionFieldSimulation(RobotOnFieldDisplay mainRobot, FieldObstaclesMap obstaclesMap) {
-        this.competitionField = new MapleCompetitionField(mainRobot);
-
+    public CompetitionFieldSimulation(HolonomicChassisSimulation robot, FieldObstaclesMap obstaclesMap) {
+        this.competitionField = new MapleCompetitionField(robot);
+        this.robot = robot;
         this.physicsWorld = new World<>();
         this.physicsWorld.setGravity(PhysicsWorld.ZERO_GRAVITY);
         for (Body obstacle: obstaclesMap.obstacles)
@@ -41,7 +44,12 @@ public abstract class CompetitionFieldSimulation {
     }
 
     public void updateSimulationWorld() {
-        this.physicsWorld.step(1, Robot.defaultPeriodSecs);
+        final double subPeriodSeconds = Robot.defaultPeriodSecs / SIM_ITERATIONS_PER_ROBOT_PERIOD;
+        // move through 5 sub-periods in each update
+        for (int i = 0; i < SIM_ITERATIONS_PER_ROBOT_PERIOD; i++) {
+            this.physicsWorld.step(1, subPeriodSeconds);
+            this.robot.updateSimulationSubPeriod(i, subPeriodSeconds);
+        }
 
         competitionField.updateObjectsToDashboardAndTelemetry();
     }

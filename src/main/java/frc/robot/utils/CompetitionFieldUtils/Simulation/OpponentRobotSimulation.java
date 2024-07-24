@@ -44,9 +44,17 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
      * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
     public OpponentRobotSimulation(int id) {
-        super(opponentRobotProfile);
+        super(opponentRobotProfile, robotQueeningPosition);
         this.id = id;
-        super.setSimulationWorldPose(robotQueeningPosition);
+    }
+
+    @Override
+    public void runRawChassisSpeeds(ChassisSpeeds speeds) {
+        super.simulateChassisBehaviorWithRobotRelativeSpeeds(speeds);
+    }
+
+    @Override
+    public Pose2d getPose() {
         return super.getPose2d();
     }
 
@@ -58,6 +66,10 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {throw new UnsupportedOperation("an opponent robot does not support vision measurement"); }
 
     // TODO using holonomic drive commands, make the opponent robots drive in the intended modes
+    @Override
+    public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
+
+    }
 
     /**
      * a method to test the driving physics

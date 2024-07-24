@@ -5,10 +5,12 @@ import com.ctre.phoenix6.StatusSignal;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -48,10 +50,8 @@ public interface OdometryThread {
                     registeredInputs.toArray(new OdometryDoubleInput[0]),
                     registeredStatusSignals.toArray(new BaseStatusSignal[0])
             );
-            case SIM ->
-                inputs -> inputs.measurementTimeStamps = new double[]{Logger.getTimestamp()};
-            case REPLAY ->
-                    inputs -> {};
+            case SIM -> new SwerveDriveSimulation.OdometryThreadSim();
+            case REPLAY -> inputs -> {};
         };
     }
 

@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
@@ -37,9 +38,7 @@ public final class Constants {
         REPLAY
     }
 
-    public static final String chassisConfigName =
-            "6433-2024-OffSeason";
-            // "5516-2024-OnSeason";
+    public static final String chassisConfigName = "5516-2024-OnSeason";
 
     public static final class LogConfigs {
         // avoid typos
@@ -139,6 +138,13 @@ public final class Constants {
     }
 
     public static final class RobotPhysicsSimulationConfigs {
+        public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
+
+        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 985.78;
+        public static final DCMotor
+                DRIVE_MOTOR = DCMotor.getKrakenX60(1),
+                STEER_MOTOR = DCMotor.getFalcon500(1);
+
         public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
         public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
         public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;

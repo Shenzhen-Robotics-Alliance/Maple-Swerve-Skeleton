@@ -28,7 +28,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final SwerveModule[] swerveModules;
 
     private final Translation2d[] MODULE_TRANSLATIONS;
-    private final SwerveDriveKinematics kinematics;
+    public final SwerveDriveKinematics kinematics;
     private Rotation2d rawGyroRotation;
     private final SwerveModulePosition[] lastModulePositions;
     private final SwerveDrivePoseEstimator poseEstimator;
