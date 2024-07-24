@@ -10,9 +10,11 @@ import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.SwerveStateProjection;
+import org.dyn4j.dynamics.Force;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import static frc.robot.Constants.RobotPhysicsSimulationConfigs.*;
 import static frc.robot.Constants.ChassisDefaultConfigs.*;
@@ -28,60 +30,82 @@ import static frc.robot.Constants.ChassisDefaultConfigs.*;
 public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     private final ModuleIOSim[] modules;
     private final SwerveDriveKinematics kinematics;
+    private final Consumer<Pose2d> resetOdometryCallBack;
     public SwerveDriveSimulation(
             MapleConfigFile.ConfigBlock chassisGeneralInfoBlock,
             ModuleIOSim frontLeft, ModuleIOSim frontRight, ModuleIOSim backLeft, ModuleIOSim backRight,
             SwerveDriveKinematics kinematics,
-            Pose2d startingPose) {
+            Pose2d startingPose,
+            Consumer<Pose2d> resetOdometryCallBack
+    ) {
         super(new RobotProfile(chassisGeneralInfoBlock), startingPose);
         this.modules = new ModuleIOSim[] {frontLeft, frontRight, backLeft, backRight};
         this.kinematics = kinematics;
+        this.resetOdometryCallBack = resetOdometryCallBack;
+        resetOdometryToActualRobotPose();
+    }
+
+    public void resetOdometryToActualRobotPose() {
+        resetOdometryCallBack.accept(getPose2d());
     }
 
     @Override
     public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
+        // TODO: improve the simulation method
         for (ModuleIOSim module:modules)
             module.updateSim(subPeriodSeconds);
-        final ChassisSpeeds swerveWheelsSpeeds = kinematics.toChassisSpeeds(
+        final ChassisSpeeds swerveWheelFreeSpeeds = kinematics.toChassisSpeeds(
                 Arrays.stream(modules)
-                        .map(ModuleIOSim::getFreeSwerveSpeed)
+                        .map(moduleIOSim -> moduleIOSim.getFreeSwerveSpeed(profile.robotMaxVelocity))
                         .toArray(SwerveModuleState[]::new)
         );
-        super.simulateChassisBehaviorWithRobotRelativeSpeeds(swerveWheelsSpeeds);
+        super.simulateChassisBehaviorWithRobotRelativeSpeeds(swerveWheelFreeSpeeds);
 
         final ChassisSpeeds instantVelocityRobotRelative = getMeasuredChassisSpeedsRobotRelative();
         final SwerveModuleState[] actualModuleFloorSpeeds = kinematics.toSwerveModuleStates(instantVelocityRobotRelative);
 
         for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++)
-            updateSimulationResults(actualModuleFloorSpeeds[moduleIndex], modules[moduleIndex], iterationNum, subPeriodSeconds);
+            updateSimulationResults(
+                    actualModuleFloorSpeeds[moduleIndex],
+                    modules[moduleIndex],
+                    profile.robotMaxVelocity,
+                    iterationNum, subPeriodSeconds
+            );
     }
 
     private static void updateSimulationResults(
             SwerveModuleState actualModuleFloorSpeed,
             ModuleIOSim module,
+            double robotMaxVelocity,
             int simulationIteration, double periodSeconds) {
+        final SwerveModuleState moduleFreeSwerveSpeed = module.getFreeSwerveSpeed(robotMaxVelocity);
         final ModuleIOSim.SwerveModulePhysicsSimulationResults results = module.physicsSimulationResults;
         final double projectedModuleFloorSpeedMetersPerSecond = SwerveStateProjection.project(
                 actualModuleFloorSpeed,
-                module.getFreeSwerveSpeed().angle
+                moduleFreeSwerveSpeed.angle
         );
 
         results.driveWheelFinalVelocityRevolutionsPerSec = getActualDriveMotorRotterSpeedRevPerSec(
                 projectedModuleFloorSpeedMetersPerSecond,
-                module.getFreeSwerveSpeed().speedMetersPerSecond
+                moduleFreeSwerveSpeed.speedMetersPerSecond
         );
-        results.odometrySteerPositions[simulationIteration] = module.getFreeSwerveSpeed().angle;
+        results.odometrySteerPositions[simulationIteration] = moduleFreeSwerveSpeed.angle;
         results.driveWheelFinalRevolutions += results.driveWheelFinalVelocityRevolutionsPerSec * periodSeconds;
         results.odometryDriveWheelRevolutions[simulationIteration] = results.driveWheelFinalRevolutions;
     }
 
 
     private static double getActualDriveMotorRotterSpeedRevPerSec(double moduleSpeedProjectedOnSwerveHeadingMPS, double moduleFreeSpeedMPS) {
-        final double FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED = 0.8,
-                speedMPS = moduleSpeedProjectedOnSwerveHeadingMPS * FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED
-                        + moduleFreeSpeedMPS * (1 - FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED),
-                speedRadPerSec = speedMPS / DEFAULT_WHEEL_RADIUS_METERS;
-        return Units.radiansToRotations(speedRadPerSec);
+        // TODO: move configs to Constants
+        final double FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED = 0.8, rotterSpeedMPS;
+        if (Math.abs(moduleFreeSpeedMPS - moduleSpeedProjectedOnSwerveHeadingMPS) / Math.abs(moduleFreeSpeedMPS) < 0.5)
+            rotterSpeedMPS = moduleSpeedProjectedOnSwerveHeadingMPS;
+        else rotterSpeedMPS =
+                moduleSpeedProjectedOnSwerveHeadingMPS * FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED
+                        + moduleFreeSpeedMPS * (1 - FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED);
+
+        final double rotterSpeedRadPerSec = rotterSpeedMPS / DEFAULT_WHEEL_RADIUS_METERS;
+        return Units.radiansToRotations(rotterSpeedRadPerSec);
     }
 
     public static final class OdometryThreadSim implements OdometryThread {

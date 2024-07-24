@@ -70,13 +70,13 @@ public class ModuleIOSim implements ModuleIO {
 
     /**
      * gets the swerve state, assuming that the chassis is allowed to move freely on field (not hitting anything)
-     * @return the swerve state, in meters/second
+     * @return the swerve state, in percent full speed
      * */
-    public SwerveModuleState getFreeSwerveSpeed() {
+    public SwerveModuleState getFreeSwerveSpeed(double robotMaximumFloorSpeed) {
         return new SwerveModuleState(
                 driveSim.getAngularVelocityRPM()
                         / DRIVE_MOTOR_FREE_FINAL_SPEED_RPM
-                        * DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
+                        * robotMaximumFloorSpeed,
                 Rotation2d.fromRadians(steerSim.getAngularPositionRad())
         );
     }

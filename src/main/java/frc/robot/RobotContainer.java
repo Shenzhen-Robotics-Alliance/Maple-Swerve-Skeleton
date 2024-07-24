@@ -93,7 +93,8 @@ public class RobotContainer {
                         generalConfigBlock,
                         frontLeft, frontRight, backLeft, backRight,
                         drive.kinematics,
-                        new Pose2d()
+                        new Pose2d(3, 3, new Rotation2d()),
+                        drive::setPose
                 ));
             }
 

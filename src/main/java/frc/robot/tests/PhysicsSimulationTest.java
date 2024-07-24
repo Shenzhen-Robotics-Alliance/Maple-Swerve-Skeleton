@@ -15,7 +15,6 @@ public class PhysicsSimulationTest implements UnitTest {
     public PhysicsSimulationTest() {
         this.opponentRobotSimulation = new OpponentRobotSimulation(0);
         this.fieldSimulation = new Crescendo2024FieldSimulation(opponentRobotSimulation);
-        fieldSimulation.addRobot(opponentRobotSimulation);
     }
     @Override
     public void testStart() {

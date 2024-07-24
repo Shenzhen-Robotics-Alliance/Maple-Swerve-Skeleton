@@ -56,13 +56,11 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     }
 
     protected void simulateChassisBehaviorWithFieldRelativeSpeeds(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
-        //        super.setAtRest(
-//                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
-//                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
-//        );
         super.setAtRest(false);
 
-        final Vector2 desiredLinearMotionPercent = GeometryConvertor.toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative).multiply(1/ profile.robotMaxVelocity);
+        final Vector2 desiredLinearMotionPercent = GeometryConvertor
+                .toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative)
+                .multiply(1.0/ profile.robotMaxVelocity);
         simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
 
         final double desiredRotationalMotionPercent = desiredChassisSpeedsFieldRelative.omegaRadiansPerSecond / profile.maxAngularVelocity;

@@ -39,8 +39,9 @@ public abstract class CompetitionFieldSimulation {
         this.physicsWorld.setGravity(PhysicsWorld.ZERO_GRAVITY);
         for (Body obstacle: obstaclesMap.obstacles)
             this.physicsWorld.addBody(obstacle);
-
         this.gamePieces = new HashSet<>();
+
+        this.addRobot(robot);
     }
 
     public void updateSimulationWorld() {
