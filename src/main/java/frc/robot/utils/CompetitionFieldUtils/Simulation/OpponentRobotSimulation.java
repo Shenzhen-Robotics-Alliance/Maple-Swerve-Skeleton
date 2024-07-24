@@ -47,6 +47,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         super(opponentRobotProfile);
         this.id = id;
         super.setSimulationWorldPose(robotQueeningPosition);
+        return super.getPose2d();
     }
 
     @Override
