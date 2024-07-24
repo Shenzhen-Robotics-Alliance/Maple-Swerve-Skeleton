@@ -19,6 +19,7 @@ public class PhysicsSimulationTest implements UnitTest {
     @Override
     public void testStart() {
         opponentRobotSimulation.setPose(new Pose2d(15.2, 2.5, Rotation2d.fromRotations(0.5)));
+        fieldSimulation.resetFieldForAuto();
     }
 
     private final XboxController xboxController = new XboxController(1);

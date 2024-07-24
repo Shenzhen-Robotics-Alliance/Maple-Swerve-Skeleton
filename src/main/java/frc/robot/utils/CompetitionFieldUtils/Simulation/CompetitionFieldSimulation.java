@@ -69,6 +69,23 @@ public abstract class CompetitionFieldSimulation {
         return competitionField;
     }
 
+    public void clearGamePieces() {
+        for (GamePieceInSimulation gamePiece: this.gamePieces) {
+            this.physicsWorld.removeBody(gamePiece);
+            this.competitionField.clearObjectsWithGivenType(gamePiece.getTypeName());
+        }
+        this.gamePieces.clear();
+    }
+
+    public void resetFieldForAuto() {
+        clearGamePieces();
+        placeGamePiecesOnField();
+    }
+    /**
+     * place all game pieces on the field (for autonomous)
+     * */
+    public abstract void placeGamePiecesOnField();
+
     /**
      * stores the obstacles on a competition field, which includes the border and the game pieces
      * */
