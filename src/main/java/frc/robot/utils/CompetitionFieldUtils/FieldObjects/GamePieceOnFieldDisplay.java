@@ -11,7 +11,7 @@ import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 public interface GamePieceOnFieldDisplay extends MapleCompetitionField.Object2dOnFieldDisplay {
     @Override
     default Pose3d getPose3d() {
-        final Pose2d pose2d = getPose2d();
+        final Pose2d pose2d = getObjectOnFieldPose2d();
         final Translation3d translation3d = new Translation3d(
                 pose2d.getX(),
                 pose2d.getY(),

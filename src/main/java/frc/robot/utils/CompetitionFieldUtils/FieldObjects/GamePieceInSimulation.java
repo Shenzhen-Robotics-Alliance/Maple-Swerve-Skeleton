@@ -45,7 +45,7 @@ public abstract class GamePieceInSimulation extends Body implements GamePieceOnF
     }
 
     @Override
-    public Pose2d getPose2d() {
+    public Pose2d getObjectOnFieldPose2d() {
         return GeometryConvertor.toWpilibPose2d(super.getTransform());
     }
 }

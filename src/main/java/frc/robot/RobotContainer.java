@@ -5,12 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
+import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.tests.*;
@@ -87,13 +85,15 @@ public class RobotContainer {
                         frontRight = new ModuleIOSim(),
                         backLeft = new ModuleIOSim(),
                         backRight = new ModuleIOSim();
+                final GyroIOSim gyroIOSim = new GyroIOSim();
                 drive = new SwerveDrive(
-                        (inputs) -> {},
+                        gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight,
                         generalConfigBlock
                 );
                 fieldSimulation = new Crescendo2024FieldSimulation(new SwerveDriveSimulation(
                         generalConfigBlock,
+                        gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight,
                         drive.kinematics,
                         new Pose2d(3, 3, new Rotation2d()),

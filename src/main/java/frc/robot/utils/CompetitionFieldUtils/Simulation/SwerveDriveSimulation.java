@@ -1,16 +1,17 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Robot;
+import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.SwerveStateProjection;
-import org.dyn4j.dynamics.Force;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
@@ -26,19 +27,23 @@ import static frc.robot.Constants.ChassisDefaultConfigs.*;
  * the class is like the bridge between ModuleIOSim and HolonomicChassisSimulation
  * it reads the motor power from ModuleIOSim
  * and feed the result of the physics simulation back to ModuleIOSim, to simulate the odometry encoders' readings
+ * TODO write this class
  * */
 public class SwerveDriveSimulation extends HolonomicChassisSimulation {
+    private final GyroIOSim gyroIOSim;
     private final ModuleIOSim[] modules;
     private final SwerveDriveKinematics kinematics;
     private final Consumer<Pose2d> resetOdometryCallBack;
     public SwerveDriveSimulation(
             MapleConfigFile.ConfigBlock chassisGeneralInfoBlock,
+            GyroIOSim gyroIOSim,
             ModuleIOSim frontLeft, ModuleIOSim frontRight, ModuleIOSim backLeft, ModuleIOSim backRight,
             SwerveDriveKinematics kinematics,
             Pose2d startingPose,
             Consumer<Pose2d> resetOdometryCallBack
     ) {
         super(new RobotProfile(chassisGeneralInfoBlock), startingPose);
+        this.gyroIOSim = gyroIOSim;
         this.modules = new ModuleIOSim[] {frontLeft, frontRight, backLeft, backRight};
         this.kinematics = kinematics;
         this.resetOdometryCallBack = resetOdometryCallBack;
@@ -46,7 +51,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     }
 
     public void resetOdometryToActualRobotPose() {
-        resetOdometryCallBack.accept(getPose2d());
+        resetOdometryCallBack.accept(getObjectOnFieldPose2d());
     }
 
     @Override
@@ -64,18 +69,35 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
         final ChassisSpeeds instantVelocityRobotRelative = getMeasuredChassisSpeedsRobotRelative();
         final SwerveModuleState[] actualModuleFloorSpeeds = kinematics.toSwerveModuleStates(instantVelocityRobotRelative);
 
+        updateGyroSimulationResults(
+                gyroIOSim,
+                super.getObjectOnFieldPose2d().getRotation(),
+                super.getAngularVelocity(),
+                iterationNum
+        );
         for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++)
-            updateSimulationResults(
-                    actualModuleFloorSpeeds[moduleIndex],
+            updateModuleSimulationResults(
                     modules[moduleIndex],
+                    actualModuleFloorSpeeds[moduleIndex],
                     profile.robotMaxVelocity,
                     iterationNum, subPeriodSeconds
             );
     }
 
-    private static void updateSimulationResults(
-            SwerveModuleState actualModuleFloorSpeed,
+    private static void updateGyroSimulationResults(
+            GyroIOSim gyroIOSim,
+            Rotation2d currentFacing,
+            double angularVelocityRadPerSec,
+            int iterationNum) {
+        final GyroIOSim.GyroPhysicsSimulationResults results = gyroIOSim.gyroPhysicsSimulationResults;
+        results.robotAngularVelocityRadPerSec = angularVelocityRadPerSec;
+        results.odometryYawPositions[iterationNum] = currentFacing;
+        results.hasReading = true;
+    }
+
+    private static void updateModuleSimulationResults(
             ModuleIOSim module,
+            SwerveModuleState actualModuleFloorSpeed,
             double robotMaxVelocity,
             int simulationIteration, double periodSeconds) {
         final SwerveModuleState moduleFreeSwerveSpeed = module.getFreeSwerveSpeed(robotMaxVelocity);

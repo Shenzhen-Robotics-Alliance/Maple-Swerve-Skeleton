@@ -69,7 +69,7 @@ public class SwerveModule extends MapleSubsystem {
 
     private void runSteerCloseLoop() {
         turnCloseLoop.setDesiredPosition(setPoint.angle.getRadians());
-        io.setSteerPower(turnCloseLoop.getMotorPower(
+        io.setSteerPowerPercent(turnCloseLoop.getMotorPower(
                 getSteerVelocityRadPerSec(),
                 getSteerFacing().getRadians()
         ));
@@ -79,7 +79,7 @@ public class SwerveModule extends MapleSubsystem {
         final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
         Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/required velocity", adjustSpeedSetpointMetersPerSec);
         Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/corresponding power (mag)", driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
-        io.setDrivePower(driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
+        io.setDriveSpeedPercent(driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
     }
 
     /**
@@ -96,8 +96,8 @@ public class SwerveModule extends MapleSubsystem {
 
     @Override
     public void onDisable() {
-        io.setSteerPower(0);
-        io.setDrivePower(0);
+        io.setSteerPowerPercent(0);
+        io.setDriveSpeedPercent(0);
     }
 
     @Override

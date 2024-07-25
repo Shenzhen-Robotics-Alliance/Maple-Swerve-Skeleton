@@ -52,7 +52,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     }
 
     public void simulateChassisBehaviorWithRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeedsRobotRelative) {
-        simulateChassisBehaviorWithFieldRelativeSpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getPose2d().getRotation()));
+        simulateChassisBehaviorWithFieldRelativeSpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getObjectOnFieldPose2d().getRotation()));
     }
 
     protected void simulateChassisBehaviorWithFieldRelativeSpeeds(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
@@ -103,12 +103,12 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     }
 
     @Override
-    public Pose2d getPose2d() {
+    public Pose2d getObjectOnFieldPose2d() {
         return GeometryConvertor.toWpilibPose2d(getTransform());
     }
 
     public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getPose2d().getRotation());
+        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getObjectOnFieldPose2d().getRotation());
     }
 
     public ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {

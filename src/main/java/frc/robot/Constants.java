@@ -43,9 +43,8 @@ public final class Constants {
     public static final class LogConfigs {
         // avoid typos
         public static final String
-                SENSORS_INPUTS_PATH = "RawInputs/",
-                SENSORS_PROCESSED_INPUTS_PATH = "ProcessedInputs/",
-                SYSTEM_PERFORMANCE_PATH = "SystemPerformance/";
+                SYSTEM_PERFORMANCE_PATH = "SystemPerformance/",
+                PHYSICS_SIMULATION_PATH = "MaplePhysicsSimulation/";
     }
 
     public static final class CrescendoField2024Constants {

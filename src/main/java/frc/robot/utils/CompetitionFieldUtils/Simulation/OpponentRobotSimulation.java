@@ -55,7 +55,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
 
     @Override
     public Pose2d getPose() {
-        return super.getPose2d();
+        return super.getObjectOnFieldPose2d();
     }
 
     @Override
