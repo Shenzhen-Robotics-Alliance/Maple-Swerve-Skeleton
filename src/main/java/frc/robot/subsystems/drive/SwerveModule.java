@@ -13,6 +13,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
+import frc.robot.utils.MapleMaths.SwerveStateProjection;
 import frc.robot.utils.MechanismControl.InterpolatedMotorFeedForward;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
 import org.littletonrobotics.junction.Logger;
@@ -24,8 +25,7 @@ public class SwerveModule extends MapleSubsystem {
 
     private final InterpolatedMotorFeedForward driveOpenLoop;
     private final MapleSimplePIDController turnCloseLoop;
-    private Rotation2d steerAbsoluteFacingSetPoint;
-    private double speedSetPointMetersPerSec;
+    private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
     public SwerveModule(ModuleIO io, String name) {
@@ -44,8 +44,7 @@ public class SwerveModule extends MapleSubsystem {
 
     @Override
     public void onReset() {
-        steerAbsoluteFacingSetPoint = new Rotation2d();
-        speedSetPointMetersPerSec = 0;
+        setPoint = new SwerveModuleState();
         onDisable();
     }
 
@@ -69,44 +68,36 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private void runSteerCloseLoop() {
-        turnCloseLoop.setDesiredPosition(steerAbsoluteFacingSetPoint.getRadians());
-        io.setSteerPower(turnCloseLoop.getMotorPower(
+        turnCloseLoop.setDesiredPosition(setPoint.angle.getRadians());
+        io.setSteerPowerPercent(turnCloseLoop.getMotorPower(
                 getSteerVelocityRadPerSec(),
                 getSteerFacing().getRadians()
         ));
     }
 
     private void runDriveOpenLoop() {
-        final double
-                CURRENT_STEER_FACING_TO_DESIRED_FACING_DIFFERENCE = steerAbsoluteFacingSetPoint.minus(getSteerFacing()).getRadians(),
-                DESIRED_VELOCITY_PROJECTION_RATIO_TO_CURRENT_STEER_FACING = Math.cos(
-                        CURRENT_STEER_FACING_TO_DESIRED_FACING_DIFFERENCE
-                ),
-                adjustSpeedSetpointMetersPerSec = speedSetPointMetersPerSec * DESIRED_VELOCITY_PROJECTION_RATIO_TO_CURRENT_STEER_FACING;
+        final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
         Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/required velocity", adjustSpeedSetpointMetersPerSec);
         Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/corresponding power (mag)", driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
-        io.setDrivePower(driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
+        io.setDriveSpeedPercent(driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
     }
 
     /**
      * Runs the module with the specified setpoint state. Returns the optimized state.
      */
     public SwerveModuleState runSetPoint(SwerveModuleState state) {
-        var optimizedState = SwerveModuleState.optimize(state, getSteerFacing());
-
-        steerAbsoluteFacingSetPoint = optimizedState.angle;
-        speedSetPointMetersPerSec = optimizedState.speedMetersPerSecond;
+        this.setPoint = SwerveModuleState.optimize(state, getSteerFacing());
 
         runDriveOpenLoop();
         runSteerCloseLoop();
 
-        return optimizedState;
+        return this.setPoint;
     }
 
     @Override
     public void onDisable() {
-        io.setSteerPower(0);
-        io.setDrivePower(0);
+        io.setSteerPowerPercent(0);
+        io.setDriveSpeedPercent(0);
     }
 
     @Override

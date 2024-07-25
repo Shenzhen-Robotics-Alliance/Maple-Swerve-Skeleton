@@ -2,7 +2,7 @@
     <GeneralInformation>
         <gyroPort type="int">15</gyroPort>
         <maxAngularVelocityRadiansPerSecond type="double">9.42477796076938</maxAngularVelocityRadiansPerSecond>
-        <maxAccelerationMetersPerSecondSquared type="double">10.184</maxAccelerationMetersPerSecondSquared>
+        <maxAccelerationMetersPerSecondSquared type="double">15</maxAccelerationMetersPerSecondSquared>
         <overallGearRatio type="double">6.12</overallGearRatio>
         <wheelRadiusMeters type="double">0.051</wheelRadiusMeters>
         <bumperWidthMeters type="double">0.876</bumperWidthMeters>

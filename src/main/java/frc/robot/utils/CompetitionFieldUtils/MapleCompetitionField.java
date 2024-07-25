@@ -24,12 +24,12 @@ public class MapleCompetitionField {
     }
 
     public interface Object2dOnFieldDisplay extends ObjectOnFieldDisplay {
-        Pose2d getPose2d();
+        Pose2d getObjectOnFieldPose2d();
         @Override
         String getTypeName();
         @Override
         default Pose3d getPose3d() {
-            return new Pose3d(getPose2d());
+            return new Pose3d(getObjectOnFieldPose2d());
         }
 
         @Override
@@ -76,8 +76,8 @@ public class MapleCompetitionField {
             Logger.recordOutput("/Field/" + typeName, getPose3ds(objects));
         }
 
-        dashboardField2d.setRobotPose(mainRobot.getPose2d());
-        Logger.recordOutput("/Field/Robot", mainRobot.getPose2d());
+        dashboardField2d.setRobotPose(mainRobot.getObjectOnFieldPose2d());
+        Logger.recordOutput("/Field/Robot", mainRobot.getObjectOnFieldPose2d());
     }
 
     private static List<Pose2d> getPose2ds(Set<ObjectOnFieldDisplay> objects) {

@@ -79,6 +79,8 @@ public class Robot extends LoggedRobot {
         if (this.isTest())
             return;
 
+        if (CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
+            robotContainer.updateSimulationWorld();
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
     }

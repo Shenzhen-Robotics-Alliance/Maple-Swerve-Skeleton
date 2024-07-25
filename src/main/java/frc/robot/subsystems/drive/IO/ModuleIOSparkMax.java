@@ -156,13 +156,13 @@ public class ModuleIOSparkMax implements ModuleIO {
     }
 
     @Override
-    public void setDrivePower(double power) {
-        driveSparkMax.set(power);
+    public void setDriveSpeedPercent(double speedPercent) {
+        driveSparkMax.set(speedPercent);
     }
 
     @Override
-    public void setSteerPower(double power) {
-        steerSparkMax.set(power);
+    public void setSteerPowerPercent(double powerPercent) {
+        steerSparkMax.set(powerPercent);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package frc.robot.utils.MechanismControl;
 
 import frc.robot.utils.MapleMaths.Angles;
-import frc.robot.utils.MapleMaths.CommonMath;
+import frc.robot.utils.MapleMaths.MapleCommonMath;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -37,7 +37,7 @@ public class MapleSimplePIDController implements SingleDimensionMechanismControl
         if (Math.abs(error) < profile.errorTolerance) return 0;
         final double
                 unsignedPower =
-                CommonMath.linearInterpretationWithBounding(
+                MapleCommonMath.linearInterpretationWithBounding(
                         profile.errorTolerance,
                         profile.minimumPower,
                         profile.errorStartDecelerate,

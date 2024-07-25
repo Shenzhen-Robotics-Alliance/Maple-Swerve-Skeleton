@@ -5,21 +5,22 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
-import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
+import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.tests.*;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -37,10 +38,14 @@ public class RobotContainer {
     private final SwerveDrive drive;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    private final CommandXboxController driverController = new CommandXboxController(0),
+            operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
+
+    // Simulation
+    private Crescendo2024FieldSimulation fieldSimulation = null;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -75,14 +80,25 @@ public class RobotContainer {
 
             case SIM -> {
                 // Sim robot, instantiate physics sim IO implementations
+                final ModuleIOSim
+                        frontLeft = new ModuleIOSim(),
+                        frontRight = new ModuleIOSim(),
+                        backLeft = new ModuleIOSim(),
+                        backRight = new ModuleIOSim();
+                final GyroIOSim gyroIOSim = new GyroIOSim();
                 drive = new SwerveDrive(
-                        (inputs) -> {},
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
-                        new ModuleIOSim(),
+                        gyroIOSim,
+                        frontLeft, frontRight, backLeft, backRight,
                         generalConfigBlock
                 );
+                fieldSimulation = new Crescendo2024FieldSimulation(new SwerveDriveSimulation(
+                        generalConfigBlock,
+                        gyroIOSim,
+                        frontLeft, frontRight, backLeft, backRight,
+                        drive.kinematics,
+                        new Pose2d(3, 3, new Rotation2d()),
+                        drive::setPose
+                ));
             }
 
             default -> {
@@ -111,12 +127,13 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        drive.setDefaultCommand(drive.joystickDrive(
-                MapleJoystickDriveInput.leftHandedJoystick(controller),
-                true
+        drive.setDefaultCommand(new JoystickDrive(
+                MapleJoystickDriveInput.leftHandedJoystick(driverController),
+                () -> true,
+                drive
         ));
-        controller.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
-        controller.b().onTrue(Commands.runOnce(
+        driverController.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
+        driverController.b().onTrue(Commands.runOnce(
                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                 drive
                 ).ignoringDisable(true)
@@ -135,5 +152,10 @@ public class RobotContainer {
 
     public UnitTest getUnitTest() {
       return new PhysicsSimulationTest();
+    }
+
+    public void updateSimulationWorld() {
+        if (fieldSimulation != null)
+            fieldSimulation.updateSimulationWorld();
     }
 }

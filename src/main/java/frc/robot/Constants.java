@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.MechanismControl.MapleSimplePIDController;
@@ -37,16 +38,13 @@ public final class Constants {
         REPLAY
     }
 
-    public static final String chassisConfigName =
-            "6433-2024-OffSeason";
-            // "5516-2024-OnSeason";
+    public static final String chassisConfigName = "5516-2024-OnSeason";
 
     public static final class LogConfigs {
         // avoid typos
         public static final String
-                SENSORS_INPUTS_PATH = "RawInputs/",
-                SENSORS_PROCESSED_INPUTS_PATH = "ProcessedInputs/",
-                SYSTEM_PERFORMANCE_PATH = "SystemPerformance/";
+                SYSTEM_PERFORMANCE_PATH = "SystemPerformance/",
+                PHYSICS_SIMULATION_PATH = "MaplePhysicsSimulation/";
     }
 
     public static final class CrescendoField2024Constants {
@@ -139,6 +137,17 @@ public final class Constants {
     }
 
     public static final class RobotPhysicsSimulationConfigs {
+        public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
+
+        /* Swerve Module Simulation */
+        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 985.78;
+        public static final DCMotor
+                DRIVE_MOTOR = DCMotor.getKrakenX60(1),
+                STEER_MOTOR = DCMotor.getFalcon500(1);
+        public static final double DRIVE_WHEEL_ROTTER_INERTIA = 0.012;
+        public static final double STEER_INERTIA = 0.008;
+        public static final double STEER_GEAR_RATIO = 150.0 / 7.0;
+
         public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
         public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
         public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;
@@ -150,6 +159,19 @@ public final class Constants {
         public static final double ROBOT_BUMPER_COEFFICIENT_OF_FRICTION = 0.85;
         /* https://en.wikipedia.org/wiki/Coefficient_of_restitution */
         public static final double ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION = 0.05;
+
+        /* Gyro Sim */
+        public static final double GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ = 100;
+        public static final double SKIDDING_AMOUNT_AT_THRESHOLD_RAD = Math.toRadians(1.2);
+        /*
+        * https://store.ctr-electronics.com/pigeon-2/
+        * for a well-installed one with vibration reduction, only 0.4 degree
+        * but most teams just install it directly on the rigid chassis frame (including my team :D)
+        * so at least 1.2 degrees of drifting in 1 minutes for an average angular velocity of 60 degrees/second
+        * which is the average velocity during normal swerve-circular-offense
+        * */
+        public static final double NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD = Math.toRadians(1.2);
+        public static final double AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST = Math.toRadians(60);
     }
 
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {

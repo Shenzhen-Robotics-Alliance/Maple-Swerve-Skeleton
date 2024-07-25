@@ -9,11 +9,12 @@ import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimula
 import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 
 public class PhysicsSimulationTest implements UnitTest {
-    private final OpponentRobotSimulation opponentRobotSimulation = new OpponentRobotSimulation(0);
-    private final Crescendo2024FieldSimulation fieldSimulation = new Crescendo2024FieldSimulation(opponentRobotSimulation);
+    private final OpponentRobotSimulation opponentRobotSimulation;
+    private final Crescendo2024FieldSimulation fieldSimulation;
 
     public PhysicsSimulationTest() {
-        fieldSimulation.addRobot(opponentRobotSimulation);
+        this.opponentRobotSimulation = new OpponentRobotSimulation(0);
+        this.fieldSimulation = new Crescendo2024FieldSimulation(opponentRobotSimulation);
     }
     @Override
     public void testStart() {

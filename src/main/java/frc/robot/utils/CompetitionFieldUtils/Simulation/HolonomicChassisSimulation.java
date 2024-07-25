@@ -18,7 +18,7 @@ import org.dyn4j.geometry.Vector2;
  * */
 public abstract class HolonomicChassisSimulation extends Body implements RobotOnFieldDisplay {
     public final RobotProfile profile;
-    public HolonomicChassisSimulation(RobotProfile profile) {
+    public HolonomicChassisSimulation(RobotProfile profile, Pose2d startingPose) {
         this.profile = profile;
 
         /* the bumper needs to be rotated 90 degrees */
@@ -34,6 +34,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         super.setMass(MassType.NORMAL);
         super.setLinearDamping(profile.linearVelocityDamping);
         super.setAngularDamping(profile.angularDamping);
+        setSimulationWorldPose(startingPose);
     }
 
     public void setSimulationWorldPose(Pose2d robotPose) {
@@ -50,18 +51,16 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         super.setAngularVelocity(givenSpeeds.omegaRadiansPerSecond);
     }
 
-    public void runRawChassisSpeeds(ChassisSpeeds desiredChassisSpeedsRobotRelative) {
-        simulateChassisBehavior(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getPose().getRotation()));
+    public void simulateChassisBehaviorWithRobotRelativeSpeeds(ChassisSpeeds desiredChassisSpeedsRobotRelative) {
+        simulateChassisBehaviorWithFieldRelativeSpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(desiredChassisSpeedsRobotRelative, getObjectOnFieldPose2d().getRotation()));
     }
 
-    protected void simulateChassisBehavior(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
-        //        super.setAtRest(
-//                HolonomicDrive.isZero(desiredChassisSpeedsFieldRelative)
-//                        && HolonomicDrive.isZero(getMeasuredChassisSpeedsFieldRelative())
-//        );
+    protected void simulateChassisBehaviorWithFieldRelativeSpeeds(ChassisSpeeds desiredChassisSpeedsFieldRelative) {
         super.setAtRest(false);
 
-        final Vector2 desiredLinearMotionPercent = GeometryConvertor.toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative).multiply(1/ profile.robotMaxVelocity);
+        final Vector2 desiredLinearMotionPercent = GeometryConvertor
+                .toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative)
+                .multiply(1.0/ profile.robotMaxVelocity);
         simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
 
         final double desiredRotationalMotionPercent = desiredChassisSpeedsFieldRelative.omegaRadiansPerSecond / profile.maxAngularVelocity;
@@ -94,7 +93,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
             return;
         }
 
-        final double actualRotationalMotionPercent = getAngularVelocity() / profile.maxAngularVelocity,
+        final double actualRotationalMotionPercent = Math.abs(getAngularVelocity() / profile.maxAngularVelocity),
                 frictionalTorqueMagnitude = this.profile.angularFrictionAcceleration * super.getMass().getInertia();
         if (actualRotationalMotionPercent > 0.03)
             super.applyTorque(Math.copySign(frictionalTorqueMagnitude, -super.getAngularVelocity()));
@@ -103,16 +102,12 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     }
 
     @Override
-    public Pose2d getPose2d() {
-        return getPose();
-    }
-
-    public Pose2d getPose() {
+    public Pose2d getObjectOnFieldPose2d() {
         return GeometryConvertor.toWpilibPose2d(getTransform());
     }
 
     public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
-        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getPose().getRotation());
+        return ChassisSpeeds.fromFieldRelativeSpeeds(getMeasuredChassisSpeedsFieldRelative(), getObjectOnFieldPose2d().getRotation());
     }
 
     public ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
@@ -126,6 +121,11 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     public double getChassisMaxAngularVelocity() {
         return profile.maxAngularVelocity;
     }
+
+    /**
+     * called in every iteration of sub-period
+     * */
+    public abstract void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds);
 
     public static final class RobotProfile {
         public final double

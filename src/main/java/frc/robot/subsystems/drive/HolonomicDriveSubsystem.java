@@ -24,7 +24,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public interface HolonomicDrive extends Subsystem {
+public interface HolonomicDriveSubsystem extends Subsystem {
     /**
      * runs a ChassisSpeeds without doing any pre-processing
      * @param speeds a discrete chassis speed, robot-centric
@@ -120,57 +120,24 @@ public interface HolonomicDrive extends Subsystem {
         );
     }
 
-    /**
-     * @param input the joystick input source
-     * @param useFieldCentric whether to do field-centric or not (otherwise, robot-centric)
-     * */
-    default Command joystickDrive(MapleJoystickDriveInput input, boolean useFieldCentric) {
-        final Timer nonSpeedTimer = new Timer();
-        final AtomicReference<ChassisSpeeds> currentChassisSpeeds = new AtomicReference<>(new ChassisSpeeds());
-        return Commands.run(
-                () -> joystickDrivePeriodic(input, useFieldCentric, nonSpeedTimer, currentChassisSpeeds),
-                this
-        ).beforeStarting(nonSpeedTimer::start);
-    }
-
-    default void joystickDrivePeriodic(MapleJoystickDriveInput input, boolean fieldCentricModeOn, Timer nonSpeedTimer, AtomicReference<ChassisSpeeds> currentChassisSpeedsTargetDriverStationCentric) {
-        final ChassisSpeeds driveStationCentricSpeed = input.getJoystickChassisSpeeds(
-                getChassisMaxLinearVelocity(), getChassisMaxAngularVelocity()
-        );
-        currentChassisSpeedsTargetDriverStationCentric.set(constrainAcceleration(
-                currentChassisSpeedsTargetDriverStationCentric.get(),
-                driveStationCentricSpeed,
-                getChassisMaxLinearVelocity() / Constants.DriveConfigs.linearAccelerationSmoothOutSeconds,
-                getChassisMaxAngularVelocity() / Constants.DriveConfigs.angularAccelerationSmoothOutSeconds,
-                Robot.defaultPeriodSecs
-        ));
-        if (!isZero(driveStationCentricSpeed))
-            nonSpeedTimer.reset();
-
-        if (nonSpeedTimer.hasElapsed(Constants.DriveConfigs.nonUsageTimeResetWheels)) {
-            stop();
-            return;
-        }
-
-        if (fieldCentricModeOn)
-            runDriverStationCentricChassisSpeeds(currentChassisSpeedsTargetDriverStationCentric.get());
-        else
-            runRobotCentricChassisSpeeds(currentChassisSpeedsTargetDriverStationCentric.get());
-    }
-
     static boolean isZero(ChassisSpeeds chassisSpeeds) {
         return chassisSpeeds.omegaRadiansPerSecond == 0 && chassisSpeeds.vxMetersPerSecond == 0 && chassisSpeeds.vyMetersPerSecond == 0;
     }
 
-    static ChassisSpeeds constrainAcceleration(
+    default ChassisSpeeds constrainAcceleration(
             ChassisSpeeds currentSpeeds, ChassisSpeeds desiredSpeeds,
-            double maxLinearAccelerationMetersPerSecSq, double maxAngularAccelerationRadPerSecSq,
-            double periodSecs) {
+            double dtSecs) {
+        final double
+                MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = getChassisMaxLinearVelocity()
+                / Constants.DriveConfigs.linearAccelerationSmoothOutSeconds,
+                MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = getChassisMaxAngularVelocity()
+                / Constants.DriveConfigs.angularAccelerationSmoothOutSeconds;
+
         Translation2d currentLinearVelocityMetersPerSec = new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
                 desiredLinearVelocityMetersPerSec = new Translation2d(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond),
                 linearVelocityDifference = desiredLinearVelocityMetersPerSec.minus(currentLinearVelocityMetersPerSec);
 
-        final double maxLinearVelocityChangeIn1Period = maxLinearAccelerationMetersPerSecSq * periodSecs;
+        final double maxLinearVelocityChangeIn1Period = MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
         final boolean desiredLinearVelocityReachableWithin1Period = linearVelocityDifference.getNorm() <= maxLinearVelocityChangeIn1Period;
         final Translation2d linearVelocityChangeVector = new Translation2d(maxLinearVelocityChangeIn1Period, linearVelocityDifference.getAngle()),
                 newLinearVelocity = desiredLinearVelocityReachableWithin1Period ?
@@ -178,7 +145,7 @@ public interface HolonomicDrive extends Subsystem {
                 : currentLinearVelocityMetersPerSec.plus(linearVelocityChangeVector);
 
         final double angularVelocityDifference = desiredSpeeds.omegaRadiansPerSecond - currentSpeeds.omegaRadiansPerSecond,
-                maxAngularVelocityChangeIn1Period = maxAngularAccelerationRadPerSecSq * periodSecs,
+                maxAngularVelocityChangeIn1Period = MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ * dtSecs,
                 angularVelocityChange = Math.copySign(maxAngularVelocityChangeIn1Period, angularVelocityDifference);
         final boolean desiredAngularVelocityReachableWithin1Period = Math.abs(angularVelocityDifference) <= maxAngularVelocityChangeIn1Period;
         final double newAngularVelocity = desiredAngularVelocityReachableWithin1Period ?

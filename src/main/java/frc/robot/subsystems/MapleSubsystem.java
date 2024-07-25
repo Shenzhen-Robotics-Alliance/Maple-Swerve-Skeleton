@@ -12,6 +12,11 @@ import org.littletonrobotics.junction.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Iron Maple's subsystem management.
+ * Based on SubsystemBase, we added on-disable/on-enable function calls and dt calculation
+ * TODO: log the dt and use real timestamps
+ * */
 public abstract class MapleSubsystem extends SubsystemBase {
     public static final List<MapleSubsystem> instances = new ArrayList<>();
     private double previousUpdateTimeStamp = 0;

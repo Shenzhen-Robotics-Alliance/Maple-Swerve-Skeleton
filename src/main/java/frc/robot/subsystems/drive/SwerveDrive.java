@@ -20,7 +20,7 @@ import frc.robot.utils.Config.MapleConfigFile;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
+public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
     public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -28,7 +28,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
     private final SwerveModule[] swerveModules;
 
     private final Translation2d[] MODULE_TRANSLATIONS;
-    private final SwerveDriveKinematics kinematics;
+    public final SwerveDriveKinematics kinematics;
     private Rotation2d rawGyroRotation;
     private final SwerveModulePosition[] lastModulePositions;
     private final SwerveDrivePoseEstimator poseEstimator;
@@ -175,7 +175,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
         for (int i = 0; i < swerveHeadings.length; i++)
             swerveHeadings[i] = new Rotation2d();
         kinematics.resetHeadings(swerveHeadings);
-        HolonomicDrive.super.stop();
+        HolonomicDriveSubsystem.super.stop();
     }
 
     /**
@@ -187,7 +187,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
         for (int i = 0; i < swerveHeadings.length; i++)
             swerveHeadings[i] = MODULE_TRANSLATIONS[i].getAngle();
         kinematics.resetHeadings(swerveHeadings);
-        HolonomicDrive.super.stop();
+        HolonomicDriveSubsystem.super.stop();
     }
 
     /**
@@ -204,7 +204,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
     /**
      * Returns the module positions (turn angles and drive positions) for all of the modules.
      */
-    private SwerveModulePosition[] getModulePositions() {
+    private SwerveModulePosition[] getModuleLatestPositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[swerveModules.length];
         for (int i = 0; i < states.length; i++)
             states[i] = swerveModules[i].getLatestPosition();
@@ -219,7 +219,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDrive {
 
     @Override
     public void setPose(Pose2d pose) {
-        poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        poseEstimator.resetPosition(rawGyroRotation, getModuleLatestPositions(), pose);
     }
 
     @Override

@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.HolonomicDrive;
+import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.ejml.simple.UnsupportedOperation;
 
@@ -16,7 +16,7 @@ import org.ejml.simple.UnsupportedOperation;
  * it is either controlled by another gamepad to simulate a defense robot
  * or can follow pre-generated paths to simulate opponent robots who are doing cycles
  * */
-public class OpponentRobotSimulation extends HolonomicChassisSimulation implements HolonomicDrive {
+public class OpponentRobotSimulation extends HolonomicChassisSimulation implements HolonomicDriveSubsystem {
     public enum Behavior {
         JOYSTICK_CONTROL,
         AUTO_CYCLE,
@@ -44,9 +44,18 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
      * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
     public OpponentRobotSimulation(int id) {
-        super(opponentRobotProfile);
+        super(opponentRobotProfile, robotQueeningPosition);
         this.id = id;
-        super.setSimulationWorldPose(robotQueeningPosition);
+    }
+
+    @Override
+    public void runRawChassisSpeeds(ChassisSpeeds speeds) {
+        super.simulateChassisBehaviorWithRobotRelativeSpeeds(speeds);
+    }
+
+    @Override
+    public Pose2d getPose() {
+        return super.getObjectOnFieldPose2d();
     }
 
     @Override
@@ -57,6 +66,10 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {throw new UnsupportedOperation("an opponent robot does not support vision measurement"); }
 
     // TODO using holonomic drive commands, make the opponent robots drive in the intended modes
+    @Override
+    public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
+
+    }
 
     /**
      * a method to test the driving physics
@@ -67,6 +80,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     public void testDrivingPhysicsWithJoystick(XboxController xboxController) {
         final MapleJoystickDriveInput mapleJoystickDriveInput = MapleJoystickDriveInput.leftHandedJoystick(xboxController);
         final ChassisSpeeds gamePadSpeeds = mapleJoystickDriveInput.getJoystickChassisSpeeds(5, 10);
-        HolonomicDrive.super.runDriverStationCentricChassisSpeeds(gamePadSpeeds);
+        System.out.println("game pad speeds: " + gamePadSpeeds);
+        HolonomicDriveSubsystem.super.runDriverStationCentricChassisSpeeds(gamePadSpeeds);
     }
 }

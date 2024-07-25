@@ -28,7 +28,7 @@ public final class Crescendo2024FieldObjects {
         }
 
         @Override
-        public Pose2d getPose2d() {
+        public Pose2d getObjectOnFieldPose2d() {
             return new Pose2d(initialPosition, new Rotation2d());
         }
 
