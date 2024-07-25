@@ -29,7 +29,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        inputs.driveWheelFinalRevolutions = Units.radiansToRotations(physicsSimulationResults.driveWheelFinalRevolutions);
+        inputs.driveWheelFinalRevolutions = physicsSimulationResults.driveWheelFinalRevolutions;
         inputs.driveWheelFinalVelocityRevolutionsPerSec = physicsSimulationResults.driveWheelFinalVelocityRevolutionsPerSec;
         inputs.driveMotorAppliedVolts = driveAppliedVolts;
         inputs.driveMotorCurrentAmps = Math.abs(driveSim.getCurrentDrawAmps());

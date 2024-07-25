@@ -204,7 +204,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     /**
      * Returns the module positions (turn angles and drive positions) for all of the modules.
      */
-    private SwerveModulePosition[] getModulePositions() {
+    private SwerveModulePosition[] getModuleLatestPositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[swerveModules.length];
         for (int i = 0; i < states.length; i++)
             states[i] = swerveModules[i].getLatestPosition();
@@ -219,7 +219,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public void setPose(Pose2d pose) {
-        poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+        poseEstimator.resetPosition(rawGyroRotation, getModuleLatestPositions(), pose);
     }
 
     @Override
