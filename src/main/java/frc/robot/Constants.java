@@ -155,6 +155,19 @@ public final class Constants {
         public static final double ROBOT_BUMPER_COEFFICIENT_OF_FRICTION = 0.85;
         /* https://en.wikipedia.org/wiki/Coefficient_of_restitution */
         public static final double ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION = 0.05;
+
+        /* Gyro Sim */
+        public static final double GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ = 100;
+        public static final double SKIDDING_AMOUNT_AT_THRESHOLD_RAD = Math.toRadians(1.2);
+        /*
+        * https://store.ctr-electronics.com/pigeon-2/
+        * for a well-installed one with vibration reduction, only 0.4 degree
+        * but most teams just install it directly on the rigid chassis frame (including my team :D)
+        * so at least 1.5 degrees of drifting in 1 minutes for an average angular velocity of 40 degrees/second
+        * which is the average velocity during normal swerve-circular-offense
+        * */
+        public static final double NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD = Math.toRadians(1.5);
+        public static final double AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST = Math.toRadians(40);
     }
 
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {

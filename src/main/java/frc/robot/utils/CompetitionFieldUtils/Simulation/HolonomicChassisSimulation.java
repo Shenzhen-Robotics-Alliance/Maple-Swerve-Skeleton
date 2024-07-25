@@ -93,7 +93,6 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
             return;
         }
 
-        final double actualRotationalMotionPercent = getAngularVelocity() / profile.maxAngularVelocity,
         final double actualRotationalMotionPercent = Math.abs(getAngularVelocity() / profile.maxAngularVelocity),
                 frictionalTorqueMagnitude = this.profile.angularFrictionAcceleration * super.getMass().getInertia();
         if (actualRotationalMotionPercent > 0.03)
