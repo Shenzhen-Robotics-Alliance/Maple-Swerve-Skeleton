@@ -23,8 +23,8 @@ import static frc.robot.Constants.ChassisDefaultConfigs.*;
  */
 public class ModuleIOSim implements ModuleIO {
     public final SwerveModulePhysicsSimulationResults physicsSimulationResults = new SwerveModulePhysicsSimulationResults();
-    private final DCMotorSim driveSim = new DCMotorSim(DRIVE_MOTOR, DEFAULT_GEAR_RATIO, 0.025);
-    private final DCMotorSim steerSim = new DCMotorSim(STEER_MOTOR, 150.0 / 7.0, 0.004);
+    private final DCMotorSim driveSim = new DCMotorSim(DRIVE_MOTOR, DEFAULT_GEAR_RATIO, DRIVE_WHEEL_ROTTER_INERTIA);
+    private final DCMotorSim steerSim = new DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA);
     private double driveAppliedVolts = 0.0, steerAppliedVolts = 0.0;
 
     @Override

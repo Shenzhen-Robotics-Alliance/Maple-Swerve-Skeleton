@@ -139,10 +139,14 @@ public final class Constants {
     public static final class RobotPhysicsSimulationConfigs {
         public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
 
+        /* Swerve Module Simulation */
         public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 985.78;
         public static final DCMotor
                 DRIVE_MOTOR = DCMotor.getKrakenX60(1),
                 STEER_MOTOR = DCMotor.getFalcon500(1);
+        public static final double DRIVE_WHEEL_ROTTER_INERTIA = 0.012;
+        public static final double STEER_INERTIA = 0.008;
+        public static final double STEER_GEAR_RATIO = 150.0 / 7.0;
 
         public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
         public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
