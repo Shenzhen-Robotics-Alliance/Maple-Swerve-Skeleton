@@ -49,17 +49,18 @@ public class ModuleIOSim implements ModuleIO {
         );
     }
 
+
     @Override
-    public void setDrivePower(double power) {
+    public void setDriveSpeedPercent(double speedPercent) {
         driveSim.setInputVoltage(
-                driveAppliedVolts = (power * 12)
+                driveAppliedVolts = (speedPercent * 12)
         );
     }
 
     @Override
-    public void setSteerPower(double power) {
+    public void setSteerPowerPercent(double powerPercent) {
         steerSim.setInputVoltage(
-                steerAppliedVolts = (power * 12)
+            steerAppliedVolts = (powerPercent * 12)
         );
     }
 

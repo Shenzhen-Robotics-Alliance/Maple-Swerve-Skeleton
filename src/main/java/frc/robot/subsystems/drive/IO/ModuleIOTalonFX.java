@@ -7,6 +7,9 @@ package frc.robot.subsystems.drive.IO;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -33,6 +36,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     private final Rotation2d absoluteEncoderOffset;
     private final double DRIVE_GEAR_RATIO;
+    private final double MODULE_MAX_VELOCITY_REV_PER_SEC;
 
     public ModuleIOTalonFX(MapleConfigFile.ConfigBlock moduleConfigs, MapleConfigFile.ConfigBlock generalConfigs) {
         this.name = moduleConfigs.getBlockName();
@@ -76,6 +80,8 @@ public class ModuleIOTalonFX implements ModuleIO {
         steerTalon.optimizeBusUtilization();
 
         this.DRIVE_GEAR_RATIO = generalConfigs.getDoubleConfig("overallGearRatio");
+        final double MODULE_MAX_VELOCITY_RAD_PER_SEC = generalConfigs.getDoubleConfig("maxVelocityMetersPerSecond") / generalConfigs.getDoubleConfig("wheelRadiusMeters");
+        this.MODULE_MAX_VELOCITY_REV_PER_SEC = Units.radiansToRotations(MODULE_MAX_VELOCITY_RAD_PER_SEC);
     }
 
     @Override
@@ -110,13 +116,16 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     @Override
-    public void setDrivePower(double power) {
-        driveTalon.set(power);
+    public void setDriveSpeedPercent(double speedPercent) {
+        driveTalon.setControl(new VelocityDutyCycle(
+                speedPercent * MODULE_MAX_VELOCITY_REV_PER_SEC)
+                .withEnableFOC(false));
     }
 
     @Override
-    public void setSteerPower(double power) {
-       steerTalon.set(power);
+    public void setSteerPowerPercent(double powerPercent) {
+       steerTalon.setControl(new DutyCycleOut(powerPercent)
+               .withEnableFOC(true));
     }
 
     @Override

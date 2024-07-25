@@ -32,16 +32,16 @@ public interface ModuleIO {
     default void calibrate() {}
 
     /**
-     * Run the drive motor at the specified percent output.
-     * @param power from -1 to 1, where 1 is the forward direction of the wheel
+     * Run the drive motor at the specified percent speed.
+     * @param speedPercent from -1 to 1, where 1 is the forward direction of the wheel
      */
-    default void setDrivePower(double power) {}
+    default void setDriveSpeedPercent(double speedPercent) {}
 
     /**
-     * Run the turn motor at the specified voltage.
-     * @param power from -1 to 1, where 1 is counter-clockwise
+     * Run the turn motor at the specified percent power.
+     * @param powerPercent from -1 to 1, where 1 is counter-clockwise
      */
-    default void setSteerPower(double power) {}
+    default void setSteerPowerPercent(double powerPercent) {}
 
     /**
      * Enable or disable brake mode on the drive motor.
