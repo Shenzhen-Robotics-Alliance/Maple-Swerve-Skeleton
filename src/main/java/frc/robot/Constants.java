@@ -87,7 +87,7 @@ public final class Constants {
                 Math.toRadians(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND),
                 Math.toRadians(30),
                 Math.toRadians(0),
-                0.2,
+                0.15,
                 true,
                 0
         );
@@ -95,7 +95,7 @@ public final class Constants {
 
         public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
                 ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
-                0.8,
+                0.5,
                 0.02,
                 0.3,
                 false,
