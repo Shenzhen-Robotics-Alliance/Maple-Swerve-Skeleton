@@ -7,10 +7,8 @@ import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -23,7 +21,7 @@ public interface OdometryThread {
 
         public OdometryDoubleInput(Supplier<Double> signal) {
             this.supplier = signal;
-            this.queue = new ArrayBlockingQueue<>(Constants.SwerveDriveConfigs.ODOMETRY_CACHE_CAPACITY);
+            this.queue = new ArrayBlockingQueue<>(Constants.SwerveDriveChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         }
 
         public void cacheInputToQueue() {
@@ -34,7 +32,7 @@ public interface OdometryThread {
     List<OdometryDoubleInput> registeredInputs = new ArrayList<>();
     List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
     static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
-        signal.setUpdateFrequency(Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY, Constants.SwerveDriveConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
+        signal.setUpdateFrequency(Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY, Constants.SwerveDriveChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
         registeredStatusSignals.add(signal);
         return registerInput(signal.asSupplier());
     }

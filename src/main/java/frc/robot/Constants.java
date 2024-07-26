@@ -8,9 +8,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.utils.MechanismControl.MapleSimplePIDController;
+import frc.robot.utils.MechanismControl.MaplePIDController;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -38,7 +39,7 @@ public final class Constants {
         REPLAY
     }
 
-    public static final String chassisConfigName = "5516-2024-OnSeason";
+    public static final String chassisConfigName = "6433-2024-OffSeason";
 
     public static final class LogConfigs {
         // avoid typos
@@ -64,9 +65,11 @@ public final class Constants {
         public static final double linearAccelerationSmoothOutSeconds = 0.1;
         /** the amount of time that the chassis needs to accelerate to the maximum angular velocity */
         public static final double angularAccelerationSmoothOutSeconds = 0.1;
+
+        public static final double timeActivateRotationMaintenanceAfterNoRotationalInputSeconds = 0.3;
     }
 
-    public static final class SwerveDriveConfigs {
+    public static final class SwerveDriveChassisConfigs {
         public enum SwerveDriveType {
             REV,
             CTRE_ON_RIO,
@@ -79,6 +82,27 @@ public final class Constants {
         public static final int ODOMETRY_CACHE_CAPACITY = 10;
         public static final double ODOMETRY_FREQUENCY = 250;
         public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
+
+        public static final MaplePIDController.MaplePIDConfig chassisRotationalPIDConfig = new MaplePIDController.MaplePIDConfig(
+                Math.toRadians(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND),
+                Math.toRadians(50),
+                0.05,
+                Math.toRadians(1),
+                0.15,
+                true,
+                0
+        );
+        public static final TrapezoidProfile.Constraints chassisRotationalConstraints = new TrapezoidProfile.Constraints(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND, ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND / 0.6);
+
+        public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
+                ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
+                0.5,
+                0.01,
+                0.03,
+                0.3,
+                false,
+                0
+        );
     }
 
     public static final class ChassisDefaultConfigs {
@@ -121,15 +145,14 @@ public final class Constants {
     }
 
     public static final class SwerveModuleConfigs {
-        public static final double NON_USAGE_TIME_RESET_SWERVE = 0.5;
-
-        public static final MapleSimplePIDController.SimplePIDProfile steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDProfile(
-                1,
+        public static final MaplePIDController.MaplePIDConfig steerHeadingCloseLoopConfig = new MaplePIDController.MaplePIDConfig(
+                0.6,
                 Math.toRadians(90),
-                0.01,
+                0.02,
                 Math.toRadians(1.5),
                 0,
-                true
+                true,
+                0
         );
         public static final double STEERING_CURRENT_LIMIT = 20;
         public static final double DRIVING_CURRENT_LIMIT = 60;

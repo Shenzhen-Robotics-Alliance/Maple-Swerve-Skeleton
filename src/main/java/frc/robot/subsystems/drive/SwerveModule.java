@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -15,7 +16,7 @@ import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.MapleMaths.SwerveStateProjection;
 import frc.robot.utils.MechanismControl.InterpolatedMotorFeedForward;
-import frc.robot.utils.MechanismControl.MapleSimplePIDController;
+import frc.robot.utils.MechanismControl.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule extends MapleSubsystem {
@@ -24,7 +25,7 @@ public class SwerveModule extends MapleSubsystem {
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
 
     private final InterpolatedMotorFeedForward driveOpenLoop;
-    private final MapleSimplePIDController turnCloseLoop;
+    private final PIDController turnCloseLoop;
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
@@ -34,7 +35,7 @@ public class SwerveModule extends MapleSubsystem {
         this.name = name;
 
         driveOpenLoop = InterpolatedMotorFeedForward.fromDeployedDirectory("DrivingMotorOpenLoop");
-        turnCloseLoop = new MapleSimplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig, 0);
+        turnCloseLoop = new MaplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);
 
@@ -46,6 +47,7 @@ public class SwerveModule extends MapleSubsystem {
     public void onReset() {
         setPoint = new SwerveModuleState();
         onDisable();
+        turnCloseLoop.calculate(getSteerFacing().getRadians()); // activate close loop controller
     }
 
     public void updateOdometryInputs() {
@@ -68,11 +70,8 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private void runSteerCloseLoop() {
-        turnCloseLoop.setDesiredPosition(setPoint.angle.getRadians());
-        io.setSteerPowerPercent(turnCloseLoop.getMotorPower(
-                getSteerVelocityRadPerSec(),
-                getSteerFacing().getRadians()
-        ));
+        turnCloseLoop.setSetpoint(setPoint.angle.getRadians());
+        io.setSteerPowerPercent(turnCloseLoop.calculate(getSteerFacing().getRadians()));
     }
 
     private void runDriveOpenLoop() {

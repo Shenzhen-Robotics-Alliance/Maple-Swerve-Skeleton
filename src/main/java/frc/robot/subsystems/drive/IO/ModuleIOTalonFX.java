@@ -8,8 +8,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -40,9 +38,9 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     public ModuleIOTalonFX(MapleConfigFile.ConfigBlock moduleConfigs, MapleConfigFile.ConfigBlock generalConfigs) {
         this.name = moduleConfigs.getBlockName();
-        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
-        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
-        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
+        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
+        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
         absoluteEncoderOffset = new Rotation2d(moduleConfigs.getDoubleConfig("steeringEncoderReadingAtOrigin")); // MUST BE CALIBRATED
 
         var driveConfig = new TalonFXConfiguration();
@@ -117,8 +115,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void setDriveSpeedPercent(double speedPercent) {
-        driveTalon.setControl(new VelocityDutyCycle(
-                speedPercent * MODULE_MAX_VELOCITY_REV_PER_SEC)
+        driveTalon.setControl(new DutyCycleOut(speedPercent)
                 .withEnableFOC(false));
     }
 
