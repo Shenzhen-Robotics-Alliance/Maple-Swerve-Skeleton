@@ -117,8 +117,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void setDriveSpeedPercent(double speedPercent) {
-        driveTalon.setControl(new VelocityDutyCycle(
-                speedPercent * MODULE_MAX_VELOCITY_REV_PER_SEC)
+        driveTalon.setControl(new DutyCycleOut(speedPercent)
                 .withEnableFOC(false));
     }
 
