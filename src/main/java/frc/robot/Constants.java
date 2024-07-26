@@ -85,8 +85,9 @@ public final class Constants {
 
         public static final MaplePIDController.MaplePIDConfig chassisRotationalPIDConfig = new MaplePIDController.MaplePIDConfig(
                 Math.toRadians(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND),
-                Math.toRadians(30),
-                Math.toRadians(0),
+                Math.toRadians(50),
+                0.05,
+                Math.toRadians(1),
                 0.15,
                 true,
                 0
@@ -96,7 +97,8 @@ public final class Constants {
         public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
                 ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
                 0.5,
-                0.02,
+                0.01,
+                0.03,
                 0.3,
                 false,
                 0
@@ -144,8 +146,9 @@ public final class Constants {
 
     public static final class SwerveModuleConfigs {
         public static final MaplePIDController.MaplePIDConfig steerHeadingCloseLoopConfig = new MaplePIDController.MaplePIDConfig(
-                1,
+                0.6,
                 Math.toRadians(90),
+                0.02,
                 Math.toRadians(1.5),
                 0,
                 true,

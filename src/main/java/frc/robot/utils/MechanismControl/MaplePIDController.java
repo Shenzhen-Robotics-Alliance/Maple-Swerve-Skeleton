@@ -5,7 +5,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 
 public class MaplePIDController extends PIDController {
-    private final double maximumPower;
+    private final MaplePIDConfig config;
     public MaplePIDController(
             MaplePIDConfig config
     ) {
@@ -13,22 +13,25 @@ public class MaplePIDController extends PIDController {
         if (config.isCircularLoop)
             super.enableContinuousInput(0, Units.rotationsToRadians(1));
         super.setTolerance(config.errorTolerance);
-        this.maximumPower = config.maximumPower;
+        this.config = config;
     }
 
     @Override
     public double calculate(double measurement) {
-        return MathUtil.clamp(super.calculate(measurement), -maximumPower, maximumPower);
+        return MathUtil.clamp(
+                MathUtil.applyDeadband(super.calculate(measurement), config.deadBand)
+                , -config.maximumPower, config.maximumPower);
     }
 
     public static final class MaplePIDConfig {
-        final double maximumPower, errorStartDecelerate, errorTolerance, timeThinkAhead;
+        final double maximumPower, errorStartDecelerate, deadBand, errorTolerance, timeThinkAhead;
         final double Kp, Ki, Kd;
         final boolean isCircularLoop;
 
-        public MaplePIDConfig(double maximumPower, double errorStartDecelerate, double errorTolerance, double timeThinkAhead, boolean isCircularLoop, double ki) {
+        public MaplePIDConfig(double maximumPower, double errorStartDecelerate, double percentDeadBand, double errorTolerance, double timeThinkAhead, boolean isCircularLoop, double ki) {
             this.maximumPower = maximumPower;
             this.errorStartDecelerate = errorStartDecelerate;
+            this.deadBand = percentDeadBand * maximumPower;
             this.errorTolerance = errorTolerance;
             this.timeThinkAhead = timeThinkAhead;
             this.isCircularLoop = isCircularLoop;

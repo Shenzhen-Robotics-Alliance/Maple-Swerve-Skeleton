@@ -32,7 +32,7 @@
         <steeringMotorID type="int">4</steeringMotorID>
     </FrontRight>
     <BackLeft>
-        <steeringEncoderReadingAtOrigin type="double">3.9377286825024407</steeringEncoderReadingAtOrigin>
+        <steeringEncoderReadingAtOrigin type="double">0.7961360289126</steeringEncoderReadingAtOrigin>
         <steeringMotorPortOnPDP type="int">-1</steeringMotorPortOnPDP>
         <steeringEncoderID type="int">3</steeringEncoderID>
         <drivingMotorPortOnPDP type="int">-1</drivingMotorPortOnPDP>
@@ -41,7 +41,7 @@
         <steeringMotorID type="int">6</steeringMotorID>
     </BackLeft>
     <BackRight>
-        <steeringEncoderReadingAtOrigin type="double">5.8475347634200645</steeringEncoderReadingAtOrigin>
+        <steeringEncoderReadingAtOrigin type="double">2.7059421098302</steeringEncoderReadingAtOrigin>
         <steeringMotorPortOnPDP type="int">-1</steeringMotorPortOnPDP>
         <steeringEncoderID type="int">4</steeringEncoderID>
         <drivingMotorPortOnPDP type="int">-1</drivingMotorPortOnPDP>
