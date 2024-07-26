@@ -38,7 +38,7 @@ public final class Constants {
         REPLAY
     }
 
-    public static final String chassisConfigName = "5516-2024-OnSeason";
+    public static final String chassisConfigName = "6433-2024-OffSeason";
 
     public static final class LogConfigs {
         // avoid typos

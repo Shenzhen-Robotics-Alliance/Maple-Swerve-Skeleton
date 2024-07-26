@@ -53,7 +53,10 @@ public class RobotContainer {
     public RobotContainer() {
         final MapleConfigFile chassisCalibrationFile;
         try {
-            chassisCalibrationFile = MapleConfigFile.fromDeployedConfig("ChassisWheelsCalibration", Constants.chassisConfigName);
+            chassisCalibrationFile = MapleConfigFile.fromDeployedConfig(
+                    "ChassisWheelsCalibration",
+                    Constants.chassisConfigName
+            );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -151,7 +154,7 @@ public class RobotContainer {
 
 
     public UnitTest getUnitTest() {
-      return new PhysicsSimulationTest();
+      return new WheelsCalibrationCTRE();
     }
 
     public void updateSimulationWorld() {

@@ -25,7 +25,7 @@ public class WheelsCalibrationCTRE implements UnitTest {
     private final String configName;
     private final MapleConfigFile calibrationFile;
     public WheelsCalibrationCTRE() {
-        configName = "5516-2024-OnSeason";
+        configName = "6433-2024-OffSeason";
         for (WheelToBeCalibrated wheelToBeCalibrated: Constants.WheelCalibrationConfigs.wheelsToBeCalibrated)
             wheelSendableChooser.addOption(wheelToBeCalibrated.name, wheelToBeCalibrated);
         wheelSendableChooser.setDefaultOption(Constants.WheelCalibrationConfigs.wheelsToBeCalibrated[0].name, Constants.WheelCalibrationConfigs.wheelsToBeCalibrated[0]);
