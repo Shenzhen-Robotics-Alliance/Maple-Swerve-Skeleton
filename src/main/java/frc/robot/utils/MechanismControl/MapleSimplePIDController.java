@@ -13,15 +13,15 @@ public class MapleSimplePIDController implements SingleDimensionMechanismControl
     /**
      * the profile of the mechanism being controlled
      */
-    private final SimplePIDProfile profile;
+    private final SimplePIDConfig profile;
 
     private double desiredPosition;
 
     /**
-     * initializes an easy pid controller with a given profile
+     * initializes an easy pid controller with a given config
      */
-    public MapleSimplePIDController(SimplePIDProfile profile, double startingPosition) {
-        this.profile = profile;
+    public MapleSimplePIDController(SimplePIDConfig config, double startingPosition) {
+        this.profile = config;
         desiredPosition = startingPosition;
     }
 
@@ -57,7 +57,7 @@ public class MapleSimplePIDController implements SingleDimensionMechanismControl
         this.desiredPosition = desiredPosition;
     }
 
-    public static final class SimplePIDProfile {
+    public static final class SimplePIDConfig {
         private final double maximumPower,
                 errorStartDecelerate,
                 minimumPower,
@@ -65,7 +65,7 @@ public class MapleSimplePIDController implements SingleDimensionMechanismControl
                 mechanismDecelerationTime;
         private final boolean isMechanismInCycle;
 
-        public SimplePIDProfile(
+        public SimplePIDConfig(
                 double maximumPower,
                 double errorStartDecelerate,
                 double minimumPower,

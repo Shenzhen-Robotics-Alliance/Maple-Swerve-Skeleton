@@ -64,9 +64,11 @@ public final class Constants {
         public static final double linearAccelerationSmoothOutSeconds = 0.1;
         /** the amount of time that the chassis needs to accelerate to the maximum angular velocity */
         public static final double angularAccelerationSmoothOutSeconds = 0.1;
+
+        public static final double timeActivateRotationMaintenanceAfterNoRotationalInputSeconds = 0.3;
     }
 
-    public static final class SwerveDriveConfigs {
+    public static final class SwerveDriveChassisConfigs {
         public enum SwerveDriveType {
             REV,
             CTRE_ON_RIO,
@@ -79,6 +81,13 @@ public final class Constants {
         public static final int ODOMETRY_CACHE_CAPACITY = 10;
         public static final double ODOMETRY_FREQUENCY = 250;
         public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
+
+        public static final class ChassisRotationalPIDConfigs {
+            public static final double ERROR_START_DECELERATE_RADIANS = Math.toRadians(60);
+            public static final double ERROR_TOLERANCE_RADIANS = Math.toRadians(0);
+            public static final double MINIMUM_CORRECTION_VELOCITY_RAD_PER_SEC = 0;
+            public static final double TIME_LOOK_FORWARD = 0.2;
+        }
     }
 
     public static final class ChassisDefaultConfigs {
@@ -121,9 +130,7 @@ public final class Constants {
     }
 
     public static final class SwerveModuleConfigs {
-        public static final double NON_USAGE_TIME_RESET_SWERVE = 0.5;
-
-        public static final MapleSimplePIDController.SimplePIDProfile steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDProfile(
+        public static final MapleSimplePIDController.SimplePIDConfig steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDConfig(
                 1,
                 Math.toRadians(90),
                 0.01,

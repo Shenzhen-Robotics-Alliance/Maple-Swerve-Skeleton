@@ -21,7 +21,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
-    public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec;
+    public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec, maxLinearAccelerationMetersPerSecSq;
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
@@ -51,6 +51,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
         this.maxModuleVelocityMetersPerSec = generalConfigBlock.getDoubleConfig("maxVelocityMetersPerSecond");
         this.maxAngularVelocityRadPerSec = generalConfigBlock.getDoubleConfig("maxAngularVelocityRadiansPerSecond");
+        this.maxLinearAccelerationMetersPerSecSq = generalConfigBlock.getDoubleConfig("maxAccelerationMetersPerSecondSquared");
         this.MODULE_TRANSLATIONS = new Translation2d[] {
                 new Translation2d(horizontalWheelsMarginMeters / 2, verticalWheelsMarginMeters / 2), // FL
                 new Translation2d(horizontalWheelsMarginMeters / 2, -verticalWheelsMarginMeters / 2), // FR

@@ -103,11 +103,11 @@ public class ModuleIOSparkMax implements ModuleIO {
 
         driveSparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2,
-                (int) (1000.0 / Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY)
+                (int) (1000.0 / Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY)
         );
         steerSparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2,
-                (int) (1000.0 / Constants.SwerveDriveConfigs.ODOMETRY_FREQUENCY)
+                (int) (1000.0 / Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY)
         );
         this.drivePositionInput = OdometryThread.registerInput(driveEncoder::getPosition);
         this.steerRelativeEncoderPositionUngeared = OdometryThread.registerInput(steerRelativeEncoder::getPosition);

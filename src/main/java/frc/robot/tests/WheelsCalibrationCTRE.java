@@ -111,16 +111,16 @@ public class WheelsCalibrationCTRE implements UnitTest {
 
         configBlock.putIntConfig("steeringMotorInverted", wheelToBeCalibrated.steeringMotorInverted ? 1 : 0);
 
-        final CANcoder canCoder = new CANcoder(wheelToBeCalibrated.encoderID, Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        final CANcoder canCoder = new CANcoder(wheelToBeCalibrated.encoderID, Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
         configBlock.putDoubleConfig("steeringEncoderReadingAtOrigin", getCanCoderReadingRadian(canCoder));
     }
 
     private void initHardware(WheelToBeCalibrated wheelToBeCalibrated) {
-        drivingMotor = new TalonFX(wheelToBeCalibrated.drivingMotorID, Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        drivingMotor = new TalonFX(wheelToBeCalibrated.drivingMotorID, Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
         drivingMotor.setNeutralMode(NeutralModeValue.Coast);
-        steeringMotor = new TalonFX(wheelToBeCalibrated.steeringMotorID, Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        steeringMotor = new TalonFX(wheelToBeCalibrated.steeringMotorID, Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
         steeringMotor.setNeutralMode(NeutralModeValue.Coast);
         steeringMotor.setInverted(false);
-        canCoder = new CANcoder(wheelToBeCalibrated.encoderID, Constants.SwerveDriveConfigs.CHASSIS_CANBUS);
+        canCoder = new CANcoder(wheelToBeCalibrated.encoderID, Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
     }
 }
