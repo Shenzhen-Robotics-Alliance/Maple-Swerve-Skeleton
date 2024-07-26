@@ -1,5 +1,6 @@
 package frc.robot.commands.drive;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
@@ -8,19 +9,18 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
-import frc.robot.utils.MechanismControl.MapleSimplePIDController;
+import frc.robot.utils.MechanismControl.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
 
 import static frc.robot.subsystems.drive.HolonomicDriveSubsystem.isZero;
-import static frc.robot.Constants.SwerveDriveChassisConfigs.ChassisRotationalPIDConfigs;
 
 public class JoystickDrive extends Command {
     private final MapleJoystickDriveInput input;
     private final BooleanSupplier useDriverStationCentricSwitch;
     private final HolonomicDriveSubsystem driveSubsystem;
-    private final MapleSimplePIDController chassisRotationController;
+    private final PIDController chassisRotationController;
 
     private final Timer previousChassisUsageTimer, previousRotationalInputTimer;
     private ChassisSpeeds currentPilotInputSpeeds;
@@ -35,14 +35,7 @@ public class JoystickDrive extends Command {
         this.previousRotationalInputTimer = new Timer();
         this.previousRotationalInputTimer.start();
 
-        this.chassisRotationController = new MapleSimplePIDController(new MapleSimplePIDController.SimplePIDConfig(
-                driveSubsystem.getChassisMaxAngularVelocity(),
-                ChassisRotationalPIDConfigs.ERROR_START_DECELERATE_RADIANS,
-                ChassisRotationalPIDConfigs.MINIMUM_CORRECTION_VELOCITY_RAD_PER_SEC,
-                ChassisRotationalPIDConfigs.ERROR_TOLERANCE_RADIANS,
-                ChassisRotationalPIDConfigs.TIME_LOOK_FORWARD,
-                true
-        ), driveSubsystem.getFacing().getRadians());
+        this.chassisRotationController = new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig);
 
         super.addRequirements(driveSubsystem);
     }
@@ -53,6 +46,8 @@ public class JoystickDrive extends Command {
         this.previousRotationalInputTimer.reset();
         this.currentPilotInputSpeeds = new ChassisSpeeds();
         this.currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
+
+        this.chassisRotationController.calculate(driveSubsystem.getFacing().getRadians()); // activate controller
     }
 
     @Override
@@ -81,13 +76,12 @@ public class JoystickDrive extends Command {
             currentPilotInputSpeeds = new ChassisSpeeds();
 
         final ChassisSpeeds chassisSpeedsWithRotationMaintenance;
-        if (previousRotationalInputTimer.get() > Constants.DriveConfigs.timeActivateRotationMaintenanceAfterNoRotationalInputSeconds) {
-            chassisRotationController.setDesiredPosition(currentRotationMaintenanceSetpoint.getRadians());
+        final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(driveSubsystem.getFacing().getRadians(), currentRotationMaintenanceSetpoint.getRadians());
+        if (previousRotationalInputTimer.get() > Constants.DriveConfigs.timeActivateRotationMaintenanceAfterNoRotationalInputSeconds)
             chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
                     currentPilotInputSpeeds.vxMetersPerSecond, currentPilotInputSpeeds.vyMetersPerSecond,
-                    chassisRotationController.getMotorPower(driveSubsystem.getMeasuredChassisSpeedsFieldRelative().omegaRadiansPerSecond, driveSubsystem.getFacing().getRadians())
+                    rotationCorrectionAngularVelocity
             );
-        }
         else {
             chassisSpeedsWithRotationMaintenance = currentPilotInputSpeeds;
             currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
@@ -95,6 +89,7 @@ public class JoystickDrive extends Command {
 
         Logger.recordOutput("JoystickDrive/rotation maintenance set-point (deg)", currentRotationMaintenanceSetpoint.getDegrees());
         Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
+        Logger.recordOutput("JoystickDrive/rotation closed loop velocity (deg per sec)", Math.toDegrees(rotationCorrectionAngularVelocity));
 
         if (useDriverStationCentricSwitch.getAsBoolean())
             driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);

@@ -8,9 +8,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.utils.MechanismControl.MapleSimplePIDController;
+import frc.robot.utils.MechanismControl.MaplePIDController;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -82,12 +83,24 @@ public final class Constants {
         public static final double ODOMETRY_FREQUENCY = 250;
         public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
 
-        public static final class ChassisRotationalPIDConfigs {
-            public static final double ERROR_START_DECELERATE_RADIANS = Math.toRadians(60);
-            public static final double ERROR_TOLERANCE_RADIANS = Math.toRadians(0);
-            public static final double MINIMUM_CORRECTION_VELOCITY_RAD_PER_SEC = 0;
-            public static final double TIME_LOOK_FORWARD = 0.2;
-        }
+        public static final MaplePIDController.MaplePIDConfig chassisRotationalPIDConfig = new MaplePIDController.MaplePIDConfig(
+                Math.toRadians(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND),
+                Math.toRadians(30),
+                Math.toRadians(0),
+                0.2,
+                true,
+                0
+        );
+        public static final TrapezoidProfile.Constraints chassisRotationalConstraints = new TrapezoidProfile.Constraints(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND, ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND / 0.6);
+
+        public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
+                ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
+                0.8,
+                0.02,
+                0.3,
+                false,
+                0
+        );
     }
 
     public static final class ChassisDefaultConfigs {
@@ -130,13 +143,13 @@ public final class Constants {
     }
 
     public static final class SwerveModuleConfigs {
-        public static final MapleSimplePIDController.SimplePIDConfig steerHeadingCloseLoopConfig = new MapleSimplePIDController.SimplePIDConfig(
+        public static final MaplePIDController.MaplePIDConfig steerHeadingCloseLoopConfig = new MaplePIDController.MaplePIDConfig(
                 1,
                 Math.toRadians(90),
-                0.01,
                 Math.toRadians(1.5),
                 0,
-                true
+                true,
+                0
         );
         public static final double STEERING_CURRENT_LIMIT = 20;
         public static final double DRIVING_CURRENT_LIMIT = 60;
