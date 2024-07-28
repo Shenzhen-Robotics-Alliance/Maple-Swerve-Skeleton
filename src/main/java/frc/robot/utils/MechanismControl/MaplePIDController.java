@@ -1,5 +1,6 @@
 package frc.robot.utils.MechanismControl;
 
+import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
@@ -39,6 +40,10 @@ public class MaplePIDController extends PIDController {
 
             this.Kp = maximumPower / errorStartDecelerate;
             this.Kd = Kp * timeThinkAhead;
+        }
+
+        public PIDConstants toPathPlannerPIDConstants() {
+            return new PIDConstants(this.Kp, this.Ki, this.Kd);
         }
     }
 }
