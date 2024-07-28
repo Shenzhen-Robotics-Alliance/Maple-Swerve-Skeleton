@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.Config.MapleConfigFile;
@@ -228,8 +229,10 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
-    @Override public double getChassisMaxLinearVelocity() {return maxModuleVelocityMetersPerSec;}
+    @Override public double getChassisMaxLinearVelocityMetersPerSec() {return maxModuleVelocityMetersPerSec;}
+    @Override public double getChassisMaxAccelerationMetersPerSecSq() {return maxLinearAccelerationMetersPerSecSq;}
     @Override public double getChassisMaxAngularVelocity() {return maxAngularVelocityRadPerSec;}
+    @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return Constants.ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_ACCELERATION_DEGREES_PER_SECOND_SQUARE;}
 
     @Override
     public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
