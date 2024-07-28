@@ -18,6 +18,7 @@ import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.Config.MapleConfigFile;
 
+import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -77,10 +78,11 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public void periodic(double dt, boolean enabled) {
+        final double t0 = MapleTimeUtils.getRealTimeSeconds();
         fetchOdometryInputs();
+        Logger.recordOutput("SystemPerformance/OdometryFetchingTimeMS", (MapleTimeUtils.getRealTimeSeconds() - t0)*1000);
         modulesPeriodic(dt, enabled);
 
-        Logger.recordOutput("/Odometry/timeStampsLength", odometryThreadInputs.measurementTimeStamps.length);
         for (int timeStampIndex = 0; timeStampIndex < odometryThreadInputs.measurementTimeStamps.length; timeStampIndex++)
             feedSingleOdometryDataToPositionEstimator(timeStampIndex);
     }
