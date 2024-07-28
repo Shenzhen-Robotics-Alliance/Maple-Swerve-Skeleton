@@ -34,7 +34,6 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     private final Rotation2d absoluteEncoderOffset;
     private final double DRIVE_GEAR_RATIO;
-    private final double MODULE_MAX_VELOCITY_REV_PER_SEC;
 
     public ModuleIOTalonFX(MapleConfigFile.ConfigBlock moduleConfigs, MapleConfigFile.ConfigBlock generalConfigs) {
         this.name = moduleConfigs.getBlockName();
@@ -78,8 +77,6 @@ public class ModuleIOTalonFX implements ModuleIO {
         steerTalon.optimizeBusUtilization();
 
         this.DRIVE_GEAR_RATIO = generalConfigs.getDoubleConfig("overallGearRatio");
-        final double MODULE_MAX_VELOCITY_RAD_PER_SEC = generalConfigs.getDoubleConfig("maxVelocityMetersPerSecond") / generalConfigs.getDoubleConfig("wheelRadiusMeters");
-        this.MODULE_MAX_VELOCITY_REV_PER_SEC = Units.radiansToRotations(MODULE_MAX_VELOCITY_RAD_PER_SEC);
     }
 
     @Override
