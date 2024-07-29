@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.MapleSubsystem;
-import frc.robot.tests.UnitTest;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -76,9 +75,6 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void robotPeriodic() {
-        if (this.isTest())
-            return;
-
         if (CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
             robotContainer.updateSimulationWorld();
         MapleSubsystem.checkForOnDisableAndEnable();
@@ -136,14 +132,15 @@ public class Robot extends LoggedRobot {
     /**
      * This function is called once when test mode is enabled.
      */
-    private UnitTest unitTest = null;
+    private Command testCommand;
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-        if (unitTest==null)
-            unitTest = robotContainer.getUnitTest();
-        unitTest.testStart();
+        CommandScheduler.getInstance().unregisterAllSubsystems();
+        if (testCommand==null)
+            testCommand = robotContainer.getTestCommand();
+        CommandScheduler.getInstance().schedule(testCommand);
     }
 
     /**
@@ -151,9 +148,11 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void testPeriodic() {
-        if (unitTest==null)
-            return;
-        unitTest.testPeriodic();
+    }
+
+    @Override
+    public void testExit() {
+        CommandScheduler.getInstance().cancelAll();
     }
 
     /**
