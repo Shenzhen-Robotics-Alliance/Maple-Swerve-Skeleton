@@ -168,11 +168,11 @@ public final class Constants {
         public static final DCMotor
                 DRIVE_MOTOR = DCMotor.getKrakenX60(1),
                 STEER_MOTOR = DCMotor.getFalcon500(1);
-        public static final double DRIVE_WHEEL_ROTTER_INERTIA = 0.012;
-        public static final double STEER_INERTIA = 0.008;
+        public static final double DRIVE_WHEEL_ROTTER_INERTIA = 0.015;
+        public static final double STEER_INERTIA = 0.01;
         public static final double STEER_GEAR_RATIO = 150.0 / 7.0;
 
-        public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
+        public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 20;
         public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
         public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;
         public static final double DEFAULT_ROBOT_MASS = 60;
