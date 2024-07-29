@@ -63,6 +63,11 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         super.setSimulationWorldPose(currentPose);
     }
 
+    @Override public double getChassisMaxLinearVelocityMetersPerSec() {return profile.robotMaxVelocity;}
+    @Override public double getChassisMaxAccelerationMetersPerSecSq() {return profile.robotMaxAcceleration;}
+    @Override public double getChassisMaxAngularVelocity() {return profile.maxAngularVelocity;}
+    @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return profile.maxAngularAcceleration;}
+
     @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {throw new UnsupportedOperation("an opponent robot does not support vision measurement"); }
 
     // TODO using holonomic drive commands, make the opponent robots drive in the intended modes

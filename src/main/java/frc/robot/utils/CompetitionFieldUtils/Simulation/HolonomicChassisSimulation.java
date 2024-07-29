@@ -114,14 +114,6 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         return GeometryConvertor.toWpilibChassisSpeeds(getLinearVelocity(), getAngularVelocity());
     }
 
-    public double getChassisMaxLinearVelocity() {
-        return profile.robotMaxVelocity;
-    }
-
-    public double getChassisMaxAngularVelocity() {
-        return profile.maxAngularVelocity;
-    }
-
     /**
      * called in every iteration of sub-period
      * */

@@ -53,7 +53,7 @@ public class JoystickDrive extends Command {
     @Override
     public void execute() {
         final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
-                driveSubsystem.getChassisMaxLinearVelocity(), driveSubsystem.getChassisMaxAngularVelocity()
+                driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(), driveSubsystem.getChassisMaxAngularVelocity()
         );
         currentPilotInputSpeeds = driveSubsystem.constrainAcceleration(
                 currentPilotInputSpeeds,

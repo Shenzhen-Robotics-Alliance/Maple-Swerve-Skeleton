@@ -3,6 +3,7 @@
 package frc.robot.subsystems.drive;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -12,17 +13,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.utils.LocalADStarAK;
-import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public interface HolonomicDriveSubsystem extends Subsystem {
     /**
@@ -52,8 +46,19 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         return ChassisSpeeds.fromRobotRelativeSpeeds(getMeasuredChassisSpeedsRobotRelative(), getFacing());
     }
 
-    double getChassisMaxLinearVelocity();
+    double getChassisMaxLinearVelocityMetersPerSec();
+    double getChassisMaxAccelerationMetersPerSecSq();
     double getChassisMaxAngularVelocity();
+    double getChassisMaxAngularAccelerationRadPerSecSq();
+
+    default PathConstraints getChassisConstrains(double speedMultiplier) {
+        return new PathConstraints(
+                getChassisMaxLinearVelocityMetersPerSec() * speedMultiplier,
+                getChassisMaxAccelerationMetersPerSecSq() ,
+                getChassisMaxAngularVelocity() * speedMultiplier,
+                getChassisMaxAngularAccelerationRadPerSecSq()
+        );
+    }
 
     /**
      * Adds a vision measurement to the pose estimator.
@@ -107,7 +112,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricChassisSpeeds,
-                new HolonomicPathFollowerConfig(getChassisMaxLinearVelocity(), driveBaseRadius, new ReplanningConfig()),
+                new HolonomicPathFollowerConfig(getChassisMaxLinearVelocityMetersPerSec(), driveBaseRadius, new ReplanningConfig()),
                 () -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red),
                 this
         );
@@ -128,7 +133,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
             ChassisSpeeds currentSpeeds, ChassisSpeeds desiredSpeeds,
             double dtSecs) {
         final double
-                MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = getChassisMaxLinearVelocity()
+                MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = getChassisMaxLinearVelocityMetersPerSec()
                 / Constants.DriveConfigs.linearAccelerationSmoothOutSeconds,
                 MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = getChassisMaxAngularVelocity()
                 / Constants.DriveConfigs.angularAccelerationSmoothOutSeconds;
