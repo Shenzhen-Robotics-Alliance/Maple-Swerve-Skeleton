@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
 import frc.robot.utils.Config.MapleConfigFile;
@@ -14,7 +15,7 @@ import java.io.IOException;
 
 import static frc.robot.Constants.WheelCalibrationConfigs.WheelToBeCalibrated;
 
-public class WheelsCalibrationCTRE implements UnitTest {
+public class WheelsCalibrationCTRE extends Command {
 
     private enum SteerWheelTurningDirection {
         NOT_INVERTED,
@@ -40,7 +41,7 @@ public class WheelsCalibrationCTRE implements UnitTest {
     }
 
     @Override
-    public void testStart() {
+    public void initialize() {
         initHardware(wheelSendableChooser.getSelected());
         SmartDashboard.putData("Steer Motor Turning Direction (Should be Spinning Counter-Clockwise)", wheelTurningDirectionSendableChooser);
         SmartDashboard.putData("Calibration/moveDrivingWheel", new InstantCommand(
@@ -58,8 +59,9 @@ public class WheelsCalibrationCTRE implements UnitTest {
     private TalonFX drivingMotor, steeringMotor;
     private CANcoder canCoder;
     private boolean finished;
+
     @Override
-    public void testPeriodic() {
+    public void execute() {
         if (finished) return;
         wheelSendableChooser.getSelected().steeringMotorInverted = switch (wheelTurningDirectionSendableChooser.getSelected()){
             case NOT_INVERTED -> false;

@@ -5,16 +5,14 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.drive.DriveToPosition;
-import frc.robot.commands.drive.FollowPath;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
@@ -45,7 +43,7 @@ public class RobotContainer {
             operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser;
+    private final LoggedDashboardChooser<Command> autoChooser, testChooser;
 
     // Simulation
     private Crescendo2024FieldSimulation fieldSimulation = null;
@@ -121,9 +119,16 @@ public class RobotContainer {
         }
 
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+        testChooser = new LoggedDashboardChooser<>("Test Choices", new SendableChooser<>());
 
+        addTestsToChooser();
         // Configure the button bindings
         configureButtonBindings();
+    }
+
+    public void addTestsToChooser() {
+        testChooser.addDefaultOption("None", Commands.none());
+        testChooser.addOption("Wheels Calibration", new WheelsCalibrationCTRE());
     }
 
     /**
@@ -145,11 +150,11 @@ public class RobotContainer {
                 ).ignoringDisable(true)
         );
 
-        driverController.y().whileTrue(new FollowPath(
-                PathPlannerPath.fromPathFile("Example Path"),
-                () -> false,
-                drive
-        ));
+//        driverController.y().whileTrue(new FollowPath(
+//                PathPlannerPath.fromPathFile("Example Path"),
+//                () -> false,
+//                drive
+//        ));
     }
 
     /**
@@ -162,8 +167,8 @@ public class RobotContainer {
     }
 
 
-    public UnitTest getUnitTest() {
-      return new WheelsCalibrationCTRE();
+    public Command getTestCommand() {
+      return testChooser.get();
     }
 
     public void updateSimulationWorld() {
