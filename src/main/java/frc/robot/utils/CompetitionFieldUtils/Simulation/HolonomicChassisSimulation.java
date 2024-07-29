@@ -68,7 +68,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         simulateChassisRotationalBehavior(desiredRotationalMotionPercent);
     }
 
-    private void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
+    protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
         final boolean robotRequestedToMoveLinearly = desiredLinearMotionPercent.getMagnitude() > 0.03;
         if (!robotRequestedToMoveLinearly) {
             simulateTranslationalFriction();
@@ -78,7 +78,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         super.applyForce(new Force(forceVec));
     }
 
-    private void simulateTranslationalFriction() {
+    protected void simulateTranslationalFriction() {
         final double actualLinearPercent = getLinearVelocity().getMagnitude() / profile.robotMaxVelocity;
         final boolean robotActuallyMovingLinearly = actualLinearPercent > 0.03;
         if (robotActuallyMovingLinearly)
