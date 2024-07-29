@@ -1,19 +1,24 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.SwerveStateProjection;
+import org.dyn4j.dynamics.Force;
+import org.dyn4j.geometry.Vector2;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -27,9 +32,10 @@ import static frc.robot.Constants.ChassisDefaultConfigs.*;
  * the class is like the bridge between ModuleIOSim and HolonomicChassisSimulation
  * it reads the motor power from ModuleIOSim
  * and feed the result of the physics simulation back to ModuleIOSim, to simulate the odometry encoders' readings
- * TODO write this class
  * */
 public class SwerveDriveSimulation extends HolonomicChassisSimulation {
+    private static final String LOG_PATH = Constants.LogConfigs.PHYSICS_SIMULATION_PATH + "SwerveDriveSim/";
+
     private final GyroIOSim gyroIOSim;
     private final ModuleIOSim[] modules;
     private final SwerveDriveKinematics kinematics;
@@ -56,7 +62,6 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
 
     @Override
     public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
-        // TODO: improve the simulation method
         for (ModuleIOSim module:modules)
             module.updateSim(subPeriodSeconds);
         final ChassisSpeeds swerveWheelFreeSpeeds = kinematics.toChassisSpeeds(
@@ -82,6 +87,22 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
                     profile.robotMaxVelocity,
                     iterationNum, subPeriodSeconds
             );
+    }
+
+    private final Vector2 previousDesiredLinearMotionPercent = new Vector2();
+    @Override
+    protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
+        super.simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
+        
+        final double dTheta = previousDesiredLinearMotionPercent.getAngleBetween(desiredLinearMotionPercent),
+                desiredMotionDirectionChangingRateOmega = dTheta / (Robot.defaultPeriodSecs / SIM_ITERATIONS_PER_ROBOT_PERIOD),
+                centripetalForce = desiredMotionDirectionChangingRateOmega * getLinearVelocity().getMagnitude() * profile.robotMass;
+
+        super.applyForce(Vector2.create(
+                MathUtil.clamp(centripetalForce, -profile.frictionForce, profile.frictionForce),
+                getLinearVelocity().getDirection() + Math.toRadians(90)
+        ));
+        previousDesiredLinearMotionPercent.set(desiredLinearMotionPercent);
     }
 
     private static void updateGyroSimulationResults(
@@ -120,7 +141,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     private static double getActualDriveMotorRotterSpeedRevPerSec(double moduleSpeedProjectedOnSwerveHeadingMPS, double moduleFreeSpeedMPS) {
         // TODO: move configs to Constants
         final double FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED = 0.8, rotterSpeedMPS;
-        if (Math.abs(moduleFreeSpeedMPS - moduleSpeedProjectedOnSwerveHeadingMPS) / Math.abs(moduleFreeSpeedMPS) < 0.5)
+        if (Math.abs(moduleFreeSpeedMPS - moduleSpeedProjectedOnSwerveHeadingMPS) < 2)
             rotterSpeedMPS = moduleSpeedProjectedOnSwerveHeadingMPS;
         else rotterSpeedMPS =
                 moduleSpeedProjectedOnSwerveHeadingMPS * FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED

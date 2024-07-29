@@ -1,5 +1,6 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
+import com.pathplanner.lib.commands.PathfindHolonomic;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Constants;
@@ -67,15 +68,17 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         simulateChassisRotationalBehavior(desiredRotationalMotionPercent);
     }
 
-    private void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
+    protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
         final boolean robotRequestedToMoveLinearly = desiredLinearMotionPercent.getMagnitude() > 0.03;
-        if (robotRequestedToMoveLinearly) {
-            super.applyForce(new Force(
-                    desiredLinearMotionPercent.multiply(this.profile.propellingForce)
-            ));
+        if (!robotRequestedToMoveLinearly) {
+            simulateTranslationalFriction();
             return;
         }
+        final Vector2 forceVec = desiredLinearMotionPercent.copy().multiply(this.profile.propellingForce);
+        super.applyForce(new Force(forceVec));
+    }
 
+    protected void simulateTranslationalFriction() {
         final double actualLinearPercent = getLinearVelocity().getMagnitude() / profile.robotMaxVelocity;
         final boolean robotActuallyMovingLinearly = actualLinearPercent > 0.03;
         if (robotActuallyMovingLinearly)
