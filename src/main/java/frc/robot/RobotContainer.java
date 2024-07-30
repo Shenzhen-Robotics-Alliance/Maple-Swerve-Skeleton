@@ -47,6 +47,7 @@ public class RobotContainer {
 
     // Simulation
     private Crescendo2024FieldSimulation fieldSimulation = null;
+    private OpponentRobotSimulation testOpponentRobot = new OpponentRobotSimulation(2);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -103,6 +104,9 @@ public class RobotContainer {
                         new Pose2d(3, 3, new Rotation2d()),
                         drive::setPose
                 ));
+                fieldSimulation.placeGamePiecesOnField();
+
+                fieldSimulation.addRobot(testOpponentRobot);
             }
 
             default -> {
@@ -129,6 +133,8 @@ public class RobotContainer {
     public void addTestsToChooser() {
         testChooser.addDefaultOption("None", Commands.none());
         testChooser.addOption("Wheels Calibration", new WheelsCalibrationCTRE());
+        testChooser.addOption("Field Display Test", new FieldDisplayTest());
+        testChooser.addOption("Robot Simulation Test", new PhysicsSimulationTest());
     }
 
     /**
@@ -155,6 +161,7 @@ public class RobotContainer {
 //                () -> false,
 //                drive
 //        ));
+        driverController.y().whileTrue(testOpponentRobot.getAutoCyleCommand());
     }
 
     /**
