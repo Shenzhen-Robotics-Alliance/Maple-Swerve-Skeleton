@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +22,7 @@ import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.tests.*;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
@@ -35,6 +37,7 @@ import java.io.IOException;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+    private final PowerDistribution powerDistribution;
     // Subsystems
     private final SwerveDrive drive;
 
@@ -66,6 +69,7 @@ public class RobotContainer {
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
+                powerDistribution = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
 //                drive = new SwerveDrive(
 //                        new GyroIOPigeon2(),
 //                        new ModuleIOSparkMax(0),
@@ -84,6 +88,7 @@ public class RobotContainer {
             }
 
             case SIM -> {
+                powerDistribution = new PowerDistribution();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim
                         frontLeft = new ModuleIOSim(),
@@ -110,6 +115,7 @@ public class RobotContainer {
             }
 
             default -> {
+                powerDistribution = new PowerDistribution();
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
                         (inputs) -> {},

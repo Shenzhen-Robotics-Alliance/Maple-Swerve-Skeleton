@@ -60,12 +60,12 @@ public class Robot extends LoggedRobot {
             }
         }
 
-        // Start AdvantageKit logger
-        Logger.start();
-
         // Instantiate our RobotContainer. This will perform all our button bindings,
         // and put our autonomous chooser on the dashboard.
         robotContainer = new RobotContainer();
+
+        // Start AdvantageKit logger
+        Logger.start();
 
         MapleSubsystem.subsystemsInit();
     }
@@ -132,15 +132,12 @@ public class Robot extends LoggedRobot {
     /**
      * This function is called once when test mode is enabled.
      */
-    private Command testCommand;
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().unregisterAllSubsystems();
-        if (testCommand==null)
-            testCommand = robotContainer.getTestCommand();
-        CommandScheduler.getInstance().schedule(testCommand);
+        CommandScheduler.getInstance().schedule(robotContainer.getTestCommand());
     }
 
     /**
