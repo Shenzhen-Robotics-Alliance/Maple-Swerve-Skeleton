@@ -1,10 +1,19 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
+import frc.robot.commands.drive.FollowPath;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.ejml.simple.UnsupportedOperation;
@@ -22,18 +31,13 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         AUTO_CYCLE,
         QUEEN
     }
-    private static final Pose2d[] redRobotsStartingPositions = new Pose2d[] {
-            new Pose2d(15.2, 7, Rotation2d.fromRotations(0.5)),
-            new Pose2d(15.2, 4, Rotation2d.fromRotations(0.5)),
-            new Pose2d(15.2, 2.5, Rotation2d.fromRotations(0.5))
-    };
     /* if an opponent robot is not requested to be on field, it queens outside the field for performance */
-    private static final Pose2d robotQueeningPosition = new Pose2d(-5, 5, new Rotation2d());
-    private static final HolonomicChassisSimulation.RobotProfile opponentRobotProfile = new RobotProfile(
+    public static final Pose2d robotQueeningPosition = new Pose2d(-5, 5, new Rotation2d());
+    public static final HolonomicChassisSimulation.RobotProfile opponentRobotProfile = new RobotProfile(
             4,
-            10,
+            12,
             Math.toRadians(360),
-            Constants.RobotPhysicsSimulationConfigs.DEFAULT_ROBOT_MASS,
+            Units.lbsToKilograms(125),
             Constants.RobotPhysicsSimulationConfigs.DEFAULT_BUMPER_WIDTH_METERS,
             Constants.RobotPhysicsSimulationConfigs.DEFAULT_BUMPER_LENGTH_METERS
     );
@@ -45,12 +49,15 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
      * */
     public OpponentRobotSimulation(int id) {
         super(opponentRobotProfile, robotQueeningPosition);
+        if (id >= 3)
+            throw new IllegalArgumentException("id must be 0~2");
         this.id = id;
     }
 
+    private ChassisSpeeds speedSetPoint = new ChassisSpeeds();
     @Override
     public void runRawChassisSpeeds(ChassisSpeeds speeds) {
-        super.simulateChassisBehaviorWithRobotRelativeSpeeds(speeds);
+        this.speedSetPoint = speeds;
     }
 
     @Override
@@ -69,11 +76,29 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return profile.maxAngularAcceleration;}
 
     @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp) {throw new UnsupportedOperation("an opponent robot does not support vision measurement"); }
+    @Override public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
+        super.simulateChassisBehaviorWithRobotRelativeSpeeds(speedSetPoint);
+    }
 
-    // TODO using holonomic drive commands, make the opponent robots drive in the intended modes
-    @Override
-    public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
-
+    public Command getAutoCyleCommand() {
+        final PathPlannerPath cyclePathRaw = PathPlannerPath.fromPathFile("opponent cycle path " + id),
+                cyclePath = Constants.isSidePresentedAsRed() ? cyclePathRaw.flipPath() : cyclePathRaw,
+                cyclePathReversed = FollowPath.reversePath(
+                    cyclePath,
+                    new GoalEndState(0, cyclePath.getPreviewStartingHolonomicPose().getRotation())
+                );
+        cyclePath.preventFlipping = cyclePathReversed.preventFlipping = true;
+        final Command teleportToStartingPose = Commands.runOnce(
+                () -> setSimulationWorldPose(cyclePathReversed.getPreviewStartingHolonomicPose())),
+                cycleForward = new FollowPath(cyclePath, () -> false, this),
+                cycleBackWards = new FollowPath(cyclePathReversed, () -> false, this);
+        return new SequentialCommandGroup(
+                teleportToStartingPose,
+                new SequentialCommandGroup(
+                        cycleBackWards,
+                        cycleForward
+                ).repeatedly()
+        ).finallyDo(this::stop);
     }
 
     /**
@@ -85,7 +110,6 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     public void testDrivingPhysicsWithJoystick(XboxController xboxController) {
         final MapleJoystickDriveInput mapleJoystickDriveInput = MapleJoystickDriveInput.leftHandedJoystick(xboxController);
         final ChassisSpeeds gamePadSpeeds = mapleJoystickDriveInput.getJoystickChassisSpeeds(5, 10);
-        System.out.println("game pad speeds: " + gamePadSpeeds);
         HolonomicDriveSubsystem.super.runDriverStationCentricChassisSpeeds(gamePadSpeeds);
     }
 }

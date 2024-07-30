@@ -29,19 +29,21 @@ import static frc.robot.Constants.RobotPhysicsSimulationConfigs.*;
 public abstract class CompetitionFieldSimulation {
     private final World<Body> physicsWorld;
     private final MapleCompetitionField competitionField;
-    private final HolonomicChassisSimulation robot;
+    private final Set<HolonomicChassisSimulation> robotSimulations = new HashSet<>();
+    private final HolonomicChassisSimulation mainRobot;
     private final Set<GamePieceInSimulation> gamePieces; // TODO: intake simulation
 
-    public CompetitionFieldSimulation(HolonomicChassisSimulation robot, FieldObstaclesMap obstaclesMap) {
-        this.competitionField = new MapleCompetitionField(robot);
-        this.robot = robot;
+    public CompetitionFieldSimulation(HolonomicChassisSimulation mainRobot, FieldObstaclesMap obstaclesMap) {
+        this.competitionField = new MapleCompetitionField(mainRobot);
+        this.mainRobot = mainRobot;
         this.physicsWorld = new World<>();
         this.physicsWorld.setGravity(PhysicsWorld.ZERO_GRAVITY);
         for (Body obstacle: obstaclesMap.obstacles)
             this.physicsWorld.addBody(obstacle);
         this.gamePieces = new HashSet<>();
 
-        this.addRobot(robot);
+        this.physicsWorld.addBody(mainRobot);
+        this.robotSimulations.add(mainRobot);
     }
 
     public void updateSimulationWorld() {
@@ -49,7 +51,8 @@ public abstract class CompetitionFieldSimulation {
         // move through 5 sub-periods in each update
         for (int i = 0; i < SIM_ITERATIONS_PER_ROBOT_PERIOD; i++) {
             this.physicsWorld.step(1, subPeriodSeconds);
-            this.robot.updateSimulationSubPeriod(i, subPeriodSeconds);
+            for (HolonomicChassisSimulation robotSimulation:robotSimulations)
+                robotSimulation.updateSimulationSubPeriod(i, subPeriodSeconds);
         }
 
         competitionField.updateObjectsToDashboardAndTelemetry();
@@ -57,6 +60,7 @@ public abstract class CompetitionFieldSimulation {
 
     public void addRobot(HolonomicChassisSimulation chassisSimulation) {
         this.physicsWorld.addBody(chassisSimulation);
+        this.robotSimulations.add(chassisSimulation);
         this.competitionField.addObject(chassisSimulation);
     }
 

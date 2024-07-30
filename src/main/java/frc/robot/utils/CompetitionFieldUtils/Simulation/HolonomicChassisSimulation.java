@@ -1,17 +1,21 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
-import com.pathplanner.lib.commands.PathfindHolonomic;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
+import frc.robot.utils.MapleMaths.MapleCommonMath;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
+
+import static frc.robot.utils.MapleMaths.MapleCommonMath.constrainMagnitude;
 
 /**
  * simulates the physics behavior of holonomic chassis,
@@ -40,6 +44,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
 
     public void setSimulationWorldPose(Pose2d robotPose) {
         super.transform.set(GeometryConvertor.toDyn4jTransform(robotPose));
+        super.linearVelocity.set(0, 0);
     }
 
     /**
@@ -62,10 +67,13 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
         final Vector2 desiredLinearMotionPercent = GeometryConvertor
                 .toDyn4jLinearVelocity(desiredChassisSpeedsFieldRelative)
                 .multiply(1.0/ profile.robotMaxVelocity);
-        simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
+        simulateChassisTranslationalBehavior(Vector2.create(
+                constrainMagnitude(desiredLinearMotionPercent.getMagnitude(), 1),
+                desiredLinearMotionPercent.getDirection()
+        ));
 
         final double desiredRotationalMotionPercent = desiredChassisSpeedsFieldRelative.omegaRadiansPerSecond / profile.maxAngularVelocity;
-        simulateChassisRotationalBehavior(desiredRotationalMotionPercent);
+        simulateChassisRotationalBehavior(constrainMagnitude(desiredRotationalMotionPercent, 1));
     }
 
     protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
@@ -174,6 +182,16 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
             this.angularFrictionAcceleration = maxAngularVelocity / timeChassisStopsRotating;
             this.width = width;
             this.height = height;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("RobotProfile { robotMaxVelocity=%.2f, robotMaxAcceleration=%.2f, robotMass=%.2f, " +
+                            "propellingForce=%.2f, frictionForce=%.2f, linearVelocityDamping=%.2f, maxAngularVelocity=%.2f, " +
+                            "maxAngularAcceleration=%.2f, angularDamping=%.2f, angularFrictionAcceleration=%.2f, width=%.2f, " +
+                            "height=%.2f }",
+                    robotMaxVelocity, robotMaxAcceleration, robotMass, propellingForce, frictionForce, linearVelocityDamping,
+                    maxAngularVelocity, maxAngularAcceleration, angularDamping, angularFrictionAcceleration, width, height);
         }
     }
 }

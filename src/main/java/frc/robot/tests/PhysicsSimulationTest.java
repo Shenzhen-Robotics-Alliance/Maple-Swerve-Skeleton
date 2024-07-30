@@ -22,17 +22,19 @@ public class PhysicsSimulationTest extends Command {
     public void initialize() {
         opponentRobotSimulation.setPose(new Pose2d(15.2, 2.5, Rotation2d.fromRotations(0.5)));
         fieldSimulation.resetFieldForAuto();
+
+        System.out.println("opponent robot profile: " + opponentRobotSimulation.profile);
     }
 
     private final XboxController xboxController = new XboxController(1);
 
-    @Override
-    public void execute() {
-        opponentRobotSimulation.testDrivingPhysicsWithJoystick(xboxController);
-        fieldSimulation.updateSimulationWorld();
-        if (xboxController.getAButton())
-            fieldSimulation.addGamePiece(new Crescendo2024FieldObjects.NoteOnFieldSimulated(
-                    new Translation2d(3, 3)
-            ));
-    }
+//    @Override
+//    public void execute() {
+//        opponentRobotSimulation.testDrivingPhysicsWithJoystick(xboxController);
+//        fieldSimulation.updateSimulationWorld();
+//        if (xboxController.getAButton())
+//            fieldSimulation.addGamePiece(new Crescendo2024FieldObjects.NoteOnFieldSimulated(
+//                    new Translation2d(3, 3)
+//            ));
+//    }
 }

@@ -54,6 +54,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
         this.kinematics = kinematics;
         this.resetOdometryCallBack = resetOdometryCallBack;
         resetOdometryToActualRobotPose();
+        System.out.println("swerve drive sim profile: " + new RobotProfile(chassisGeneralInfoBlock));
     }
 
     public void resetOdometryToActualRobotPose() {
