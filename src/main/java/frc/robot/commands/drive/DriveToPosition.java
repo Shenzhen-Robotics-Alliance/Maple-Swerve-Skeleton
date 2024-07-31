@@ -47,4 +47,9 @@ public class DriveToPosition extends Command {
     private ChassisSpeeds getFeedBackSpeeds() {
         return positionController.calculate(driveSubsystem.getPose(), desiredPoseSupplier.get(), 0, desiredPoseSupplier.get().getRotation());
     }
+
+    @Override
+    public boolean isFinished() {
+        return this.positionController.atReference();
+    }
 }
