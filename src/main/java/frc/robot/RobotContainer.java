@@ -29,6 +29,7 @@ import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -46,11 +47,11 @@ public class RobotContainer {
             operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser, testChooser;
+    private final LoggedDashboardChooser<Command> autoChooser;
+    private final LoggedDashboardChooser<Supplier<Command>> testChooser;
 
     // Simulation
     private Crescendo2024FieldSimulation fieldSimulation = null;
-    private OpponentRobotSimulation testOpponentRobot = new OpponentRobotSimulation(2);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -111,7 +112,9 @@ public class RobotContainer {
                 ));
                 fieldSimulation.placeGamePiecesOnField();
 
-                fieldSimulation.addRobot(testOpponentRobot);
+                fieldSimulation.addRobot(new OpponentRobotSimulation(0));
+                fieldSimulation.addRobot(new OpponentRobotSimulation(1));
+                fieldSimulation.addRobot(new OpponentRobotSimulation(2));
             }
 
             default -> {
@@ -137,10 +140,10 @@ public class RobotContainer {
     }
 
     public void addTestsToChooser() {
-        testChooser.addDefaultOption("None", Commands.none());
-        testChooser.addOption("Wheels Calibration", new WheelsCalibrationCTRE());
-        testChooser.addOption("Field Display Test", new FieldDisplayTest());
-        testChooser.addOption("Robot Simulation Test", new PhysicsSimulationTest());
+        testChooser.addDefaultOption("None", Commands::none);
+        testChooser.addOption("Wheels Calibration", WheelsCalibrationCTRE::new);
+        testChooser.addOption("Field Display Test", FieldDisplayTest::new);
+        testChooser.addOption("Robot Simulation Test", PhysicsSimulationTest::new);
     }
 
     /**
@@ -167,7 +170,6 @@ public class RobotContainer {
 //                () -> false,
 //                drive
 //        ));
-        driverController.y().whileTrue(testOpponentRobot.getAutoCyleCommand());
     }
 
     /**
@@ -181,7 +183,7 @@ public class RobotContainer {
 
 
     public Command getTestCommand() {
-      return testChooser.get();
+      return testChooser.get().get();
     }
 
     public void updateSimulationWorld() {
