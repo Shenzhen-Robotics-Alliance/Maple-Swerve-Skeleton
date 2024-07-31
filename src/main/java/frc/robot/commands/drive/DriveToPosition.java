@@ -19,12 +19,7 @@ public class DriveToPosition extends Command {
     public DriveToPosition(Supplier<Pose2d> desiredPoseSupplier, HolonomicDriveSubsystem driveSubsystem) {
         this.desiredPoseSupplier = desiredPoseSupplier;
         this.driveSubsystem = driveSubsystem;
-
-        this.positionController = new HolonomicDriveController(
-                new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig),
-                new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig),
-                new MapleProfiledPIDController(Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig, Constants.SwerveDriveChassisConfigs.chassisRotationalConstraints)
-        );
+        this.positionController = createPositionController();
 
         super.addRequirements(driveSubsystem);
     }
@@ -51,5 +46,13 @@ public class DriveToPosition extends Command {
     @Override
     public boolean isFinished() {
         return this.positionController.atReference();
+    }
+
+    public static HolonomicDriveController createPositionController() {
+        return new HolonomicDriveController(
+                new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig),
+                new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig),
+                new MapleProfiledPIDController(Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig, Constants.SwerveDriveChassisConfigs.chassisRotationalConstraints)
+        );
     }
 }
