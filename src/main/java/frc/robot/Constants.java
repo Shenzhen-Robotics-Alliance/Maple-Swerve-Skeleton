@@ -98,10 +98,10 @@ public final class Constants {
 
         public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
                 ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
-                0.5,
+                0.6,
                 0.01,
                 0.03,
-                0.3,
+                0.5,
                 false,
                 0
         );

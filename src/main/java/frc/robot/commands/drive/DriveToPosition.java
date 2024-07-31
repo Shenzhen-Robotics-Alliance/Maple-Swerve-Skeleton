@@ -16,7 +16,11 @@ public class DriveToPosition extends Command {
     private final HolonomicDriveSubsystem driveSubsystem;
     private final HolonomicDriveController positionController;
 
-    public DriveToPosition(Supplier<Pose2d> desiredPoseSupplier, HolonomicDriveSubsystem driveSubsystem) {
+    public DriveToPosition(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> desiredPoseSupplier, Pose2d tolerance) {
+        this(driveSubsystem, desiredPoseSupplier);
+        this.positionController.setTolerance(tolerance);
+    }
+    public DriveToPosition(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> desiredPoseSupplier) {
         this.desiredPoseSupplier = desiredPoseSupplier;
         this.driveSubsystem = driveSubsystem;
         this.positionController = createPositionController();

@@ -117,12 +117,12 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this
         );
         Pathfinding.setPathfinder(new LocalADStarAK());
-//        PathPlannerLogging.setLogActivePathCallback(
-//                (activePath) -> Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]))
-//        );
-//        PathPlannerLogging.setLogTargetPoseCallback(
-//                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
-//        );
+        PathPlannerLogging.setLogActivePathCallback(
+                (activePath) -> Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]))
+        );
+        PathPlannerLogging.setLogTargetPoseCallback(
+                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
+        );
     }
 
     static boolean isZero(ChassisSpeeds chassisSpeeds) {

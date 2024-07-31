@@ -10,23 +10,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Constants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class AutoAlignment extends SequentialCommandGroup {
-    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Pose2d targetPose, Pose2d tolerance) {
-        this(
-                driveSubsystem.getChassisConstrains(0.75),
-                DriveToPosition.createPositionController(),
-                driveSubsystem::getPose,
-                driveSubsystem::runRobotCentricChassisSpeeds,
-                driveSubsystem,
-                targetPose,
-                tolerance
-        );
+    private static final Pose2d DEFAULT_TOLERANCE = new Pose2d(0.03, 0.03, new Rotation2d(2));
+    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Pose2d targetPose){
+        this(driveSubsystem, targetPose, DEFAULT_TOLERANCE);
     }
 
     /**
@@ -36,6 +28,22 @@ public class AutoAlignment extends SequentialCommandGroup {
      * 1. path-find to the target pose, roughly
      * 2. accurate auto alignment
      * */
+    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Pose2d targetPose, Pose2d tolerance) {
+        final Command pathFindToTargetRough = AutoBuilder.pathfindToPose(
+                targetPose,
+                driveSubsystem.getChassisConstrains(0.75)),
+                preciseAlignment = new DriveToPosition(
+                        driveSubsystem,
+                        () -> targetPose,
+                        tolerance
+                );
+
+        super.addCommands(pathFindToTargetRough);
+        super.addCommands(preciseAlignment);
+
+        super.addRequirements(driveSubsystem);
+    }
+
     public AutoAlignment(
             PathConstraints constraints,
             HolonomicDriveController holonomicDriveController,
