@@ -146,6 +146,15 @@ public class RobotContainer {
         testChooser.addOption("Robot Simulation Test", PhysicsSimulationTest::new);
     }
 
+    private boolean isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+    /**
+     * reconfigures button bindings if alliance station has changed
+     * */
+    public void checkForAllianceStationChange() {
+        if (Constants.isSidePresentedAsRed() != isDSPresentedAsRed)
+            configureButtonBindings();
+        isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+    }
     /**
      * Use this method to define your button->command mappings. Buttons can be created by
      * instantiating a {@link GenericHID} or one of its subclasses ({@link

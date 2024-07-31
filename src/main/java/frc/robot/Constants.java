@@ -13,6 +13,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.MechanismControl.MaplePIDController;
 
+import java.util.Optional;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -199,9 +201,11 @@ public final class Constants {
     }
 
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {
-        if (isSidePresentedAsRed())
-            return rotationAtBlueSide.rotateBy(Rotation2d.fromRotations(0.5));
-        return rotationAtBlueSide;
+        final Rotation2d
+                yAxis = Rotation2d.fromDegrees(90),
+                differenceFromYAxisAtBlueSide = rotationAtBlueSide.minus(yAxis),
+                differenceFromYAxisNew = differenceFromYAxisAtBlueSide.times(isSidePresentedAsRed() ? -1:1);
+        return yAxis.rotateBy(differenceFromYAxisNew);
     }
 
     public static Translation2d toCurrentAllianceTranslation(Translation2d translationAtBlueSide) {
@@ -221,6 +225,7 @@ public final class Constants {
     }
 
     public static boolean isSidePresentedAsRed() {
-        return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red);
+        final Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
+        return alliance.isPresent() && alliance.get().equals(DriverStation.Alliance.Red);
     }
 }
