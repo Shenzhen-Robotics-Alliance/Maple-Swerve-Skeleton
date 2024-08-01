@@ -1,6 +1,7 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
 import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,9 +12,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
+import frc.robot.commands.drive.CustomFollowPath;
+import frc.robot.commands.drive.CustomFollowPathOnFly;
 import frc.robot.commands.drive.FollowPathPP;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
+import frc.robot.utils.MaplePathPlannerLoader;
 import org.ejml.simple.UnsupportedOperation;
 
 /**
@@ -100,17 +104,31 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         super.simulateChassisBehaviorWithRobotRelativeSpeeds(speedSetPoint);
     }
 
+    private static final PathConstraints constraints = new PathConstraints(3.5, 8, Math.toRadians(180), Math.toRadians(360));
+    private static final Pose2d tolerance = new Pose2d(3, 3, Rotation2d.fromDegrees(20));
     public Command getAutoCyleRepeadtelyCommand() {
-        final PathPlannerPath cyclePathRaw = PathPlannerPath.fromPathFile("opponent cycle path " + robotID),
-                cyclePath = Constants.isSidePresentedAsRed() ? cyclePathRaw.flipPath() : cyclePathRaw,
-                cyclePathReversed = FollowPathPP.reversePath(
-                    cyclePath,
-                    new GoalEndState(0, cyclePath.getPreviewStartingHolonomicPose().getRotation())
+        final PathPlannerPath cycleForwardPath = MaplePathPlannerLoader.fromPathFile("opponent cycle path " + robotID, constraints),
+                cycleBackwardPath = MaplePathPlannerLoader.fromPathFileReversed(
+                        "opponent cycle path " + robotID,
+                        constraints,
+                        new GoalEndState(0, cycleForwardPath.getPreviewStartingHolonomicPose().getRotation()));
+        final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cycleBackwardPath.getPreviewStartingHolonomicPose()), this),
+                cycleForward = new CustomFollowPathOnFly(
+                        this,
+                        () -> Constants.isSidePresentedAsRed() ? cycleForwardPath.flipPath() : cycleForwardPath,
+                        tolerance,
+                        1,
+                        false,
+                        "Field/Opponent"+robotID+"Cycle"
+                ),
+                cycleBackWards = new CustomFollowPathOnFly(
+                        this,
+                        () -> Constants.isSidePresentedAsRed() ? cycleBackwardPath.flipPath() : cycleBackwardPath,
+                        tolerance,
+                        1,
+                        false,
+                        "Field/Opponent"+robotID+"Cycle"
                 );
-        cyclePath.preventFlipping = cyclePathReversed.preventFlipping = true;
-        final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cyclePathReversed.getPreviewStartingHolonomicPose()), this),
-                cycleForward = new FollowPathPP(cyclePath, () -> false, this),
-                cycleBackWards = new FollowPathPP(cyclePathReversed, () -> false, this);
 
         final Runnable end = () -> {
             stop();
