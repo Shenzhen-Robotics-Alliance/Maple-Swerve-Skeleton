@@ -100,10 +100,10 @@ public class RobotContainer {
                 powerDistribution = new PowerDistribution();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim
-                        frontLeft = new ModuleIOSim(),
-                        frontRight = new ModuleIOSim(),
-                        backLeft = new ModuleIOSim(),
-                        backRight = new ModuleIOSim();
+                        frontLeft = new ModuleIOSim(generalConfigBlock),
+                        frontRight = new ModuleIOSim(generalConfigBlock),
+                        backLeft = new ModuleIOSim(generalConfigBlock),
+                        backRight = new ModuleIOSim(generalConfigBlock);
                 final GyroIOSim gyroIOSim = new GyroIOSim();
                 drive = new SwerveDrive(
                         gyroIOSim,
