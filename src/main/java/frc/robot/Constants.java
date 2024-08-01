@@ -13,6 +13,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.MechanismControl.MaplePIDController;
 
+import java.util.Optional;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -88,7 +90,7 @@ public final class Constants {
                 Math.toRadians(50),
                 0.05,
                 Math.toRadians(1),
-                0.15,
+                0.12,
                 true,
                 0
         );
@@ -96,7 +98,7 @@ public final class Constants {
 
         public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
                 ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
-                0.5,
+                0.6,
                 0.01,
                 0.03,
                 0.3,
@@ -164,7 +166,7 @@ public final class Constants {
         public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
 
         /* Swerve Module Simulation */
-        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 985.78;
+        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 615.4245267615913;
         public static final DCMotor
                 DRIVE_MOTOR = DCMotor.getKrakenX60(1),
                 STEER_MOTOR = DCMotor.getFalcon500(1);
@@ -172,7 +174,7 @@ public final class Constants {
         public static final double STEER_INERTIA = 0.015;
         public static final double STEER_GEAR_RATIO = 150.0 / 7.0;
 
-        public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 10;
+        public static final double FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ = 15;
         public static final double MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = Math.toRadians(1200);
         public static final double TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC = 0.3;
         public static final double DEFAULT_ROBOT_MASS = 40;
@@ -199,9 +201,11 @@ public final class Constants {
     }
 
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {
-        if (isSidePresentedAsRed())
-            return rotationAtBlueSide.rotateBy(Rotation2d.fromRotations(0.5));
-        return rotationAtBlueSide;
+        final Rotation2d
+                yAxis = Rotation2d.fromDegrees(90),
+                differenceFromYAxisAtBlueSide = rotationAtBlueSide.minus(yAxis),
+                differenceFromYAxisNew = differenceFromYAxisAtBlueSide.times(isSidePresentedAsRed() ? -1:1);
+        return yAxis.rotateBy(differenceFromYAxisNew);
     }
 
     public static Translation2d toCurrentAllianceTranslation(Translation2d translationAtBlueSide) {
@@ -221,6 +225,7 @@ public final class Constants {
     }
 
     public static boolean isSidePresentedAsRed() {
-        return DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red);
+        final Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
+        return alliance.isPresent() && alliance.get().equals(DriverStation.Alliance.Red);
     }
 }

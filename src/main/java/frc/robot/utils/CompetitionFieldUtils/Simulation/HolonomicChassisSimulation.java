@@ -1,5 +1,6 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -192,6 +193,15 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
                             "height=%.2f }",
                     robotMaxVelocity, robotMaxAcceleration, robotMass, propellingForce, frictionForce, linearVelocityDamping,
                     maxAngularVelocity, maxAngularAcceleration, angularDamping, angularFrictionAcceleration, width, height);
+        }
+
+        public PathConstraints getConstrains() {
+            return new PathConstraints(
+                    this.robotMaxVelocity,
+                    this.robotMaxAcceleration,
+                    this.maxAngularVelocity,
+                    this.maxAngularAcceleration
+            );
         }
     }
 }

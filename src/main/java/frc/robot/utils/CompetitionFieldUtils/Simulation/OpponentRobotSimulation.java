@@ -1,21 +1,23 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
-import frc.robot.commands.drive.FollowPath;
+import frc.robot.commands.drive.CustomFollowPath;
+import frc.robot.commands.drive.CustomFollowPathOnFly;
+import frc.robot.commands.drive.FollowPathPP;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
+import frc.robot.utils.MaplePathPlannerLoader;
 import org.ejml.simple.UnsupportedOperation;
 
 /**
@@ -26,13 +28,17 @@ import org.ejml.simple.UnsupportedOperation;
  * or can follow pre-generated paths to simulate opponent robots who are doing cycles
  * */
 public class OpponentRobotSimulation extends HolonomicChassisSimulation implements HolonomicDriveSubsystem {
-    public enum Behavior {
-        JOYSTICK_CONTROL,
-        AUTO_CYCLE,
-        QUEEN
-    }
     /* if an opponent robot is not requested to be on field, it queens outside the field for performance */
-    public static final Pose2d robotQueeningPosition = new Pose2d(-5, 5, new Rotation2d());
+    public static final Pose2d[] ROBOT_QUEENING_POSITIONS = new Pose2d[] {
+            new Pose2d(-6, 0, new Rotation2d()),
+            new Pose2d(-4, 0, new Rotation2d()),
+            new Pose2d(-2, 0, new Rotation2d())
+    };
+    public static final Pose2d[] RED_ROBOTS_STARTING_POSITIONS = new Pose2d[] {
+            new Pose2d(15.2, 6.5, new Rotation2d()),
+            new Pose2d(15.2, 6, new Rotation2d()),
+            new Pose2d(15.2, 5.5, new Rotation2d())
+    };
     public static final HolonomicChassisSimulation.RobotProfile opponentRobotProfile = new RobotProfile(
             4,
             12,
@@ -42,16 +48,34 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
             Constants.RobotPhysicsSimulationConfigs.DEFAULT_BUMPER_LENGTH_METERS
     );
 
-    private final int id;
-
+    private final int robotID;
+    private final SendableChooser<Command> behaviorChooser = new SendableChooser<>();
+    private final Runnable disable;
     /**
      * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
     public OpponentRobotSimulation(int id) {
-        super(opponentRobotProfile, robotQueeningPosition);
-        if (id >= 3)
-            throw new IllegalArgumentException("id must be 0~2");
-        this.id = id;
+        super(opponentRobotProfile, ROBOT_QUEENING_POSITIONS[id]);
+        this.robotID = id;
+        this.disable = () -> {
+            stop();
+            setSimulationWorldPose(ROBOT_QUEENING_POSITIONS[robotID]);
+        };
+
+        behaviorChooser.setDefaultOption("Disabled", Commands.runOnce(disable, this));
+        behaviorChooser.addOption("Auto Cycle", getAutoCyleRepeadtelyCommand());
+        final XboxController xboxController = new XboxController(1+robotID);
+        behaviorChooser.addOption(
+                "Joystick Control Left-Handed",
+                getJoystickDrive(MapleJoystickDriveInput.leftHandedJoystick(xboxController))
+        );
+        behaviorChooser.addOption(
+                "Joystick Control Right-Handed",
+                getJoystickDrive(MapleJoystickDriveInput.rightHandedJoystick(xboxController))
+        );
+        behaviorChooser.onChange((selectedCommand) -> CommandScheduler.getInstance().schedule(selectedCommand));
+
+        SmartDashboard.putData("FieldSimulation/OpponentRobot"+robotID+" Behavior", behaviorChooser);
     }
 
     private ChassisSpeeds speedSetPoint = new ChassisSpeeds();
@@ -80,25 +104,67 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         super.simulateChassisBehaviorWithRobotRelativeSpeeds(speedSetPoint);
     }
 
-    public Command getAutoCyleCommand() {
-        final PathPlannerPath cyclePathRaw = PathPlannerPath.fromPathFile("opponent cycle path " + id),
-                cyclePath = Constants.isSidePresentedAsRed() ? cyclePathRaw.flipPath() : cyclePathRaw,
-                cyclePathReversed = FollowPath.reversePath(
-                    cyclePath,
-                    new GoalEndState(0, cyclePath.getPreviewStartingHolonomicPose().getRotation())
+    private static final PathConstraints constraints = new PathConstraints(3.5, 8, Math.toRadians(180), Math.toRadians(360));
+    private static final Pose2d tolerance = new Pose2d(3, 3, Rotation2d.fromDegrees(20));
+    public Command getAutoCyleRepeadtelyCommand() {
+        final PathPlannerPath cycleForwardPath = MaplePathPlannerLoader.fromPathFile("opponent cycle path " + robotID, constraints),
+                cycleBackwardPath = MaplePathPlannerLoader.fromPathFileReversed(
+                        "opponent cycle path " + robotID,
+                        constraints,
+                        new GoalEndState(0, cycleForwardPath.getPreviewStartingHolonomicPose().getRotation()));
+        final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cycleBackwardPath.getPreviewStartingHolonomicPose()), this),
+                cycleForward = new CustomFollowPathOnFly(
+                        this,
+                        () -> Constants.isSidePresentedAsRed() ? cycleForwardPath.flipPath() : cycleForwardPath,
+                        tolerance,
+                        1,
+                        false,
+                        "Field/Opponent"+robotID+"Cycle"
+                ),
+                cycleBackWards = new CustomFollowPathOnFly(
+                        this,
+                        () -> Constants.isSidePresentedAsRed() ? cycleBackwardPath.flipPath() : cycleBackwardPath,
+                        tolerance,
+                        1,
+                        false,
+                        "Field/Opponent"+robotID+"Cycle"
                 );
-        cyclePath.preventFlipping = cyclePathReversed.preventFlipping = true;
-        final Command teleportToStartingPose = Commands.runOnce(
-                () -> setSimulationWorldPose(cyclePathReversed.getPreviewStartingHolonomicPose())),
-                cycleForward = new FollowPath(cyclePath, () -> false, this),
-                cycleBackWards = new FollowPath(cyclePathReversed, () -> false, this);
-        return new SequentialCommandGroup(
+
+        final Runnable end = () -> {
+            stop();
+            setSimulationWorldPose(ROBOT_QUEENING_POSITIONS[robotID]);
+        };
+
+        final Command cycleRepeatedlyAndStop = new SequentialCommandGroup(
                 teleportToStartingPose,
                 new SequentialCommandGroup(
                         cycleBackWards,
                         cycleForward
                 ).repeatedly()
-        ).finallyDo(this::stop);
+        ).finallyDo(end);
+        cycleRepeatedlyAndStop.addRequirements(this);
+        return cycleRepeatedlyAndStop;
+    }
+
+    public Command getJoystickDrive(MapleJoystickDriveInput joystickDriveInput) {
+        final Pose2d startingPose = Constants.toCurrentAlliancePose(RED_ROBOTS_STARTING_POSITIONS[robotID]),
+                queeningPose = ROBOT_QUEENING_POSITIONS[robotID];
+        final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(startingPose), this);
+        Runnable end = () -> {
+            setSimulationWorldPose(queeningPose);
+            stop();
+        };
+
+        return new SequentialCommandGroup(
+                teleportToStartingPose,
+                Commands.run(() -> joystickDrivePeriod(joystickDriveInput), this)
+        ).finallyDo(end);
+    }
+
+    private void joystickDrivePeriod(MapleJoystickDriveInput driveInput) {
+        final ChassisSpeeds gamePadSpeeds = driveInput.getJoystickChassisSpeeds(4, 8),
+                gamePadSpeedsInOurDriverStationReference = ChassisSpeeds.fromFieldRelativeSpeeds(gamePadSpeeds, new Rotation2d(Math.PI));
+        HolonomicDriveSubsystem.super.runDriverStationCentricChassisSpeeds(gamePadSpeedsInOurDriverStationReference);
     }
 
     /**

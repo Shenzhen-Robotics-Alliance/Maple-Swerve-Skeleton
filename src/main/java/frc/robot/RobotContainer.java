@@ -5,6 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -14,6 +17,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.drive.AutoAlignment;
+import frc.robot.commands.drive.CustomFollowPath;
+import frc.robot.commands.drive.CustomFollowPathOnFly;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
@@ -26,9 +32,12 @@ import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
+import frc.robot.utils.MaplePathPlannerLoader;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.io.IOException;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -46,11 +55,11 @@ public class RobotContainer {
             operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
-    private final LoggedDashboardChooser<Command> autoChooser, testChooser;
+    private final LoggedDashboardChooser<Command> autoChooser;
+    private final LoggedDashboardChooser<Supplier<Command>> testChooser;
 
     // Simulation
     private Crescendo2024FieldSimulation fieldSimulation = null;
-    private OpponentRobotSimulation testOpponentRobot = new OpponentRobotSimulation(2);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -111,7 +120,9 @@ public class RobotContainer {
                 ));
                 fieldSimulation.placeGamePiecesOnField();
 
-                fieldSimulation.addRobot(testOpponentRobot);
+                fieldSimulation.addRobot(new OpponentRobotSimulation(0));
+                fieldSimulation.addRobot(new OpponentRobotSimulation(1));
+                fieldSimulation.addRobot(new OpponentRobotSimulation(2));
             }
 
             default -> {
@@ -132,17 +143,25 @@ public class RobotContainer {
         testChooser = new LoggedDashboardChooser<>("Test Choices", new SendableChooser<>());
 
         addTestsToChooser();
-        // Configure the button bindings
         configureButtonBindings();
     }
 
     public void addTestsToChooser() {
-        testChooser.addDefaultOption("None", Commands.none());
-        testChooser.addOption("Wheels Calibration", new WheelsCalibrationCTRE());
-        testChooser.addOption("Field Display Test", new FieldDisplayTest());
-        testChooser.addOption("Robot Simulation Test", new PhysicsSimulationTest());
+        testChooser.addDefaultOption("None", Commands::none);
+        testChooser.addOption("Wheels Calibration", WheelsCalibrationCTRE::new);
+        testChooser.addOption("Field Display Test", FieldDisplayTest::new);
+        testChooser.addOption("Robot Simulation Test", PhysicsSimulationTest::new);
     }
 
+    private boolean isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+    /**
+     * reconfigures button bindings if alliance station has changed
+     * */
+    public void checkForAllianceStationChange() {
+        if (Constants.isSidePresentedAsRed() != isDSPresentedAsRed)
+            configureButtonBindings();
+        isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+    }
     /**
      * Use this method to define your button->command mappings. Buttons can be created by
      * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -162,12 +181,15 @@ public class RobotContainer {
                 ).ignoringDisable(true)
         );
 
-//        driverController.y().whileTrue(new FollowPath(
-//                PathPlannerPath.fromPathFile("Example Path"),
-//                () -> false,
-//                drive
-//        ));
-        driverController.y().whileTrue(testOpponentRobot.getAutoCyleCommand());
+        driverController.y().whileTrue(new CustomFollowPath(
+                drive,
+                MaplePathPlannerLoader.fromPathFileReversed(
+                        "Test Path",
+                        new PathConstraints(3, 6, 6.28, 10),
+                        new GoalEndState(0, new Rotation2d())
+                ).flipPath(),
+                "Drive/TestPath"
+        ).rePlannedOnStart());
     }
 
     /**
@@ -181,7 +203,7 @@ public class RobotContainer {
 
 
     public Command getTestCommand() {
-      return testChooser.get();
+      return testChooser.get().get();
     }
 
     public void updateSimulationWorld() {
