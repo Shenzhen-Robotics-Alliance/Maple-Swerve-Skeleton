@@ -113,7 +113,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricChassisSpeeds,
                 new HolonomicPathFollowerConfig(getChassisMaxLinearVelocityMetersPerSec(), driveBaseRadius, new ReplanningConfig()),
-                () -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red),
+                Constants::isSidePresentedAsRed,
                 this
         );
         Pathfinding.setPathfinder(new LocalADStarAK());

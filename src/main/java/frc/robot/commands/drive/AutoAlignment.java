@@ -6,10 +6,7 @@ import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 
 import java.util.function.Consumer;
@@ -17,7 +14,7 @@ import java.util.function.Supplier;
 
 public class AutoAlignment extends SequentialCommandGroup {
     private static final Pose2d DEFAULT_TOLERANCE = new Pose2d(0.03, 0.03, new Rotation2d(2));
-    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Pose2d targetPose){
+    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> targetPose){
         this(driveSubsystem, targetPose, DEFAULT_TOLERANCE);
     }
 
@@ -28,13 +25,11 @@ public class AutoAlignment extends SequentialCommandGroup {
      * 1. path-find to the target pose, roughly
      * 2. accurate auto alignment
      * */
-    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Pose2d targetPose, Pose2d tolerance) {
-        final Command pathFindToTargetRough = AutoBuilder.pathfindToPose(
-                targetPose,
-                driveSubsystem.getChassisConstrains(0.75)),
+    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> targetPose, Pose2d tolerance) {
+        final Command pathFindToTargetRough = new PathFindToPose(driveSubsystem, targetPose, 0.75),
                 preciseAlignment = new DriveToPosition(
                         driveSubsystem,
-                        () -> targetPose,
+                        targetPose,
                         tolerance
                 );
 

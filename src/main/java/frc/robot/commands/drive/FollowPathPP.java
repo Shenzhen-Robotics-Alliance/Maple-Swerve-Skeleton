@@ -19,8 +19,8 @@ import java.util.function.BooleanSupplier;
  * this replaces AutoBuilder because in our code, opponent robots are simulated using path-planner drive commands
  * only the main robot should use AutoBuilder, opponent robots should use this
  * */
-public class FollowPath extends FollowPathHolonomic {
-    public FollowPath(BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem, double speedMultiplier, Rotation2d endingRotation, Pose2d... poses) {
+public class FollowPathPP extends FollowPathHolonomic {
+    public FollowPathPP(BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem, double speedMultiplier, Rotation2d endingRotation, Pose2d... poses) {
         this(
                 new PathPlannerPath(
                         PathPlannerPath.bezierFromPoses(poses),
@@ -32,7 +32,7 @@ public class FollowPath extends FollowPathHolonomic {
         );
     }
 
-    public FollowPath(PathPlannerPath path, BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem) {
+    public FollowPathPP(PathPlannerPath path, BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem) {
         super(
                 path,
                 driveSubsystem::getPose,

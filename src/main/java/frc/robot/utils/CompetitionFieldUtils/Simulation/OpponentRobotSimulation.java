@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
-import frc.robot.commands.drive.FollowPath;
+import frc.robot.commands.drive.FollowPathPP;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.ejml.simple.UnsupportedOperation;
@@ -103,14 +103,14 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     public Command getAutoCyleRepeadtelyCommand() {
         final PathPlannerPath cyclePathRaw = PathPlannerPath.fromPathFile("opponent cycle path " + robotID),
                 cyclePath = Constants.isSidePresentedAsRed() ? cyclePathRaw.flipPath() : cyclePathRaw,
-                cyclePathReversed = FollowPath.reversePath(
+                cyclePathReversed = FollowPathPP.reversePath(
                     cyclePath,
                     new GoalEndState(0, cyclePath.getPreviewStartingHolonomicPose().getRotation())
                 );
         cyclePath.preventFlipping = cyclePathReversed.preventFlipping = true;
         final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cyclePathReversed.getPreviewStartingHolonomicPose()), this),
-                cycleForward = new FollowPath(cyclePath, () -> false, this),
-                cycleBackWards = new FollowPath(cyclePathReversed, () -> false, this);
+                cycleForward = new FollowPathPP(cyclePath, () -> false, this),
+                cycleBackWards = new FollowPathPP(cyclePathReversed, () -> false, this);
 
         final Runnable end = () -> {
             stop();
