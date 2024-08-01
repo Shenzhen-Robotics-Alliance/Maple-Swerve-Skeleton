@@ -166,7 +166,7 @@ public final class Constants {
         public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
 
         /* Swerve Module Simulation */
-        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 985.78;
+        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 615.4245267615913;
         public static final DCMotor
                 DRIVE_MOTOR = DCMotor.getKrakenX60(1),
                 STEER_MOTOR = DCMotor.getFalcon500(1);
