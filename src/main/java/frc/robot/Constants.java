@@ -90,7 +90,7 @@ public final class Constants {
                 Math.toRadians(50),
                 0.05,
                 Math.toRadians(1),
-                0.15,
+                0.12,
                 true,
                 0
         );
@@ -101,7 +101,7 @@ public final class Constants {
                 0.6,
                 0.01,
                 0.03,
-                0.5,
+                0.3,
                 false,
                 0
         );

@@ -5,7 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -16,6 +18,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.drive.AutoAlignment;
+import frc.robot.commands.drive.CustomFollowPath;
+import frc.robot.commands.drive.CustomFollowPathOnFly;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
@@ -28,6 +32,7 @@ import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleJoystickDriveInput;
+import frc.robot.utils.MaplePathPlannerLoader;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.io.IOException;
@@ -176,12 +181,15 @@ public class RobotContainer {
                 ).ignoringDisable(true)
         );
 
-        driverController.y().whileTrue(new AutoAlignment(
+        driverController.y().whileTrue(new CustomFollowPath(
                 drive,
-                Constants.toCurrentAlliancePose(
-                        new Pose2d(1.8, 7.72, Rotation2d.fromDegrees(90))
-                )
-        ));
+                MaplePathPlannerLoader.fromPathFileReversed(
+                        "Test Path",
+                        new PathConstraints(3, 6, 6.28, 10),
+                        new GoalEndState(0, new Rotation2d())
+                ).flipPath(),
+                "Drive/TestPath"
+        ).rePlannedOnStart());
     }
 
     /**
