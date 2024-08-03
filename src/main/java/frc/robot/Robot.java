@@ -93,7 +93,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void disabledPeriodic() {
-        robotContainer.checkForAllianceStationChange();
+        robotContainer.rebindKeysIfChanged();
     }
 
     /**
@@ -128,6 +128,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void teleopPeriodic() {
+        robotContainer.rebindKeysIfChanged();
     }
 
     /**

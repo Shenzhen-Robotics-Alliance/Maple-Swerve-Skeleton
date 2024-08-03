@@ -97,17 +97,17 @@ public class MapleJoystickDriveInput {
 
     public static MapleJoystickDriveInput rightHandedJoystick(CommandXboxController driverController) {
         return new MapleJoystickDriveInput(
-                driverController::getLeftX,
-                driverController::getLeftY,
-                driverController::getRightX
+                driverController::getRightX,
+                driverController::getRightY,
+                driverController::getLeftX
         );
     }
 
     public static MapleJoystickDriveInput rightHandedJoystick(XboxController driverController) {
         return new MapleJoystickDriveInput(
-                driverController::getLeftX,
-                driverController::getLeftY,
-                driverController::getRightX
+                driverController::getRightX,
+                driverController::getRightY,
+                driverController::getLeftX
         );
     }
 }

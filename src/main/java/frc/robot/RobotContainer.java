@@ -7,19 +7,18 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.drive.AutoAlignment;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.drive.CustomFollowPath;
-import frc.robot.commands.drive.CustomFollowPathOnFly;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
@@ -36,7 +35,6 @@ import frc.robot.utils.MaplePathPlannerLoader;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -55,6 +53,11 @@ public class RobotContainer {
             operatorController = new CommandXboxController(1);
 
     // Dashboard inputs
+    public enum DriverMode {
+        LEFT_HANDED,
+        RIGHT_HANDED
+    }
+    private final LoggedDashboardChooser<DriverMode> driverModeChooser;
     private final LoggedDashboardChooser<Command> autoChooser;
     private final LoggedDashboardChooser<Supplier<Command>> testChooser;
 
@@ -142,6 +145,10 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
         testChooser = new LoggedDashboardChooser<>("Test Choices", new SendableChooser<>());
 
+        driverModeChooser = new LoggedDashboardChooser<>("Driver Mode", new SendableChooser<>());
+        driverModeChooser.addDefaultOption(DriverMode.LEFT_HANDED.name(), DriverMode.LEFT_HANDED);
+        driverModeChooser.addOption(DriverMode.RIGHT_HANDED.name(), DriverMode.RIGHT_HANDED);
+
         addTestsToChooser();
         configureButtonBindings();
     }
@@ -154,26 +161,35 @@ public class RobotContainer {
     }
 
     private boolean isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+    private boolean isLeftHanded = true;
     /**
      * reconfigures button bindings if alliance station has changed
      * */
-    public void checkForAllianceStationChange() {
-        if (Constants.isSidePresentedAsRed() != isDSPresentedAsRed)
+    public void rebindKeysIfChanged() {
+        final boolean isLeftHandedSelected = !driverModeChooser.get().equals(DriverMode.RIGHT_HANDED);
+        if (Constants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
             configureButtonBindings();
         isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+        isLeftHanded = isLeftHandedSelected;
     }
     /**
      * Use this method to define your button->command mappings. Buttons can be created by
      * instantiating a {@link GenericHID} or one of its subclasses ({@link
-     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+     * Joystick} or {@link XboxController}), and then passing it to a {@link
+     * JoystickButton}.
      */
     private void configureButtonBindings() {
+        System.out.println("configuring key bindings...  mode:" + driverModeChooser.get());
+        final MapleJoystickDriveInput driveInput = DriverMode.RIGHT_HANDED.equals(driverModeChooser.get()) ?
+                MapleJoystickDriveInput.rightHandedJoystick(driverController)
+                : MapleJoystickDriveInput.leftHandedJoystick(driverController);
+
         drive.setDefaultCommand(new JoystickDrive(
-                MapleJoystickDriveInput.leftHandedJoystick(driverController),
+                driveInput,
                 () -> true,
                 drive
         ));
+
         driverController.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
         driverController.b().onTrue(Commands.runOnce(
                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
