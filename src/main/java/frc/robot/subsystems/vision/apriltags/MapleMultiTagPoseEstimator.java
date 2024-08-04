@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.utils.Config.PhotonCameraProperties;
-import frc.robot.utils.MapleMaths.MapleCommonMath;
 import frc.robot.utils.MapleMaths.Statistics;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -16,7 +15,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static frc.robot.Constants.VisionConfigs.*;
 import static frc.robot.Constants.LogConfigs.APRIL_TAGS_VISION_PATH;
@@ -46,17 +44,27 @@ public class MapleMultiTagPoseEstimator {
      * @param pipelineResults pipeline results
      * @return (optionally) the best guess of the robot pose and the standard error, if there are valid targets
      * */
-    public Optional<RobotPoseEstimationResult> estimateRobotPose(PhotonPipelineResult[] pipelineResults) {
+    public Optional<RobotPoseEstimationResult> estimateRobotPose(PhotonPipelineResult[] pipelineResults, Pose2d currentOdometryPose) {
         if (pipelineResults.length != camerasProperties.size())
             throw new IllegalStateException("pipe line results length" + pipelineResults.length
                     + " does not match cameras properties length: " + camerasProperties.size());
-        final List<Pose3d> robotPose3dObservations = new ArrayList<>();
+        final List<Integer> observedAprilTagsIDs = new ArrayList<>();
+        final List<Pose3d> robotPose3dObservations = new ArrayList<>(),
+                observedAprilTagsPoses = new ArrayList<>(),
+                observedVisionTargetPoseInFieldLayout = new ArrayList<>();
         for (int i = 0; i < pipelineResults.length; i++)
-            for (PhotonTrackedTarget target:pipelineResults[i].getTargets())
+            for (PhotonTrackedTarget target:pipelineResults[i].getTargets()) {
+                final Transform3d robotToCamera = camerasProperties.get(i).robotToCamera;
                 calculateRobotPose3dFromSingleObservation(
                         target,
-                        camerasProperties.get(i).robotToCamera
-                ).ifPresent(robotPose3dObservations::add);
+                        robotToCamera
+                ).ifPresent(robotPose3dObservation -> {
+                    robotPose3dObservations.add(robotPose3dObservation);
+                    observedAprilTagsIDs.add(target.getFiducialId());
+                    observedAprilTagsPoses.add(calculateObservedAprilTagTargetPose(target, robotToCamera, currentOdometryPose));
+                    observedVisionTargetPoseInFieldLayout.add(fieldLayout.getTagPose(target.getFiducialId()).orElse(new Pose3d()));
+                });
+            }
 
         final List<Pose2d> filteredResults = robotPose3dObservations.stream()
                 .filter(filter)
@@ -66,16 +74,23 @@ public class MapleMultiTagPoseEstimator {
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/RobotPose3dsResults", robotPose3dObservations.toArray(Pose3d[]::new));
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/CurrentFilterImplementation", filter.getFilterImplementationName());
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/RobotPose2dObservationsFiltered", filteredResults.toArray(Pose2d[]::new));
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/VisibleFieldTargets", observedVisionTargetPoseInFieldLayout.toArray(Pose3d[]::new));
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/AprilTag ID", observedAprilTagsIDs.stream().mapToInt(i -> i).toArray());
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/", observedAprilTagsPoses.toArray(Pose3d[]::new));
+
         return getEstimationResultFromValidObservations(filteredResults);
     }
 
-    private Optional<Pose3d> calculateRobotPose3dFromSingleObservation(PhotonTrackedTarget target, Transform3d cameraToRobot) {
+    private Pose3d calculateObservedAprilTagTargetPose(PhotonTrackedTarget target, Transform3d robotToCamera, Pose2d currentOdometryPose) {
+        return new Pose3d(currentOdometryPose).transformBy(robotToCamera).transformBy(target.getBestCameraToTarget());
+    }
+    private Optional<Pose3d> calculateRobotPose3dFromSingleObservation(PhotonTrackedTarget target, Transform3d robotToCamera) {
         if (target == null) return Optional.empty();
         final Optional<Pose3d> targetPosition = fieldLayout.getTagPose(target.getFiducialId());
         return targetPosition.map(tagAbsolutePoseOnField ->
                 tagAbsolutePoseOnField
                         .transformBy(target.getBestCameraToTarget().inverse())
-                        .transformBy(cameraToRobot.inverse())
+                        .transformBy(robotToCamera.inverse())
         );
     }
 

@@ -8,19 +8,20 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.subsystems.vision.apriltags.VisionLocalizationResultConsumer;
 import frc.robot.utils.LocalADStarAK;
 import org.littletonrobotics.junction.Logger;
 
-public interface HolonomicDriveSubsystem extends Subsystem, VisionLocalizationResultConsumer {
-
+public interface HolonomicDriveSubsystem extends Subsystem {
     /**
      * runs a ChassisSpeeds without doing any pre-processing
      * @param speeds a discrete chassis speed, robot-centric
@@ -38,6 +39,15 @@ public interface HolonomicDriveSubsystem extends Subsystem, VisionLocalizationRe
      * Resets the current odometry Pose to a given Pose
      */
     void setPose(Pose2d currentPose);
+
+    /**
+     * Adds a vision measurement to the pose estimator.
+     *
+     * @param visionPose The pose of the robot as measured by the vision camera.
+     * @param timestamp  The timestamp of the vision measurement in seconds.
+     * @param measurementStdDevs the standard deviation of the measurement
+     */
+    void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs);
 
     /**
      * @return the measured(actual) velocities of the chassis, robot-relative

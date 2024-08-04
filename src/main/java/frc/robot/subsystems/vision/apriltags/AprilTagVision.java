@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import frc.robot.subsystems.MapleSubsystem;
+import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Config.PhotonCameraProperties;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -18,8 +19,8 @@ public class AprilTagVision extends MapleSubsystem {
     private final ApriltagVisionIO.VisionInputs inputs;
 
     private final MapleMultiTagPoseEstimator multiTagPoseEstimator;
-    private final VisionLocalizationResultConsumer consumer;
-    public AprilTagVision(ApriltagVisionIO io, List<PhotonCameraProperties> camerasProperties, VisionLocalizationResultConsumer consumer) {
+    private final HolonomicDriveSubsystem driveSubsystem;
+    public AprilTagVision(ApriltagVisionIO io, List<PhotonCameraProperties> camerasProperties, HolonomicDriveSubsystem driveSubsystem) {
         super("Vision");
         this.io = io;
         this.inputs = new ApriltagVisionIO.VisionInputs(camerasProperties.size());
@@ -29,7 +30,7 @@ public class AprilTagVision extends MapleSubsystem {
                 new CameraHeightFilter(),
                 camerasProperties
         );
-        this.consumer = consumer;
+        this.driveSubsystem = driveSubsystem;
     }
 
     @Override
@@ -42,8 +43,8 @@ public class AprilTagVision extends MapleSubsystem {
         io.updateInputs(inputs);
         Logger.processInputs(APRIL_TAGS_VISION_PATH + "Inputs", inputs);
 
-        Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.pipelineResults);
-        result.ifPresent(robotPoseEstimationResult -> consumer.addVisionMeasurement(
+        Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.pipelineResults, driveSubsystem.getPose());
+        result.ifPresent(robotPoseEstimationResult -> driveSubsystem.addVisionMeasurement(
                 robotPoseEstimationResult.pointEstimation,
                 getResultsTimeStamp(),
                 robotPoseEstimationResult.estimationStandardError
