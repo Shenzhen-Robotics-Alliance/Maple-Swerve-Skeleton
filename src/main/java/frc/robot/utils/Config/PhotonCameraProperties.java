@@ -15,9 +15,9 @@ public class PhotonCameraProperties {
     public final String name;
     public final double frameRate, averageLatencyMS, latencyStandardDeviationMS,
             calibrationAverageErrorPixel, calibrationErrorStandardDeviation;
-    private final Rotation2d cameraFOVDiag;
+    public final Rotation2d cameraFOVDiag;
     public final int captureWidthPixels, captureHeightPixels;
-    private final Transform3d cameraToRobot;
+    public final Transform3d robotToCamera;
 
     public PhotonCameraProperties(
             String name,
@@ -25,7 +25,7 @@ public class PhotonCameraProperties {
             Rotation2d cameraFOVDiag,
             double calibrationAverageErrorPixel, double calibrationErrorStandardDeviation,
             int captureWidthPixels, int captureHeightPixels,
-            Transform3d cameraToRobot
+            Transform3d robotToCamera
     ) {
         this.name = name;
         this.frameRate = frameRate;
@@ -36,7 +36,7 @@ public class PhotonCameraProperties {
         this.calibrationErrorStandardDeviation = calibrationErrorStandardDeviation;
         this.captureWidthPixels = captureWidthPixels;
         this.captureHeightPixels = captureHeightPixels;
-        this.cameraToRobot = cameraToRobot;
+        this.robotToCamera = robotToCamera;
     }
 
     public SimCameraProperties getSimulationProperties() {
@@ -161,7 +161,7 @@ public class PhotonCameraProperties {
                         }""",
                 name, frameRate, averageLatencyMS, latencyStandardDeviationMS,
                 calibrationAverageErrorPixel, calibrationErrorStandardDeviation,
-                cameraFOVDiag.toString(), captureWidthPixels, captureHeightPixels, cameraToRobot.toString());
+                cameraFOVDiag.toString(), captureWidthPixels, captureHeightPixels, robotToCamera.toString());
     }
 
 }
