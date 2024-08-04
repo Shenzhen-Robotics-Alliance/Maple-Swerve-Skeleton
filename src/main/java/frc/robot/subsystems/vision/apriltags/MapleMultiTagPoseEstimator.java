@@ -110,9 +110,9 @@ public class MapleMultiTagPoseEstimator {
 
         return Optional.of(new RobotPoseEstimationResult(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
-                estimationStandardDeviationX / Math.sqrt(n),
-                estimationStandardDeviationY / Math.sqrt(n),
-                estimationStandardDeviationTheta / Math.sqrt(n)
+                estimationStandardDeviationX,
+                estimationStandardDeviationY,
+                estimationStandardDeviationTheta
         ));
     }
 }

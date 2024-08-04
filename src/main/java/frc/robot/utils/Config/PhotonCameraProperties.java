@@ -76,10 +76,9 @@ public class PhotonCameraProperties {
 
         for (int i = 0; i < cameraAmount ; i++) {
             final MapleConfigFile.ConfigBlock cameraBlock = configFile.getBlock("Camera"+i);
-            cameraProperties.add(
-                    loadSingleCameraPropertyFromBlock(configFile.getBlock("Camera"+i),
-                            cameraFPS, averageLatencyMS, latencyStandardDeviationMS)
-            );
+            cameraProperties.add(loadSingleCameraPropertyFromBlock(
+                    cameraBlock, cameraFPS, averageLatencyMS, latencyStandardDeviationMS
+            ));
         }
 
         return cameraProperties;
@@ -94,7 +93,7 @@ public class PhotonCameraProperties {
                 ),
                 new Rotation3d(
                         0,
-                        Math.toRadians(cameraBlock.getDoubleConfig("cameraPitchDegrees")),
+                        -Math.toRadians(cameraBlock.getDoubleConfig("cameraPitchDegrees")),
                         Math.toRadians(cameraBlock.getDoubleConfig("cameraYawDegrees"))
                 )
         );

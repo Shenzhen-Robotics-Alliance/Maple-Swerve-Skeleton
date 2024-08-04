@@ -26,6 +26,7 @@ public class ApriltagVisionIOSim extends ApriltagVisionIOReal {
                     super.cameras[i],
                     cameraProperties.get(i).getSimulationProperties()
             );
+            cameraSim.enableRawStream(true);
             cameraSim.enableProcessedStream(true);
             cameraSim.enableDrawWireframe(true);
             visionSystemSim.addCamera(

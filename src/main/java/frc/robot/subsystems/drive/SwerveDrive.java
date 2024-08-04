@@ -241,7 +241,6 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {
-        System.out.printf("added vision measurement, time stamp: %.2f, current time: %.2f \n", timestamp, MapleTimeUtils.getLogTimeSeconds());
         poseEstimator.addVisionMeasurement(visionPose, timestamp ,measurementStdDevs);
     }
 }

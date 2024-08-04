@@ -14,6 +14,7 @@ import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.SwerveStateProjection;
+import frc.robot.utils.MapleTimeUtils;
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Vector2;
 import org.littletonrobotics.junction.Logger;
@@ -156,7 +157,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
         @Override
         public void updateInputs(OdometryThreadInputs inputs) {
             inputs.measurementTimeStamps = new double[SIM_ITERATIONS_PER_ROBOT_PERIOD];
-            final double robotStartingTimeStamps = Logger.getTimestamp(),
+            final double robotStartingTimeStamps = MapleTimeUtils.getLogTimeSeconds(),
                     iterationPeriodSeconds = Robot.defaultPeriodSecs/SIM_ITERATIONS_PER_ROBOT_PERIOD;
             for (int i =0; i < SIM_ITERATIONS_PER_ROBOT_PERIOD; i++)
                 inputs.measurementTimeStamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds;
