@@ -25,16 +25,21 @@ import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
+import frc.robot.subsystems.vision.apriltags.AprilTagVision;
+import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOReal;
+import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.tests.*;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
 import frc.robot.utils.Config.MapleConfigFile;
+import frc.robot.utils.Config.PhotonCameraProperties;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MaplePathPlannerLoader;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -47,6 +52,7 @@ public class RobotContainer {
     private final PowerDistribution powerDistribution;
     // Subsystems
     private final SwerveDrive drive;
+    private final AprilTagVision aprilTagVision;
 
     // Controller
     private final CommandXboxController driverController = new CommandXboxController(0),
@@ -72,12 +78,15 @@ public class RobotContainer {
         try {
             chassisCalibrationFile = MapleConfigFile.fromDeployedConfig(
                     "ChassisWheelsCalibration",
-                    Constants.chassisConfigName
+                    Constants.ROBOT_NAME
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        final MapleConfigFile.ConfigBlock generalConfigBlock = chassisCalibrationFile.getBlock("GeneralInformation");
+        final List<PhotonCameraProperties> camerasProperties = PhotonCameraProperties.loadCamerasPropertiesFromConfig(Constants.ROBOT_NAME);
+        final MapleConfigFile.ConfigBlock chassisGeneralConfigBlock = chassisCalibrationFile.getBlock("GeneralInformation");
+
+
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
@@ -91,11 +100,17 @@ public class RobotContainer {
 //                );
                  drive = new SwerveDrive(
                          new GyroIOPigeon2(),
-                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontLeft"), generalConfigBlock),
-                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontRight"), generalConfigBlock),
-                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackLeft"), generalConfigBlock),
-                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackRight"), generalConfigBlock),
-                         generalConfigBlock
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontLeft"), chassisGeneralConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontRight"), chassisGeneralConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackLeft"), chassisGeneralConfigBlock),
+                         new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackRight"), chassisGeneralConfigBlock),
+                         chassisGeneralConfigBlock
+                 );
+
+                 aprilTagVision = new AprilTagVision(
+                         new ApriltagVisionIOReal(camerasProperties),
+                         camerasProperties,
+                         drive
                  );
             }
 
@@ -103,24 +118,36 @@ public class RobotContainer {
                 powerDistribution = new PowerDistribution();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim
-                        frontLeft = new ModuleIOSim(generalConfigBlock),
-                        frontRight = new ModuleIOSim(generalConfigBlock),
-                        backLeft = new ModuleIOSim(generalConfigBlock),
-                        backRight = new ModuleIOSim(generalConfigBlock);
+                        frontLeft = new ModuleIOSim(chassisGeneralConfigBlock),
+                        frontRight = new ModuleIOSim(chassisGeneralConfigBlock),
+                        backLeft = new ModuleIOSim(chassisGeneralConfigBlock),
+                        backRight = new ModuleIOSim(chassisGeneralConfigBlock);
                 final GyroIOSim gyroIOSim = new GyroIOSim();
                 drive = new SwerveDrive(
                         gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight,
-                        generalConfigBlock
+                        chassisGeneralConfigBlock
                 );
-                fieldSimulation = new Crescendo2024FieldSimulation(new SwerveDriveSimulation(
-                        generalConfigBlock,
+                final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
+                        chassisGeneralConfigBlock,
                         gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight,
                         drive.kinematics,
                         new Pose2d(3, 3, new Rotation2d()),
                         drive::setPose
-                ));
+                );
+                fieldSimulation = new Crescendo2024FieldSimulation(driveSimulation);
+
+                aprilTagVision = new AprilTagVision(
+                        new ApriltagVisionIOSim(
+                                camerasProperties,
+                                Constants.VisionConfigs.fieldLayout,
+                                driveSimulation::getObjectOnFieldPose2d
+                        ),
+                        camerasProperties,
+                        drive
+                );
+
                 fieldSimulation.placeGamePiecesOnField();
 
                 fieldSimulation.addRobot(new OpponentRobotSimulation(0));
@@ -137,7 +164,13 @@ public class RobotContainer {
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
-                        generalConfigBlock
+                        chassisGeneralConfigBlock
+                );
+
+                aprilTagVision = new AprilTagVision(
+                        (inputs) -> {},
+                        camerasProperties,
+                        drive
                 );
             }
         }

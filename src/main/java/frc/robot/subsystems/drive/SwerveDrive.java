@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.drive;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,6 +14,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
@@ -237,7 +240,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return Constants.ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_ACCELERATION_DEGREES_PER_SECOND_SQUARE;}
 
     @Override
-    public void addVisionMeasurement(Pose2d visionPose, double timestamp) {
-        poseEstimator.addVisionMeasurement(visionPose, timestamp);
+    public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {
+        System.out.printf("added vision measurement, time stamp: %.2f, current time: %.2f \n", timestamp, MapleTimeUtils.getLogTimeSeconds());
+        poseEstimator.addVisionMeasurement(visionPose, timestamp ,measurementStdDevs);
     }
 }

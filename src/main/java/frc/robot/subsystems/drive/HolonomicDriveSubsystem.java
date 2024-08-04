@@ -15,10 +15,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
+import frc.robot.subsystems.vision.apriltags.VisionLocalizationResultConsumer;
 import frc.robot.utils.LocalADStarAK;
 import org.littletonrobotics.junction.Logger;
 
-public interface HolonomicDriveSubsystem extends Subsystem {
+public interface HolonomicDriveSubsystem extends Subsystem, VisionLocalizationResultConsumer {
+
     /**
      * runs a ChassisSpeeds without doing any pre-processing
      * @param speeds a discrete chassis speed, robot-centric
@@ -59,14 +61,6 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 getChassisMaxAngularAccelerationRadPerSecSq()
         );
     }
-
-    /**
-     * Adds a vision measurement to the pose estimator.
-     *
-     * @param visionPose The pose of the robot as measured by the vision camera.
-     * @param timestamp  The timestamp of the vision measurement in seconds.
-     */
-    void addVisionMeasurement(Pose2d visionPose, double timestamp);
 
     /**
      * runs a driverstation-centric ChassisSpeeds

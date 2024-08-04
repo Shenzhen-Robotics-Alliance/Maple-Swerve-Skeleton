@@ -1,5 +1,6 @@
 package frc.robot.utils.MapleMaths;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.BuildConstants;
 
 import java.util.Random;
@@ -41,5 +42,11 @@ public class MapleCommonMath {
                 ),
                 value
         );
+    }
+
+    public static String printRotation3d(Rotation3d rotation3d) {
+        return "rotation 3d object with value: " + rotation3d.getQuaternion() +
+                String.format("\nand roll %.2f deg, pitch %.2f deg, yaw %.2f deg",
+                        Math.toDegrees(rotation3d.getX()), Math.toDegrees(rotation3d.getY()), Math.toDegrees(rotation3d.getZ()));
     }
 }
