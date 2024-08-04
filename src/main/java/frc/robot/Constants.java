@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,6 +14,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.MechanismControl.MaplePIDController;
+import org.photonvision.PhotonPoseEstimator;
 
 import java.util.Optional;
 
@@ -41,13 +44,14 @@ public final class Constants {
         REPLAY
     }
 
-    public static final String chassisConfigName = "6433-2024-OffSeason";
+    public static final String ROBOT_NAME = "6433-2024-OffSeason";
 
+    // avoid typo errors
     public static final class LogConfigs {
-        // avoid typos
         public static final String
                 SYSTEM_PERFORMANCE_PATH = "SystemPerformance/",
-                PHYSICS_SIMULATION_PATH = "MaplePhysicsSimulation/";
+                PHYSICS_SIMULATION_PATH = "MaplePhysicsSimulation/",
+                APRIL_TAGS_VISION_PATH = "Vision/AprilTags/";
     }
 
     public static final class CrescendoField2024Constants {
@@ -166,7 +170,7 @@ public final class Constants {
         public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
 
         /* Swerve Module Simulation */
-        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 615.4245267615913;
+        public static final double DRIVE_MOTOR_FREE_FINAL_SPEED_RPM = 4800;
         public static final DCMotor
                 DRIVE_MOTOR = DCMotor.getKrakenX60(1),
                 STEER_MOTOR = DCMotor.getFalcon500(1);
@@ -198,6 +202,15 @@ public final class Constants {
         * */
         public static final double NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD = Math.toRadians(1.2);
         public static final double AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST = Math.toRadians(60);
+    }
+
+    public static final class VisionConfigs {
+        public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+        public static final PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy = PhotonPoseEstimator.PoseStrategy.AVERAGE_BEST_TARGETS;
+        /* default standard error for vision observation, if only one apriltag observed */
+        public static final double
+                TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.9,
+                ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = 0.9;
     }
 
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {

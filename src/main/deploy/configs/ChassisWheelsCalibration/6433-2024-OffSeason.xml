@@ -3,10 +3,10 @@
         <gyroPort type="int">0</gyroPort>
         <maxAngularVelocityRadiansPerSecond type="double">8</maxAngularVelocityRadiansPerSecond>
         <maxAccelerationMetersPerSecondSquared type="double">10</maxAccelerationMetersPerSecondSquared>
-        <overallGearRatio type="double">6.12</overallGearRatio>
+        <overallGearRatio type="double">6.75</overallGearRatio>
         <wheelRadiusMeters type="double">0.051</wheelRadiusMeters>
         <bumperWidthMeters type="double">0.876</bumperWidthMeters>
-        <maxVelocityMetersPerSecond type="double">4.2</maxVelocityMetersPerSecond>
+        <maxVelocityMetersPerSecond type="double">3.8</maxVelocityMetersPerSecond>
         <bumperLengthMeters type="double">0.876</bumperLengthMeters>
         <robotMassInSimulation type="double">60</robotMassInSimulation>
 

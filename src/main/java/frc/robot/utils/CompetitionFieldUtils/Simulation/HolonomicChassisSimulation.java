@@ -194,14 +194,5 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
                     robotMaxVelocity, robotMaxAcceleration, robotMass, propellingForce, frictionForce, linearVelocityDamping,
                     maxAngularVelocity, maxAngularAcceleration, angularDamping, angularFrictionAcceleration, width, height);
         }
-
-        public PathConstraints getConstrains() {
-            return new PathConstraints(
-                    this.robotMaxVelocity,
-                    this.robotMaxAcceleration,
-                    this.maxAngularVelocity,
-                    this.maxAngularAcceleration
-            );
-        }
     }
 }

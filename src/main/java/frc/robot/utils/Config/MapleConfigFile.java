@@ -185,16 +185,15 @@ public class MapleConfigFile {
         String type = configElement.getAttribute("type");
         String value = configElement.getTextContent();
 
-        block.configOrders.add(configTag);
         switch (type) {
             case "double":
-                block.doubleConfigs.put(configTag, Double.parseDouble(value));
+                block.putDoubleConfig(configTag, Double.parseDouble(value));
                 break;
             case "int":
-                block.intConfigs.put(configTag, Integer.parseInt(value));
+                block.putIntConfig(configTag, Integer.parseInt(value));
                 break;
             case "string":
-                block.stringConfigs.put(configTag, value);
+                block.putStringConfig(configTag, value);
                 break;
         }
     }

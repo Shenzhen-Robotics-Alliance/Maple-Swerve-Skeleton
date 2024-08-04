@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.utils.Config.MapleConfigFile;
 
 import java.util.Arrays;
 
@@ -22,10 +23,17 @@ import static frc.robot.Constants.ChassisDefaultConfigs.*;
  * approximation for the behavior of the module.
  */
 public class ModuleIOSim implements ModuleIO {
-    public final SwerveModulePhysicsSimulationResults physicsSimulationResults = new SwerveModulePhysicsSimulationResults();
-    private final DCMotorSim driveSim = new DCMotorSim(DRIVE_MOTOR, DEFAULT_GEAR_RATIO, DRIVE_WHEEL_ROTTER_INERTIA);
-    private final DCMotorSim steerSim = new DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA);
+    private final double GEAR_RATIO;
+    public final SwerveModulePhysicsSimulationResults physicsSimulationResults;
+    private final DCMotorSim driveSim, steerSim;
     private double driveAppliedVolts = 0.0, steerAppliedVolts = 0.0;
+
+    public ModuleIOSim(MapleConfigFile.ConfigBlock generalConfigs) {
+        this.GEAR_RATIO = generalConfigs.getDoubleConfig("overallGearRatio");
+        this.driveSim = new DCMotorSim(DRIVE_MOTOR, GEAR_RATIO, DRIVE_WHEEL_ROTTER_INERTIA);
+        this.steerSim = new DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA);
+        this.physicsSimulationResults = new SwerveModulePhysicsSimulationResults();
+    }
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
@@ -75,7 +83,7 @@ public class ModuleIOSim implements ModuleIO {
      * */
     public SwerveModuleState getFreeSwerveSpeed(double robotMaximumFloorSpeed) {
         return new SwerveModuleState(
-                driveSim.getAngularVelocityRPM()
+                driveSim.getAngularVelocityRPM() * GEAR_RATIO
                         / DRIVE_MOTOR_FREE_FINAL_SPEED_RPM
                         * robotMaximumFloorSpeed,
                 Rotation2d.fromRadians(steerSim.getAngularPositionRad())
