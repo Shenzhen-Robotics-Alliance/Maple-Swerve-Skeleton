@@ -166,7 +166,7 @@ public class RobotContainer {
      * reconfigures button bindings if alliance station has changed
      * */
     public void rebindKeysIfChanged() {
-        final boolean isLeftHandedSelected = !driverModeChooser.get().equals(DriverMode.RIGHT_HANDED);
+        final boolean isLeftHandedSelected = !DriverMode.RIGHT_HANDED.equals(driverModeChooser.get());
         if (Constants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
             configureButtonBindings();
         isDSPresentedAsRed = Constants.isSidePresentedAsRed();
