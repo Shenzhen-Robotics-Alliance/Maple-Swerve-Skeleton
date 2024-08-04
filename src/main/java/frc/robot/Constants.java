@@ -140,10 +140,10 @@ public final class Constants {
             }
         }
         public static final WheelToBeCalibrated[] wheelsToBeCalibrated = new WheelToBeCalibrated[] {
-                new WheelToBeCalibrated("FrontLeft", 1, 2, 1),
-                new WheelToBeCalibrated("FrontRight", 3, 4, 2),
-                new WheelToBeCalibrated("BackLeft", 5, 6, 3),
-                new WheelToBeCalibrated("BackRight", 7, 8, 4)
+                new WheelToBeCalibrated("FrontLeft", 2, 1, 9),
+                new WheelToBeCalibrated("FrontRight", 4, 3, 10),
+                new WheelToBeCalibrated("BackLeft", 8, 7, 12),
+                new WheelToBeCalibrated("BackRight", 6, 5, 11)
         };
     }
 
