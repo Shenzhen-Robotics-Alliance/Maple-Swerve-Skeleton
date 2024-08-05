@@ -43,7 +43,7 @@ public class AprilTagVision extends MapleSubsystem {
         io.updateInputs(inputs);
         Logger.processInputs(APRIL_TAGS_VISION_PATH + "Inputs", inputs);
 
-        Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.pipelineResults, driveSubsystem.getPose());
+        Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
         result.ifPresent(robotPoseEstimationResult -> driveSubsystem.addVisionMeasurement(
                 robotPoseEstimationResult.pointEstimation,
                 getResultsTimeStamp(),
@@ -61,16 +61,16 @@ public class AprilTagVision extends MapleSubsystem {
     }
 
     private double getResultsTimeStamp() {
-        return inputs.inputsFetchedRealTimeStampSeconds - getResultsAverageLatencySeconds(inputs.pipelineResults);
+        return inputs.inputsFetchedRealTimeStampSeconds - getResultsAverageLatencySeconds(inputs.camerasInputs);
     }
-    private static double getResultsAverageLatencySeconds(PhotonPipelineResult[] results) {
-        if (results.length == 0)
+    private static double getResultsAverageLatencySeconds(AprilTagVisionIO.CameraInputs[] camerasInputs) {
+        if (camerasInputs.length == 0)
             return 0;
         double totalLatencyMS = 0;
-        for (PhotonPipelineResult result:results)
-            totalLatencyMS += result.getLatencyMillis();
+        for (AprilTagVisionIO.CameraInputs cameraInputs:camerasInputs)
+            totalLatencyMS += cameraInputs.resultsDelaySeconds;
 
-        return totalLatencyMS / results.length / 1000.0;
+        return totalLatencyMS / camerasInputs.length;
     }
 
     private static final Function<RobotPoseEstimationResult, String> printStandardError = result ->

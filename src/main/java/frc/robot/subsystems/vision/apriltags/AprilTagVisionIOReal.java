@@ -25,10 +25,11 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         if (inputs.camerasAmount != cameras.length)
             throw new IllegalStateException("inputs camera amount (" + inputs.camerasAmount + ") does not match actual cameras amount");
 
-        for (int i = 0; i < cameras.length; i++) {
-            inputs.pipelineResults[i] = cameras[i].getLatestResult();
-            inputs.camerasConnected[i] = cameras[i].isConnected();
-        }
+        for (int i = 0; i < cameras.length; i++)
+            inputs.camerasInputs[i] = CameraInputs.fromPhotonPipeLine(
+                    cameras[i].getLatestResult(),
+                    cameras[i].isConnected()
+            );
         inputs.inputsFetchedRealTimeStampSeconds = MapleTimeUtils.getRealTimeSeconds();
     }
 
