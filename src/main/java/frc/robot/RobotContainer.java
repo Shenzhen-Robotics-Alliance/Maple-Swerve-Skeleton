@@ -28,7 +28,7 @@ import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
-import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOReal;
+import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.tests.*;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.CompetitionFieldSimulation;
@@ -111,7 +111,7 @@ public class RobotContainer {
                  );
 
                  aprilTagVision = new AprilTagVision(
-                         new ApriltagVisionIOReal(camerasProperties),
+                         new AprilTagVisionIOReal(camerasProperties),
                          camerasProperties,
                          drive
                  );

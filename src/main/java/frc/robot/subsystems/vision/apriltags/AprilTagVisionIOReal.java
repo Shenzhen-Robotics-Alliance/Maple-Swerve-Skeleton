@@ -7,9 +7,9 @@ import org.photonvision.PhotonCamera;
 
 import java.util.List;
 
-public class ApriltagVisionIOReal implements ApriltagVisionIO {
+public class AprilTagVisionIOReal implements AprilTagVisionIO {
     protected final PhotonCamera[] cameras;
-    public ApriltagVisionIOReal(List<PhotonCameraProperties> cameraProperties) {
+    public AprilTagVisionIOReal(List<PhotonCameraProperties> cameraProperties) {
         if (cameraProperties.size() > MAX_SUPPORTED_CAMERA_AMOUNT)
             throw new IllegalArgumentException("max supported camera count is 10");
         cameras = new PhotonCamera[cameraProperties.size()];

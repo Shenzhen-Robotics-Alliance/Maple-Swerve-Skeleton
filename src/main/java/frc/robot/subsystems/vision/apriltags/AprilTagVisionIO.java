@@ -4,7 +4,7 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-public interface ApriltagVisionIO {
+public interface AprilTagVisionIO {
     int MAX_SUPPORTED_CAMERA_AMOUNT = 10;
     class VisionInputs implements LoggableInputs {
         public final int camerasAmount;

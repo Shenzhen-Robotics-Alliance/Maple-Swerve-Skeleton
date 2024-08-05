@@ -15,15 +15,15 @@ import static frc.robot.Constants.LogConfigs.APRIL_TAGS_VISION_PATH;
 import static frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator.RobotPoseEstimationResult;
 
 public class AprilTagVision extends MapleSubsystem {
-    private final ApriltagVisionIO io;
-    private final ApriltagVisionIO.VisionInputs inputs;
+    private final AprilTagVisionIO io;
+    private final AprilTagVisionIO.VisionInputs inputs;
 
     private final MapleMultiTagPoseEstimator multiTagPoseEstimator;
     private final HolonomicDriveSubsystem driveSubsystem;
-    public AprilTagVision(ApriltagVisionIO io, List<PhotonCameraProperties> camerasProperties, HolonomicDriveSubsystem driveSubsystem) {
+    public AprilTagVision(AprilTagVisionIO io, List<PhotonCameraProperties> camerasProperties, HolonomicDriveSubsystem driveSubsystem) {
         super("Vision");
         this.io = io;
-        this.inputs = new ApriltagVisionIO.VisionInputs(camerasProperties.size());
+        this.inputs = new AprilTagVisionIO.VisionInputs(camerasProperties.size());
 
         this.multiTagPoseEstimator = new MapleMultiTagPoseEstimator(
                 fieldLayout,
