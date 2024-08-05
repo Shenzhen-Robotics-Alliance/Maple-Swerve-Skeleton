@@ -9,7 +9,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ApriltagVisionIOSim extends ApriltagVisionIOReal {
+public class ApriltagVisionIOSim extends AprilTagVisionIOReal {
     private final VisionSystemSim visionSystemSim;
     private final PhotonCameraSim[] camerasSim;
     private final Supplier<Pose2d> robotActualPoseInSimulationSupplier;

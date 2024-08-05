@@ -69,9 +69,8 @@ public abstract class CompetitionFieldSimulation {
         this.competitionField.addObject(gamePieceInSimulation);
     }
 
-    public MapleCompetitionField getCompetitionField() {
-        return competitionField;
-    }
+    public MapleCompetitionField getCompetitionField() {return competitionField;}
+    public HolonomicChassisSimulation getMainRobot() {return mainRobot;}
 
     public void clearGamePieces() {
         for (GamePieceInSimulation gamePiece: this.gamePieces) {
