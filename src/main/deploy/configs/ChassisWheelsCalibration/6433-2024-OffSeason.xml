@@ -2,16 +2,16 @@
     <GeneralInformation>
         <gyroPort type="int">0</gyroPort>
         <maxAngularVelocityRadiansPerSecond type="double">8</maxAngularVelocityRadiansPerSecond>
-        <maxAccelerationMetersPerSecondSquared type="double">10</maxAccelerationMetersPerSecondSquared>
+        <maxAccelerationMetersPerSecondSquared type="double">17</maxAccelerationMetersPerSecondSquared>
         <overallGearRatio type="double">6.75</overallGearRatio>
         <wheelRadiusMeters type="double">0.051</wheelRadiusMeters>
         <bumperWidthMeters type="double">0.876</bumperWidthMeters>
         <maxVelocityMetersPerSecond type="double">3.8</maxVelocityMetersPerSecond>
         <bumperLengthMeters type="double">0.876</bumperLengthMeters>
-        <robotMassInSimulation type="double">60</robotMassInSimulation>
+        <robotMassInSimulation type="double">35</robotMassInSimulation>
 
-        <horizontalWheelsMarginMeters type="double">0.53</horizontalWheelsMarginMeters>
-        <verticalWheelsMarginMeters type="double">0.53</verticalWheelsMarginMeters>
+        <horizontalWheelsMarginMeters type="double">0.62</horizontalWheelsMarginMeters>
+        <verticalWheelsMarginMeters type="double">0.47</verticalWheelsMarginMeters>
     </GeneralInformation>
     <FrontLeft>
         <steeringEncoderReadingAtOrigin type="double">5.177185159114039</steeringEncoderReadingAtOrigin>
