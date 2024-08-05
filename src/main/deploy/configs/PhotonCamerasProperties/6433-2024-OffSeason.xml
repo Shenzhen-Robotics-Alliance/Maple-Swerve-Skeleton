@@ -7,7 +7,7 @@
     </GeneralInfo>
 
     <Camera0>
-        <name type="string">frontCam</name>
+        <name type="string">FrontCam</name>
         <captureWidthPixels type="int">640</captureWidthPixels>
         <captureHeightPixels type="int">480</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
@@ -18,10 +18,12 @@
         <mountHeightMeters type="double">0.2</mountHeightMeters>
         <cameraPitchDegrees type="double">30</cameraPitchDegrees>
         <cameraYawDegrees type="double">0</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
     </Camera0>
 
     <Camera1>
-        <name type="string">frontLeftCam</name>
+        <name type="string">FrontLeftCam</name>
         <captureWidthPixels type="int">640</captureWidthPixels>
         <captureHeightPixels type="int">480</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
@@ -32,10 +34,12 @@
         <mountHeightMeters type="double">0.2</mountHeightMeters>
         <cameraPitchDegrees type="double">45</cameraPitchDegrees>
         <cameraYawDegrees type="double">45</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
     </Camera1>
 
     <Camera2>
-        <name type="string">frontRightCam</name>
+        <name type="string">FrontRightCam</name>
         <captureWidthPixels type="int">640</captureWidthPixels>
         <captureHeightPixels type="int">480</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
@@ -46,5 +50,7 @@
         <mountHeightMeters type="double">0.2</mountHeightMeters>
         <cameraPitchDegrees type="double">45</cameraPitchDegrees>
         <cameraYawDegrees type="double">-45</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
     </Camera2>
 </PhotonCamerasProperties>

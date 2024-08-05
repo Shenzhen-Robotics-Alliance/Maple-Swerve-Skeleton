@@ -85,7 +85,7 @@ public class PhotonCameraProperties {
     }
 
     private static PhotonCameraProperties loadSingleCameraPropertyFromBlock(MapleConfigFile.ConfigBlock cameraBlock, double cameraFPS, double averageLatencyMS, double latencyStandardDeviationMS) {
-        final Transform3d cameraToRobot = new Transform3d(
+        final Transform3d robotToCameraInstallation = new Transform3d(
                 new Translation3d(
                         cameraBlock.getDoubleConfig("mountPositionToRobotCenterForwardsMeters"),
                         cameraBlock.getDoubleConfig("mountPositionToRobotCenterLeftwardsMeters"),
@@ -95,8 +95,20 @@ public class PhotonCameraProperties {
                         0,
                         -Math.toRadians(cameraBlock.getDoubleConfig("cameraPitchDegrees")),
                         Math.toRadians(cameraBlock.getDoubleConfig("cameraYawDegrees"))
-                )
-        );
+                ));
+        final double cameraRollDeg = switch (cameraBlock.getIntConfig("captureOrientation")) {
+            case 1 -> 180;
+            case 2 -> -90;
+            case 3 -> 90;
+            default ->
+                    throw new IllegalStateException("Unexpected value: " + cameraBlock.getIntConfig("captureOrientation"));
+        };
+        final Transform3d cameraInstallationToCapturedImage = new Transform3d(
+                        new Translation3d(),
+                        new Rotation3d(
+                                Math.toRadians(cameraRollDeg),
+                                0, 0
+                        ));
         return new PhotonCameraProperties(
                 cameraBlock.getStringConfig("name"),
                 cameraFPS,
@@ -107,7 +119,7 @@ public class PhotonCameraProperties {
                 cameraBlock.getDoubleConfig("calibrationErrorStandardDeviationPixel"),
                 cameraBlock.getIntConfig("captureWidthPixels"),
                 cameraBlock.getIntConfig("captureHeightPixels"),
-                cameraToRobot
+                robotToCameraInstallation.plus(cameraInstallationToCapturedImage)
         );
     }
 

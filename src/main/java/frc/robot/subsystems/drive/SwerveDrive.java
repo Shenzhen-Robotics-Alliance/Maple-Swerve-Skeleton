@@ -198,7 +198,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     /**
-     * Returns the module states (turn angles and drive velocities) for all of the modules.
+     * Returns the module states (turn angles and drive velocities) for all the modules.
      */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
@@ -209,7 +209,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     /**
-     * Returns the module positions (turn angles and drive positions) for all of the modules.
+     * Returns the module positions (turn angles and drive positions) for all the modules.
      */
     private SwerveModulePosition[] getModuleLatestPositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[swerveModules.length];
