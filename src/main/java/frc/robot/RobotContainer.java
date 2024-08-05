@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,10 +13,13 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.autos.Auto;
+import frc.robot.autos.AutoBuilder;
 import frc.robot.commands.drive.CustomFollowPath;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
@@ -29,6 +31,7 @@ import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.tests.*;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.CompetitionFieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
@@ -51,8 +54,8 @@ import java.util.function.Supplier;
 public class RobotContainer {
     private final PowerDistribution powerDistribution;
     // Subsystems
-    private final SwerveDrive drive;
-    private final AprilTagVision aprilTagVision;
+    public final SwerveDrive drive;
+    public final AprilTagVision aprilTagVision;
 
     // Controller
     private final CommandXboxController driverController = new CommandXboxController(0),
@@ -64,11 +67,11 @@ public class RobotContainer {
         RIGHT_HANDED
     }
     private final LoggedDashboardChooser<DriverMode> driverModeChooser;
-    private final LoggedDashboardChooser<Command> autoChooser;
-    private final LoggedDashboardChooser<Supplier<Command>> testChooser;
+    private LoggedDashboardChooser<Auto> autoChooser;
+    private final SendableChooser<Supplier<Command>> testChooser;
 
     // Simulation
-    private Crescendo2024FieldSimulation fieldSimulation = null;
+    private CompetitionFieldSimulation fieldSimulation = null;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -174,23 +177,14 @@ public class RobotContainer {
                 );
             }
         }
-
-        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-        testChooser = new LoggedDashboardChooser<>("Test Choices", new SendableChooser<>());
+        SmartDashboard.putData("Select Test", testChooser = TestBuilder.buildTestsChooser());
+        autoChooser = AutoBuilder.buildAutoChooser(this);
 
         driverModeChooser = new LoggedDashboardChooser<>("Driver Mode", new SendableChooser<>());
         driverModeChooser.addDefaultOption(DriverMode.LEFT_HANDED.name(), DriverMode.LEFT_HANDED);
         driverModeChooser.addOption(DriverMode.RIGHT_HANDED.name(), DriverMode.RIGHT_HANDED);
 
-        addTestsToChooser();
         configureButtonBindings();
-    }
-
-    public void addTestsToChooser() {
-        testChooser.addDefaultOption("None", Commands::none);
-        testChooser.addOption("Wheels Calibration", WheelsCalibrationCTRE::new);
-        testChooser.addOption("Field Display Test", FieldDisplayTest::new);
-        testChooser.addOption("Robot Simulation Test", PhysicsSimulationTest::new);
     }
 
     private boolean isDSPresentedAsRed = Constants.isSidePresentedAsRed();
@@ -247,12 +241,18 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
+        final Pose2d startingPose = Constants.toCurrentAlliancePose(
+                autoChooser.get().getStartingPoseAtBlueAlliance()
+        );
+        drive.setPose(startingPose);
+        if (fieldSimulation != null)
+            fieldSimulation.getMainRobot().setSimulationWorldPose(startingPose);
         return autoChooser.get();
     }
 
 
     public Command getTestCommand() {
-      return testChooser.get().get();
+      return testChooser.getSelected().get();
     }
 
     public void updateSimulationWorld() {
