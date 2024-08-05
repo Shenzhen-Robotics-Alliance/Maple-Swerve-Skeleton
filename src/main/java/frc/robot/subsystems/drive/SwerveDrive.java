@@ -5,6 +5,7 @@
 package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +25,8 @@ import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.Constants.VisionConfigs.*;
 
 public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
     public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec, maxLinearAccelerationMetersPerSecSq;
@@ -65,7 +68,11 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         };
         kinematics = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
         lastModulePositions = new SwerveModulePosition[] {new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()};
-        this.poseEstimator = new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+        this.poseEstimator = new SwerveDrivePoseEstimator(
+                kinematics, rawGyroRotation, lastModulePositions, new Pose2d(),
+                VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_ODOMETRY, TRANSLATIONAL_STANDARD_ERROR_METERS_ODOMETRY, ROTATIONAL_STANDARD_ERROR_RADIANS_ODOMETRY),
+                VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION)
+        );
 
         configHolonomicPathPlannerAutoBuilder(driveBaseRadius);
 
@@ -198,7 +205,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     /**
-     * Returns the module states (turn angles and drive velocities) for all of the modules.
+     * Returns the module states (turn angles and drive velocities) for all the modules.
      */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleState[] getModuleStates() {
@@ -209,7 +216,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     /**
-     * Returns the module positions (turn angles and drive positions) for all of the modules.
+     * Returns the module positions (turn angles and drive positions) for all the modules.
      */
     private SwerveModulePosition[] getModuleLatestPositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[swerveModules.length];

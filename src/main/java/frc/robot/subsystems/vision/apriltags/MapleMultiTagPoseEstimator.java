@@ -6,6 +6,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.Constants;
 import frc.robot.utils.Config.PhotonCameraProperties;
 import frc.robot.utils.MapleMaths.Statistics;
 import org.littletonrobotics.junction.Logger;
@@ -119,10 +120,16 @@ public class MapleMultiTagPoseEstimator {
                 Statistics.getMean(robotPoseEstimatorThetaRadians)
         );
 
-        final double estimationStandardDeviationX = Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
+        double estimationStandardDeviationX = Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
                 estimationStandardDeviationY = Statistics.getStandardDeviation(robotPoseEstimationsYMeters),
                 estimationStandardDeviationTheta = Statistics.getStandardDeviation(robotPoseEstimatorThetaRadians);
 
+        /* don't calibrate odometry if translation error is not inside range */
+        if (estimationStandardDeviationX > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD || estimationStandardDeviationY > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
+            estimationStandardDeviationTheta = estimationStandardDeviationX = estimationStandardDeviationY = Double.POSITIVE_INFINITY;
+        /* don't calibrate gyro if rotation error is not inside range */
+        if (estimationStandardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
+            estimationStandardDeviationTheta = Double.POSITIVE_INFINITY;
         return Optional.of(new RobotPoseEstimationResult(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
                 estimationStandardDeviationX,
