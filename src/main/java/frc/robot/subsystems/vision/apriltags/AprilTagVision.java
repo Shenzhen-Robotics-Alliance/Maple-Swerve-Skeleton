@@ -86,7 +86,7 @@ public class AprilTagVision extends MapleSubsystem {
         if (result.isEmpty()
                 || Double.isInfinite(result.get().translationXStandardDeviationMeters)
                 || Double.isInfinite(result.get().translationYStandardDeviationMeters))
-            return new Pose2d(-114514, -114514, new Rotation2d()); // let it disappear
+            return null;
         if (Double.isInfinite(result.get().rotationalStandardDeviationRadians))
             return new Pose2d(result.get().pointEstimation.getTranslation(), driveSubsystem.getFacing());
         return result.get().pointEstimation;

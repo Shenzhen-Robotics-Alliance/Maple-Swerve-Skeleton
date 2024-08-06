@@ -76,7 +76,8 @@ public class MapleMultiTagPoseEstimator {
     private void applyFilteringToRawRobotPose3dEstimations() {
         filteredRobotPoseEstimations.clear();
         for (Pose3d pose3d:robotPose3dObservations)
-            filteredRobotPoseEstimations.add(pose3d.toPose2d());
+            if (filter.test(pose3d))
+                filteredRobotPoseEstimations.add(pose3d.toPose2d());
     }
 
     /**
