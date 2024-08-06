@@ -11,11 +11,11 @@ import java.util.Arrays;
 public interface AprilTagVisionIO {
     int MAX_SUPPORTED_CAMERA_AMOUNT = 10;
     class CameraInputs {
-        public final boolean cameraConnected;
-        public final double resultsDelaySeconds;
-        public final int currentTargetsCount;
-        public final int[] fiducialMarksID;
-        public final Transform3d[] bestCameraToTargets;
+        public boolean cameraConnected;
+        public double resultsDelaySeconds;
+        public int currentTargetsCount;
+        public int[] fiducialMarksID;
+        public Transform3d[] bestCameraToTargets;
 
         public CameraInputs(boolean cameraConnected, double resultsDelaySeconds, int currentTargetsCount, int[] fiducialMarksID, Transform3d[] bestCameraToTargets) {
             this.cameraConnected = cameraConnected;
@@ -25,26 +25,33 @@ public interface AprilTagVisionIO {
             this.bestCameraToTargets = bestCameraToTargets;
         }
 
-        public static CameraInputs empty = new CameraInputs(false, 0, 0, new int[0], new Transform3d[0]);
-        public static CameraInputs fromPhotonPipeLine(PhotonPipelineResult pipelineResult, boolean cameraConnected) {
-            return new CameraInputs(
-                    cameraConnected,
-                    pipelineResult.getLatencyMillis() / 1000.0,
-                    pipelineResult.getTargets().size(),
-                    pipelineResult.getTargets().stream().mapToInt(PhotonTrackedTarget::getFiducialId).toArray(),
-                    pipelineResult.getTargets().stream().map(PhotonTrackedTarget::getBestCameraToTarget).toArray(Transform3d[]::new)
-            );
+        public CameraInputs() {
+            clear();
         }
 
-        public static CameraInputs fromLog(LogTable table, int cameraID) {
+        public void clear() {
+            this.cameraConnected = false;
+            this.resultsDelaySeconds = 0;
+            this.currentTargetsCount = 0;
+            this.fiducialMarksID = new int[0];
+            this.bestCameraToTargets = new Transform3d[0];
+        }
+
+        public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult, boolean cameraConnected) {
+            this.cameraConnected = cameraConnected;
+            this.resultsDelaySeconds = pipelineResult.getLatencyMillis() / 1000.0;
+            this.currentTargetsCount = pipelineResult.getTargets().size();
+            this.fiducialMarksID = pipelineResult.getTargets().stream().mapToInt(PhotonTrackedTarget::getFiducialId).toArray();
+            this.bestCameraToTargets = pipelineResult.getTargets().stream().map(PhotonTrackedTarget::getBestCameraToTarget).toArray(Transform3d[]::new);
+        }
+
+        public void fromLog(LogTable table, int cameraID) {
             final String cameraKey = "camera" + cameraID;
-            return new CameraInputs(
-                    table.get(cameraKey+"Connected", false),
-                    table.get(cameraKey+"ResultsDelaySeconds", 0.0),
-                    table.get(cameraKey+"CurrentTargetsCount", 0),
-                    table.get(cameraKey+"FiducialMarksID", new int[0]),
-                    table.get(cameraKey+"bestCameraToTargets", new Transform3d[0])
-            );
+            this.cameraConnected = table.get(cameraKey+"Connected", false);
+            this.resultsDelaySeconds = table.get(cameraKey+"ResultsDelaySeconds", 0.0);
+            this.currentTargetsCount = table.get(cameraKey+"CurrentTargetsCount", 0);
+            this.fiducialMarksID = table.get(cameraKey+"FiducialMarksID", new int[0]);
+            this.bestCameraToTargets = table.get(cameraKey+"bestCameraToTargets", new Transform3d[0]);
         }
 
         public void writeToLog(LogTable table, int cameraID) {
@@ -64,7 +71,8 @@ public interface AprilTagVisionIO {
         public VisionInputs(int camerasAmount) {
             this.camerasAmount = camerasAmount;
             this.camerasInputs = new CameraInputs[camerasAmount];
-            Arrays.fill(camerasInputs, CameraInputs.empty);
+            for (int i = 0; i < camerasAmount; i++)
+                camerasInputs[i] = new CameraInputs();
         }
 
         @Override
@@ -84,7 +92,7 @@ public interface AprilTagVisionIO {
 
             inputsFetchedRealTimeStampSeconds = table.get("inputsFetchedTimeStamp", 0.0);
             for (int i = 0; i < camerasAmount; i++)
-                camerasInputs[i] = CameraInputs.fromLog(table, i);
+                camerasInputs[i].fromLog(table, i);
         }
     }
 

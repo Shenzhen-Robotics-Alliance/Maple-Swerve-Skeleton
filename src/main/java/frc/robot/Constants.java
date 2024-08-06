@@ -210,11 +210,13 @@ public final class Constants {
         /* default standard error for vision observation, if only one apriltag observed */
         public static final double
                 TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.6,
-                ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = 0.9,
+                ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = 0.5,
+
                 // only do odometry calibration if translational standard error if it is not greater than
-                TRANSLATIONAL_STANDARD_ERROR_THRESHOLD = 0.6,
+                TRANSLATIONAL_STANDARD_ERROR_THRESHOLD = 0.5,
                 // only do gyro calibration if rotational standard error is very, very small
                 ROTATIONAL_STANDARD_ERROR_THRESHOLD = Math.toRadians(5),
+
                 TRANSLATIONAL_STANDARD_ERROR_METERS_ODOMETRY = 0.05,
                 // we trust the IMU very much (recommend 0.1 for Pigeon2, 0.5 for NavX)
                 ROTATIONAL_STANDARD_ERROR_RADIANS_ODOMETRY = Math.toRadians(0.1);

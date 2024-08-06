@@ -29,6 +29,15 @@ deploy {
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
+                    jvmArgs.add("-XX:+HeapDumpOnOutOfMemoryError")
+                    jvmArgs.add("-XX:HeapDumpPath=/U/frc-usercode.hprof")
+                    // Enable VisualVM connection
+                    jvmArgs.add("-Dcom.sun.management.jmxremote=true")
+                    jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
+                    jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
+                    jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
+                    jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
+                    jvmArgs.add("-Djava.rmi.server.hostname=172.22.11.2")
                 }
 
                 // Static files artifact

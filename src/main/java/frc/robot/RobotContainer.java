@@ -20,7 +20,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.autos.Auto;
 import frc.robot.autos.AutoBuilder;
+import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.commands.drive.CustomFollowPath;
+import frc.robot.commands.drive.CustomFollowPathOnFly;
 import frc.robot.commands.drive.JoystickDrive;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
@@ -224,15 +226,13 @@ public class RobotContainer {
                 ).ignoringDisable(true)
         );
 
-        driverController.y().whileTrue(new CustomFollowPath(
+        driverController.y().whileTrue(new AutoAlignment(
                 drive,
-                MaplePathPlannerLoader.fromPathFileReversed(
-                        "Test Path",
-                        new PathConstraints(3, 6, 6.28, 10),
-                        new GoalEndState(0, new Rotation2d())
-                ).flipPath(),
-                "Drive/TestPath"
-        ).rePlannedOnStart());
+                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.35, Rotation2d.fromDegrees(-90))),
+                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.7, Rotation2d.fromDegrees(-90))),
+                new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(3)),
+                0.5
+        ));
     }
 
     /**
