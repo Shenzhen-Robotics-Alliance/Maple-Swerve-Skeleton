@@ -46,14 +46,14 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.CurrentLimits.SupplyCurrentLimit = Constants.SwerveModuleConfigs.DRIVING_CURRENT_LIMIT;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
-        setDriveBrakeMode(true);
+        setDriveBrake(true);
 
         var steerConfig = new TalonFXConfiguration();
         steerConfig.CurrentLimits.SupplyCurrentLimit = Constants.SwerveModuleConfigs.STEERING_CURRENT_LIMIT;
         steerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
         steerTalon.setInverted(moduleConfigs.getIntConfig("steeringMotorInverted") != 0);
-        setSteerBrakeMode(true);
+        setSteerBrake(true);
 
         driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
         driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
@@ -123,12 +123,12 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     @Override
-    public void setDriveBrakeMode(boolean enable) {
+    public void setDriveBrake(boolean enable) {
         driveTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     }
 
     @Override
-    public void setSteerBrakeMode(boolean enable) {
+    public void setSteerBrake(boolean enable) {
         steerTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     }
 }

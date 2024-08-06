@@ -46,10 +46,10 @@ public interface ModuleIO {
     /**
      * Enable or disable brake mode on the drive motor.
      */
-    default void setDriveBrakeMode(boolean enable) {}
+    default void setDriveBrake(boolean enable) {}
 
     /**
      * Enable or disable brake mode on the turn motor.
      */
-    default void setSteerBrakeMode(boolean enable) {}
+    default void setSteerBrake(boolean enable) {}
 }
