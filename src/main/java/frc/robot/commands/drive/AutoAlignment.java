@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class AutoAlignment extends SequentialCommandGroup {
     private static final Pose2d DEFAULT_TOLERANCE = new Pose2d(0.03, 0.03, new Rotation2d(2));
     public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> targetPose){
-        this(driveSubsystem, targetPose, DEFAULT_TOLERANCE);
+        this(driveSubsystem, targetPose, targetPose, DEFAULT_TOLERANCE, 0.75);
     }
 
     /**
@@ -25,45 +25,13 @@ public class AutoAlignment extends SequentialCommandGroup {
      * 1. path-find to the target pose, roughly
      * 2. accurate auto alignment
      * */
-    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> targetPose, Pose2d tolerance) {
-        final Command pathFindToTargetRough = new PathFindToPose(driveSubsystem, targetPose, 0.75),
+    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> roughTarget, Supplier<Pose2d> target, Pose2d tolerance, double speedMultiplier) {
+        final Command pathFindToTargetRough = new PathFindToPose(driveSubsystem, target, speedMultiplier),
                 preciseAlignment = new DriveToPosition(
                         driveSubsystem,
-                        targetPose,
+                        target,
                         tolerance
                 );
-
-        super.addCommands(pathFindToTargetRough);
-        super.addCommands(preciseAlignment);
-
-        super.addRequirements(driveSubsystem);
-    }
-
-    public AutoAlignment(
-            PathConstraints constraints,
-            HolonomicDriveController holonomicDriveController,
-            Supplier<Pose2d> robotPoseSupplier,
-            Consumer<ChassisSpeeds> robotRelativeSpeedsOutput,
-            Subsystem driveSubsystem,
-            Pose2d targetPose,
-            Pose2d tolerance
-    ) {
-        /* tolerance for the precise approach */
-        holonomicDriveController.setTolerance(tolerance);
-        final Command
-                pathFindToTargetRough = AutoBuilder.pathfindToPose(targetPose, constraints, 0.5),
-                preciseAlignment = new FunctionalCommand(
-                        () -> {},
-                        () -> robotRelativeSpeedsOutput.accept(holonomicDriveController.calculate(
-                                robotPoseSupplier.get(),
-                                targetPose,
-                                0,
-                                targetPose.getRotation()
-                        )),
-                        (interrupted) ->
-                                robotRelativeSpeedsOutput.accept(new ChassisSpeeds()),
-                        holonomicDriveController::atReference
-                        );
 
         super.addCommands(pathFindToTargetRough);
         super.addCommands(preciseAlignment);

@@ -228,8 +228,10 @@ public class RobotContainer {
 
         driverController.y().whileTrue(new AutoAlignment(
                 drive,
-                () -> Constants.toCurrentAlliancePose(new Pose2d(1.8, 7.7, Rotation2d.fromDegrees(90))),
-                new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(3))
+                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.35, Rotation2d.fromDegrees(-90))),
+                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.7, Rotation2d.fromDegrees(-90))),
+                new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(3)),
+                0.5
         ));
     }
 
