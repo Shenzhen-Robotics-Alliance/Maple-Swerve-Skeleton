@@ -230,6 +230,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
+    @Override
+    public Rotation2d getRawGyroYaw() {return gyroInputs.yawPosition; }
 
     @Override
     public void setPose(Pose2d pose) {

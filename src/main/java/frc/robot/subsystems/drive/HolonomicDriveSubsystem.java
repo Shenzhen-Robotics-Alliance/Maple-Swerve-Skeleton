@@ -35,6 +35,8 @@ public interface HolonomicDriveSubsystem extends Subsystem {
 
     default Rotation2d getFacing() {return getPose().getRotation(); }
 
+    default Rotation2d getRawGyroYaw() {return getFacing(); }
+
     /**
      * Resets the current odometry Pose to a given Pose
      */

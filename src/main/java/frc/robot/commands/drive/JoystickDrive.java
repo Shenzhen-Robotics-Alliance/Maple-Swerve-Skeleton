@@ -45,9 +45,9 @@ public class JoystickDrive extends Command {
         this.previousChassisUsageTimer.reset();
         this.previousRotationalInputTimer.reset();
         this.currentPilotInputSpeeds = new ChassisSpeeds();
-        this.currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
+        this.currentRotationMaintenanceSetpoint = driveSubsystem.getRawGyroYaw();
 
-        this.chassisRotationController.calculate(driveSubsystem.getFacing().getRadians()); // activate controller
+        this.chassisRotationController.calculate(driveSubsystem.getRawGyroYaw().getRadians()); // activate controller
     }
 
     @Override
@@ -76,7 +76,10 @@ public class JoystickDrive extends Command {
             currentPilotInputSpeeds = new ChassisSpeeds();
 
         final ChassisSpeeds chassisSpeedsWithRotationMaintenance;
-        final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(driveSubsystem.getFacing().getRadians(), currentRotationMaintenanceSetpoint.getRadians());
+        final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(
+                driveSubsystem.getRawGyroYaw().getRadians(),
+                currentRotationMaintenanceSetpoint.getRadians()
+        );
         if (previousRotationalInputTimer.get() > Constants.DriveConfigs.timeActivateRotationMaintenanceAfterNoRotationalInputSeconds)
             chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
                     currentPilotInputSpeeds.vxMetersPerSecond, currentPilotInputSpeeds.vyMetersPerSecond,
@@ -84,7 +87,7 @@ public class JoystickDrive extends Command {
             );
         else {
             chassisSpeedsWithRotationMaintenance = currentPilotInputSpeeds;
-            currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
+            currentRotationMaintenanceSetpoint = driveSubsystem.getRawGyroYaw();
         }
 
         Logger.recordOutput("JoystickDrive/rotation maintenance set-point (deg)", currentRotationMaintenanceSetpoint.getDegrees());

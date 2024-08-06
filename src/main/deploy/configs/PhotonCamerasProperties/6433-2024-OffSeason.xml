@@ -13,8 +13,8 @@
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.15</calibrationAverageErrorPixel>
         <calibrationErrorStandardDeviationPixel type="double">0.05</calibrationErrorStandardDeviationPixel>
-        <mountPositionToRobotCenterForwardsMeters type="double">0</mountPositionToRobotCenterForwardsMeters>
-        <mountPositionToRobotCenterLeftwardsMeters type="double">0</mountPositionToRobotCenterLeftwardsMeters>
+        <mountPositionToRobotCenterForwardsMeters type="double">0.265</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">0.19</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
         <cameraPitchDegrees type="double">30</cameraPitchDegrees>
         <cameraYawDegrees type="double">0</cameraYawDegrees>
@@ -29,8 +29,8 @@
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.15</calibrationAverageErrorPixel>
         <calibrationErrorStandardDeviationPixel type="double">0.05</calibrationErrorStandardDeviationPixel>
-        <mountPositionToRobotCenterForwardsMeters type="double">0</mountPositionToRobotCenterForwardsMeters>
-        <mountPositionToRobotCenterLeftwardsMeters type="double">0</mountPositionToRobotCenterLeftwardsMeters>
+        <mountPositionToRobotCenterForwardsMeters type="double">-0.115</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">0.29</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
         <cameraPitchDegrees type="double">45</cameraPitchDegrees>
         <cameraYawDegrees type="double">45</cameraYawDegrees>
@@ -45,8 +45,8 @@
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.15</calibrationAverageErrorPixel>
         <calibrationErrorStandardDeviationPixel type="double">0.05</calibrationErrorStandardDeviationPixel>
-        <mountPositionToRobotCenterForwardsMeters type="double">0</mountPositionToRobotCenterForwardsMeters>
-        <mountPositionToRobotCenterLeftwardsMeters type="double">0</mountPositionToRobotCenterLeftwardsMeters>
+        <mountPositionToRobotCenterForwardsMeters type="double">-0.115</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">-0.29</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
         <cameraPitchDegrees type="double">45</cameraPitchDegrees>
         <cameraYawDegrees type="double">-45</cameraYawDegrees>

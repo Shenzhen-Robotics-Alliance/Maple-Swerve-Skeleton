@@ -1,10 +1,11 @@
 package frc.robot.subsystems.vision.apriltags;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Config.PhotonCameraProperties;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class AprilTagVision extends MapleSubsystem {
 
         this.multiTagPoseEstimator = new MapleMultiTagPoseEstimator(
                 fieldLayout,
-                new CameraHeightFilter(),
+                new CameraHeightAndPitchRollAngleFilter(),
                 camerasProperties
         );
         this.driveSubsystem = driveSubsystem;
@@ -44,6 +45,7 @@ public class AprilTagVision extends MapleSubsystem {
         Logger.processInputs(APRIL_TAGS_VISION_PATH + "Inputs", inputs);
 
         Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
+        result = discardResultIfOverThreshold(result);
         result.ifPresent(robotPoseEstimationResult -> driveSubsystem.addVisionMeasurement(
                 robotPoseEstimationResult.pointEstimation,
                 getResultsTimeStamp(),
@@ -51,13 +53,43 @@ public class AprilTagVision extends MapleSubsystem {
         ));
 
         Logger.recordOutput(
-                APRIL_TAGS_VISION_PATH + "Results/Estimated Pose",
-                result.map(robotPoseEstimationResult -> robotPoseEstimationResult.pointEstimation).orElse(null)
-        );
-        Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Results/Standard Error",
                 result.map(printStandardError).orElse(null)
         );
+
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
+    }
+
+    private Optional<RobotPoseEstimationResult> discardResultIfOverThreshold(Optional<RobotPoseEstimationResult> result) {
+        if (result.isEmpty())
+            return result;
+
+        double standardDeviationX = result.get().translationXStandardDeviationMeters,
+                standardDeviationY = result.get().translationYStandardDeviationMeters,
+                standardDeviationTheta = result.get().rotationalStandardDeviationRadians;
+        /* don't calibrate odometry if translation error is not inside range */
+        if (standardDeviationX > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD || standardDeviationY > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
+            standardDeviationTheta = standardDeviationX = standardDeviationY = Double.POSITIVE_INFINITY;
+        /* don't calibrate gyro if rotation error is not inside range */
+        if (standardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
+            standardDeviationTheta = Double.POSITIVE_INFINITY;
+
+        return Optional.of(new RobotPoseEstimationResult(
+                result.get().pointEstimation,
+                standardDeviationX,
+                standardDeviationY,
+                standardDeviationTheta
+        ));
+    }
+
+    private Pose2d displayVisionPointEstimateResult(Optional<RobotPoseEstimationResult> result) {
+        if (result.isEmpty()
+                || Double.isInfinite(result.get().translationXStandardDeviationMeters)
+                || Double.isInfinite(result.get().translationYStandardDeviationMeters))
+            return null;
+        if (Double.isInfinite(result.get().rotationalStandardDeviationRadians))
+            return new Pose2d(result.get().pointEstimation.getTranslation(), driveSubsystem.getFacing());
+        return result.get().pointEstimation;
     }
 
     private double getResultsTimeStamp() {
