@@ -23,10 +23,14 @@ public class MapleMultiTagPoseEstimator {
     public static final class RobotPoseEstimationResult {
         public final Pose2d pointEstimation;
         public final Matrix<N3, N1> estimationStandardError;
+        public final double translationXStandardDeviationMeters, translationYStandardDeviationMeters, rotationalStandardDeviationRadians;
 
         public RobotPoseEstimationResult(Pose2d pointEstimation, double translationXStandardDeviationMeters, double translationYStandardDeviationMeters, double rotationalStandardDeviationRadians) {
             this.pointEstimation = pointEstimation;
             this.estimationStandardError = VecBuilder.fill(translationXStandardDeviationMeters, translationYStandardDeviationMeters, rotationalStandardDeviationRadians);
+            this.translationXStandardDeviationMeters = translationXStandardDeviationMeters;
+            this.translationYStandardDeviationMeters = translationYStandardDeviationMeters;
+            this.rotationalStandardDeviationRadians = rotationalStandardDeviationRadians;
         }
     }
 
@@ -136,12 +140,6 @@ public class MapleMultiTagPoseEstimator {
                 estimationStandardDeviationY = Statistics.getStandardDeviation(robotPoseEstimationsYMeters),
                 estimationStandardDeviationTheta = Statistics.getStandardDeviation(robotPoseEstimatorThetaRadians);
 
-        /* don't calibrate odometry if translation error is not inside range */
-        if (estimationStandardDeviationX > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD || estimationStandardDeviationY > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
-            estimationStandardDeviationTheta = estimationStandardDeviationX = estimationStandardDeviationY = Double.POSITIVE_INFINITY;
-        /* don't calibrate gyro if rotation error is not inside range */
-        if (estimationStandardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
-            estimationStandardDeviationTheta = Double.POSITIVE_INFINITY;
         return Optional.of(new RobotPoseEstimationResult(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
                 estimationStandardDeviationX,
