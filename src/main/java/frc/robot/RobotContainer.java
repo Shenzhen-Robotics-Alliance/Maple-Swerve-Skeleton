@@ -207,7 +207,7 @@ public class RobotContainer {
      * Joystick} or {@link XboxController}), and then passing it to a {@link
      * JoystickButton}.
      */
-    private void configureButtonBindings() {
+    public void configureButtonBindings() {
         System.out.println("configuring key bindings...  mode:" + driverModeChooser.get());
         final MapleJoystickDriveInput driveInput = DriverMode.RIGHT_HANDED.equals(driverModeChooser.get()) ?
                 MapleJoystickDriveInput.rightHandedJoystick(driverController)
