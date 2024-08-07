@@ -40,6 +40,11 @@ public class DriveToPosition extends Command {
         driveSubsystem.runRobotCentricChassisSpeeds(feedBackSpeeds);
     }
 
+    @Override
+    public void end(boolean interrupted) {
+        driveSubsystem.stop();
+    }
+
     /**
      * @return the feed-back speed, robot-relative
      * */
