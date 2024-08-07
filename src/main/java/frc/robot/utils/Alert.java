@@ -11,6 +11,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -91,7 +92,7 @@ public class Alert {
                     DriverStation.reportWarning(text, false);
                     break;
                 case INFO:
-                    System.out.println(text);
+                    Logger.recordOutput("INFO/", text);
                     break;
             }
         }

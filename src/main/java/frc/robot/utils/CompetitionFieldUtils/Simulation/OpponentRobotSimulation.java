@@ -100,7 +100,6 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     @Override public double getChassisMaxAngularVelocity() {return profile.maxAngularVelocity;}
     @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return profile.maxAngularAcceleration;}
 
-    @Override public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> stdDevs) {throw new UnsupportedOperation("an opponent robot does not support vision measurement"); }
     @Override public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
         super.simulateChassisBehaviorWithRobotRelativeSpeeds(speedSetPoint);
     }

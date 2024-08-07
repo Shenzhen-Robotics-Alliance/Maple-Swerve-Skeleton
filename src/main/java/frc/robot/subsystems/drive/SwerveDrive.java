@@ -43,7 +43,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final SwerveDrivePoseEstimator poseEstimator;
 
     private final OdometryThread odometryThread;
-    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR);
+    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR),  visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.INFO);
     public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
         super("Drive");
         this.gyroIO = gyroIO;
@@ -83,6 +83,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         this.odometryThread.start();
 
         gyroDisconnectedAlert.setActivated(false);
+        visionNoResultAlert.setActivated(false);
     }
 
     @Override
@@ -99,6 +100,10 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
         for (int timeStampIndex = 0; timeStampIndex < odometryThreadInputs.measurementTimeStamps.length; timeStampIndex++)
             feedSingleOdometryDataToPositionEstimator(timeStampIndex);
+
+        final double timeNotVisionResultSeconds = MapleTimeUtils.getLogTimeSeconds() - previousMeasurementTimeStamp;
+        visionNoResultAlert.setText(String.format("AprilTag Vision No Result For %.2f (s)", timeNotVisionResultSeconds));
+        visionNoResultAlert.setActivated(timeNotVisionResultSeconds > 4);
     }
 
     private void fetchOdometryInputs() {
@@ -256,5 +261,12 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override
     public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {
         poseEstimator.addVisionMeasurement(visionPose, timestamp ,measurementStdDevs);
+        previousMeasurementTimeStamp = Math.max(timestamp, previousMeasurementTimeStamp);
+    }
+
+    private double previousMeasurementTimeStamp = -1;
+    @Override
+    public double getPreviousVisionMeasurementTimeStamp() {
+        return previousMeasurementTimeStamp;
     }
 }
