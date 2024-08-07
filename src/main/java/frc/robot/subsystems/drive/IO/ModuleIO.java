@@ -22,10 +22,12 @@ public interface ModuleIO {
 
         public double[] odometryDriveWheelRevolutions = new double[]{};
         public Rotation2d[] odometrySteerPositions = new Rotation2d[]{};
+
+        public boolean hardwareConnected = false;
     }
 
     /**
-     * Updates the set of loggable inputs.
+     * Updates the inputs
      */
     void updateInputs(ModuleIOInputs inputs);
 

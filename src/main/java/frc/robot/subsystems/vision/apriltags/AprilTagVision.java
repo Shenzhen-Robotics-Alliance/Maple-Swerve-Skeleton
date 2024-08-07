@@ -1,9 +1,9 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
+import frc.robot.utils.Alert;
 import frc.robot.utils.Config.PhotonCameraProperties;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,10 +21,19 @@ public class AprilTagVision extends MapleSubsystem {
 
     private final MapleMultiTagPoseEstimator multiTagPoseEstimator;
     private final HolonomicDriveSubsystem driveSubsystem;
+    private final Alert[] camerasDisconnectedAlerts;
     public AprilTagVision(AprilTagVisionIO io, List<PhotonCameraProperties> camerasProperties, HolonomicDriveSubsystem driveSubsystem) {
         super("Vision");
         this.io = io;
         this.inputs = new AprilTagVisionIO.VisionInputs(camerasProperties.size());
+        this.camerasDisconnectedAlerts = new Alert[camerasProperties.size()];
+        for (int i = 0; i < camerasProperties.size(); i++) {
+            this.camerasDisconnectedAlerts[i] = new Alert(
+                    "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' disconnected",
+                    Alert.AlertType.WARNING
+            );
+            this.camerasDisconnectedAlerts[i].setActivated(false);
+        }
 
         this.multiTagPoseEstimator = new MapleMultiTagPoseEstimator(
                 fieldLayout,
@@ -43,6 +52,9 @@ public class AprilTagVision extends MapleSubsystem {
     public void periodic(double dt, boolean enabled) {
         io.updateInputs(inputs);
         Logger.processInputs(APRIL_TAGS_VISION_PATH + "Inputs", inputs);
+
+        for (int i = 0; i < inputs.camerasInputs.length; i++)
+            this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
 
         Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
         result = discardResultIfOverThreshold(result);

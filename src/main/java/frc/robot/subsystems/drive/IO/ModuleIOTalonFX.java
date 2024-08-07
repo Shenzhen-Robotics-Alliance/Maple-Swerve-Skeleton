@@ -81,7 +81,7 @@ public class ModuleIOTalonFX implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        BaseStatusSignal.refreshAll(periodicallyRefreshedSignals);
+        inputs.hardwareConnected = BaseStatusSignal.refreshAll(periodicallyRefreshedSignals).isOK();
 
         inputs.odometryDriveWheelRevolutions = driveEncoderUngearedRevolutions.stream()
                 .mapToDouble(value -> value / DRIVE_GEAR_RATIO)

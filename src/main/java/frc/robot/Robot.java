@@ -151,7 +151,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testExit() {
-        CommandScheduler.getInstance().cancelAll();
+        robotContainer.configureButtonBindings();
     }
 
     /**

@@ -20,6 +20,7 @@ import edu.wpi.first.math.numbers.N3;
 import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.utils.Alert;
 import frc.robot.utils.Config.MapleConfigFile;
 
 import frc.robot.utils.MapleTimeUtils;
@@ -42,6 +43,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final SwerveDrivePoseEstimator poseEstimator;
 
     private final OdometryThread odometryThread;
+    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR);
     public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
         super("Drive");
         this.gyroIO = gyroIO;
@@ -79,6 +81,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         this.odometryThread = OdometryThread.createInstance();
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
+
+        gyroDisconnectedAlert.setActivated(false);
     }
 
     @Override
@@ -107,6 +111,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
+        gyroDisconnectedAlert.setActivated(!gyroInputs.connected);
 
         odometryThread.unlockOdometry();
     }

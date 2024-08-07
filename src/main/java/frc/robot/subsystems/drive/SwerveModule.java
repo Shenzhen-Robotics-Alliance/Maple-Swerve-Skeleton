@@ -14,6 +14,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
+import frc.robot.utils.Alert;
 import frc.robot.utils.MapleMaths.SwerveStateProjection;
 import frc.robot.utils.MechanismControl.InterpolatedMotorFeedForward;
 import frc.robot.utils.MechanismControl.MaplePIDController;
@@ -29,10 +30,17 @@ public class SwerveModule extends MapleSubsystem {
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
+    private final Alert hardwareFaultAlert;
+
     public SwerveModule(ModuleIO io, String name) {
         super("Module-" + name);
         this.io = io;
         this.name = name;
+        this.hardwareFaultAlert = new Alert(
+                "Module-" + name + " Hardware Fault",
+                Alert.AlertType.ERROR
+        );
+        this.hardwareFaultAlert.setActivated(false);
 
         driveOpenLoop = InterpolatedMotorFeedForward.fromDeployedDirectory("DrivingMotorOpenLoop");
         turnCloseLoop = new MaplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig);
@@ -53,6 +61,7 @@ public class SwerveModule extends MapleSubsystem {
     public void updateOdometryInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module-" + name, inputs);
+        this.hardwareFaultAlert.setActivated(!inputs.hardwareConnected);
     }
 
     @Override

@@ -2,11 +2,11 @@
     <GeneralInformation>
         <gyroPort type="int">0</gyroPort>
         <maxAngularVelocityRadiansPerSecond type="double">9.42477796076938</maxAngularVelocityRadiansPerSecond>
-        <maxAccelerationMetersPerSecondSquared type="double">13.4</maxAccelerationMetersPerSecondSquared>
+        <maxAccelerationMetersPerSecondSquared type="double">10.9</maxAccelerationMetersPerSecondSquared>
         <overallGearRatio type="double">5.36</overallGearRatio>
         <wheelRadiusMeters type="double">0.051</wheelRadiusMeters>
         <bumperWidthMeters type="double">0.876</bumperWidthMeters>
-        <maxVelocityMetersPerSecond type="double">4.968</maxVelocityMetersPerSecond>
+        <maxVelocityMetersPerSecond type="double">4.764</maxVelocityMetersPerSecond>
         <bumperLengthMeters type="double">0.876</bumperLengthMeters>
         <robotMassInSimulation type="double">45</robotMassInSimulation>
 
