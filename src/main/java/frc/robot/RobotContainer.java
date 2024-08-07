@@ -29,6 +29,7 @@ import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
+import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
@@ -58,6 +59,7 @@ public class RobotContainer {
     // Subsystems
     public final SwerveDrive drive;
     public final AprilTagVision aprilTagVision;
+    private final LEDStatusLight ledStatusLight;
 
     // Controller
     private final CommandXboxController driverController = new CommandXboxController(0),
@@ -179,6 +181,8 @@ public class RobotContainer {
                 );
             }
         }
+        this.ledStatusLight = new LEDStatusLight(0, 155);
+
         SmartDashboard.putData("Select Test", testChooser = TestBuilder.buildTestsChooser());
         autoChooser = AutoBuilder.buildAutoChooser(this);
 
@@ -228,10 +232,16 @@ public class RobotContainer {
 
         driverController.y().whileTrue(new AutoAlignment(
                 drive,
-                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.35, Rotation2d.fromDegrees(-90))),
-                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.7, Rotation2d.fromDegrees(-90))),
+                () -> Constants.toCurrentAlliancePose(new Pose2d(
+                        1.85, 7,
+                        Rotation2d.fromDegrees(-90)
+                )),
+                () -> Constants.toCurrentAlliancePose(new Pose2d(
+                        1.85, 7.7,
+                        Rotation2d.fromDegrees(-90)
+                )),
                 new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(3)),
-                0.5
+                0.75
         ));
     }
 

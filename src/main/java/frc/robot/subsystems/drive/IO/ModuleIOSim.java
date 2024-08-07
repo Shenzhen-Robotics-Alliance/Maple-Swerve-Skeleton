@@ -55,6 +55,8 @@ public class ModuleIOSim implements ModuleIO {
                 physicsSimulationResults.odometrySteerPositions,
                 SIM_ITERATIONS_PER_ROBOT_PERIOD
         );
+
+        inputs.hardwareConnected = true;
     }
 
 

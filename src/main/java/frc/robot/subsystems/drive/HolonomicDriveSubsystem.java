@@ -49,7 +49,9 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param timestamp  The timestamp of the vision measurement in seconds.
      * @param measurementStdDevs the standard deviation of the measurement
      */
-    void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs);
+    default void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {}
+
+    default double getPreviousVisionMeasurementTimeStamp() {return -1;}
 
     /**
      * @return the measured(actual) velocities of the chassis, robot-relative
