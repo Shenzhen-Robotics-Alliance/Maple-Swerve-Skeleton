@@ -6,10 +6,7 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import java.util.Arrays;
-
 public interface AprilTagVisionIO {
-    int MAX_SUPPORTED_CAMERA_AMOUNT = 10;
     class CameraInputs {
         public boolean cameraConnected;
         public double resultsDelaySeconds;
@@ -67,6 +64,7 @@ public interface AprilTagVisionIO {
         public final int camerasAmount;
         public final CameraInputs[] camerasInputs;
         public double inputsFetchedRealTimeStampSeconds = 0;
+        public boolean coprocessorConnected = false;
 
         public VisionInputs(int camerasAmount) {
             this.camerasAmount = camerasAmount;

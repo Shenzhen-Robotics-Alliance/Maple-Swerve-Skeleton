@@ -30,17 +30,17 @@ public class SwerveModule extends MapleSubsystem {
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
-    private final Alert alert;
+    private final Alert hardwareFaultAlert;
 
     public SwerveModule(ModuleIO io, String name) {
         super("Module-" + name);
         this.io = io;
         this.name = name;
-        this.alert = new Alert(
+        this.hardwareFaultAlert = new Alert(
                 "Module-" + name + " Hardware Fault",
                 Alert.AlertType.ERROR
         );
-        this.alert.setActivated(false);
+        this.hardwareFaultAlert.setActivated(false);
 
         driveOpenLoop = InterpolatedMotorFeedForward.fromDeployedDirectory("DrivingMotorOpenLoop");
         turnCloseLoop = new MaplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig);
@@ -61,7 +61,7 @@ public class SwerveModule extends MapleSubsystem {
     public void updateOdometryInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module-" + name, inputs);
-        this.alert.setActivated(!inputs.hardwareConnected);
+        this.hardwareFaultAlert.setActivated(!inputs.hardwareConnected);
     }
 
     @Override

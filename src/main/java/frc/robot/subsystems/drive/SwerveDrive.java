@@ -43,7 +43,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final SwerveDrivePoseEstimator poseEstimator;
 
     private final OdometryThread odometryThread;
-    private final Alert gyroDisconnected = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR);
+    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR);
     public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
         super("Drive");
         this.gyroIO = gyroIO;
@@ -82,7 +82,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 
-        gyroDisconnected.setActivated(false);
+        gyroDisconnectedAlert.setActivated(false);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        gyroDisconnected.setActivated(!gyroInputs.connected);
+        gyroDisconnectedAlert.setActivated(!gyroInputs.connected);
 
         odometryThread.unlockOdometry();
     }
