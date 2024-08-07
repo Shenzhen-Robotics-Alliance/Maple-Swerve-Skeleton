@@ -44,7 +44,7 @@ public final class Constants {
         REPLAY
     }
 
-    public static final String ROBOT_NAME = "6433-2024-OffSeason";
+    public static final String ROBOT_NAME = "5516-2024-OffSeason";
 
     // avoid typo errors
     public static final class LogConfigs {

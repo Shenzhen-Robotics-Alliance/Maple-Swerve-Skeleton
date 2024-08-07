@@ -1,0 +1,52 @@
+<ChassisWheelsCalibration>
+    <GeneralInformation>
+        <gyroPort type="int">0</gyroPort>
+        <maxAngularVelocityRadiansPerSecond type="double">9.42477796076938</maxAngularVelocityRadiansPerSecond>
+        <maxAccelerationMetersPerSecondSquared type="double">10.9</maxAccelerationMetersPerSecondSquared>
+        <overallGearRatio type="double">5.36</overallGearRatio>
+        <wheelRadiusMeters type="double">0.051</wheelRadiusMeters>
+        <bumperWidthMeters type="double">0.876</bumperWidthMeters>
+        <maxVelocityMetersPerSecond type="double">4.764</maxVelocityMetersPerSecond>
+        <bumperLengthMeters type="double">0.876</bumperLengthMeters>
+        <robotMassInSimulation type="double">45</robotMassInSimulation>
+
+        <horizontalWheelsMarginMeters type="double">0.54</horizontalWheelsMarginMeters>
+        <verticalWheelsMarginMeters type="double">0.44</verticalWheelsMarginMeters>
+    </GeneralInformation>
+    <FrontLeft>
+        <steeringEncoderReadingAtOrigin type="double">1.9036701577660806</steeringEncoderReadingAtOrigin>
+        <steeringMotorPortOnPDP type="int">-1</steeringMotorPortOnPDP>
+        <steeringEncoderID type="int">9</steeringEncoderID>
+        <drivingMotorPortOnPDP type="int">-1</drivingMotorPortOnPDP>
+        <drivingMotorID type="int">2</drivingMotorID>
+        <steeringMotorInverted type="int">1</steeringMotorInverted>
+        <steeringMotorID type="int">1</steeringMotorID>
+    </FrontLeft>
+    <FrontRight>
+        <steeringEncoderReadingAtOrigin type="double">5.505457047721566</steeringEncoderReadingAtOrigin>
+        <steeringMotorPortOnPDP type="int">-1</steeringMotorPortOnPDP>
+        <steeringEncoderID type="int">10</steeringEncoderID>
+        <drivingMotorPortOnPDP type="int">-1</drivingMotorPortOnPDP>
+        <drivingMotorID type="int">4</drivingMotorID>
+        <steeringMotorInverted type="int">1</steeringMotorInverted>
+        <steeringMotorID type="int">3</steeringMotorID>
+    </FrontRight>
+    <BackLeft>
+        <steeringEncoderReadingAtOrigin type="double">3.761320891895592</steeringEncoderReadingAtOrigin>
+        <steeringMotorPortOnPDP type="int">-1</steeringMotorPortOnPDP>
+        <steeringEncoderID type="int">12</steeringEncoderID>
+        <drivingMotorPortOnPDP type="int">-1</drivingMotorPortOnPDP>
+        <drivingMotorID type="int">8</drivingMotorID>
+        <steeringMotorInverted type="int">1</steeringMotorInverted>
+        <steeringMotorID type="int">7</steeringMotorID>
+    </BackLeft>
+    <BackRight>
+        <steeringEncoderReadingAtOrigin type="double">3.2198256737719606</steeringEncoderReadingAtOrigin>
+        <steeringMotorPortOnPDP type="int">-1</steeringMotorPortOnPDP>
+        <steeringEncoderID type="int">11</steeringEncoderID>
+        <drivingMotorPortOnPDP type="int">-1</drivingMotorPortOnPDP>
+        <drivingMotorID type="int">6</drivingMotorID>
+        <steeringMotorInverted type="int">1</steeringMotorInverted>
+        <steeringMotorID type="int">5</steeringMotorID>
+    </BackRight>
+</ChassisWheelsCalibration>
