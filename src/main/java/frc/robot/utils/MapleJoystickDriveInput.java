@@ -1,7 +1,6 @@
 package frc.robot.utils;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
@@ -12,7 +11,7 @@ import frc.robot.utils.MapleMaths.MapleCommonMath;
 import java.util.function.DoubleSupplier;
 
 public class MapleJoystickDriveInput {
-    private final DoubleSupplier joystickXSupplier, joystickYSupplier, joystickOmegaSupplier;
+    public final DoubleSupplier joystickXSupplier, joystickYSupplier, joystickOmegaSupplier;
 
     /**
      * @param joystickXSupplier the supplier of the x-axis of the joystick, positive is RIGHTWARDS

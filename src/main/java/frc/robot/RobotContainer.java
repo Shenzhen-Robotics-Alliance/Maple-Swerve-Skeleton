@@ -21,10 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.autos.Auto;
 import frc.robot.autos.AutoBuilder;
-import frc.robot.commands.drive.AutoAlignment;
-import frc.robot.commands.drive.CustomFollowPath;
-import frc.robot.commands.drive.CustomFollowPathOnFly;
-import frc.robot.commands.drive.JoystickDrive;
+import frc.robot.commands.drive.*;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
@@ -225,6 +222,13 @@ public class RobotContainer {
                 driveInput,
                 () -> true,
                 drive
+        ));
+
+        driverController.rightBumper().whileTrue(new JoystickDriveAndAimAtTarget(
+                driveInput,
+                drive,
+                () -> Constants.toCurrentAllianceTranslation(new Translation2d(0.15, 5.55)),
+                () -> 0.4
         ));
 
         driverController.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
