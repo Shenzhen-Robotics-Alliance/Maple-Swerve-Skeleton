@@ -45,6 +45,7 @@ public class MapleShooterOptimization {
 
     private final String name;
     private final MapleInterpolationTable table;
+    private final double minShootingDistance, maxShootingDistance;
     public MapleShooterOptimization(String name, double[] distancesToTargetsMeters, double[] shooterAngleDegrees, double[] shooterRPM, double[] projectileFlightTimeSeconds) {
         this(name, new MapleInterpolationTable(
                 name,
@@ -58,6 +59,9 @@ public class MapleShooterOptimization {
     private MapleShooterOptimization(String name, MapleInterpolationTable table) {
         this.name = name;
         this.table = table;
+
+        this.minShootingDistance = table.minX;
+        this.maxShootingDistance = table.maxX;
     }
 
     public double getFlightTimeSeconds(Translation2d targetPosition, Translation2d robotPosition) {
@@ -91,6 +95,11 @@ public class MapleShooterOptimization {
                 shooterRPM,
                 shooterRPMChangeRateRPMPerSec
         );
+    }
+
+    public boolean isTargetInRange(Translation2d targetPosition, Translation2d robotPosition) {
+        final double distanceToTarget = targetPosition.getDistance(robotPosition);
+        return minShootingDistance <= distanceToTarget && maxShootingDistance >= distanceToTarget;
     }
 
     public static MapleShooterOptimization fromDeployDirectory(String name) throws IOException {
