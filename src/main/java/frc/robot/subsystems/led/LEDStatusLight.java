@@ -35,7 +35,7 @@ public class LEDStatusLight extends MapleSubsystem {
     @Override
     public void onReset() {
         t.start();
-        led.start();
+        if (led != null) led.start();
         this.animation = new LEDAnimation.ShowColor(0, 0, 0); // turn off
     }
 
