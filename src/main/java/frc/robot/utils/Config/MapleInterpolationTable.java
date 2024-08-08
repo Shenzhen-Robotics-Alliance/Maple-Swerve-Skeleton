@@ -103,6 +103,14 @@ public class MapleInterpolationTable {
         return interpolatingDoubleTreeMap.get(independentVariableValue);
     }
 
+    public double findDerivative(String interpolatedVariableName, double independentVariableValue, double dx) {
+        final double dy =
+                interpolateVariable(interpolatedVariableName, independentVariableValue + dx/2)
+                        - interpolateVariable(interpolatedVariableName, independentVariableValue - dx/2);
+
+        return dy / dx;
+    }
+
     public MapleConfigFile toConfigFile(String configType) {
         final MapleConfigFile configFile = new MapleConfigFile(configType, tableName);
 
