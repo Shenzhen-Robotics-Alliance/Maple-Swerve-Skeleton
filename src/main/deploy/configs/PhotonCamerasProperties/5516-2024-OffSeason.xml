@@ -64,8 +64,8 @@
         <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">0.05</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
-        <cameraPitchDegrees type="double">45</cameraPitchDegrees>
-        <cameraYawDegrees type="double">160</cameraYawDegrees>
+        <cameraPitchDegrees type="double">35</cameraPitchDegrees>
+        <cameraYawDegrees type="double">150</cameraYawDegrees>
         <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
         <captureOrientation type="int">1</captureOrientation>
     </Camera3>
@@ -80,8 +80,8 @@
         <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">-0.05</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
-        <cameraPitchDegrees type="double">45</cameraPitchDegrees>
-        <cameraYawDegrees type="double">-160</cameraYawDegrees>
+        <cameraPitchDegrees type="double">35</cameraPitchDegrees>
+        <cameraYawDegrees type="double">-150</cameraYawDegrees>
         <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
         <captureOrientation type="int">1</captureOrientation>
     </Camera4>
