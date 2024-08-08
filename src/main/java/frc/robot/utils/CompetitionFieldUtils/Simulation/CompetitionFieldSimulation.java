@@ -31,7 +31,9 @@ public abstract class CompetitionFieldSimulation {
     private final MapleCompetitionField competitionField;
     private final Set<HolonomicChassisSimulation> robotSimulations = new HashSet<>();
     private final HolonomicChassisSimulation mainRobot;
-    private final Set<GamePieceInSimulation> gamePieces; // TODO: intake simulation
+    private final Set<GamePieceInSimulation> gamePieces;
+
+    private List<IntakeSimulation> intakeSimulations = new ArrayList<>();
 
     public CompetitionFieldSimulation(HolonomicChassisSimulation mainRobot, FieldObstaclesMap obstaclesMap) {
         this.competitionField = new MapleCompetitionField(mainRobot);
@@ -56,6 +58,10 @@ public abstract class CompetitionFieldSimulation {
         }
 
         competitionField.updateObjectsToDashboardAndTelemetry();
+
+        for (IntakeSimulation intakeSimulation:intakeSimulations)
+            while (!intakeSimulation.getGamePiecesToRemove().isEmpty())
+                this.removeGamePiece(intakeSimulation.getGamePiecesToRemove().poll());
     }
 
     public void addRobot(HolonomicChassisSimulation chassisSimulation) {
@@ -64,9 +70,20 @@ public abstract class CompetitionFieldSimulation {
         this.competitionField.addObject(chassisSimulation);
     }
 
+    public void registerIntake(IntakeSimulation intakeSimulation) {
+        this.intakeSimulations.add(intakeSimulation);
+        this.mainRobot.addFixture(intakeSimulation);
+        this.physicsWorld.addContactListener(intakeSimulation.getGamePieceContactListener());
+    }
+
     public void addGamePiece(GamePieceInSimulation gamePieceInSimulation) {
         this.physicsWorld.addBody(gamePieceInSimulation);
         this.competitionField.addObject(gamePieceInSimulation);
+    }
+
+    public void removeGamePiece(GamePieceInSimulation gamePieceInSimulation) {
+        this.physicsWorld.removeBody(gamePieceInSimulation);
+        this.competitionField.deleteObject(gamePieceInSimulation);
     }
 
     public MapleCompetitionField getCompetitionField() {return competitionField;}
