@@ -3,7 +3,6 @@ package frc.robot.utils;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Robot;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.Config.MapleInterpolationTable;
 import org.littletonrobotics.junction.Logger;
@@ -13,21 +12,17 @@ import java.io.IOException;
 import static frc.robot.utils.Config.MapleInterpolationTable.Variable;
 
 public class MapleShooterOptimization {
-    public static final class ShootingState {
+    public static final class ShooterState {
         public final double shooterAngleDegrees;
         public final double shooterAngleChangeRateDegreesPerSecond;
         public final double shooterRPM;
         public final double shooterRPMChangeRateRPMPerSeconds;
-        public final Rotation2d shooterFacing;
-        public final double shooterFacingChangeRateRadPerSec;
 
-        private ShootingState(double shooterAngleDegrees, double shooterAngleChangeRateDegreesPerSecond, double shooterRPM, double shooterRPMChangeRateRPMPerSeconds, Rotation2d shooterFacing, double shooterFacingChangeRateRadPerSec) {
+        private ShooterState(double shooterAngleDegrees, double shooterAngleChangeRateDegreesPerSecond, double shooterRPM, double shooterRPMChangeRateRPMPerSeconds) {
             this.shooterAngleDegrees = shooterAngleDegrees;
             this.shooterAngleChangeRateDegreesPerSecond = shooterAngleChangeRateDegreesPerSecond;
             this.shooterRPM = shooterRPM;
             this.shooterRPMChangeRateRPMPerSeconds = shooterRPMChangeRateRPMPerSeconds;
-            this.shooterFacing = shooterFacing;
-            this.shooterFacingChangeRateRadPerSec = shooterFacingChangeRateRadPerSec;
         }
 
         @Override
@@ -37,8 +32,6 @@ public class MapleShooterOptimization {
                     ", shooterAngleChangeRateDegreesPerSecond=" + shooterAngleChangeRateDegreesPerSecond +
                     ", shooterRPM=" + shooterRPM +
                     ", shooterRPMChangeRateRPMPerSeconds=" + shooterRPMChangeRateRPMPerSeconds +
-                    ", shooterFacing=" + shooterFacing +
-                    ", shooterFacingChangeRateRadPerSec=" + shooterFacingChangeRateRadPerSec +
                     '}';
         }
 
@@ -47,13 +40,12 @@ public class MapleShooterOptimization {
             Logger.recordOutput(logPath + "ShooterAngleChangeRateDegreesPerSecond", shooterAngleChangeRateDegreesPerSecond);
             Logger.recordOutput(logPath + "ShooterRPM", shooterRPM);
             Logger.recordOutput(logPath + "ShooterRPMChangeRateRPMPerSeconds", shooterRPMChangeRateRPMPerSeconds);
-            Logger.recordOutput(logPath + "ShooterFacing", shooterFacing);
-            Logger.recordOutput(logPath + "ShooterFacingChangeRateRadPerSec", shooterFacingChangeRateRadPerSec);
         }
     }
 
     private final String name;
     private final MapleInterpolationTable table;
+    private final double minShootingDistance, maxShootingDistance;
     public MapleShooterOptimization(String name, double[] distancesToTargetsMeters, double[] shooterAngleDegrees, double[] shooterRPM, double[] projectileFlightTimeSeconds) {
         this(name, new MapleInterpolationTable(
                 name,
@@ -67,11 +59,18 @@ public class MapleShooterOptimization {
     private MapleShooterOptimization(String name, MapleInterpolationTable table) {
         this.name = name;
         this.table = table;
+
+        this.minShootingDistance = table.minX;
+        this.maxShootingDistance = table.maxX;
     }
 
-    public ShootingState getOptimizedShootingState(Translation2d targetPosition, Translation2d robotPosition, ChassisSpeeds robotVelocityFieldRelative) {
-        final double distanceToTargetMeters = targetPosition.getDistance(robotPosition),
-                flightTimeSeconds = table.interpolateVariable("Flight-Time", distanceToTargetMeters);
+    public double getFlightTimeSeconds(Translation2d targetPosition, Translation2d robotPosition) {
+        final double distanceToTargetMeters = targetPosition.getDistance(robotPosition);
+        return table.interpolateVariable("Flight-Time", distanceToTargetMeters);
+    }
+
+    public ShooterState getOptimizedShootingState(Translation2d targetPosition, Translation2d robotPosition, ChassisSpeeds robotVelocityFieldRelative) {
+        final double flightTimeSeconds = getFlightTimeSeconds(targetPosition, robotPosition);
         final Translation2d robotNewPosition = robotPosition.plus(new Translation2d(
                 robotVelocityFieldRelative.vxMetersPerSecond * flightTimeSeconds,
                 robotVelocityFieldRelative.vyMetersPerSecond * flightTimeSeconds
@@ -90,25 +89,17 @@ public class MapleShooterOptimization {
                 shooterRPMChangeRateToDistance = table.findDerivative("Shooter-RPM", newDistanceToTarget, 0.1),
                 shooterRPMChangeRateRPMPerSec = shooterRPMChangeRateToDistance * distanceToTargetChangingRate;
 
-        final Translation2d robotPositionAfterDt = robotPosition.plus(new Translation2d(
-                robotVelocityFieldRelative.vxMetersPerSecond * Robot.defaultPeriodSecs,
-                robotVelocityFieldRelative.vyMetersPerSecond * Robot.defaultPeriodSecs
-        ));
-        final Rotation2d shooterFacing = targetPosition.minus(robotNewPosition).getAngle(),
-                shooterFacingNow = targetPosition.minus(robotPosition).getAngle(),
-                shooterFacingAfterDT = targetPosition.minus(robotPositionAfterDt).getAngle();
-        final double shooterFacingChangeRateRadPerSec =
-                shooterFacingAfterDT.minus(shooterFacingNow).getRadians()
-                / Robot.defaultPeriodSecs;
-
-        return new ShootingState(
+        return new ShooterState(
                 shooterAngleDeg,
                 shooterAngleDegChangeRateDegPerSec,
                 shooterRPM,
-                shooterRPMChangeRateRPMPerSec,
-                shooterFacing,
-                shooterFacingChangeRateRadPerSec
+                shooterRPMChangeRateRPMPerSec
         );
+    }
+
+    public boolean isTargetInRange(Translation2d targetPosition, Translation2d robotPosition) {
+        final double distanceToTarget = targetPosition.getDistance(robotPosition);
+        return minShootingDistance <= distanceToTarget && maxShootingDistance >= distanceToTarget;
     }
 
     public static MapleShooterOptimization fromDeployDirectory(String name) throws IOException {

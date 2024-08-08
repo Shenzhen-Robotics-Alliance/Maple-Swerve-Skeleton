@@ -17,14 +17,14 @@ import java.util.function.BooleanSupplier;
 import static frc.robot.subsystems.drive.HolonomicDriveSubsystem.isZero;
 
 public class JoystickDrive extends Command {
-    private final MapleJoystickDriveInput input;
+    protected MapleJoystickDriveInput input;
     private final BooleanSupplier useDriverStationCentricSwitch;
     private final HolonomicDriveSubsystem driveSubsystem;
     private final PIDController chassisRotationController;
 
-    private final Timer previousChassisUsageTimer, previousRotationalInputTimer;
+    protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
     private ChassisSpeeds currentPilotInputSpeeds;
-    private Rotation2d currentRotationMaintenanceSetpoint;
+    protected Rotation2d currentRotationMaintenanceSetpoint;
     public JoystickDrive(MapleJoystickDriveInput input, BooleanSupplier useDriverStationCentricSwitch, HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
@@ -52,6 +52,8 @@ public class JoystickDrive extends Command {
 
     @Override
     public void execute() {
+        if (input == null) return;
+
         final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(), driveSubsystem.getChassisMaxAngularVelocity()
         );
@@ -80,6 +82,7 @@ public class JoystickDrive extends Command {
                 driveSubsystem.getRawGyroYaw().getRadians(),
                 currentRotationMaintenanceSetpoint.getRadians()
         );
+        Logger.recordOutput("previousRotationalInputTimer.get()", previousRotationalInputTimer.get());
         if (previousRotationalInputTimer.get() > Constants.DriveConfigs.timeActivateRotationMaintenanceAfterNoRotationalInputSeconds)
             chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
                     currentPilotInputSpeeds.vxMetersPerSecond, currentPilotInputSpeeds.vyMetersPerSecond,
@@ -87,6 +90,7 @@ public class JoystickDrive extends Command {
             );
         else {
             chassisSpeedsWithRotationMaintenance = currentPilotInputSpeeds;
+            Logger.recordOutput("pilot input speeds", currentPilotInputSpeeds);
             currentRotationMaintenanceSetpoint = driveSubsystem.getRawGyroYaw();
         }
 
