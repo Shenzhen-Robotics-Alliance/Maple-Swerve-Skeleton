@@ -1,15 +1,11 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulation;
 
-import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.utils.CompetitionFieldUtils.FieldObjects.RobotOnFieldDisplay;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.MapleMaths.GeometryConvertor;
-import frc.robot.utils.MapleMaths.MapleCommonMath;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Force;
 import org.dyn4j.geometry.Geometry;

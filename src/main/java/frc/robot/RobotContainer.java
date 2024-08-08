@@ -8,6 +8,7 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -34,10 +35,7 @@ import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.tests.*;
-import frc.robot.utils.CompetitionFieldUtils.Simulation.CompetitionFieldSimulation;
-import frc.robot.utils.CompetitionFieldUtils.Simulation.Crescendo2024FieldSimulation;
-import frc.robot.utils.CompetitionFieldUtils.Simulation.OpponentRobotSimulation;
-import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
+import frc.robot.utils.CompetitionFieldUtils.Simulation.*;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.Config.PhotonCameraProperties;
 import frc.robot.utils.MapleJoystickDriveInput;
@@ -160,6 +158,12 @@ public class RobotContainer {
                 fieldSimulation.addRobot(new OpponentRobotSimulation(0));
                 fieldSimulation.addRobot(new OpponentRobotSimulation(1));
                 fieldSimulation.addRobot(new OpponentRobotSimulation(2));
+
+                fieldSimulation.registerIntake(new IntakeSimulation(
+                        new Translation2d(-0.876/2, 0.35), new Translation2d(-0.876/2, -0.35),
+                        10,
+                        () -> driverController.leftBumper().getAsBoolean()
+                ));
             }
 
             default -> {
