@@ -42,13 +42,10 @@ public class Robot extends LoggedRobot {
 
         // Set up data receivers & replay source
         switch (CURRENT_ROBOT_MODE) {
-            case REAL -> {
+            case REAL, SIM -> {
                 // Running on a real robot, log to a USB stick ("/U/logs")
+                // Running a physics simulator, log to $PROJECT_FOLDER/logs
                 Logger.addDataReceiver(new WPILOGWriter());
-                Logger.addDataReceiver(new NT4Publisher());
-            }
-            case SIM -> {
-                // Running a physics simulator, log to NT
                 Logger.addDataReceiver(new NT4Publisher());
             }
             case REPLAY -> {

@@ -228,7 +228,7 @@ public class RobotContainer {
         ));
 
         driverController.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
-        driverController.b().onTrue(Commands.runOnce(
+        driverController.start().onTrue(Commands.runOnce(
                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                 drive
                 ).ignoringDisable(true)
