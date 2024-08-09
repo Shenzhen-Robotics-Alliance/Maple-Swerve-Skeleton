@@ -228,7 +228,8 @@ public class RobotContainer {
                 driveInput,
                 drive,
                 () -> Constants.toCurrentAllianceTranslation(new Translation2d(0.15, 5.55)),
-                () -> 0.4
+                () -> 0.4,
+                1
         ));
 
         driverController.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));

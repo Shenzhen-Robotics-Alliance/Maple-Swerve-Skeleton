@@ -1,28 +1,26 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.Arrays;
+
 public interface AprilTagVisionIO {
     class CameraInputs {
+        public static final int MAX_TARGET_PER_CAMERA = 5;
         public boolean cameraConnected;
         public double resultsDelaySeconds;
         public int currentTargetsCount;
-        public int[] fiducialMarksID;
-        public Transform3d[] bestCameraToTargets;
-
-        public CameraInputs(boolean cameraConnected, double resultsDelaySeconds, int currentTargetsCount, int[] fiducialMarksID, Transform3d[] bestCameraToTargets) {
-            this.cameraConnected = cameraConnected;
-            this.resultsDelaySeconds = resultsDelaySeconds;
-            this.currentTargetsCount = currentTargetsCount;
-            this.fiducialMarksID = fiducialMarksID;
-            this.bestCameraToTargets = bestCameraToTargets;
-        }
+        public final int[] fiducialMarksID;
+        public final Transform3d[] bestCameraToTargets;
 
         public CameraInputs() {
+            this.fiducialMarksID = new int[MAX_TARGET_PER_CAMERA];
+            this.bestCameraToTargets = new Transform3d[MAX_TARGET_PER_CAMERA];
             clear();
         }
 
@@ -30,16 +28,20 @@ public interface AprilTagVisionIO {
             this.cameraConnected = false;
             this.resultsDelaySeconds = 0;
             this.currentTargetsCount = 0;
-            this.fiducialMarksID = new int[0];
-            this.bestCameraToTargets = new Transform3d[0];
+            Arrays.fill(fiducialMarksID, -1);
+            Arrays.fill(bestCameraToTargets, new Transform3d());
         }
 
         public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult, boolean cameraConnected) {
             this.cameraConnected = cameraConnected;
             this.resultsDelaySeconds = pipelineResult.getLatencyMillis() / 1000.0;
             this.currentTargetsCount = pipelineResult.getTargets().size();
-            this.fiducialMarksID = pipelineResult.getTargets().stream().mapToInt(PhotonTrackedTarget::getFiducialId).toArray();
-            this.bestCameraToTargets = pipelineResult.getTargets().stream().map(PhotonTrackedTarget::getBestCameraToTarget).toArray(Transform3d[]::new);
+            Arrays.fill(fiducialMarksID, -1);
+            Arrays.fill(bestCameraToTargets, new Transform3d());
+            for (int i = 0; i < currentTargetsCount && i < MAX_TARGET_PER_CAMERA; i++) {
+                this.fiducialMarksID[i] = pipelineResult.getTargets().get(i).getFiducialId();
+                this.bestCameraToTargets[i] = pipelineResult.getTargets().get(i).getBestCameraToTarget();
+            }
         }
 
         public void fromLog(LogTable table, int cameraID) {
@@ -47,8 +49,14 @@ public interface AprilTagVisionIO {
             this.cameraConnected = table.get(cameraKey+"Connected", false);
             this.resultsDelaySeconds = table.get(cameraKey+"ResultsDelaySeconds", 0.0);
             this.currentTargetsCount = table.get(cameraKey+"CurrentTargetsCount", 0);
-            this.fiducialMarksID = table.get(cameraKey+"FiducialMarksID", new int[0]);
-            this.bestCameraToTargets = table.get(cameraKey+"bestCameraToTargets", new Transform3d[0]);
+            final int[] fiducialMarkIDLogged = table.get(cameraKey+"FiducialMarksID", new int[MAX_TARGET_PER_CAMERA]);
+            final Transform3d[] bestCameraToTargetsLogged = table.get(cameraKey+"bestCameraToTargets", new Transform3d[MAX_TARGET_PER_CAMERA]);
+            if (fiducialMarkIDLogged.length != MAX_TARGET_PER_CAMERA || bestCameraToTargetsLogged.length != MAX_TARGET_PER_CAMERA)
+                DriverStation.reportError("vision log length not match", false);
+            for (int i = 0; i < MAX_TARGET_PER_CAMERA; i++) {
+                fiducialMarksID[i] = fiducialMarkIDLogged[i];
+                bestCameraToTargets[i] = bestCameraToTargetsLogged[i];
+            }
         }
 
         public void writeToLog(LogTable table, int cameraID) {
