@@ -123,34 +123,6 @@ public final class Constants {
         public static final double DEFAULT_MAX_ANGULAR_ACCELERATION_DEGREES_PER_SECOND_SQUARE = 540;
     }
 
-    public static final class WheelCalibrationConfigs {
-        public static final class WheelToBeCalibrated {
-            public final String name;
-            public final int drivingMotorID, steeringMotorID, encoderID, drivingMotorPortOnPDP, steeringMotorPortOnPDP;
-            public boolean steeringMotorInverted;
-
-            public WheelToBeCalibrated(String name, int drivingMotorID, int steeringMotorID, int encoderID) {
-                this(name, drivingMotorID, steeringMotorID, encoderID, -1, -1);
-            }
-
-            private WheelToBeCalibrated(String name, int drivingMotorID, int steeringMotorID, int encoderID, int drivingMotorPortOnPDP, int steeringMotorPortOnPDP) {
-                this.name = name;
-                this.drivingMotorID = drivingMotorID;
-                this.steeringMotorID = steeringMotorID;
-                this.encoderID = encoderID;
-                this.drivingMotorPortOnPDP = drivingMotorPortOnPDP;
-                this.steeringMotorPortOnPDP = steeringMotorPortOnPDP;
-                this.steeringMotorInverted = false;
-            }
-        }
-        public static final WheelToBeCalibrated[] wheelsToBeCalibrated = new WheelToBeCalibrated[] {
-                new WheelToBeCalibrated("FrontLeft", 2, 1, 9),
-                new WheelToBeCalibrated("FrontRight", 4, 3, 10),
-                new WheelToBeCalibrated("BackLeft", 8, 7, 12),
-                new WheelToBeCalibrated("BackRight", 6, 5, 11)
-        };
-    }
-
     public static final class SwerveModuleConfigs {
         public static final MaplePIDController.MaplePIDConfig steerHeadingCloseLoopConfig = new MaplePIDController.MaplePIDConfig(
                 0.6,
