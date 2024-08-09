@@ -92,7 +92,7 @@ public class RobotContainer {
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
-                powerDistribution = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
+                powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
 //                drive = new SwerveDrive(
 //                        new GyroIOPigeon2(),
 //                        new ModuleIOSparkMax(0),
