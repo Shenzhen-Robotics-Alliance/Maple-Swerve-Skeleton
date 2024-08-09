@@ -81,7 +81,7 @@ public class AprilTagVision extends MapleSubsystem {
                 standardDeviationTheta = result.get().rotationalStandardDeviationRadians;
         /* don't calibrate odometry if translation error is not inside range */
         if (standardDeviationX > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD || standardDeviationY > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
-            standardDeviationTheta = standardDeviationX = standardDeviationY = Double.POSITIVE_INFINITY;
+            return Optional.empty();
         /* don't calibrate gyro if rotation error is not inside range */
         if (standardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
             standardDeviationTheta = Double.POSITIVE_INFINITY;
@@ -95,10 +95,8 @@ public class AprilTagVision extends MapleSubsystem {
     }
 
     private Pose2d displayVisionPointEstimateResult(Optional<RobotPoseEstimationResult> result) {
-        if (result.isEmpty()
-                || Double.isInfinite(result.get().translationXStandardDeviationMeters)
-                || Double.isInfinite(result.get().translationYStandardDeviationMeters))
-            return null;
+        if (result.isEmpty()) return null;
+
         if (Double.isInfinite(result.get().rotationalStandardDeviationRadians))
             return new Pose2d(result.get().pointEstimation.getTranslation(), driveSubsystem.getFacing());
         return result.get().pointEstimation;
