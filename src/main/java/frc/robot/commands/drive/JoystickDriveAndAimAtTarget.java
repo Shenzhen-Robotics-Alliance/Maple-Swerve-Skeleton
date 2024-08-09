@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
@@ -15,51 +16,58 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class JoystickDriveAndAimAtTarget extends JoystickDrive {
+public class JoystickDriveAndAimAtTarget extends Command {
+    private final MapleJoystickDriveInput input;
     private final Supplier<Translation2d> targetPositionSupplier;
     private final DoubleSupplier inAdvanceTimeSupplier;
     private final HolonomicDriveSubsystem driveSubsystem;
     private final PIDController chassisRotationController;
-    public JoystickDriveAndAimAtTarget(MapleJoystickDriveInput input, HolonomicDriveSubsystem driveSubsystem, Supplier<Translation2d> targetPositionSupplier, MapleShooterOptimization shooterOptimization) {
+
+    private final double pilotInputMultiplier;
+    public JoystickDriveAndAimAtTarget(MapleJoystickDriveInput input, HolonomicDriveSubsystem driveSubsystem, Supplier<Translation2d> targetPositionSupplier, MapleShooterOptimization shooterOptimization, double pilotInputMultiplier) {
         this(input, driveSubsystem, targetPositionSupplier,
-                () -> shooterOptimization.getFlightTimeSeconds(targetPositionSupplier.get(), driveSubsystem.getPose().getTranslation()));
+                () -> shooterOptimization.getFlightTimeSeconds(targetPositionSupplier.get(), driveSubsystem.getPose().getTranslation()), pilotInputMultiplier);
     }
 
-    public JoystickDriveAndAimAtTarget(MapleJoystickDriveInput input, HolonomicDriveSubsystem driveSubsystem, Supplier<Translation2d> targetPositionSupplier, DoubleSupplier inAdvanceTimeSupplier) {
-        super(
-                null,
-                () -> true,
-                driveSubsystem);
+    public JoystickDriveAndAimAtTarget(MapleJoystickDriveInput input, HolonomicDriveSubsystem driveSubsystem, Supplier<Translation2d> targetPositionSupplier, DoubleSupplier inAdvanceTimeSupplier, double pilotInputMultiplier) {
         this.targetPositionSupplier = targetPositionSupplier;
         this.inAdvanceTimeSupplier = inAdvanceTimeSupplier;
+        this.pilotInputMultiplier = pilotInputMultiplier;
         this.chassisRotationController = new MaplePIDController(
                 Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig
         );
 
         this.driveSubsystem = driveSubsystem;
-        super.input = new MapleJoystickDriveInput(
-                input.joystickXSupplier, input.joystickYSupplier,
-                this::getRotationalCorrectionPowerPercentClockWise
+        this.input = new MapleJoystickDriveInput(
+                () -> input.joystickXSupplier.getAsDouble() * pilotInputMultiplier,
+                () -> input.joystickYSupplier.getAsDouble() * pilotInputMultiplier,
+                () -> 0
         );
     }
 
     @Override
     public void initialize() {
         this.chassisRotationController.calculate(driveSubsystem.getRawGyroYaw().getRadians());
-        super.initialize();
+        this.chassisRotationInPosition = false;
     }
 
     @Override
     public void execute() {
-        /* disable auto stop and original rotation maintenance */
-        previousChassisUsageTimer.reset();
-        previousRotationalInputTimer.reset();
+        final ChassisSpeeds pilotInputSpeeds = input.getJoystickChassisSpeeds(
+                        driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(), driveSubsystem.getChassisMaxAngularVelocity())
+                .times(pilotInputMultiplier),
 
+                chassisSpeeds = pilotInputSpeeds.plus(new ChassisSpeeds(
+                        0, 0,
+                        getRotationalCorrectionVelocityRadPerSec()
+                ));
+
+        driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeeds);
         super.execute();
     }
 
-    public static double FEED_FORWARD_RATE = 1.3;
-    public double getRotationalCorrectionPowerPercentClockWise() {
+    public static double FEED_FORWARD_RATE = 1.3, ROTATION_TOLERANCE_DEGREES = 3;
+    public double getRotationalCorrectionVelocityRadPerSec() {
         final Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
         final ChassisSpeeds robotVelocityFieldRelative = driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
         final Translation2d robotPositionAfterDt = robotPosition.plus(new Translation2d(
@@ -84,6 +92,20 @@ public class JoystickDriveAndAimAtTarget extends JoystickDrive {
                 targetedFacingInAdvance.getRadians()),
                 feedForwardRotationalSpeed = targetedFacingChangeRateRadPerSec
                         * FEED_FORWARD_RATE;
-        return  (feedForwardRotationalSpeed + feedBackRotationalSpeed) / -driveSubsystem.getChassisMaxAngularVelocity();
+
+        final double chassisRotationalError = Math.abs(
+                targetedFacingInAdvance
+                        .minus(driveSubsystem.getFacing())
+                        .getDegrees()
+        );
+        Logger.recordOutput("Drive/Aim At Target Rational Error (Deg)", chassisRotationalError);
+        this.chassisRotationInPosition = chassisRotationalError < ROTATION_TOLERANCE_DEGREES;
+
+        return feedForwardRotationalSpeed + feedBackRotationalSpeed;
+    }
+
+    private boolean chassisRotationInPosition;
+    public boolean chassisRotationInPosition() {
+        return chassisRotationInPosition;
     }
 }
