@@ -12,6 +12,6 @@ public class FieldDisplayTest extends Command {
     @Override
     public void execute() {
         Logger.recordOutput("Test/Robot", new Pose2d(3, 3, new Rotation2d()));
-        Logger.recordOutput("Test/Mechanism", new Pose3d(-0.25, 0.245, 0.06, new Rotation3d(0, -Math.toRadians(15 + 8 + 15 * Math.sin(MapleTimeUtils.getLogTimeSeconds())), 0)));
+        Logger.recordOutput("Test/Mechanism", new Pose3d(-0.25, 0.245, 0.09, new Rotation3d(0, -Math.toRadians(15 + 8 + 15 * Math.sin(MapleTimeUtils.getLogTimeSeconds())), 0)));
     }
 }
