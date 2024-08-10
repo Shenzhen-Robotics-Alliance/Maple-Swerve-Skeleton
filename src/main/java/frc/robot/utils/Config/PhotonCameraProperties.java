@@ -10,6 +10,8 @@ import org.photonvision.simulation.SimCameraProperties;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 public class PhotonCameraProperties {
     public final String name;
@@ -37,6 +39,9 @@ public class PhotonCameraProperties {
         this.captureWidthPixels = captureWidthPixels;
         this.captureHeightPixels = captureHeightPixels;
         this.robotToCamera = robotToCamera;
+
+        System.out.println("Created photon camera: " + name + " on robot");
+        System.out.println("Advantage Scope Asset String:\n" + toAdvantageScopeAssetFixedCameraConfigurationJsonString());
     }
 
     public SimCameraProperties getSimulationProperties() {
@@ -61,7 +66,6 @@ public class PhotonCameraProperties {
                     true);
             return new ArrayList<>();
         }
-
         return loadCamerasPropertiesFromConfig(configFile);
     }
 
@@ -100,8 +104,7 @@ public class PhotonCameraProperties {
             case 1 -> 180;
             case 2 -> -90;
             case 3 -> 90;
-            default ->
-                    throw new IllegalStateException("Unexpected value: " + cameraBlock.getIntConfig("captureOrientation"));
+            default -> 0;
         };
         final Transform3d cameraInstallationToCapturedImage = new Transform3d(
                         new Translation3d(),
@@ -175,4 +178,43 @@ public class PhotonCameraProperties {
                 cameraFOVDiag.toString(), captureWidthPixels, captureHeightPixels, robotToCamera.toString());
     }
 
+    @SuppressWarnings("unchecked")
+    public String toAdvantageScopeAssetFixedCameraConfigurationJsonString() {
+        // Create the JSON object
+        JSONObject jsonObject = new JSONObject();
+
+        // Add the name
+        jsonObject.put("name", this.name);
+
+        // Add the rotations
+        JSONArray rotations = new JSONArray();
+        JSONObject rotationY = new JSONObject();
+        rotationY.put("axis", "y");
+        rotationY.put("degrees", Math.toDegrees(robotToCamera.getRotation().getY()));
+        rotations.add(rotationY);
+        JSONObject rotationZ = new JSONObject();
+        rotationZ.put("axis", "z");
+        rotationZ.put("degrees", Math.toDegrees(robotToCamera.getRotation().getZ()));
+        rotations.add(rotationZ);
+        jsonObject.put("rotations", rotations);
+
+        // Add the position
+        JSONArray position = new JSONArray();
+        position.add(robotToCamera.getX());
+        position.add(robotToCamera.getY());
+        position.add(robotToCamera.getZ());
+        jsonObject.put("position", position);
+
+        // Add the resolution
+        JSONArray resolution = new JSONArray();
+        resolution.add(captureWidthPixels);
+        resolution.add(captureHeightPixels);
+        jsonObject.put("resolution", resolution);
+
+        // Add the FOV
+        jsonObject.put("fov", cameraFOVDiag.getDegrees());
+
+        // Return the JSON string
+        return jsonObject.toJSONString(); // Convert the JSONObject to a JSON string
+    }
 }
