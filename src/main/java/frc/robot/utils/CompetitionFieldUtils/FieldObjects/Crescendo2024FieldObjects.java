@@ -2,6 +2,7 @@ package frc.robot.utils.CompetitionFieldUtils.FieldObjects;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
 import frc.robot.utils.CompetitionFieldUtils.MapleCompetitionField;
 import org.dyn4j.geometry.Geometry;
 
@@ -67,25 +68,18 @@ public final class Crescendo2024FieldObjects {
      * a note that is flying from a shooter to the speaker
      * the flight is simulated by a simple linear animation
      * */
-    public static class NoteOnFly implements MapleCompetitionField.ObjectOnFieldDisplay {
-        private final double launchingTimeStampSec, launchingHeightMeters, launchingSpeedMetersPerSec;
-        private final Translation2d positionLaunched;
-
-        public NoteOnFly(double launchingTimeStampSec, double launchingHeightMeters, double launchingSpeedMetersPerSec, Translation2d positionLaunched) {
-            this.launchingTimeStampSec = launchingTimeStampSec;
-            this.launchingHeightMeters = launchingHeightMeters;
-            this.launchingSpeedMetersPerSec = launchingSpeedMetersPerSec;
-            this.positionLaunched = positionLaunched;
+    public static class NoteOnFly extends GamePieceOnFlyDisplay {
+        public NoteOnFly(Translation3d shooterPosition, double flightTimeSeconds) {
+            super(
+                    shooterPosition,
+                    Constants.toCurrentAllianceTranslation(Constants.CrescendoField2024Constants.SPEAKER_POSE_BLUE),
+                    flightTimeSeconds
+            );
         }
 
         @Override
         public String getTypeName() {
             return "Note";
-        }
-
-        @Override
-        public Pose3d getPose3d() {
-            return null; // TODO linear interpret the position when the note is on fly
         }
     }
 }

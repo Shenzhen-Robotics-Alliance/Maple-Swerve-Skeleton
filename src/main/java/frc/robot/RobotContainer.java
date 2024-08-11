@@ -9,6 +9,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -32,6 +33,8 @@ import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.tests.*;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.Crescendo2024FieldObjects;
+import frc.robot.utils.CompetitionFieldUtils.FieldObjects.GamePieceOnFlyDisplay;
 import frc.robot.utils.CompetitionFieldUtils.Simulation.*;
 import frc.robot.utils.Config.MapleConfigFile;
 import frc.robot.utils.Config.PhotonCameraProperties;
@@ -252,6 +255,12 @@ public class RobotContainer {
                 new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(3)),
                 0.75
         ));
+
+        // for testing only
+        if (Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
+            driverController.rightTrigger(0.5).onTrue(Commands.runOnce(() -> fieldSimulation.getCompetitionField().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteOnFly(
+                    new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3), 0.5
+            ))));
     }
 
     /**

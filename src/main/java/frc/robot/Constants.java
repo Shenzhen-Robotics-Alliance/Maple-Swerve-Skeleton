@@ -9,6 +9,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -57,6 +58,8 @@ public final class Constants {
     public static final class CrescendoField2024Constants {
         public static final double FIELD_WIDTH = 16.54;
         public static final double FIELD_HEIGHT = 8.21;
+
+        public static final Translation3d SPEAKER_POSE_BLUE = new Translation3d(0, 5.55, 2.2);
     }
 
     public static final class DriveConfigs {
@@ -209,6 +212,17 @@ public final class Constants {
                     translationAtBlueSide.getY()
             );
         return translationAtBlueSide;
+    }
+
+    public static Translation3d toCurrentAllianceTranslation(Translation3d translation3dAtBlueSide) {
+        final Translation2d translation3dAtCurrentAlliance = toCurrentAllianceTranslation(translation3dAtBlueSide.toTranslation2d());
+        if (isSidePresentedAsRed())
+            return new Translation3d(
+                    translation3dAtCurrentAlliance.getX(),
+                    translation3dAtCurrentAlliance.getY(),
+                    translation3dAtBlueSide.getZ()
+            );
+        return translation3dAtBlueSide;
     }
 
     public static Pose2d toCurrentAlliancePose(Pose2d poseAtBlueSide) {
