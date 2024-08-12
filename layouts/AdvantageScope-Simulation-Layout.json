@@ -1,0 +1,556 @@
+{
+  "hubs": [
+    {
+      "x": -348,
+      "y": -864,
+      "width": 1038,
+      "height": 823,
+      "state": {
+        "sidebar": {
+          "width": 277,
+          "expanded": [
+            "/robot pos/rotation",
+            "/robot pos/translation",
+            "/desiredPosition",
+            "/calculated swerve state/swerveStates/3",
+            "/chassis/actualPosition/rotation",
+            "/chassis/actualPosition/translation",
+            "/SmartDashboard/desired swerve state",
+            "/SmartDashboard/actual swerve state",
+            "/test swerve drive",
+            "/SmartDashboard/test swerve drive",
+            "/Shuffleboard/test",
+            "/chassis/robotPosition/translation",
+            "/AprilTagVision/Inst1/Frame",
+            "/Shuffleboard/chassis physics simulation/robot angular velocity (Deg",
+            "/SmartDashboard/test field",
+            "/notesOnField",
+            "/SmartDashboard/Alerts/errors",
+            "/notePositions/1",
+            "/notePositions/1/translation",
+            "/notePositions/0",
+            "/notePositions/0/translation",
+            "/NT/chassis",
+            "/NT/AdvantageKit",
+            "/NT/SmartDashboard",
+            "/NT/Shuffleboard",
+            "/NT/Shuffleboard/chassis",
+            "/NT/Shuffleboard/other",
+            "/NT",
+            "/Log0",
+            "/Log1",
+            "/match-simulation/ opponent robot 0 desired position/rotation",
+            "/RealOutputs/chassis",
+            "/Shuffleboard/other",
+            "/Shuffleboard/led",
+            "/match-simulation",
+            "/Log0/NT/SmartDashboard/PDP",
+            "/ReplayOutputs/Odometry",
+            "/ReplayOutputs/Odometry/Robot/rotation",
+            "/AdvantageKit/Sensors",
+            "/AdvantageKit/Sensors/DigitalSwitches",
+            "/AdvantageKit/Sensors/DigitalSwitches/test switch 1",
+            "/ReplayOutputs",
+            "/AdvantageKit/RawInputs/DigitalSwitchtest switch 1",
+            "/RawInputs/DigitalSwitchtest switch 1",
+            "/Robot",
+            "/Robot/Subsystems",
+            "/Robot/Subsystems/elevator",
+            "/Robot/Subsystems/shooter",
+            "/Robot/Swerve",
+            "/Robot/Swerve/currentPose",
+            "/Robot/Swerve/frontLeft",
+            "/Robot/Swerve/frontLeft/desiredState",
+            "/Robot/Swerve/swerveModules",
+            "/Robot/Swerve/swerveModules/MAXSwerveModule[0]",
+            "/Robot/Swerve/swerveModules/MAXSwerveModule[0]/desiredState",
+            "/Robot/Swerve/swerveModules/MAXSwerveModule[0]/desiredState/angle",
+            "/AdvantageKit/RealOutputs/Kinematics Output/0",
+            "/AdvantageKit/RealOutputs/Kinematics Output/0/angle",
+            "/AdvantageKit/RealOutputs/ProcessedInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder",
+            "/RawInputs",
+            "/RawInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder/timeStamps",
+            "/RawInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder/uncalibratedEncoderPosition",
+            "/RealOutputs/ProcessedInputs",
+            "/RealOutputs/ProcessedInputs/AbsoluteRotationEncoders",
+            "/RealOutputs/ProcessedInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder",
+            "/ReplayOutputs/ProcessedInputs",
+            "/ReplayOutputs/ProcessedInputs/AbsoluteRotationEncoders",
+            "/ReplayOutputs/ProcessedInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder",
+            "/ReplayOutputs/ProcessedInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder/timeStamps",
+            "/RealOutputs/ProcessedInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder/absoluteRotationsRadian",
+            "/ReplayOutputs/ProcessedInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder/absoluteRotationsRadian",
+            "/RawInputs/AbsoluteRotationEncoders",
+            "/RawInputs/AbsoluteRotationEncoders/FrontLeftSteeringEncoder",
+            "/AdvantageKit/RealOutputs/test",
+            "/RealOutputs/test",
+            "/AdvantageKit/RealOutputs/Chassis/ModuleStates",
+            "/AdvantageKit/RealOutputs/Chassis/ModuleStates/FrontLeft",
+            "/AdvantageKit/RealOutputs/Chassis/ModuleStates/FrontLeft/swerveStateSetpoint",
+            "/AdvantageKit/RealOutputs/Chassis/ModuleStates/FrontLeft/swerveStateSetpoint/angle",
+            "/AdvantageKit/RealOutputs/Chassis/Modules",
+            "/AdvantageKit/RealOutputs/Chassis/Modules/FrontLeft/swerveStateSetpoint/angle",
+            "/AdvantageKit/RawInputs/AbsoluteRotationEncoders",
+            "/AdvantageKit/RealOutputs/ProcessedInputs/AbsoluteRotationEncoders",
+            "/AdvantageKit/RealOutputs/Chassis",
+            "/AdvantageKit/RealOutputs/ClosedLoops/MapleSimplePID",
+            "/AdvantageKit/RawInputs/RelativePositionEncoder/FrontLeftDrivingEncoder",
+            "/AdvantageKit/RawInputs/RelativePositionEncoder/FrontLeftDrivingEncoder/uncalibratedEncoderPosition",
+            "/AdvantageKit/RealOutputs/Odometer",
+            "/AdvantageKit/RealOutputs/Chassis/Modules/FrontLeft",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/0",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/1",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/2",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/3",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/4",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/0/angle",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/1/angle",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/2/angle",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/3/angle",
+            "/AdvantageKit/RealOutputs/Odometer/Cached Swerve Positions/4/angle",
+            "/AdvantageKit/RealOutputs/Chassis/Modules/FrontRight",
+            "/AdvantageKit/RealOutputs/Odometry/GyroReadings/0",
+            "/AdvantageKit/RealOutputs/Odometry/GyroReadings/1",
+            "/AdvantageKit/RealOutputs/Odometry/GyroReadings/2",
+            "/AdvantageKit/RealOutputs/Odometry/LatestSwervePositions/0",
+            "/AdvantageKit/RawInputs/AbsoluteRotationEncoders/BackLeftSteeringEncoder",
+            "/AdvantageKit/RealOutputs/Odometry/GyroReadings/3",
+            "/AdvantageKit/RealOutputs/Odometry/GyroReadings/5",
+            "/AdvantageKit/RealOutputs/Odometry/LatestRobotPosition",
+            "/AdvantageKit/RealOutputs/Odometry/LatestRobotPosition/rotation",
+            "/AdvantageKit/RealOutputs/SystemPerformance/PrePeriodicUpdatedInputsTime",
+            "/Drive/Gyro/YawPosition",
+            "/Drive/Gyro/OdometryYawPositions/0",
+            "/Drive/Module0/OdometryTurnPositions/0",
+            "/Drive/Module0/OdometryTurnPositions/1",
+            "/Drive/Module0/OdometryTurnPositions/2",
+            "/Drive/Module0/OdometryTurnPositions/3",
+            "/Drive/Module0/OdometryTurnPositions/4",
+            "/ReplayOutputs/Odometry/MeasurementTimeStamps",
+            "/Drive/Module0/OdometryTurnPositions/5",
+            "/Drive/Module3/OdometryDrivePositionsRad",
+            "/Drive/OdometryThread/measurementTimeStamps",
+            "/RealOutputs/Odometry/Robot",
+            "/ReplayOutputs/Odometry/Robot",
+            "/ReplayOutputs/Odometry/Robot/translation",
+            "/Drive/Module1/OdometryTurnPositions",
+            "/Drive/Module1/OdometryTurnPositions/0",
+            "/Drive/Module1/OdometryTurnPositions/1",
+            "/AdvantageKit/RealOutputs/SwerveStates/Measured/0",
+            "/AdvantageKit/RealOutputs/Odometry/Robot",
+            "/AdvantageKit/RealOutputs/SystemPerformance/Module0",
+            "/AdvantageKit/RealOutputs/SystemPerformance/Module1",
+            "/AdvantageKit/RealOutputs/SystemPerformance/Module2",
+            "/AdvantageKit/RealOutputs/SystemPerformance/Module3",
+            "/AdvantageKit/RealOutputs/SwerveStates/Measured/1/angle",
+            "/AdvantageKit/RealOutputs/SwerveStates/Measured/0/angle",
+            "/AdvantageKit/RealOutputs/SwerveStates/Setpoints/0",
+            "/AdvantageKit/RealOutputs/Field/OtherRobots",
+            "/chassis",
+            "/AdvantageKit/RealOutputs/PhysicsSimulations",
+            "/AdvantageKit/RealOutputs/PhysicsSimulations/ChassisWheelSpeedsFromModuleIOs",
+            "/AdvantageKit/RealOutputs/Odometry/RobotPosition/rotation",
+            "/AdvantageKit/Drive/Gyro/OdometryYawPositions/0",
+            "/AdvantageKit/RealOutputs/SwerveStates/FeedForward/FrontLeft",
+            "/AdvantageKit/Drive/Module0",
+            "/AdvantageKit/RealOutputs/JoystickDrive/rotation closed loop velocity (deg",
+            "/AdvantageKit/Drive/Module-BackLeft/OdometrySteerPositions",
+            "/AdvantageKit/RealOutputs/Field/Robots/0/translation",
+            "/AdvantageKit/RealOutputs/Field/Robot/translation",
+            "/AdvantageKit/RealOutputs/MaplePhysicsSimulation/SwerveDriveSim",
+            "/AdvantageKit/RealOutputs/MaplePhysicsSimulation/Chassis",
+            "/AdvantageKit/RealOutputs/TestPitch",
+            "/AdvantageKit/RealOutputs/Test Path distance",
+            "/RealOutputs/Odometry/RobotPosition/rotation",
+            "/RealOutputs/SwerveStates/Measured",
+            "/RealOutputs/SwerveStates/Measured/0",
+            "/AdvantageKit/RealOutputs/DummyIntake",
+            "/AdvantageKit/RealOutputs/TestPitch/lower gate",
+            "/AdvantageKit/RealOutputs/TestPitch/upper gate",
+            "/AdvantageKit/RealOutputs/Drive",
+            "/AdvantageKit/RealOutputs/Vision/Filtering",
+            "/AdvantageKit/RealOutputs/Vision/Filtering/RobotPose2dObservationsFiltered",
+            "/AdvantageKit/RealOutputs/Vision/Filtering/RobotPose3dsResults/0",
+            "/AdvantageKit/RealOutputs/Vision/Filtering/RobotPose3dsResults/0/translation",
+            "/AdvantageKit/RealOutputs/Vision/Filtering/RobotPose3dsResults/0/rotation",
+            "/AdvantageKit/RealOutputs/Vision/Filtering/RobotPose3dsResults/0/rotation/q",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Results/Estimated Pose/translation",
+            "/AdvantageKit/RealOutputs/Test",
+            "/AdvantageKit/RealOutputs/Test/pose estimation",
+            "/AdvantageKit/RealOutputs/Test/pose estimation/translation",
+            "/RealOutputs/Vision/AprilTags/Filtering",
+            "/RealOutputs/Vision/AprilTags",
+            "/RealOutputs/Vision/AprilTags/Filtering/RobotPose3dsResults",
+            "/RealOutputs/Vision/AprilTags/Filtering/RobotPose3dsResults/0",
+            "/ReplayOutputs/Vision",
+            "/ReplayOutputs/Vision/AprilTags",
+            "/ReplayOutputs/Vision/AprilTags/Filtering",
+            "/AdvantageKit/RealOutputs/TestShooter",
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Results/Estimated Pose",
+            "/RealOutputs",
+            "/ReplayOutputs/Vision/AprilTags/Results",
+            "/ReplayOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions",
+            "/RealOutputs/Vision/AprilTags/Results/Estimated Pose",
+            "/RealOutputs/Vision/AprilTags/Results/Estimated Pose/translation",
+            "/ReplayOutputs/Vision/AprilTags/Filtering/RobotPose3dsResults/0",
+            "/ReplayOutputs/Vision/AprilTags/Filtering/RobotPose3dsResults/0/translation",
+            "/AdvantageKit/RealOutputs/Intake",
+            "/AdvantageKit/Intake",
+            "/SmartDashboard/Status Light",
+            "/RealOutputs/SystemPerformance",
+            "/RealOutputs/Odometry",
+            "/Vision/AprilTags",
+            "/RealOutputs/Vision",
+            "/SmartDashboard/Field",
+            "/AdvantageKit/RealOutputs/ShooterStateOptimization",
+            "/AdvantageKit/RealOutputs/ShooterStateOptimization/ShooterFacing",
+            "/SmartDashboard/Alerts",
+            "/SmartDashboard/Alerts/warnings",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/RealOutputs/Shooter",
+            "/SmartDashboard/InterpolationTables",
+            "/SmartDashboard/InterpolationTables/MainShooter",
+            "/AdvantageKit/Shooter/Pitch",
+            "/photonvision/FrontCam",
+            "/AdvantageKit/Drive/Module-BackLeft/OdometrySteerPositions/0",
+            "/AdvantageKit/Drive/Module-BackLeft/OdometrySteerPositions/1",
+            "/AdvantageKit/PowerDistribution",
+            "/AdvantageKit/Vision",
+            "/AdvantageKit/Vision/AprilTags",
+            "/AdvantageKit/RealOutputs/Test/Mechanism",
+            "/AdvantageKit/RealOutputs/Field/Note/20",
+            "/AdvantageKit/RealOutputs/Field",
+            "/AdvantageKit/RealOutputs/Vision"
+          ]
+        },
+        "tabs": {
+          "selected": 5,
+          "tabs": [
+            {
+              "type": 0,
+              "path": "../docs/INDEX.md"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.2980561555075594,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+                      "color": "#2b66a2",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": []
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": []
+                }
+              },
+              "title": "Line Graph"
+            },
+            {
+              "type": 1,
+              "legendHeight": 0.3,
+              "legends": {
+                "left": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/AdvantageKit/RealOutputs/Shooter/Pitch Actual Position (Deg)",
+                      "color": "#2b66a2",
+                      "show": true
+                    },
+                    {
+                      "key": "NT:/AdvantageKit/RealOutputs/Shooter/Pitch Control Loop SetPoint (Deg)",
+                      "color": "#e5b31b",
+                      "show": true
+                    }
+                  ]
+                },
+                "discrete": {
+                  "fields": []
+                },
+                "right": {
+                  "lockedRange": null,
+                  "unitConversion": {
+                    "type": null,
+                    "factor": 1
+                  },
+                  "fields": [
+                    {
+                      "key": "NT:/AdvantageKit/RealOutputs/Shooter/Pitch Control Voltage",
+                      "color": "#af2437",
+                      "show": true
+                    }
+                  ]
+                }
+              },
+              "title": "Line Graph"
+            },
+            {
+              "type": 4,
+              "fields": [
+                "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+                null,
+                null
+              ],
+              "selectionType": "range",
+              "selectionRangeMin": 30,
+              "selectionRangeMax": 120,
+              "measurementType": "independent",
+              "measurementSampling": "fixed",
+              "measurementSamplingPeriod": 20,
+              "histogramMin": 0,
+              "histogramMax": 50,
+              "histogramStep": 1,
+              "title": "Statistics"
+            },
+            {
+              "type": 9,
+              "uuid": "v3rduxq6hicv0lc4f9md28vwbik8ceaa",
+              "fields": [
+                {
+                  "key": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+                  "sourceTypeIndex": 1,
+                  "sourceType": "SwerveModuleState[]"
+                },
+                null,
+                null
+              ],
+              "listFields": [],
+              "options": {
+                "maxSpeed": 4.5,
+                "rotationUnits": "radians",
+                "arrangement": "0,1,2,3",
+                "sizeLeftRight": 0.65,
+                "sizeFrontBack": 0.65,
+                "forwardDirection": "up"
+              },
+              "configHidden": false,
+              "visualizer": null,
+              "title": "Swerve"
+            },
+            {
+              "type": 6,
+              "uuid": "3jgcb77605yuam6hhn1qlcgydiu5cklf",
+              "fields": [],
+              "listFields": [
+                [
+                  {
+                    "type": "Game Piece 0",
+                    "key": "NT:/AdvantageKit/RealOutputs//Field/Note",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  },
+                  {
+                    "type": "Component (Robot)",
+                    "key": "NT:/AdvantageKit/RealOutputs/Shooter/MechanismPose",
+                    "sourceTypeIndex": 1,
+                    "sourceType": "Pose3d"
+                  },
+                  {
+                    "type": "Game Piece 0",
+                    "key": "NT:/AdvantageKit/RealOutputs/Shooter/NoteInShooter",
+                    "sourceTypeIndex": 1,
+                    "sourceType": "Pose3d"
+                  },
+                  {
+                    "type": "AprilTag 36h11",
+                    "key": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions/",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  },
+                  {
+                    "type": "Vision Target",
+                    "key": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "sourceTypeIndex": 2,
+                    "sourceType": "Pose3d[]"
+                  }
+                ],
+                [
+                  {
+                    "type": "Robot",
+                    "key": "NT:/AdvantageKit/RealOutputs//Field/Robot",
+                    "sourceTypeIndex": 1,
+                    "sourceType": "Pose2d"
+                  },
+                  {
+                    "type": "Yellow Ghost",
+                    "key": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Results/Estimated Pose",
+                    "sourceTypeIndex": 1,
+                    "sourceType": "Pose2d"
+                  }
+                ]
+              ],
+              "options": {
+                "field": "2024 Field",
+                "alliance": "blue",
+                "robot": "Firefox",
+                "unitDistance": "meters",
+                "unitRotation": "radians"
+              },
+              "configHidden": false,
+              "visualizer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  -12.762359774598426,
+                  9.663903994255952,
+                  -1.049588138396124
+                ],
+                "cameraTarget": [
+                  1.1948939798174762,
+                  -1.631171342050277,
+                  -0.7554903381262129
+                ]
+              },
+              "title": "3D Field"
+            },
+            {
+              "type": 8,
+              "uuid": "97xmdvi1haepvoi1wae3eppt41peigt1",
+              "fields": [],
+              "listFields": [],
+              "options": {
+                "ids": [
+                  0,
+                  1,
+                  2
+                ],
+                "layouts": [
+                  "Xbox Controller (White)",
+                  "None",
+                  "None"
+                ]
+              },
+              "configHidden": false,
+              "visualizer": null,
+              "title": "Joysticks"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [
+    {
+      "x": 675,
+      "y": -860,
+      "width": 476,
+      "height": 357,
+      "state": {
+        "type": 6,
+        "visualizer": {
+          "cameraIndex": 1,
+          "orbitFov": 50,
+          "cameraPosition": [
+            -4.418674090818925,
+            0.20000000000000095,
+            2.151137455571344
+          ],
+          "cameraTarget": [
+            0,
+            0.5,
+            0
+          ]
+        }
+      },
+      "uuid": "3jgcb77605yuam6hhn1qlcgydiu5cklf"
+    },
+    {
+      "x": 1241,
+      "y": -860,
+      "width": 408,
+      "height": 306,
+      "state": {
+        "type": 6,
+        "visualizer": {
+          "cameraIndex": 3,
+          "orbitFov": 50,
+          "cameraPosition": [
+            -4.184322749595476,
+            0.20000000000000093,
+            2.064077425323415
+          ],
+          "cameraTarget": [
+            0,
+            0.5,
+            0
+          ]
+        }
+      },
+      "uuid": "3jgcb77605yuam6hhn1qlcgydiu5cklf"
+    },
+    {
+      "x": 787,
+      "y": -547,
+      "width": 484,
+      "height": 363,
+      "state": {
+        "type": 6,
+        "visualizer": {
+          "cameraIndex": 0,
+          "orbitFov": 50,
+          "cameraPosition": [
+            -4.1548644874003715,
+            0.2000000000000009,
+            1.9997951510291392
+          ],
+          "cameraTarget": [
+            0,
+            0.5,
+            0
+          ]
+        }
+      },
+      "uuid": "3jgcb77605yuam6hhn1qlcgydiu5cklf"
+    },
+    {
+      "x": 1186,
+      "y": -489,
+      "width": 526,
+      "height": 395,
+      "state": {
+        "type": 6,
+        "visualizer": {
+          "cameraIndex": 2,
+          "orbitFov": 50,
+          "cameraPosition": [
+            -3.8562308718826466,
+            0.20000000000000087,
+            1.942193382976314
+          ],
+          "cameraTarget": [
+            0,
+            0.5,
+            0
+          ]
+        }
+      },
+      "uuid": "3jgcb77605yuam6hhn1qlcgydiu5cklf"
+    }
+  ],
+  "version": "3.2.1"
+}
