@@ -37,7 +37,7 @@ This allows drivers to practice defense/offense.
 
 Odometry Simulation with realistic characteristics such as skidding and the IMU drifts.  
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/subsystems/drive/IO/ModuleIOSim.java) | [Video](https://youtu.be/ersRWIzC0zc)]
-![Odometry Sim](./media/odometrysim.gif)
+![Odometry Sim](media/odometrysim.gif)
 ### Vision Simulation with
 Built Upon [PhotonLib Camera Sim](https://docs.photonvision.org/en/latest/docs/simulation/simulation.html), our vision simulation behaves exactly the same as a real vision system
 The system uses April Tags to position the robot on field, and teams can tune the system without a field
