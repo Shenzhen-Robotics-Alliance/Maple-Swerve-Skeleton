@@ -10,9 +10,11 @@
 
 ## Simulation Details
 
-A complete-real simulation with [dyn4j physics engine](https://github.com/dyn4j/dyn4j)
+### The Field has Collision Space
+The greatest distinction of the project is the implementation of [dyn4j](https://github.com/dyn4j/dyn4j), an open-source java physics engine, which enables us to add a collision detection for everything on the field, including obstacles, robots and game pieces.
+![robot_physics_simulation.gif](media/robot_physics_simulation.gif)
 
-### Swerve-Drive Physics Simulation, 
+### Swerve-Drive Physics Simulation
 Fine-tuned with data measured in our training field, the swerve drive simulation provides an incredibly realistic drivetrain characteristics.
 It simulates the behavior of each individual swerve module using [WPILib DCMotorSim](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html) and use the data from 4 modules together to simulate the force on the drivetrain. 
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CompetitionFieldUtils/Simulations/SwerveDriveSimulation.java)]
