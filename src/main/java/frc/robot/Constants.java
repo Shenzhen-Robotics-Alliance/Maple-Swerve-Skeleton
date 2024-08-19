@@ -4,8 +4,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -14,10 +16,11 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.utils.MechanismControl.MaplePIDController;
+import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.photonvision.PhotonPoseEstimator;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -59,10 +62,12 @@ public final class Constants {
         public static final double FIELD_WIDTH = 16.54;
         public static final double FIELD_HEIGHT = 8.21;
 
-        public static final Translation3d SPEAKER_POSE_BLUE = new Translation3d(0, 5.55, 2.2);
+        public static final Translation3d SPEAKER_POSE_BLUE = new Translation3d(0.1, 5.55, 2.2);
+
+        public static final Supplier<Translation2d> SPEAKER_POSITION_SUPPLIER = () -> toCurrentAllianceTranslation(SPEAKER_POSE_BLUE.toTranslation2d());
     }
 
-    public static final class DriveConfigs {
+    public static final class DriverJoystickConfigs {
         public static final double nonUsageTimeResetWheels = 1;
 
         public static final double deadBandWhenOtherAxisEmpty = 0.02;
@@ -93,7 +98,7 @@ public final class Constants {
         public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
 
         public static final MaplePIDController.MaplePIDConfig chassisRotationalPIDConfig = new MaplePIDController.MaplePIDConfig(
-                Math.toRadians(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND),
+                Math.toRadians(360),
                 Math.toRadians(60),
                 0.02,
                 Math.toRadians(3),
@@ -101,10 +106,10 @@ public final class Constants {
                 true,
                 0
         );
-        public static final TrapezoidProfile.Constraints chassisRotationalConstraints = new TrapezoidProfile.Constraints(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND, ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND / 0.6);
+        public static final TrapezoidProfile.Constraints chassisRotationalConstraints = new TrapezoidProfile.Constraints(Math.toRadians(540), Math.toRadians(540) / 0.6);
 
         public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfig = new MaplePIDController.MaplePIDConfig(
-                ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND,
+                3,
                 0.6,
                 0.01,
                 0.03,
@@ -112,36 +117,36 @@ public final class Constants {
                 false,
                 0
         );
-    }
 
-    public static final class ChassisDefaultConfigs {
-        public static final int DEFAULT_GYRO_PORT = 0;
-        public static final double DEFAULT_GEAR_RATIO = 6.12;
-        public static final double DEFAULT_WHEEL_RADIUS_METERS = 0.051; // 2 inch
-        public static final double DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS = 0.53;
-        public static final double DEFAULT_VERTICAL_WHEELS_MARGIN_METERS = 0.53;
-        public static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 4.172; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
-        public static final double DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND = 10.184; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
-        public static final double DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND = 540;
-        public static final double DEFAULT_MAX_ANGULAR_ACCELERATION_DEGREES_PER_SECOND_SQUARE = 540;
+        public static final MaplePIDController.MaplePIDConfig chassisTranslationPIDConfigPathFollowing = new MaplePIDController.MaplePIDConfig(
+                2,
+                1.2,
+                0,
+                0.03,
+                0,
+                false,
+                0
+        );
     }
 
     public static final class SwerveModuleConfigs {
         public static final MaplePIDController.MaplePIDConfig steerHeadingCloseLoopConfig = new MaplePIDController.MaplePIDConfig(
-                0.7,
+                0.5,
                 Math.toRadians(90),
-                0.01,
+                0.02,
                 Math.toRadians(1.5),
                 0,
                 true,
                 0
         );
         public static final double STEERING_CURRENT_LIMIT = 20;
-        public static final double DRIVING_CURRENT_LIMIT = 50;
+        public static final double DRIVING_CURRENT_LIMIT = 40;
         public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+
+        public static final SimpleMotorFeedforward DRIVE_OPEN_LOOP = new SimpleMotorFeedforward(0.01, 2.03);
     }
 
-    public static final class RobotPhysicsSimulationConfigs {
+    public static final class DriveTrainPhysicsSimulationConstants {
         public static final int SIM_ITERATIONS_PER_ROBOT_PERIOD = 5;
 
         /* Swerve Module Simulation */
@@ -232,8 +237,19 @@ public final class Constants {
         );
     }
 
+    public static PathPlannerPath toCurrentAlliancePath(PathPlannerPath pathAtBlueAlliance) {
+        return isSidePresentedAsRed() ? pathAtBlueAlliance.flipPath() : pathAtBlueAlliance;
+    }
+
     public static boolean isSidePresentedAsRed() {
         final Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
         return alliance.isPresent() && alliance.get().equals(DriverStation.Alliance.Red);
+    }
+
+    public static Rotation2d getDriverStationFacing() {
+        return switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
+            case Red -> new Rotation2d(Math.PI);
+            case Blue -> new Rotation2d(0);
+        };
     }
 }

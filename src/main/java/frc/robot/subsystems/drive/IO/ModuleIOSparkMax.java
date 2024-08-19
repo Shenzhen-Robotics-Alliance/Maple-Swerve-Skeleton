@@ -156,8 +156,8 @@ public class ModuleIOSparkMax implements ModuleIO {
     }
 
     @Override
-    public void setDriveSpeedPercent(double speedPercent) {
-        driveSparkMax.set(speedPercent);
+    public void setDriveVoltage(double volts) {
+        driveSparkMax.set(volts / RobotController.getBatteryVoltage());
     }
 
     @Override

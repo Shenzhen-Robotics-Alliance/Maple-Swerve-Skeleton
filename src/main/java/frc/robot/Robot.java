@@ -63,8 +63,6 @@ public class Robot extends LoggedRobot {
 
         // Start AdvantageKit logger
         Logger.start();
-
-        MapleSubsystem.subsystemsInit();
     }
 
     /**
@@ -73,7 +71,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         if (CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
-            robotContainer.updateSimulationWorld();
+            robotContainer.updateFieldSimAndDisplay();
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
     }
@@ -90,7 +88,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void disabledPeriodic() {
-        robotContainer.rebindKeysIfChanged();
+        robotContainer.checkForCommandChanges();
     }
 
     /**
@@ -125,7 +123,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        robotContainer.rebindKeysIfChanged();
+
     }
 
     /**
@@ -135,7 +133,6 @@ public class Robot extends LoggedRobot {
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-        CommandScheduler.getInstance().unregisterAllSubsystems();
         CommandScheduler.getInstance().schedule(robotContainer.getTestCommand());
     }
 

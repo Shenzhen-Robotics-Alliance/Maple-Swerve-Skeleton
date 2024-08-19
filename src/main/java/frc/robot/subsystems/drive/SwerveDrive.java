@@ -17,12 +17,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.Alert;
-import frc.robot.utils.Config.MapleConfigFile;
-
+import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -32,11 +32,12 @@ import static frc.robot.Constants.VisionConfigs.*;
 public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
     public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec, maxLinearAccelerationMetersPerSecSq;
     private final GyroIO gyroIO;
-    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+    private final GyroIOInputsAutoLogged gyroInputs;
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
     private final SwerveModule[] swerveModules;
 
     private final Translation2d[] MODULE_TRANSLATIONS;
+    private final double DRIVE_BASE_RADIUS;
     public final SwerveDriveKinematics kinematics;
     private Rotation2d rawGyroRotation;
     private final SwerveModulePosition[] lastModulePositions;
@@ -47,6 +48,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
         super("Drive");
         this.gyroIO = gyroIO;
+        this.gyroInputs = new GyroIOInputsAutoLogged();
         this.rawGyroRotation = new Rotation2d();
         this.swerveModules = new SwerveModule[] {
                 new SwerveModule(frontLeftModuleIO, "FrontLeft"),
@@ -56,8 +58,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         };
 
         final double horizontalWheelsMarginMeters = generalConfigBlock.getDoubleConfig("horizontalWheelsMarginMeters"),
-                verticalWheelsMarginMeters = generalConfigBlock.getDoubleConfig("verticalWheelsMarginMeters"),
-                driveBaseRadius = Math.hypot(horizontalWheelsMarginMeters/2, verticalWheelsMarginMeters/2);
+                verticalWheelsMarginMeters = generalConfigBlock.getDoubleConfig("verticalWheelsMarginMeters");
+        DRIVE_BASE_RADIUS = Math.hypot(horizontalWheelsMarginMeters/2, verticalWheelsMarginMeters/2);
 
         this.maxModuleVelocityMetersPerSec = generalConfigBlock.getDoubleConfig("maxVelocityMetersPerSecond");
         this.maxAngularVelocityRadPerSec = generalConfigBlock.getDoubleConfig("maxAngularVelocityRadiansPerSecond");
@@ -76,19 +78,14 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION)
         );
 
-        configHolonomicPathPlannerAutoBuilder(driveBaseRadius);
-
         this.odometryThread = OdometryThread.createInstance();
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 
         gyroDisconnectedAlert.setActivated(false);
         visionNoResultAlert.setActivated(false);
-    }
 
-    @Override
-    public void onReset() {
-
+        startDashboardDisplay();
     }
 
     @Override
@@ -256,7 +253,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override public double getChassisMaxLinearVelocityMetersPerSec() {return maxModuleVelocityMetersPerSec;}
     @Override public double getChassisMaxAccelerationMetersPerSecSq() {return maxLinearAccelerationMetersPerSecSq;}
     @Override public double getChassisMaxAngularVelocity() {return maxAngularVelocityRadPerSec;}
-    @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return Constants.ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_ACCELERATION_DEGREES_PER_SECOND_SQUARE;}
+    @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return maxAngularVelocityRadPerSec / 0.7;}
 
     @Override
     public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {
@@ -268,5 +265,25 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override
     public double getPreviousVisionMeasurementTimeStamp() {
         return previousMeasurementTimeStamp;
+    }
+
+    private void startDashboardDisplay() {
+        SmartDashboard.putData("Swerve Drive", builder -> {
+            builder.setSmartDashboardType("SwerveDrive");
+
+            builder.addDoubleProperty("Front Left Angle", () -> swerveModules[0].getSteerFacing().getRadians(), null);
+            builder.addDoubleProperty("Front Left Velocity", () -> swerveModules[0].getDriveVelocityMetersPerSec(), null);
+
+            builder.addDoubleProperty("Front Right Angle", () -> swerveModules[0].getSteerFacing().getRadians(), null);
+            builder.addDoubleProperty("Front Right Velocity", () -> swerveModules[0].getDriveVelocityMetersPerSec(), null);
+
+            builder.addDoubleProperty("Back Left Angle", () -> swerveModules[0].getSteerFacing().getRadians(), null);
+            builder.addDoubleProperty("Back Left Velocity", () -> swerveModules[0].getDriveVelocityMetersPerSec(), null);
+
+            builder.addDoubleProperty("Back Right Angle", () -> swerveModules[0].getSteerFacing().getRadians(), null);
+            builder.addDoubleProperty("Back Right Velocity", () -> swerveModules[0].getDriveVelocityMetersPerSec(), null);
+
+            builder.addDoubleProperty("Robot Angle", () -> getFacing().minus(Constants.getDriverStationFacing()).getRadians(), null);
+        });
     }
 }

@@ -12,11 +12,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class OdometryThreadReal extends Thread implements OdometryThread {
-    private final OdometryThread.OdometryDoubleInput[] odometryDoubleInputs;
+    private final OdometryDoubleInput[] odometryDoubleInputs;
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
     private final Lock lock = new ReentrantLock();
-    public OdometryThreadReal(OdometryThread.OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
+    public OdometryThreadReal(OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
         this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.SwerveDriveChassisConfigs.ODOMETRY_CACHE_CAPACITY);
         this.odometryDoubleInputs = odometryDoubleInputs;
         this.statusSignals = statusSignals;
@@ -42,7 +42,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
 
         lock.lock();
         timeStampsQueue.offer(estimateAverageTimeStamps());
-        for(OdometryThread.OdometryDoubleInput odometryDoubleInput : odometryDoubleInputs)
+        for(OdometryDoubleInput odometryDoubleInput : odometryDoubleInputs)
             odometryDoubleInput.cacheInputToQueue();
         lock.unlock();
     }

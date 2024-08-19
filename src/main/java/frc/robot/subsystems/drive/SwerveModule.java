@@ -15,17 +15,17 @@ import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.Alert;
-import frc.robot.utils.MapleMaths.SwerveStateProjection;
-import frc.robot.utils.MechanismControl.InterpolatedMotorFeedForward;
-import frc.robot.utils.MechanismControl.MaplePIDController;
+import frc.robot.utils.CustomMaths.SwerveStateProjection;
+import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.Constants.SwerveModuleConfigs.DRIVE_OPEN_LOOP;
 
 public class SwerveModule extends MapleSubsystem {
     private final ModuleIO io;
     private final String name;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
 
-    private final InterpolatedMotorFeedForward driveOpenLoop;
     private final PIDController turnCloseLoop;
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
@@ -42,25 +42,19 @@ public class SwerveModule extends MapleSubsystem {
         );
         this.hardwareFaultAlert.setActivated(false);
 
-        driveOpenLoop = InterpolatedMotorFeedForward.fromDeployedDirectory("DrivingMotorOpenLoop");
         turnCloseLoop = new MaplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);
 
+        setPoint = new SwerveModuleState();
+        turnCloseLoop.calculate(getSteerFacing().getRadians()); // activate close loop controller
         io.setDriveBrake(true);
         io.setSteerBrake(true);
     }
 
-    @Override
-    public void onReset() {
-        setPoint = new SwerveModuleState();
-        onDisable();
-        turnCloseLoop.calculate(getSteerFacing().getRadians()); // activate close loop controller
-    }
-
     public void updateOdometryInputs() {
         io.updateInputs(inputs);
-        Logger.processInputs("Drive/Module-" + name, inputs);
+        // Logger.processInputs("Drive/Module-" + name, inputs);
         this.hardwareFaultAlert.setActivated(!inputs.hardwareConnected);
     }
 
@@ -86,8 +80,8 @@ public class SwerveModule extends MapleSubsystem {
     private void runDriveOpenLoop() {
         final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
         Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/required velocity", adjustSpeedSetpointMetersPerSec);
-        Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/corresponding power (mag)", driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
-        io.setDriveSpeedPercent(driveOpenLoop.calculate(adjustSpeedSetpointMetersPerSec));
+        Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/corresponding power (mag)", DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec));
+        io.setDriveVoltage(DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec));
     }
 
     /**
@@ -105,7 +99,7 @@ public class SwerveModule extends MapleSubsystem {
     @Override
     public void onDisable() {
         io.setSteerPowerPercent(0);
-        io.setDriveSpeedPercent(0);
+        io.setDriveVoltage(0);
     }
 
     /**

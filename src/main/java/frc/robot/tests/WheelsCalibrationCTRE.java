@@ -9,12 +9,23 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants;
-import frc.robot.utils.Config.MapleConfigFile;
-import frc.robot.utils.MapleMaths.Angles;
+import frc.robot.utils.CustomConfigs.MapleConfigFile;
+import frc.robot.utils.CustomMaths.Angles;
 
 import java.io.IOException;
 
 public class WheelsCalibrationCTRE extends Command {
+    public static final class ChassisDefaultConfigs {
+        public static final int DEFAULT_GYRO_PORT = 0;
+        public static final double DEFAULT_GEAR_RATIO = 6.12;
+        public static final double DEFAULT_WHEEL_RADIUS_METERS = 0.051; // 2 inch
+        public static final double DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS = 0.53;
+        public static final double DEFAULT_VERTICAL_WHEELS_MARGIN_METERS = 0.53;
+        public static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 4.172; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
+        public static final double DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND = 10.184; // calculated from Choreo (Kraken x60 motor, 6.12 gear ratio, 55kg robot mass)
+        public static final double DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND = 540;
+    }
+
     public static final class WheelToBeCalibrated {
         public final String name;
         public final int drivingMotorID, steeringMotorID, encoderID, drivingMotorPortOnPDP, steeringMotorPortOnPDP;
@@ -136,18 +147,18 @@ public class WheelsCalibrationCTRE extends Command {
     public void end(boolean interrupted) {
         System.out.println("writing configs to usb");
         final MapleConfigFile.ConfigBlock configBlock = calibrationFile.getBlock("GeneralInformation");
-        configBlock.putIntConfig("gyroPort", Constants.ChassisDefaultConfigs.DEFAULT_GYRO_PORT);
-        configBlock.putDoubleConfig("overallGearRatio", Constants.ChassisDefaultConfigs.DEFAULT_GEAR_RATIO);
-        configBlock.putDoubleConfig("wheelRadiusMeters", Constants.ChassisDefaultConfigs.DEFAULT_WHEEL_RADIUS_METERS);
-        configBlock.putDoubleConfig("horizontalWheelsMarginMeters", Constants.ChassisDefaultConfigs.DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS);
-        configBlock.putDoubleConfig("verticalWheelsMarginMeters", Constants.ChassisDefaultConfigs.DEFAULT_VERTICAL_WHEELS_MARGIN_METERS);
-        configBlock.putDoubleConfig("maxVelocityMetersPerSecond", Constants.ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND);
-        configBlock.putDoubleConfig("maxAccelerationMetersPerSecondSquared", Constants.ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND);
-        configBlock.putDoubleConfig("maxAngularVelocityRadiansPerSecond", Math.toRadians(Constants.ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND));
+        configBlock.putIntConfig("gyroPort", ChassisDefaultConfigs.DEFAULT_GYRO_PORT);
+        configBlock.putDoubleConfig("overallGearRatio", ChassisDefaultConfigs.DEFAULT_GEAR_RATIO);
+        configBlock.putDoubleConfig("wheelRadiusMeters", ChassisDefaultConfigs.DEFAULT_WHEEL_RADIUS_METERS);
+        configBlock.putDoubleConfig("horizontalWheelsMarginMeters", ChassisDefaultConfigs.DEFAULT_HORIZONTAL_WHEELS_MARGIN_METERS);
+        configBlock.putDoubleConfig("verticalWheelsMarginMeters", ChassisDefaultConfigs.DEFAULT_VERTICAL_WHEELS_MARGIN_METERS);
+        configBlock.putDoubleConfig("maxVelocityMetersPerSecond", ChassisDefaultConfigs.DEFAULT_MAX_VELOCITY_METERS_PER_SECOND);
+        configBlock.putDoubleConfig("maxAccelerationMetersPerSecondSquared", ChassisDefaultConfigs.DEFAULT_MAX_ACCELERATION_METERS_PER_SQUARED_SECOND);
+        configBlock.putDoubleConfig("maxAngularVelocityRadiansPerSecond", Math.toRadians(ChassisDefaultConfigs.DEFAULT_MAX_ANGULAR_VELOCITY_DEGREES_PER_SECOND));
 
-        configBlock.putDoubleConfig("bumperWidthMeters", Constants.RobotPhysicsSimulationConfigs.DEFAULT_BUMPER_WIDTH_METERS);
-        configBlock.putDoubleConfig("bumperLengthMeters", Constants.RobotPhysicsSimulationConfigs.DEFAULT_BUMPER_LENGTH_METERS);
-        configBlock.putDoubleConfig("robotMassInSimulation", Constants.RobotPhysicsSimulationConfigs.DEFAULT_ROBOT_MASS);
+        configBlock.putDoubleConfig("bumperWidthMeters", Constants.DriveTrainPhysicsSimulationConstants.DEFAULT_BUMPER_WIDTH_METERS);
+        configBlock.putDoubleConfig("bumperLengthMeters", Constants.DriveTrainPhysicsSimulationConstants.DEFAULT_BUMPER_LENGTH_METERS);
+        configBlock.putDoubleConfig("robotMassInSimulation", Constants.DriveTrainPhysicsSimulationConstants.DEFAULT_ROBOT_MASS);
 
         for (WheelToBeCalibrated wheelToBeCalibrated: WHEELS_TO_BE_CALIBRATED)
             saveConfigurationForCurrentWheel(wheelToBeCalibrated);

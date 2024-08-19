@@ -23,7 +23,7 @@ public class AutoAlignment extends SequentialCommandGroup {
      * 2. accurate auto alignment
      * */
     public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> roughTarget, Supplier<Pose2d> target, Pose2d tolerance, double speedMultiplier) {
-        this(driveSubsystem, roughTarget, target, tolerance, speedMultiplier, Commands.run(()->{}), Commands.run(()->{}));
+        this(driveSubsystem, roughTarget, target, tolerance, speedMultiplier, Commands.runOnce(()->{}), Commands.runOnce(()->{}));
     }
 
     /**
@@ -35,10 +35,11 @@ public class AutoAlignment extends SequentialCommandGroup {
      * */
     public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> roughTarget, Supplier<Pose2d> target, Pose2d tolerance, double speedMultiplier, Command toRunDuringRoughApproach, Command toRunDuringPrecise) {
         final Command pathFindToTargetRough = new PathFindToPose(driveSubsystem, roughTarget, speedMultiplier),
-                preciseAlignment = new DriveToPosition(
+                preciseAlignment = new DriveToPose(
                         driveSubsystem,
                         target,
-                        tolerance
+                        tolerance,
+                        2
                 );
 
         super.addRequirements(driveSubsystem);

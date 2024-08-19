@@ -8,8 +8,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.utils.Config.PhotonCameraProperties;
-import frc.robot.utils.MapleMaths.Statistics;
+import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
+import frc.robot.utils.CustomMaths.Statistics;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;

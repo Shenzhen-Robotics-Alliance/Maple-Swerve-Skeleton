@@ -15,9 +15,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
+import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.LocalADStarAK;
 import org.littletonrobotics.junction.Logger;
 
@@ -81,10 +81,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      * */
     default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds) {
-        final Rotation2d driverStationFacing = switch (DriverStation.getAlliance().orElse(DriverStation.Alliance.Red)) {
-            case Red -> new Rotation2d(Math.PI);
-            case Blue -> new Rotation2d(0);
-        };
+        final Rotation2d driverStationFacing = Constants.getDriverStationFacing();
         runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 driverStationCentricSpeeds,
                 getPose().getRotation().minus(driverStationFacing)
@@ -114,19 +111,29 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02));
     }
 
-    default void configHolonomicPathPlannerAutoBuilder(double driveBaseRadius) {
+    default void configHolonomicPathPlannerAutoBuilder(CompetitionFieldVisualizer fieldVisualizer) {
         AutoBuilder.configureHolonomic(
                 this::getPose,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricChassisSpeeds,
-                new HolonomicPathFollowerConfig(getChassisMaxLinearVelocityMetersPerSec(), driveBaseRadius, new ReplanningConfig()),
+                new HolonomicPathFollowerConfig(
+                        Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfigPathFollowing.toPathPlannerPIDConstants(),
+                        Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig.toPathPlannerPIDConstants(),
+                        getChassisMaxLinearVelocityMetersPerSec(),
+                        getChassisMaxLinearVelocityMetersPerSec() / getChassisMaxAngularVelocity(),
+                        new ReplanningConfig(false, true)
+                ),
                 Constants::isSidePresentedAsRed,
                 this
         );
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> Logger.recordOutput("Odometry/Trajectory", activePath.toArray(new Pose2d[0]))
+                (activePath) -> {
+                    final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
+                    Logger.recordOutput("Odometry/Trajectory", trajectory);
+                    fieldVisualizer.displayTrajectory(trajectory);
+                }
         );
         PathPlannerLogging.setLogTargetPoseCallback(
                 (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
@@ -134,7 +141,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     }
 
     static boolean isZero(ChassisSpeeds chassisSpeeds) {
-        return chassisSpeeds.omegaRadiansPerSecond == 0 && chassisSpeeds.vxMetersPerSecond == 0 && chassisSpeeds.vyMetersPerSecond == 0;
+        return Math.abs(chassisSpeeds.omegaRadiansPerSecond) < Math.toRadians(5) && Math.abs(chassisSpeeds.vxMetersPerSecond) < 0.05 && Math.abs(chassisSpeeds.vyMetersPerSecond) < 0.05;
     }
 
     default ChassisSpeeds constrainAcceleration(
@@ -142,9 +149,9 @@ public interface HolonomicDriveSubsystem extends Subsystem {
             double dtSecs) {
         final double
                 MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = getChassisMaxLinearVelocityMetersPerSec()
-                / Constants.DriveConfigs.linearAccelerationSmoothOutSeconds,
+                / Constants.DriverJoystickConfigs.linearAccelerationSmoothOutSeconds,
                 MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = getChassisMaxAngularVelocity()
-                / Constants.DriveConfigs.angularAccelerationSmoothOutSeconds;
+                / Constants.DriverJoystickConfigs.angularAccelerationSmoothOutSeconds;
 
         Translation2d currentLinearVelocityMetersPerSec = new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
                 desiredLinearVelocityMetersPerSec = new Translation2d(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond),

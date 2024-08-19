@@ -1,28 +1,20 @@
 package frc.robot.autos;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.Constants;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
-import frc.robot.commands.drive.FollowPathPP;
-import frc.robot.utils.MaplePathPlannerLoader;
 
-public class ExampleAuto extends Auto {
-    private final Pose2d startingPose;
-    public ExampleAuto(RobotContainer robot) {
-        super();
-        super.setName("Example Auto");
-        super.addRequirements(robot.drive);
-
-        final PathPlannerPath testPath = MaplePathPlannerLoader.fromPathFile(
-                "Test Path", robot.drive.getChassisConstrains(1)
-        );
-        this.startingPose = testPath.getPreviewStartingHolonomicPose();
-        super.addCommands(new FollowPathPP(testPath, Constants::isSidePresentedAsRed, robot.drive));
+public class ExampleAuto implements Auto {
+    @Override
+    public Command getAutoCommand(RobotContainer robot) {
+        return AutoBuilder.followPath(PathPlannerPath.fromPathFile("Example Path"));
     }
 
     @Override
     public Pose2d getStartingPoseAtBlueAlliance() {
-        return startingPose;
+        return new Pose2d(1.3, 7.2, Rotation2d.fromDegrees(180));
     }
 }

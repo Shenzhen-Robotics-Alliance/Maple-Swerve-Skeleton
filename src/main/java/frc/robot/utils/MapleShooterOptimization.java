@@ -3,13 +3,20 @@ package frc.robot.utils;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.utils.Config.MapleConfigFile;
-import frc.robot.utils.Config.MapleInterpolationTable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
+import frc.robot.utils.CustomConfigs.MapleConfigFile;
+import frc.robot.utils.CustomConfigs.MapleInterpolationTable;
 import org.littletonrobotics.junction.Logger;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
-import static frc.robot.utils.Config.MapleInterpolationTable.Variable;
+import static frc.robot.utils.CustomConfigs.MapleInterpolationTable.Variable;
 
 public class MapleShooterOptimization {
     public static final class ShooterState {
@@ -62,11 +69,26 @@ public class MapleShooterOptimization {
 
         this.minShootingDistance = table.minX;
         this.maxShootingDistance = table.maxX;
+
+        SmartDashboard.putData(
+                "InterpolationTables/" + table.tableName + "/SaveConfigsToUSB",
+                Commands.runOnce(this::saveConfigsToUSBIfExist)
+        );
     }
 
     public double getFlightTimeSeconds(Translation2d targetPosition, Translation2d robotPosition) {
         final double distanceToTargetMeters = targetPosition.getDistance(robotPosition);
         return table.interpolateVariable("Flight-Time", distanceToTargetMeters);
+    }
+
+    public Rotation2d getShooterFacing(Translation2d targetPosition, Translation2d robotPosition, ChassisSpeeds robotVelocityFieldRelative) {
+        final double flightTime = getFlightTimeSeconds(targetPosition, robotPosition);
+        final Translation2d robotPositionAfterFlightTime = robotPosition.plus(new Translation2d(
+                robotVelocityFieldRelative.vxMetersPerSecond * flightTime,
+                robotVelocityFieldRelative.vyMetersPerSecond * flightTime
+        ));
+
+        return targetPosition.minus(robotPositionAfterFlightTime).getAngle();
     }
 
     public ShooterState getOptimizedShootingState(Translation2d targetPosition, Translation2d robotPosition, ChassisSpeeds robotVelocityFieldRelative) {
@@ -109,7 +131,52 @@ public class MapleShooterOptimization {
         return new MapleShooterOptimization(name, interpolationTable);
     }
 
-    public void saveConfigsToDeploy() {
+    public void saveConfigsToUSBIfExist() {
         table.toConfigFile("ShooterOptimization").saveConfigToUSBSafe();
+    }
+
+    public static class ChassisAimAtSpeakerDuringAuto extends Command {
+        private final AtomicReference<Optional<Rotation2d>> rotationalTargetOverride;
+        private final Supplier<Translation2d> targetPositionSupplier;
+        private final HolonomicDriveSubsystem driveSubsystem;
+        private final MapleShooterOptimization shooterOptimization;
+        public ChassisAimAtSpeakerDuringAuto(AtomicReference<Optional<Rotation2d>> rotationalTargetOverride, Supplier<Translation2d> targetPositionSupplier, HolonomicDriveSubsystem driveSubsystem, MapleShooterOptimization shooterOptimization) {
+            this.rotationalTargetOverride = rotationalTargetOverride;
+            this.targetPositionSupplier = targetPositionSupplier;
+            this.driveSubsystem = driveSubsystem;
+            this.shooterOptimization = shooterOptimization;
+        }
+
+        Rotation2d desiredChassisFacing = new Rotation2d();
+        boolean complete = false;
+
+        @Override
+        public void initialize() {
+            complete = false;
+        }
+
+        @Override
+        public void execute() {
+            desiredChassisFacing = shooterOptimization.getShooterFacing(
+                    targetPositionSupplier.get(),
+                    driveSubsystem.getPose().getTranslation(),
+                    driveSubsystem.getMeasuredChassisSpeedsFieldRelative()
+            );
+            rotationalTargetOverride.set(Optional.of(desiredChassisFacing));
+            complete = driveSubsystem.getFacing().minus(desiredChassisFacing).getDegrees() < 3;
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+            rotationalTargetOverride.set(Optional.empty());
+        }
+
+        public boolean aimComplete() {
+            return complete;
+        }
+    }
+
+    public ChassisAimAtSpeakerDuringAuto chassisAimAtSpeakerDuringAuto(AtomicReference<Optional<Rotation2d>> rotationalTargetOverride, Supplier<Translation2d> targetPositionSupplier, HolonomicDriveSubsystem driveSubsystem) {
+        return new ChassisAimAtSpeakerDuringAuto(rotationalTargetOverride, targetPositionSupplier, driveSubsystem, this);
     }
 }

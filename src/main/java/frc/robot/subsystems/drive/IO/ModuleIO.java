@@ -37,7 +37,7 @@ public interface ModuleIO {
      * Run the drive motor at the specified percent speed.
      * @param speedPercent from -1 to 1, where 1 is the forward direction of the wheel
      */
-    default void setDriveSpeedPercent(double speedPercent) {}
+    default void setDriveVoltage(double speedPercent) {}
 
     /**
      * Run the turn motor at the specified percent power.

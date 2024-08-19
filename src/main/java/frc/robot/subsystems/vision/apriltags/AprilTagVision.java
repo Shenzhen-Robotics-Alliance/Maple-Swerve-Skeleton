@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Alert;
-import frc.robot.utils.Config.PhotonCameraProperties;
+import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
@@ -41,11 +41,6 @@ public class AprilTagVision extends MapleSubsystem {
                 camerasProperties
         );
         this.driveSubsystem = driveSubsystem;
-    }
-
-    @Override
-    public void onReset() {
-
     }
 
     @Override

@@ -8,13 +8,14 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
-import frc.robot.utils.Config.MapleConfigFile;
+import frc.robot.utils.CustomConfigs.MapleConfigFile;
 
 import java.util.Queue;
 
@@ -111,9 +112,9 @@ public class ModuleIOTalonFX implements ModuleIO {
     }
 
     @Override
-    public void setDriveSpeedPercent(double speedPercent) {
-        driveTalon.setControl(new DutyCycleOut(speedPercent)
-                .withEnableFOC(false));
+    public void setDriveVoltage(double volts) {
+        final VoltageOut voltageOut = new VoltageOut(volts).withEnableFOC(false);
+        driveTalon.setControl(voltageOut);
     }
 
     @Override

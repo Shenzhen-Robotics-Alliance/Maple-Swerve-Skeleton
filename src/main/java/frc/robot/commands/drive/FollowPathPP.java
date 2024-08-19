@@ -38,7 +38,7 @@ public class FollowPathPP extends FollowPathHolonomic {
                 driveSubsystem::getPose,
                 driveSubsystem::getMeasuredChassisSpeedsRobotRelative,
                 driveSubsystem::runRobotCentricChassisSpeeds,
-                Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig.toPathPlannerPIDConstants(),
+                Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfigPathFollowing.toPathPlannerPIDConstants(),
                 Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig.toPathPlannerPIDConstants(),
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(),
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() / driveSubsystem.getChassisMaxAngularVelocity(),

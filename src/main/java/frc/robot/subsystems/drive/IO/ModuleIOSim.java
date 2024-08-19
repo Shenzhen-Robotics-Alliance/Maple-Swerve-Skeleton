@@ -6,14 +6,12 @@ package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.utils.Config.MapleConfigFile;
+import frc.robot.utils.CustomConfigs.MapleConfigFile;
 
 import java.util.Arrays;
 
-import static frc.robot.Constants.RobotPhysicsSimulationConfigs.*;
-import static frc.robot.Constants.ChassisDefaultConfigs.*;
+import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
 
 /**
  * Physics sim implementation of module IO.
@@ -61,10 +59,8 @@ public class ModuleIOSim implements ModuleIO {
 
 
     @Override
-    public void setDriveSpeedPercent(double speedPercent) {
-        driveSim.setInputVoltage(
-                driveAppliedVolts = (speedPercent * 12)
-        );
+    public void setDriveVoltage(double volts) {
+        driveSim.setInputVoltage(driveAppliedVolts = volts);
     }
 
     @Override

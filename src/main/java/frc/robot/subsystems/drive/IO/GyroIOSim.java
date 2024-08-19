@@ -3,13 +3,13 @@ package frc.robot.subsystems.drive.IO;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.utils.MapleMaths.MapleCommonMath;
+import frc.robot.utils.CustomMaths.MapleCommonMath;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
-import static frc.robot.Constants.RobotPhysicsSimulationConfigs.*;
+import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
 
 public class GyroIOSim implements GyroIO {
     public final GyroPhysicsSimulationResults gyroPhysicsSimulationResults = new GyroPhysicsSimulationResults();

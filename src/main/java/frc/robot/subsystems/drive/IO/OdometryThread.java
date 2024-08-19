@@ -5,7 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
-import frc.robot.utils.CompetitionFieldUtils.Simulation.SwerveDriveSimulation;
+import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLog;
 
 import java.util.ArrayList;
