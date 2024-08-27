@@ -1,18 +1,18 @@
 <PhotonCamerasProperties>
     <GeneralInfo>
         <camerasAmount type="int">5</camerasAmount>
-        <cameraFPS type="double">30</cameraFPS>
-        <averageLatencyMS type="double">18</averageLatencyMS>
-        <latencyStandardDeviationMS type="double">6</latencyStandardDeviationMS>
+        <cameraFPS type="double">50</cameraFPS>
+        <averageLatencyMS type="double">12</averageLatencyMS>
+        <latencyStandardDeviationMS type="double">4</latencyStandardDeviationMS>
     </GeneralInfo>
 
     <Camera0>
         <name type="string">FrontCam</name>
-        <captureWidthPixels type="int">640</captureWidthPixels>
-        <captureHeightPixels type="int">480</captureHeightPixels>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
-        <calibrationErrorStandardDeviationPixel type="double">0.2</calibrationErrorStandardDeviationPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
         <mountPositionToRobotCenterForwardsMeters type="double">0.3</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">0</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
@@ -24,11 +24,11 @@
 
     <Camera1>
         <name type="string">FrontLeftCam</name>
-        <captureWidthPixels type="int">640</captureWidthPixels>
-        <captureHeightPixels type="int">480</captureHeightPixels>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
-        <calibrationErrorStandardDeviationPixel type="double">0.2</calibrationErrorStandardDeviationPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
         <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">0.3</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
@@ -40,11 +40,11 @@
 
     <Camera2>
         <name type="string">FrontRightCam</name>
-        <captureWidthPixels type="int">640</captureWidthPixels>
-        <captureHeightPixels type="int">480</captureHeightPixels>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
-        <calibrationErrorStandardDeviationPixel type="double">0.2</calibrationErrorStandardDeviationPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
         <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">-0.3</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
@@ -56,11 +56,11 @@
 
     <Camera3>
         <name type="string">BackLeftCam</name>
-        <captureWidthPixels type="int">640</captureWidthPixels>
-        <captureHeightPixels type="int">480</captureHeightPixels>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
-        <calibrationErrorStandardDeviationPixel type="double">0.2</calibrationErrorStandardDeviationPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
         <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">0.05</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>
@@ -72,11 +72,11 @@
 
     <Camera4>
         <name type="string">BackRightCam</name>
-        <captureWidthPixels type="int">640</captureWidthPixels>
-        <captureHeightPixels type="int">480</captureHeightPixels>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
         <cameraFOVDegrees type="double">60</cameraFOVDegrees>
         <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
-        <calibrationErrorStandardDeviationPixel type="double">0.2</calibrationErrorStandardDeviationPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
         <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
         <mountPositionToRobotCenterLeftwardsMeters type="double">-0.05</mountPositionToRobotCenterLeftwardsMeters>
         <mountHeightMeters type="double">0.2</mountHeightMeters>

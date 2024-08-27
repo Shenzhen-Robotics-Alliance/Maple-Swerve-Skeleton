@@ -17,16 +17,15 @@ import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.Alert;
 import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
-import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.Constants.SwerveModuleConfigs.DRIVE_OPEN_LOOP;
+import static frc.robot.Constants.SwerveModuleConfigs.*;
 
 public class SwerveModule extends MapleSubsystem {
     private final ModuleIO io;
     private final String name;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
 
-    private final PIDController turnCloseLoop;
+    private final PIDController turnCloseLoop, driveCloseLoop;
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
 
@@ -42,7 +41,8 @@ public class SwerveModule extends MapleSubsystem {
         );
         this.hardwareFaultAlert.setActivated(false);
 
-        turnCloseLoop = new MaplePIDController(Constants.SwerveModuleConfigs.steerHeadingCloseLoopConfig);
+        turnCloseLoop = new MaplePIDController(STEER_CLOSE_LOOP);
+        driveCloseLoop = new MaplePIDController(DRIVE_CLOSE_LOOP);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);
 
@@ -66,7 +66,7 @@ public class SwerveModule extends MapleSubsystem {
     private void updateOdometryPositions() {
         odometryPositions = new SwerveModulePosition[inputs.odometryDriveWheelRevolutions.length];
         for (int i = 0; i < odometryPositions.length; i++) {
-            double positionMeters = toDrivePositionMeters(inputs.odometryDriveWheelRevolutions[i]);
+            double positionMeters = driveWheelRevolutionsToMeters(inputs.odometryDriveWheelRevolutions[i]);
             Rotation2d angle = inputs.odometrySteerPositions[i];
             odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
         }
@@ -77,11 +77,12 @@ public class SwerveModule extends MapleSubsystem {
         io.setSteerPowerPercent(turnCloseLoop.calculate(getSteerFacing().getRadians()));
     }
 
-    private void runDriveOpenLoop() {
+    private void runDriveControlLoop() {
         final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
-        Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/required velocity", adjustSpeedSetpointMetersPerSec);
-        Logger.recordOutput("/SwerveStates/FeedForward/" + this.name + "/corresponding power (mag)", DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec));
-        io.setDriveVoltage(DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec));
+        io.setDriveVoltage(
+                DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec)
+                + driveCloseLoop.calculate(getDriveVelocityMetersPerSec(), adjustSpeedSetpointMetersPerSec)
+        );
     }
 
     /**
@@ -90,7 +91,7 @@ public class SwerveModule extends MapleSubsystem {
     public SwerveModuleState runSetPoint(SwerveModuleState state) {
         this.setPoint = SwerveModuleState.optimize(state, getSteerFacing());
 
-        runDriveOpenLoop();
+        runDriveControlLoop();
         runSteerCloseLoop();
 
         return this.setPoint;
@@ -117,10 +118,10 @@ public class SwerveModule extends MapleSubsystem {
      * Returns the current drive position of the module in meters.
      */
     public double getDrivePositionMeters() {
-        return toDrivePositionMeters(inputs.driveWheelFinalRevolutions);
+        return driveWheelRevolutionsToMeters(inputs.driveWheelFinalRevolutions);
     }
 
-    private double toDrivePositionMeters(double driveWheelRevolutions) {
+    private double driveWheelRevolutionsToMeters(double driveWheelRevolutions) {
         return Units.rotationsToRadians(driveWheelRevolutions) * Constants.SwerveModuleConfigs.WHEEL_RADIUS;
     }
 
@@ -128,7 +129,7 @@ public class SwerveModule extends MapleSubsystem {
      * Returns the current drive velocity of the module in meters per second.
      */
     public double getDriveVelocityMetersPerSec() {
-        return toDrivePositionMeters(inputs.driveWheelFinalVelocityRevolutionsPerSec);
+        return driveWheelRevolutionsToMeters(inputs.driveWheelFinalVelocityRevolutionsPerSec);
     }
 
     /**

@@ -130,7 +130,8 @@ public final class Constants {
     }
 
     public static final class SwerveModuleConfigs {
-        public static final MaplePIDController.MaplePIDConfig steerHeadingCloseLoopConfig = new MaplePIDController.MaplePIDConfig(
+        public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+        public static final MaplePIDController.MaplePIDConfig STEER_CLOSE_LOOP = new MaplePIDController.MaplePIDConfig(
                 0.5,
                 Math.toRadians(90),
                 0.02,
@@ -139,11 +140,19 @@ public final class Constants {
                 true,
                 0
         );
+
+        public static final SimpleMotorFeedforward DRIVE_OPEN_LOOP = new SimpleMotorFeedforward(0.01, 2.7);
+        public static final MaplePIDController.MaplePIDConfig DRIVE_CLOSE_LOOP = new MaplePIDController.MaplePIDConfig(
+                5,
+                2,
+                0,
+                0,
+                0,
+                false, 0
+        );
+
         public static final double STEERING_CURRENT_LIMIT = 20;
         public static final double DRIVING_CURRENT_LIMIT = 40;
-        public static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
-
-        public static final SimpleMotorFeedforward DRIVE_OPEN_LOOP = new SimpleMotorFeedforward(0.01, 2.03);
     }
 
     public static final class DriveTrainPhysicsSimulationConstants {
