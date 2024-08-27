@@ -74,7 +74,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         lastModulePositions = new SwerveModulePosition[] {new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()};
         this.poseEstimator = new SwerveDrivePoseEstimator(
                 kinematics, rawGyroRotation, lastModulePositions, new Pose2d(),
-                VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_ODOMETRY, TRANSLATIONAL_STANDARD_ERROR_METERS_ODOMETRY, ROTATIONAL_STANDARD_ERROR_RADIANS_ODOMETRY),
+                VecBuilder.fill(ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS),
                 VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION)
         );
 

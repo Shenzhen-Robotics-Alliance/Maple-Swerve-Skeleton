@@ -197,9 +197,9 @@ public final class Constants {
                 // only do gyro calibration if rotational standard error is very, very small
                 ROTATIONAL_STANDARD_ERROR_THRESHOLD = Math.toRadians(5),
 
-                TRANSLATIONAL_STANDARD_ERROR_METERS_ODOMETRY = 0.05,
+                ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.02,
                 // we trust the IMU very much (recommend 0.1 for Pigeon2, 0.5 for NavX)
-                ROTATIONAL_STANDARD_ERROR_RADIANS_ODOMETRY = Math.toRadians(0.1);
+                GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.1);
     }
 
     public static Rotation2d toCurrentAllianceRotation(Rotation2d rotationAtBlueSide) {

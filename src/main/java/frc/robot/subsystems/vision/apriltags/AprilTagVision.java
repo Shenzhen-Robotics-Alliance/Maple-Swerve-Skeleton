@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Alert;
@@ -43,6 +44,7 @@ public class AprilTagVision extends MapleSubsystem {
         this.driveSubsystem = driveSubsystem;
     }
 
+    private Optional<RobotPoseEstimationResult> result = Optional.empty();
     @Override
     public void periodic(double dt, boolean enabled) {
         io.updateInputs(inputs);
@@ -51,7 +53,7 @@ public class AprilTagVision extends MapleSubsystem {
         for (int i = 0; i < inputs.camerasInputs.length; i++)
             this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
 
-        Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
+        result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
         result = discardResultIfOverThreshold(result);
         result.ifPresent(robotPoseEstimationResult -> driveSubsystem.addVisionMeasurement(
                 robotPoseEstimationResult.pointEstimation,
@@ -65,6 +67,8 @@ public class AprilTagVision extends MapleSubsystem {
         );
 
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
+        SmartDashboard.putBoolean("Vision Result Trustable", result.isPresent());
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Presented", result.isPresent());
     }
 
     private Optional<RobotPoseEstimationResult> discardResultIfOverThreshold(Optional<RobotPoseEstimationResult> result) {
@@ -103,21 +107,21 @@ public class AprilTagVision extends MapleSubsystem {
     private static double getResultsAverageLatencySeconds(AprilTagVisionIO.CameraInputs[] camerasInputs) {
         if (camerasInputs.length == 0)
             return 0;
-        double totalLatencyMS = 0;
+        double totalLatencySeconds = 0;
         for (AprilTagVisionIO.CameraInputs cameraInputs:camerasInputs)
-            totalLatencyMS += cameraInputs.resultsDelaySeconds;
+            totalLatencySeconds += cameraInputs.resultsDelaySeconds;
 
-        return totalLatencyMS / camerasInputs.length;
+        return totalLatencySeconds / camerasInputs.length;
     }
 
     private static final Function<RobotPoseEstimationResult, String> printStandardError = result ->
-        String.format(
-                "Standard Error : { \n"
-                + "Translation X (Meters) %.2f, \n"
-                + "Translation Y (Meters) %.2f, \n"
-                + "Rotation Theta (Degrees) %.2f, \n }",
-                result.estimationStandardError.get(0, 0),
-                result.estimationStandardError.get(1, 0),
-                Math.toDegrees(result.estimationStandardError.get(2, 0))
-        );
+            String.format(
+                    "Standard Error : { \n"
+                            + "Translation X (Meters) %.2f, \n"
+                            + "Translation Y (Meters) %.2f, \n"
+                            + "Rotation Theta (Degrees) %.2f, \n }",
+                    result.estimationStandardError.get(0, 0),
+                    result.estimationStandardError.get(1, 0),
+                    Math.toDegrees(result.estimationStandardError.get(2, 0))
+            );
 }
