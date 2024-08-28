@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects;
 
-import static frc.robot.Constants.CrescendoField2024Constants.*;
+import static frc.robot.constants.FieldConstants.*;
 
 /**
  * field simulation for 2024 competition

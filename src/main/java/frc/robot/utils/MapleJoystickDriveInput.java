@@ -5,11 +5,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.Constants;
 import frc.robot.utils.CustomMaths.MapleCommonMath;
 
 import java.util.function.DoubleSupplier;
 
+import static frc.robot.constants.JoystickConfigs.*;
+
+/**
+ * Some optimizations to the pilot's input, including
+ * */
 public class MapleJoystickDriveInput {
     public final DoubleSupplier joystickXSupplier, joystickYSupplier, joystickOmegaSupplier;
 
@@ -46,7 +50,7 @@ public class MapleJoystickDriveInput {
                 linearSpeedYComponentDeadBanded = applySmartDeadBand(linearSpeedYComponentRaw, linearSpeedXComponentRaw);
 
         final Translation2d originalTranslationalSpeed = new Translation2d(linearSpeedXComponentDeadBanded, linearSpeedYComponentDeadBanded);
-        final double translationalSpeedMagnitudeScaled = Math.pow(originalTranslationalSpeed.getNorm(), Constants.DriverJoystickConfigs.linearSpeedInputExponent);
+        final double translationalSpeedMagnitudeScaled = Math.pow(originalTranslationalSpeed.getNorm(), LINEAR_SPEED_INPUT_EXPONENT);
         return new Translation2d(
                 translationalSpeedMagnitudeScaled * chassisMaxVelocityMetersPerSec,
                 originalTranslationalSpeed.getAngle()
@@ -58,7 +62,7 @@ public class MapleJoystickDriveInput {
                 rotationSpeedRaw = -joystickOmegaSupplier.getAsDouble(),
                 rotationalSpeedDeadBanded = applySmartDeadBand(rotationSpeedRaw, 0),
                 rotationalSpeedScaledMagnitude = Math.abs(Math.pow(
-                        rotationalSpeedDeadBanded, Constants.DriverJoystickConfigs.rotationSpeedInputExponent
+                        rotationalSpeedDeadBanded, ROTATION_SPEED_INPUT_EXPONENT
                 )) * maxAngularVelocityRadPerSec;
         return Math.copySign(rotationalSpeedScaledMagnitude, rotationSpeedRaw);
     }
@@ -72,8 +76,8 @@ public class MapleJoystickDriveInput {
      * */
     private static double applySmartDeadBand(double axisValue, double otherAxisValue) {
         final double deadBand = MapleCommonMath.linearInterpretationWithBounding(
-                0, Constants.DriverJoystickConfigs.deadBandWhenOtherAxisEmpty,
-                1, Constants.DriverJoystickConfigs.deadBandWhenOtherAxisFull,
+                0, DEAD_BAND_WHEN_OTHER_AXIS_EMPTY,
+                1, DEAD_BAND_WHEN_OTHER_AXIS_FULL,
                 Math.abs(otherAxisValue)
         );
         return MathUtil.applyDeadband(axisValue, deadBand, 1);

@@ -9,7 +9,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,26 +17,29 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
+import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.Alert;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.Constants.VisionConfigs.*;
+import static frc.robot.constants.Constants.VisionConfigs.*;
+import static frc.robot.constants.DriveTrainConstants.*;
 
 public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
-    public final double maxModuleVelocityMetersPerSec, maxAngularVelocityRadPerSec, maxLinearAccelerationMetersPerSecSq;
+    public enum DriveType {
+        GENERIC,
+        CTRE_ON_RIO,
+        CTRE_ON_CANIVORE
+    }
+
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs;
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
     private final SwerveModule[] swerveModules;
 
-    private final Translation2d[] MODULE_TRANSLATIONS;
-    private final double DRIVE_BASE_RADIUS;
     public final SwerveDriveKinematics kinematics;
     private Rotation2d rawGyroRotation;
     private final SwerveModulePosition[] lastModulePositions;
@@ -45,7 +47,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     private final OdometryThread odometryThread;
     private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR),  visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.INFO);
-    public SwerveDrive(GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO, MapleConfigFile.ConfigBlock generalConfigBlock) {
+    public SwerveDrive(DriveType type, GyroIO gyroIO, ModuleIO frontLeftModuleIO, ModuleIO frontRightModuleIO, ModuleIO backLeftModuleIO, ModuleIO backRightModuleIO) {
         super("Drive");
         this.gyroIO = gyroIO;
         this.gyroInputs = new GyroIOInputsAutoLogged();
@@ -57,19 +59,6 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 new SwerveModule(backRightModuleIO, "BackRight"),
         };
 
-        final double horizontalWheelsMarginMeters = generalConfigBlock.getDoubleConfig("horizontalWheelsMarginMeters"),
-                verticalWheelsMarginMeters = generalConfigBlock.getDoubleConfig("verticalWheelsMarginMeters");
-        DRIVE_BASE_RADIUS = Math.hypot(horizontalWheelsMarginMeters/2, verticalWheelsMarginMeters/2);
-
-        this.maxModuleVelocityMetersPerSec = generalConfigBlock.getDoubleConfig("maxVelocityMetersPerSecond");
-        this.maxAngularVelocityRadPerSec = generalConfigBlock.getDoubleConfig("maxAngularVelocityRadiansPerSecond");
-        this.maxLinearAccelerationMetersPerSecSq = generalConfigBlock.getDoubleConfig("maxAccelerationMetersPerSecondSquared");
-        this.MODULE_TRANSLATIONS = new Translation2d[] {
-                new Translation2d(horizontalWheelsMarginMeters / 2, verticalWheelsMarginMeters / 2), // FL
-                new Translation2d(horizontalWheelsMarginMeters / 2, -verticalWheelsMarginMeters / 2), // FR
-                new Translation2d(-horizontalWheelsMarginMeters / 2, verticalWheelsMarginMeters / 2), // BL
-                new Translation2d(-horizontalWheelsMarginMeters / 2, -verticalWheelsMarginMeters / 2)  // BR
-        };
         kinematics = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
         lastModulePositions = new SwerveModulePosition[] {new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()};
         this.poseEstimator = new SwerveDrivePoseEstimator(
@@ -78,7 +67,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION)
         );
 
-        this.odometryThread = OdometryThread.createInstance();
+        this.odometryThread = OdometryThread.createInstance(type);
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 
@@ -179,7 +168,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override
     public void runRawChassisSpeeds(ChassisSpeeds speeds) {
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxModuleVelocityMetersPerSec);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, CHASSIS_MAX_VELOCITY);
 
         // Send setpoints to modules
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
@@ -250,10 +239,10 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
-    @Override public double getChassisMaxLinearVelocityMetersPerSec() {return maxModuleVelocityMetersPerSec;}
-    @Override public double getChassisMaxAccelerationMetersPerSecSq() {return maxLinearAccelerationMetersPerSecSq;}
-    @Override public double getChassisMaxAngularVelocity() {return maxAngularVelocityRadPerSec;}
-    @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return maxAngularVelocityRadPerSec / 0.7;}
+    @Override public double getChassisMaxLinearVelocityMetersPerSec() {return CHASSIS_MAX_VELOCITY;}
+    @Override public double getChassisMaxAccelerationMetersPerSecSq() {return CHASSIS_MAX_ACCELERATION_MPS_SQ;}
+    @Override public double getChassisMaxAngularVelocity() {return CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC;}
+    @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ;}
 
     @Override
     public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {
@@ -283,7 +272,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
             builder.addDoubleProperty("Back Right Angle", () -> swerveModules[0].getSteerFacing().getRadians(), null);
             builder.addDoubleProperty("Back Right Velocity", () -> swerveModules[0].getDriveVelocityMetersPerSec(), null);
 
-            builder.addDoubleProperty("Robot Angle", () -> getFacing().minus(Constants.getDriverStationFacing()).getRadians(), null);
+            builder.addDoubleProperty("Robot Angle", () -> getFacing().minus(FieldConstants.getDriverStationFacing()).getRadians(), null);
         });
     }
 }

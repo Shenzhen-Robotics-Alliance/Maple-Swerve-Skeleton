@@ -6,8 +6,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
@@ -30,7 +31,7 @@ public class JoystickDriveAndAimAtTarget extends Command {
         this.shooterOptimization = shooterOptimization;
         this.pilotInputMultiplier = pilotInputMultiplier;
         this.chassisRotationController = new MaplePIDController(
-                Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig
+                DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP
         );
 
         this.driveSubsystem = driveSubsystem;

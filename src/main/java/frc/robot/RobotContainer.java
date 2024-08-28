@@ -21,29 +21,29 @@ import frc.robot.autos.Auto;
 import frc.robot.autos.ExampleAuto;
 import frc.robot.autos.PathPlannerAuto;
 import frc.robot.commands.drive.*;
+import frc.robot.constants.Constants;
+import frc.robot.constants.FieldConstants;
+import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
-import frc.robot.subsystems.drive.IO.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.IO.ModuleIOTalon;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
-import frc.robot.tests.*;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -85,17 +85,7 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        final MapleConfigFile chassisCalibrationFile;
-        try {
-            chassisCalibrationFile = MapleConfigFile.fromDeployedConfig(
-                    "ChassisWheelsCalibration",
-                    Constants.ROBOT_NAME
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         final List<PhotonCameraProperties> camerasProperties = PhotonCameraProperties.loadCamerasPropertiesFromConfig(Constants.ROBOT_NAME);
-        final MapleConfigFile.ConfigBlock chassisGeneralConfigBlock = chassisCalibrationFile.getBlock("GeneralInformation");
 
         this.ledStatusLight = new LEDStatusLight(0, 155);
         switch (Robot.CURRENT_ROBOT_MODE) {
@@ -103,12 +93,12 @@ public class RobotContainer {
                 // Real robot, instantiate hardware IO implementations
                 powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
                 drive = new SwerveDrive(
-                        new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontLeft"), chassisGeneralConfigBlock),
-                        new ModuleIOTalonFX(chassisCalibrationFile.getBlock("FrontRight"), chassisGeneralConfigBlock),
-                        new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackLeft"), chassisGeneralConfigBlock),
-                        new ModuleIOTalonFX(chassisCalibrationFile.getBlock("BackRight"), chassisGeneralConfigBlock),
-                        chassisGeneralConfigBlock
+                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
+                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft, "FrontLeft"),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontRight, "FrontRight"),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight")
                 );
 
                 aprilTagVision = new AprilTagVision(
@@ -124,18 +114,17 @@ public class RobotContainer {
                 powerDistribution = new PowerDistribution();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim
-                        frontLeft = new ModuleIOSim(chassisGeneralConfigBlock),
-                        frontRight = new ModuleIOSim(chassisGeneralConfigBlock),
-                        backLeft = new ModuleIOSim(chassisGeneralConfigBlock),
-                        backRight = new ModuleIOSim(chassisGeneralConfigBlock);
+                        frontLeft = new ModuleIOSim(),
+                        frontRight = new ModuleIOSim(),
+                        backLeft = new ModuleIOSim(),
+                        backRight = new ModuleIOSim();
                 final GyroIOSim gyroIOSim = new GyroIOSim();
                 drive = new SwerveDrive(
+                        SwerveDrive.DriveType.GENERIC,
                         gyroIOSim,
-                        frontLeft, frontRight, backLeft, backRight,
-                        chassisGeneralConfigBlock
+                        frontLeft, frontRight, backLeft, backRight
                 );
                 final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
-                        chassisGeneralConfigBlock,
                         gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight,
                         drive.kinematics,
@@ -166,12 +155,12 @@ public class RobotContainer {
                 powerDistribution = new PowerDistribution();
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
+                        SwerveDrive.DriveType.GENERIC,
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
-                        (inputs) -> {},
-                        chassisGeneralConfigBlock
+                        (inputs) -> {}
                 );
 
                 aprilTagVision = new AprilTagVision(
@@ -221,12 +210,11 @@ public class RobotContainer {
     private static SendableChooser<Supplier<Command>> buildTestsChooser() {
         final SendableChooser<Supplier<Command>> testsChooser = new SendableChooser<>();
         testsChooser.setDefaultOption("None", Commands::none);
-        testsChooser.addOption("Wheels Calibration", WheelsCalibrationCTRE::new);
         // TODO add your tests here (system identification and etc.)
         return testsChooser;
     }
 
-    private boolean isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+    private boolean isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
     private boolean isLeftHanded = true;
     private Command autonomousCommand = Commands.none();
     private Auto previouslySelectedAuto = null;
@@ -236,9 +224,9 @@ public class RobotContainer {
      * */
     public void checkForCommandChanges() {
         final boolean isLeftHandedSelected = !JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get());
-        if (Constants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
+        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
             configureButtonBindings();
-        isDSPresentedAsRed = Constants.isSidePresentedAsRed();
+        isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
         isLeftHanded = isLeftHandedSelected;
 
         final Auto selectedAuto = autoChooser.get();
@@ -252,7 +240,7 @@ public class RobotContainer {
     }
 
     private void resetFieldAndOdometryForAuto(Pose2d robotStartingPoseAtBlueAlliance) {
-        final Pose2d startingPose = Constants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
+        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
         drive.setPose(startingPose);
 
         if (fieldSimulation == null) return;
@@ -288,7 +276,7 @@ public class RobotContainer {
         /* aim at target and drive example, delete it for your project */
         final JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
                 driveInput, drive,
-                Constants.CrescendoField2024Constants.SPEAKER_POSITION_SUPPLIER,
+                FieldConstants.SPEAKER_POSITION_SUPPLIER,
                 exampleShooterOptimization,
                 0.5
         );
@@ -298,7 +286,7 @@ public class RobotContainer {
         final AutoAlignment exampleAutoAlignment = new AutoAlignment(
                 drive,
                 /* (position of AMP) */
-                () -> Constants.toCurrentAlliancePose(new Pose2d(1.85, 7.6, Rotation2d.fromDegrees(90)))
+                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.6, Rotation2d.fromDegrees(90)))
         );
     }
 

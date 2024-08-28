@@ -10,7 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Constants;
+import frc.robot.constants.DriveTrainConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
@@ -18,7 +18,7 @@ import frc.robot.utils.Alert;
 import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
-import static frc.robot.Constants.SwerveModuleConfigs.*;
+import static frc.robot.constants.DriveControlLoops.*;
 
 public class SwerveModule extends MapleSubsystem {
     private final ModuleIO io;
@@ -122,7 +122,7 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private double driveWheelRevolutionsToMeters(double driveWheelRevolutions) {
-        return Units.rotationsToRadians(driveWheelRevolutions) * Constants.SwerveModuleConfigs.WHEEL_RADIUS;
+        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS_METERS;
     }
 
     /**

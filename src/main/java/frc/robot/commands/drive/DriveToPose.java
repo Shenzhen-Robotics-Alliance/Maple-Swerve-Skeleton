@@ -4,13 +4,15 @@ import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import frc.robot.utils.CustomPIDs.MapleProfiledPIDController;
 
 import java.util.function.Supplier;
+
+import static frc.robot.constants.DriveControlLoops.*;
 
 public class DriveToPose extends Command {
     private final Supplier<Pose2d> desiredPoseSupplier;
@@ -27,7 +29,7 @@ public class DriveToPose extends Command {
     public DriveToPose(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> desiredPoseSupplier, Pose2d tolerance, double speedConstrainMPS) {
         this.desiredPoseSupplier = desiredPoseSupplier;
         this.driveSubsystem = driveSubsystem;
-        this.positionController = createPositionController();
+        this.positionController = createPositionController(driveSubsystem);
         this.tolerance = tolerance;
         this.speedConstrainMPS = speedConstrainMPS;
 
@@ -74,11 +76,12 @@ public class DriveToPose extends Command {
                 && Math.abs(speeds.omegaRadiansPerSecond) < Math.toRadians(30);
     }
 
-    public static HolonomicDriveController createPositionController() {
+    public static HolonomicDriveController createPositionController(HolonomicDriveSubsystem driveSubsystem) {
+        final TrapezoidProfile.Constraints chassisRotationalConstraints = new TrapezoidProfile.Constraints(driveSubsystem.getChassisMaxAngularVelocity(), driveSubsystem.getChassisMaxAngularAccelerationRadPerSecSq());
         return new HolonomicDriveController(
-                new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig),
-                new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfig),
-                new MapleProfiledPIDController(Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig, Constants.SwerveDriveChassisConfigs.chassisRotationalConstraints)
+                new MaplePIDController(CHASSIS_TRANSLATION_CLOSE_LOOP),
+                new MaplePIDController(CHASSIS_TRANSLATION_CLOSE_LOOP),
+                new MapleProfiledPIDController(CHASSIS_ROTATION_CLOSE_LOOP, chassisRotationalConstraints)
         );
     }
 }

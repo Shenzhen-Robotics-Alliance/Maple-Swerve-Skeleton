@@ -2,7 +2,6 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import frc.robot.Constants;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.MapleTimeUtils;
 
@@ -11,13 +10,18 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static frc.robot.constants.DriveTrainConstants.*;
+
 public class OdometryThreadReal extends Thread implements OdometryThread {
+    private final SwerveDrive.DriveType driveType;
+
     private final OdometryDoubleInput[] odometryDoubleInputs;
     private final BaseStatusSignal[] statusSignals;
     private final Queue<Double> timeStampsQueue;
     private final Lock lock = new ReentrantLock();
-    public OdometryThreadReal(OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
-        this.timeStampsQueue = new ArrayBlockingQueue<>(Constants.SwerveDriveChassisConfigs.ODOMETRY_CACHE_CAPACITY);
+    public OdometryThreadReal(SwerveDrive.DriveType driveType, OdometryDoubleInput[] odometryDoubleInputs, BaseStatusSignal[] statusSignals) {
+        this.driveType = driveType;
+        this.timeStampsQueue = new ArrayBlockingQueue<>(ODOMETRY_CACHE_CAPACITY);
         this.odometryDoubleInputs = odometryDoubleInputs;
         this.statusSignals = statusSignals;
 
@@ -48,15 +52,15 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     }
 
     private void refreshSignalsAndBlockThread() {
-        switch (Constants.SwerveDriveChassisConfigs.SWERVE_DRIVE_TYPE) {
-            case REV ->
-                    MapleTimeUtils.delay(1.0 / Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY);
+        switch (driveType) {
+            case GENERIC ->
+                    MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
             case CTRE_ON_RIO -> {
-                MapleTimeUtils.delay(1.0 / Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY);
+                MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
                 BaseStatusSignal.refreshAll();
             }
             case CTRE_ON_CANIVORE ->
-                    BaseStatusSignal.waitForAll(Constants.SwerveDriveChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
+                    BaseStatusSignal.waitForAll(ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
         }
     }
 

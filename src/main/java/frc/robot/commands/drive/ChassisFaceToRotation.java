@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
@@ -22,7 +22,7 @@ public class ChassisFaceToRotation extends Command {
         this.targetRotationSupplier = targetRotationSupplier;
         this.tolerance = tolerance;
 
-        this.chassisRotationController = new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig);
+        this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
     }
 
     @Override

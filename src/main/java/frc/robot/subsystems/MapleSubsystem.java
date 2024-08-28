@@ -4,8 +4,9 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.LogPaths;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.Logger;
 
@@ -60,7 +61,7 @@ public abstract class MapleSubsystem extends SubsystemBase {
         final long t0 = System.nanoTime();
         periodic(getDt(), DriverStation.isEnabled());
         final double cpuTimeMS = (System.nanoTime() - t0) / 1_000_000.0;
-        Logger.recordOutput(Constants.LogConfigs.SYSTEM_PERFORMANCE_PATH + getName() + "-CPUTimeMS", cpuTimeMS);
+        Logger.recordOutput(LogPaths.SYSTEM_PERFORMANCE_PATH + getName() + "-CPUTimeMS", cpuTimeMS);
     }
 
     private double getDt() {

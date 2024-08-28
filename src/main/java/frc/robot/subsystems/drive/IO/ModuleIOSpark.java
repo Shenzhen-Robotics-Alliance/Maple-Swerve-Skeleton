@@ -13,9 +13,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.Constants;
 
 import java.util.Queue;
+
+import static frc.robot.constants.DriveTrainConstants.*;
 
 /**
  * Module IO implementation for SparkMax drive motor controller, SparkMax turn motor controller (NEO
@@ -29,7 +30,7 @@ import java.util.Queue;
  * absolute encoders using AdvantageScope. These values are logged under
  * "/Drive/ModuleX/TurnAbsolutePositionRad"
  */
-public class ModuleIOSparkMax implements ModuleIO {
+public class ModuleIOSpark implements ModuleIO {
     // Gear ratios for SDS MK4i L2, adjust as necessary
     private static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (17.0 / 27.0) * (45.0 / 15.0);
     private static final double STEER_GEAR_RATIO = 150.0 / 7.0;
@@ -46,7 +47,7 @@ public class ModuleIOSparkMax implements ModuleIO {
     private final boolean isTurnMotorInverted = true;
     private final Rotation2d absoluteEncoderOffset;
 
-    public ModuleIOSparkMax(int index) {
+    public ModuleIOSpark(int index) {
         switch (index) {
             case 0 -> {
                 driveSparkMax = new CANSparkMax(1, MotorType.kBrushless);
@@ -103,11 +104,11 @@ public class ModuleIOSparkMax implements ModuleIO {
 
         driveSparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2,
-                (int) (1000.0 / Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY)
+                (int) (1000.0 / ODOMETRY_FREQUENCY)
         );
         steerSparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2,
-                (int) (1000.0 / Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY)
+                (int) (1000.0 / ODOMETRY_FREQUENCY)
         );
         this.drivePositionInput = OdometryThread.registerInput(driveEncoder::getPosition);
         this.steerRelativeEncoderPositionUngeared = OdometryThread.registerInput(steerRelativeEncoder::getPosition);

@@ -7,13 +7,15 @@ import com.pathplanner.lib.path.PathPoint;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+
+import static frc.robot.constants.DriveControlLoops.*;
 
 /**
  * this replaces AutoBuilder because in our code, opponent robots are simulated using path-planner drive commands
@@ -38,8 +40,8 @@ public class FollowPathPP extends FollowPathHolonomic {
                 driveSubsystem::getPose,
                 driveSubsystem::getMeasuredChassisSpeedsRobotRelative,
                 driveSubsystem::runRobotCentricChassisSpeeds,
-                Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfigPathFollowing.toPathPlannerPIDConstants(),
-                Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig.toPathPlannerPIDConstants(),
+                CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
+                CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(),
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() / driveSubsystem.getChassisMaxAngularVelocity(),
                 Robot.defaultPeriodSecs,

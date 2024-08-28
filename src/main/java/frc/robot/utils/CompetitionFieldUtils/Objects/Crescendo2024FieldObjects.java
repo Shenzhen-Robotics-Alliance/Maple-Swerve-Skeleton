@@ -2,7 +2,7 @@ package frc.robot.utils.CompetitionFieldUtils.Objects;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants;
+import frc.robot.constants.FieldConstants;
 import org.dyn4j.geometry.Geometry;
 
 /**
@@ -71,7 +71,7 @@ public final class Crescendo2024FieldObjects {
         public NoteOnFly(Translation3d shooterPosition, double flightTimeSeconds) {
             super(
                     shooterPosition,
-                    Constants.toCurrentAllianceTranslation(Constants.CrescendoField2024Constants.SPEAKER_POSE_BLUE),
+                    FieldConstants.toCurrentAllianceTranslation(FieldConstants.SPEAKER_POSE_BLUE),
                     flightTimeSeconds
             );
         }

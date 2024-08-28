@@ -16,10 +16,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Constants;
+import frc.robot.constants.FieldConstants;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.LocalADStarAK;
 import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.constants.JoystickConfigs.*;
+import static frc.robot.constants.DriveControlLoops.*;
 
 public interface HolonomicDriveSubsystem extends Subsystem {
     /**
@@ -81,7 +84,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      * */
     default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds) {
-        final Rotation2d driverStationFacing = Constants.getDriverStationFacing();
+        final Rotation2d driverStationFacing = FieldConstants.getDriverStationFacing();
         runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 driverStationCentricSpeeds,
                 getPose().getRotation().minus(driverStationFacing)
@@ -118,13 +121,13 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricChassisSpeeds,
                 new HolonomicPathFollowerConfig(
-                        Constants.SwerveDriveChassisConfigs.chassisTranslationPIDConfigPathFollowing.toPathPlannerPIDConstants(),
-                        Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig.toPathPlannerPIDConstants(),
+                        CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
+                        CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
                         getChassisMaxLinearVelocityMetersPerSec(),
                         getChassisMaxLinearVelocityMetersPerSec() / getChassisMaxAngularVelocity(),
                         new ReplanningConfig(false, true)
                 ),
-                Constants::isSidePresentedAsRed,
+                FieldConstants::isSidePresentedAsRed,
                 this
         );
         Pathfinding.setPathfinder(new LocalADStarAK());
@@ -149,9 +152,9 @@ public interface HolonomicDriveSubsystem extends Subsystem {
             double dtSecs) {
         final double
                 MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ = getChassisMaxLinearVelocityMetersPerSec()
-                / Constants.DriverJoystickConfigs.linearAccelerationSmoothOutSeconds,
+                / LINEAR_ACCELERATION_SMOOTH_OUT_SECONDS,
                 MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = getChassisMaxAngularVelocity()
-                / Constants.DriverJoystickConfigs.angularAccelerationSmoothOutSeconds;
+                / ANGULAR_ACCELERATION_SMOOTH_OUT_SECONDS;
 
         Translation2d currentLinearVelocityMetersPerSec = new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
                 desiredLinearVelocityMetersPerSec = new Translation2d(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond),

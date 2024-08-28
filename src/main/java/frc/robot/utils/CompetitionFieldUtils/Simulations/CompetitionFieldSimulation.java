@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
+import static frc.robot.constants.DriveTrainConstants.*;
 
 /**
  * this class simulates the physical behavior of all the objects on field
@@ -49,9 +49,9 @@ public abstract class CompetitionFieldSimulation {
     }
 
     public void updateSimulationWorld() {
-        final double subPeriodSeconds = Robot.defaultPeriodSecs / SIM_ITERATIONS_PER_ROBOT_PERIOD;
+        final double subPeriodSeconds = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD;
         // move through 5 sub-periods in each update
-        for (int i = 0; i < SIM_ITERATIONS_PER_ROBOT_PERIOD; i++) {
+        for (int i = 0; i < SIMULATION_TICKS_IN_1_PERIOD; i++) {
             this.physicsWorld.step(1, subPeriodSeconds);
             for (HolonomicChassisSimulation robotSimulation:robotSimulations)
                 robotSimulation.updateSimulationSubPeriod(i, subPeriodSeconds);

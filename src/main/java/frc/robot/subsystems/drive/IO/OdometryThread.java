@@ -2,9 +2,9 @@ package frc.robot.subsystems.drive.IO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
+import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -14,6 +14,8 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Supplier;
 
+import static frc.robot.constants.DriveTrainConstants.*;
+
 public interface OdometryThread {
     final class OdometryDoubleInput {
         private final Supplier<Double> supplier;
@@ -21,7 +23,7 @@ public interface OdometryThread {
 
         public OdometryDoubleInput(Supplier<Double> signal) {
             this.supplier = signal;
-            this.queue = new ArrayBlockingQueue<>(Constants.SwerveDriveChassisConfigs.ODOMETRY_CACHE_CAPACITY);
+            this.queue = new ArrayBlockingQueue<>(ODOMETRY_CACHE_CAPACITY);
         }
 
         public void cacheInputToQueue() {
@@ -32,7 +34,7 @@ public interface OdometryThread {
     List<OdometryDoubleInput> registeredInputs = new ArrayList<>();
     List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
     static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
-        signal.setUpdateFrequency(Constants.SwerveDriveChassisConfigs.ODOMETRY_FREQUENCY, Constants.SwerveDriveChassisConfigs.ODOMETRY_WAIT_TIMEOUT_SECONDS);
+        signal.setUpdateFrequency(ODOMETRY_FREQUENCY, ODOMETRY_WAIT_TIMEOUT_SECONDS);
         registeredStatusSignals.add(signal);
         return registerInput(signal.asSupplier());
     }
@@ -42,9 +44,10 @@ public interface OdometryThread {
         return odometryDoubleInput.queue;
     }
 
-    static OdometryThread createInstance() {
+    static OdometryThread createInstance(SwerveDrive.DriveType type) {
         return switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> new OdometryThreadReal(
+                    type,
                     registeredInputs.toArray(new OdometryDoubleInput[0]),
                     registeredStatusSignals.toArray(new BaseStatusSignal[0])
             );

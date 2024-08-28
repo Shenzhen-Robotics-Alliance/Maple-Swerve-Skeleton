@@ -6,7 +6,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 import frc.robot.Robot;
 import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
 import frc.robot.utils.CustomMaths.Statistics;
@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static frc.robot.Constants.VisionConfigs.*;
-import static frc.robot.Constants.LogConfigs.APRIL_TAGS_VISION_PATH;
+import static frc.robot.constants.Constants.VisionConfigs.*;
+import static frc.robot.constants.LogPaths.APRIL_TAGS_VISION_PATH;
 
 public class MapleMultiTagPoseEstimator {
     public static final class RobotPoseEstimationResult {

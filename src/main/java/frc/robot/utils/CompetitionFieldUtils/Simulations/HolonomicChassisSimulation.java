@@ -2,9 +2,9 @@ package frc.robot.utils.CompetitionFieldUtils.Simulations;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
+import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.CompetitionFieldUtils.Objects.RobotOnFieldDisplay;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import frc.robot.utils.CustomMaths.GeometryConvertor;
 import org.dyn4j.dynamics.Body;
 import org.dyn4j.dynamics.Force;
@@ -19,18 +19,18 @@ import static frc.robot.utils.CustomMaths.MapleCommonMath.constrainMagnitude;
  * with respect to its collision space, friction and motor propelling forces
  * */
 public abstract class HolonomicChassisSimulation extends Body implements RobotOnFieldDisplay {
-    public final RobotProfile profile;
-    public HolonomicChassisSimulation(RobotProfile profile, Pose2d startingPose) {
+    public final RobotSimulationProfile profile;
+    public HolonomicChassisSimulation(RobotSimulationProfile profile, Pose2d startingPose) {
         this.profile = profile;
 
-        /* the bumper needs to be rotated 90 degrees */
+        /* width and height in world reference is flipped */
         final double WIDTH_IN_WORLD_REFERENCE = profile.height,
                 HEIGHT_IN_WORLD_REFERENCE = profile.width;
         super.addFixture(
                 Geometry.createRectangle(WIDTH_IN_WORLD_REFERENCE, HEIGHT_IN_WORLD_REFERENCE),
                 profile.robotMass / (profile.height * profile.width),
-                Constants.DriveTrainPhysicsSimulationConstants.ROBOT_BUMPER_COEFFICIENT_OF_FRICTION,
-                Constants.DriveTrainPhysicsSimulationConstants.ROBOT_BUMPER_COEFFICIENT_OF_RESTITUTION
+                DriveTrainConstants.BUMPER_COEFFICIENT_OF_FRICTION,
+                DriveTrainConstants.BUMPER_COEFFICIENT_OF_RESTITUTION
         );
 
         super.setMass(MassType.NORMAL);
@@ -127,7 +127,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
      * */
     public abstract void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds);
 
-    public static final class RobotProfile {
+    public static final class RobotSimulationProfile {
         public final double
                 robotMaxVelocity,
                 robotMaxAcceleration,
@@ -142,41 +142,28 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
                 width,
                 height;
 
-        public RobotProfile(MapleConfigFile.ConfigBlock chassisGeneralInformation) {
+        public RobotSimulationProfile() {
             this(
-                    chassisGeneralInformation.getDoubleConfig("maxVelocityMetersPerSecond"),
-                    chassisGeneralInformation.getDoubleConfig("maxAccelerationMetersPerSecondSquared"),
-                    chassisGeneralInformation.getDoubleConfig("maxAngularVelocityRadiansPerSecond"),
-                    chassisGeneralInformation.getDoubleConfig("robotMassInSimulation"),
-                    chassisGeneralInformation.getDoubleConfig("bumperWidthMeters"),
-                    chassisGeneralInformation.getDoubleConfig("bumperLengthMeters")
+                    DriveTrainConstants.CHASSIS_MAX_VELOCITY,
+                    DriveTrainConstants.CHASSIS_MAX_ACCELERATION_MPS_SQ,
+                    DriveTrainConstants.CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
+                    DriveTrainConstants.ROBOT_MASS_KG,
+                    DriveTrainConstants.BUMPER_WIDTH_METERS,
+                    DriveTrainConstants.BUMPER_LENGTH_METERS
             );
         }
 
-        public RobotProfile(double robotMaxVelocity, double robotMaxAcceleration, double maxAngularVelocity, double robotMass, double width, double height) {
-            this(
-                    robotMaxVelocity,
-                    robotMaxAcceleration,
-                    Constants.DriveTrainPhysicsSimulationConstants.FLOOR_FRICTION_ACCELERATION_METERS_PER_SEC_SQ,
-                    maxAngularVelocity,
-                    Constants.DriveTrainPhysicsSimulationConstants.MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ,
-                    Constants.DriveTrainPhysicsSimulationConstants.TIME_CHASSIS_STOPS_ROTATING_NO_POWER_SEC,
-                    robotMass,
-                    width, height
-            );
-        }
-
-        public RobotProfile(double robotMaxVelocity, double robotMaxAcceleration, double floorFrictionAcceleration, double maxAngularVelocity, double maxAngularAcceleration, double timeChassisStopsRotating, double robotMass, double width, double height) {
+        public RobotSimulationProfile(double robotMaxVelocity, double robotMaxAcceleration, double maxAngularVelocity, double robotMass, double width, double height) {
             this.robotMaxVelocity = robotMaxVelocity;
             this.robotMaxAcceleration = robotMaxAcceleration;
             this.robotMass = robotMass;
             this.propellingForce = robotMaxAcceleration * robotMass;
-            this.frictionForce = floorFrictionAcceleration * robotMass;
+            this.frictionForce = DriveTrainConstants.MAX_FRICTION_ACCELERATION * robotMass;
             this.linearVelocityDamping = robotMaxAcceleration / robotMaxVelocity;
             this.maxAngularVelocity = maxAngularVelocity;
-            this.maxAngularAcceleration = maxAngularAcceleration;
+            this.maxAngularAcceleration = robotMaxAcceleration / (Math.hypot(width, height) / 2);
             this.angularDamping = maxAngularAcceleration / maxAngularVelocity;
-            this.angularFrictionAcceleration = maxAngularVelocity / timeChassisStopsRotating;
+            this.angularFrictionAcceleration = DriveTrainConstants.CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION;
             this.width = width;
             this.height = height;
         }

@@ -7,12 +7,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.LogPaths;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.MapleTimeUtils;
 import org.dyn4j.geometry.Vector2;
@@ -20,7 +19,7 @@ import org.dyn4j.geometry.Vector2;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
+import static frc.robot.constants.DriveTrainConstants.*;
 
 /**
  * simulates the behavior of our robot
@@ -31,27 +30,28 @@ import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
  * and feed the result of the physics simulation back to ModuleIOSim, to simulate the odometry encoders' readings
  * */
 public class SwerveDriveSimulation extends HolonomicChassisSimulation {
-    private static final String LOG_PATH = Constants.LogConfigs.PHYSICS_SIMULATION_PATH + "SwerveDriveSim/";
+    private static final String LOG_PATH = LogPaths.PHYSICS_SIMULATION_PATH + "SwerveDriveSim/";
 
     private final GyroIOSim gyroIOSim;
     private final ModuleIOSim[] modules;
     private final SwerveDriveKinematics kinematics;
     private final Consumer<Pose2d> resetOdometryCallBack;
     public SwerveDriveSimulation(
-            MapleConfigFile.ConfigBlock chassisGeneralInfoBlock,
             GyroIOSim gyroIOSim,
             ModuleIOSim frontLeft, ModuleIOSim frontRight, ModuleIOSim backLeft, ModuleIOSim backRight,
             SwerveDriveKinematics kinematics,
             Pose2d startingPose,
             Consumer<Pose2d> resetOdometryCallBack
     ) {
-        super(new RobotProfile(chassisGeneralInfoBlock), startingPose);
+        super(new RobotSimulationProfile(
+
+        ), startingPose);
         this.gyroIOSim = gyroIOSim;
         this.modules = new ModuleIOSim[] {frontLeft, frontRight, backLeft, backRight};
         this.kinematics = kinematics;
         this.resetOdometryCallBack = resetOdometryCallBack;
         resetOdometryToActualRobotPose();
-        System.out.println("swerve drive sim profile: " + new RobotProfile(chassisGeneralInfoBlock));
+        System.out.println("swerve drive sim profile: " + new RobotSimulationProfile());
     }
 
     public void resetOdometryToActualRobotPose() {
@@ -64,7 +64,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
             module.updateSim(subPeriodSeconds);
         final ChassisSpeeds swerveWheelFreeSpeeds = kinematics.toChassisSpeeds(
                 Arrays.stream(modules)
-                        .map(moduleIOSim -> moduleIOSim.getFreeSwerveSpeed(profile.robotMaxVelocity))
+                        .map(ModuleIOSim::getFreeSwerveSpeed)
                         .toArray(SwerveModuleState[]::new)
         );
         super.simulateChassisBehaviorWithRobotRelativeSpeeds(swerveWheelFreeSpeeds);
@@ -82,7 +82,6 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
             updateModuleSimulationResults(
                     modules[moduleIndex],
                     actualModuleFloorSpeeds[moduleIndex],
-                    profile.robotMaxVelocity,
                     iterationNum, subPeriodSeconds
             );
     }
@@ -92,8 +91,10 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
         super.simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
         
-        final double dTheta = previousDesiredLinearMotionPercent.getAngleBetween(desiredLinearMotionPercent),
-                desiredMotionDirectionChangingRateOmega = dTheta / (Robot.defaultPeriodSecs / SIM_ITERATIONS_PER_ROBOT_PERIOD),
+        final double
+                dt = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD,
+                dTheta = previousDesiredLinearMotionPercent.getAngleBetween(desiredLinearMotionPercent),
+                desiredMotionDirectionChangingRateOmega = dTheta / dt,
                 centripetalForce = desiredMotionDirectionChangingRateOmega * getLinearVelocity().getMagnitude() * profile.robotMass;
 
         super.applyForce(Vector2.create(
@@ -117,9 +118,8 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     private static void updateModuleSimulationResults(
             ModuleIOSim module,
             SwerveModuleState actualModuleFloorSpeed,
-            double robotMaxVelocity,
             int simulationIteration, double periodSeconds) {
-        final SwerveModuleState moduleFreeSwerveSpeed = module.getFreeSwerveSpeed(robotMaxVelocity);
+        final SwerveModuleState moduleFreeSwerveSpeed = module.getFreeSwerveSpeed();
         final ModuleIOSim.SwerveModulePhysicsSimulationResults results = module.physicsSimulationResults;
         final double projectedModuleFloorSpeedMetersPerSecond = SwerveStateProjection.project(
                 actualModuleFloorSpeed,
@@ -144,17 +144,17 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
                 moduleSpeedProjectedOnSwerveHeadingMPS * FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED
                         + moduleFreeSpeedMPS * (1 - FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED);
 
-        final double rotterSpeedRadPerSec = rotterSpeedMPS / Constants.SwerveModuleConfigs.WHEEL_RADIUS;
+        final double rotterSpeedRadPerSec = rotterSpeedMPS / WHEEL_RADIUS_METERS;
         return Units.radiansToRotations(rotterSpeedRadPerSec);
     }
 
     public static final class OdometryThreadSim implements OdometryThread {
         @Override
         public void updateInputs(OdometryThreadInputs inputs) {
-            inputs.measurementTimeStamps = new double[SIM_ITERATIONS_PER_ROBOT_PERIOD];
+            inputs.measurementTimeStamps = new double[SIMULATION_TICKS_IN_1_PERIOD];
             final double robotStartingTimeStamps = MapleTimeUtils.getLogTimeSeconds(),
-                    iterationPeriodSeconds = Robot.defaultPeriodSecs/SIM_ITERATIONS_PER_ROBOT_PERIOD;
-            for (int i =0; i < SIM_ITERATIONS_PER_ROBOT_PERIOD; i++)
+                    iterationPeriodSeconds = Robot.defaultPeriodSecs/SIMULATION_TICKS_IN_1_PERIOD;
+            for (int i =0; i < SIMULATION_TICKS_IN_1_PERIOD; i++)
                 inputs.measurementTimeStamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds;
         }
     }

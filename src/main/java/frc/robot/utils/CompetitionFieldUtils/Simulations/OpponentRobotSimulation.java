@@ -11,8 +11,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 import frc.robot.commands.drive.CustomFollowPathOnFly;
+import frc.robot.constants.DriveTrainConstants;
+import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MaplePathPlannerLoader;
@@ -36,13 +38,13 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
             new Pose2d(15.2, 6, new Rotation2d()),
             new Pose2d(15.2, 5.5, new Rotation2d())
     };
-    public static final HolonomicChassisSimulation.RobotProfile opponentRobotProfile = new RobotProfile(
+    public static final RobotSimulationProfile opponentRobotProfile = new RobotSimulationProfile(
             4,
             12,
             Math.toRadians(360),
             Units.lbsToKilograms(125),
-            Constants.DriveTrainPhysicsSimulationConstants.DEFAULT_BUMPER_WIDTH_METERS,
-            Constants.DriveTrainPhysicsSimulationConstants.DEFAULT_BUMPER_LENGTH_METERS
+            DriveTrainConstants.BUMPER_WIDTH_METERS,
+            DriveTrainConstants.BUMPER_LENGTH_METERS
     );
 
     private final int robotID;
@@ -111,7 +113,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cycleBackwardPath.getPreviewStartingHolonomicPose()), this),
                 cycleForward = new CustomFollowPathOnFly(
                         this,
-                        () -> Constants.isSidePresentedAsRed() ? cycleForwardPath.flipPath() : cycleForwardPath,
+                        () -> FieldConstants.isSidePresentedAsRed() ? cycleForwardPath.flipPath() : cycleForwardPath,
                         tolerance,
                         1,
                         false,
@@ -119,7 +121,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
                 ),
                 cycleBackWards = new CustomFollowPathOnFly(
                         this,
-                        () -> Constants.isSidePresentedAsRed() ? cycleBackwardPath.flipPath() : cycleBackwardPath,
+                        () -> FieldConstants.isSidePresentedAsRed() ? cycleBackwardPath.flipPath() : cycleBackwardPath,
                         tolerance,
                         1,
                         false,
@@ -143,7 +145,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     }
 
     public Command getJoystickDrive(MapleJoystickDriveInput joystickDriveInput) {
-        final Pose2d startingPose = Constants.toCurrentAlliancePose(RED_ROBOTS_STARTING_POSITIONS[robotID]),
+        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(RED_ROBOTS_STARTING_POSITIONS[robotID]),
                 queeningPose = ROBOT_QUEENING_POSITIONS[robotID];
         final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(startingPose), this);
         Runnable end = () -> {

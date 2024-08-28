@@ -7,11 +7,10 @@ package frc.robot.subsystems.drive.IO;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 
 import java.util.Arrays;
 
-import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
+import static frc.robot.constants.DriveTrainConstants.*;
 
 /**
  * Physics sim implementation of module IO.
@@ -21,14 +20,12 @@ import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
  * approximation for the behavior of the module.
  */
 public class ModuleIOSim implements ModuleIO {
-    private final double GEAR_RATIO;
     public final SwerveModulePhysicsSimulationResults physicsSimulationResults;
     private final DCMotorSim driveSim, steerSim;
     private double driveAppliedVolts = 0.0, steerAppliedVolts = 0.0;
 
-    public ModuleIOSim(MapleConfigFile.ConfigBlock generalConfigs) {
-        this.GEAR_RATIO = generalConfigs.getDoubleConfig("overallGearRatio");
-        this.driveSim = new DCMotorSim(DRIVE_MOTOR, GEAR_RATIO, DRIVE_WHEEL_ROTTER_INERTIA);
+    public ModuleIOSim() {
+        this.driveSim = new DCMotorSim(DRIVE_MOTOR, DRIVE_GEAR_RATIO, DRIVE_INERTIA);
         this.steerSim = new DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA);
         this.physicsSimulationResults = new SwerveModulePhysicsSimulationResults();
     }
@@ -47,11 +44,11 @@ public class ModuleIOSim implements ModuleIO {
 
         inputs.odometryDriveWheelRevolutions = Arrays.copyOf(
                 physicsSimulationResults.odometryDriveWheelRevolutions,
-                SIM_ITERATIONS_PER_ROBOT_PERIOD
+                SIMULATION_TICKS_IN_1_PERIOD
         );
         inputs.odometrySteerPositions = Arrays.copyOf(
                 physicsSimulationResults.odometrySteerPositions,
-                SIM_ITERATIONS_PER_ROBOT_PERIOD
+                SIMULATION_TICKS_IN_1_PERIOD
         );
 
         inputs.hardwareConnected = true;
@@ -79,11 +76,9 @@ public class ModuleIOSim implements ModuleIO {
      * gets the swerve state, assuming that the chassis is allowed to move freely on field (not hitting anything)
      * @return the swerve state, in percent full speed
      * */
-    public SwerveModuleState getFreeSwerveSpeed(double robotMaximumFloorSpeed) {
+    public SwerveModuleState getFreeSwerveSpeed() {
         return new SwerveModuleState(
-                driveSim.getAngularVelocityRPM() * GEAR_RATIO
-                        / DRIVE_MOTOR_FREE_FINAL_SPEED_RPM
-                        * robotMaximumFloorSpeed,
+                driveSim.getAngularVelocityRPM() * WHEEL_RADIUS_METERS,
                 Rotation2d.fromRadians(steerSim.getAngularPositionRad())
         );
     }
@@ -97,9 +92,9 @@ public class ModuleIOSim implements ModuleIO {
                 driveWheelFinalVelocityRevolutionsPerSec = 0;
 
         public final double[] odometryDriveWheelRevolutions =
-                new double[SIM_ITERATIONS_PER_ROBOT_PERIOD];
+                new double[SIMULATION_TICKS_IN_1_PERIOD];
         public final Rotation2d[] odometrySteerPositions =
-                new Rotation2d[SIM_ITERATIONS_PER_ROBOT_PERIOD];
+                new Rotation2d[SIMULATION_TICKS_IN_1_PERIOD];
 
         public SwerveModulePhysicsSimulationResults() {
             Arrays.fill(odometrySteerPositions, new Rotation2d());

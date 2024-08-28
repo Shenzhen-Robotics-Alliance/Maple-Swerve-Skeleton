@@ -33,7 +33,7 @@ public class CustomFollowPath extends Command {
         this.path = path;
         this.logPath = logPath;
 
-        this.controller = DriveToPose.createPositionController();
+        this.controller = DriveToPose.createPositionController(driveSubsystem);
         controller.setTolerance(tolerance);
         super.addRequirements(driveSubsystem);
 

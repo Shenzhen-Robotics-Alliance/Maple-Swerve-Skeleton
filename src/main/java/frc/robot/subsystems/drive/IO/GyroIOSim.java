@@ -1,21 +1,22 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.LogPaths;
 import frc.robot.utils.CustomMaths.MapleCommonMath;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
-import static frc.robot.Constants.DriveTrainPhysicsSimulationConstants.*;
+import static frc.robot.constants.DriveTrainConstants.*;
 
 public class GyroIOSim implements GyroIO {
     public final GyroPhysicsSimulationResults gyroPhysicsSimulationResults = new GyroPhysicsSimulationResults();
     public double previousAngularVelocityRadPerSec = gyroPhysicsSimulationResults.robotAngularVelocityRadPerSec;
     public Rotation2d currentGyroDriftAmount = new Rotation2d();
-    public static final String GYRO_LOG_PATH = Constants.LogConfigs.PHYSICS_SIMULATION_PATH + "GyroSim/";
+    public static final String GYRO_LOG_PATH = LogPaths.PHYSICS_SIMULATION_PATH + "GyroSim/";
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {
@@ -61,7 +62,7 @@ public class GyroIOSim implements GyroIO {
         public boolean hasReading;
 
         public final Rotation2d[] odometryYawPositions =
-                new Rotation2d[SIM_ITERATIONS_PER_ROBOT_PERIOD];
+                new Rotation2d[SIMULATION_TICKS_IN_1_PERIOD];
 
         public GyroPhysicsSimulationResults() {
             robotAngularVelocityRadPerSec = 0.0;

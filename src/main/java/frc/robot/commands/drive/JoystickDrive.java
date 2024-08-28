@@ -5,8 +5,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
+import frc.robot.constants.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
@@ -15,6 +16,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 
 import static frc.robot.subsystems.drive.HolonomicDriveSubsystem.isZero;
+import static frc.robot.constants.JoystickConfigs.*;
 
 public class JoystickDrive extends Command {
     protected MapleJoystickDriveInput input;
@@ -36,7 +38,7 @@ public class JoystickDrive extends Command {
         this.previousChassisUsageTimer.start();
         this.previousRotationalInputTimer = new Timer();
         this.previousRotationalInputTimer.start();
-        this.chassisRotationController = new MaplePIDController(Constants.SwerveDriveChassisConfigs.chassisRotationalPIDConfig);
+        this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
 
         super.addRequirements(driveSubsystem);
     }
@@ -70,7 +72,7 @@ public class JoystickDrive extends Command {
             previousRotationalInputTimer.reset();
         Logger.recordOutput("JoystickDrive/current pilot input speeds", currentPilotInputSpeeds.toString());
 
-        if (previousChassisUsageTimer.hasElapsed(Constants.DriverJoystickConfigs.nonUsageTimeResetWheels)) {
+        if (previousChassisUsageTimer.hasElapsed(NON_USAGE_TIME_RESET_WHEELS)) {
             driveSubsystem.stop();
             return;
         }
@@ -85,7 +87,7 @@ public class JoystickDrive extends Command {
                 currentRotationMaintenanceSetpoint.getRadians()
         );
         Logger.recordOutput("previousRotationalInputTimer.get()", previousRotationalInputTimer.get());
-        if (previousRotationalInputTimer.get() > Constants.DriverJoystickConfigs.timeActivateRotationMaintenanceAfterNoRotationalInputSeconds)
+        if (previousRotationalInputTimer.get() > TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS)
             chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
                     currentPilotInputSpeeds.vxMetersPerSecond, currentPilotInputSpeeds.vyMetersPerSecond,
                     rotationCorrectionAngularVelocity

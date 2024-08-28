@@ -7,9 +7,10 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants;
+import org.opencv.calib3d.StereoBM;
 
 import java.util.Queue;
 
@@ -17,17 +18,31 @@ import java.util.Queue;
  * IO implementation for Pigeon2
  */
 public class GyroIOPigeon2 implements GyroIO {
-    private final Pigeon2 pigeon = new Pigeon2(0, Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
-    private final StatusSignal<Double> yaw = pigeon.getYaw();
+    private final Pigeon2 pigeon;
+    private final StatusSignal<Double> yaw;
     private final Queue<Double> yawPositionInput;
-    private final StatusSignal<Double> yawVelocity = pigeon.getAngularVelocityZWorld();
+    private final StatusSignal<Double> yawVelocity;
 
-    public GyroIOPigeon2() {
-        pigeon.getConfigurator().apply(new Pigeon2Configuration());
+    public GyroIOPigeon2(SwerveDrivetrainConstants drivetrainConstants) {
+        this(
+                drivetrainConstants.Pigeon2Id,
+                drivetrainConstants.CANbusName,
+                drivetrainConstants.Pigeon2Configs
+        );
+    }
+
+    public GyroIOPigeon2(int Pigeon2Id, String CANbusName, Pigeon2Configuration Pigeon2Configs) {
+        pigeon = new Pigeon2(Pigeon2Id, CANbusName);
+        pigeon.getConfigurator().apply(Pigeon2Configs);
         pigeon.getConfigurator().setYaw(0.0);
+
+        yaw = pigeon.getYaw();
+        yawVelocity = pigeon.getAngularVelocityZWorld();
+
         yawVelocity.setUpdateFrequency(100.0);
-        pigeon.optimizeBusUtilization();
         yawPositionInput = OdometryThread.registerSignalInput(pigeon.getYaw());
+
+        pigeon.optimizeBusUtilization();
     }
 
     @Override

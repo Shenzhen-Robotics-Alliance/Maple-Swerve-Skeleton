@@ -6,20 +6,21 @@ package frc.robot.subsystems.drive.IO;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.Constants;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 
 import java.util.Queue;
 
-public class ModuleIOTalonFX implements ModuleIO {
+import static frc.robot.constants.DriveTrainConstants.*;
+
+public class ModuleIOTalon implements ModuleIO {
     private final String name;
     private final TalonFX driveTalon;
     private final TalonFX steerTalon;
@@ -36,24 +37,24 @@ public class ModuleIOTalonFX implements ModuleIO {
     private final Rotation2d absoluteEncoderOffset;
     private final double DRIVE_GEAR_RATIO;
 
-    public ModuleIOTalonFX(MapleConfigFile.ConfigBlock moduleConfigs, MapleConfigFile.ConfigBlock generalConfigs) {
-        this.name = moduleConfigs.getBlockName();
-        driveTalon = new TalonFX(moduleConfigs.getIntConfig("drivingMotorID"), Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
-        steerTalon = new TalonFX(moduleConfigs.getIntConfig("steeringMotorID"), Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
-        cancoder = new CANcoder(moduleConfigs.getIntConfig("steeringEncoderID"), Constants.SwerveDriveChassisConfigs.CHASSIS_CANBUS);
-        absoluteEncoderOffset = new Rotation2d(moduleConfigs.getDoubleConfig("steeringEncoderReadingAtOrigin")); // MUST BE CALIBRATED
+    public ModuleIOTalon(SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants moduleConstants, String name) {
+        this.name = name;
+        driveTalon = new TalonFX(moduleConstants.DriveMotorId, drivetrainConstants.CANbusName);
+        steerTalon = new TalonFX(moduleConstants.SteerMotorId, drivetrainConstants.CANbusName);
+        cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANbusName);
+        absoluteEncoderOffset = Rotation2d.fromRotations(moduleConstants.CANcoderOffset);
 
-        var driveConfig = new TalonFXConfiguration();
-        driveConfig.CurrentLimits.SupplyCurrentLimit = Constants.SwerveModuleConfigs.DRIVING_CURRENT_LIMIT;
+        var driveConfig = moduleConstants.DriveMotorInitialConfigs;
+        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_CURRENT_LIMIT;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
         setDriveBrake(true);
 
-        var steerConfig = new TalonFXConfiguration();
-        steerConfig.CurrentLimits.SupplyCurrentLimit = Constants.SwerveModuleConfigs.STEERING_CURRENT_LIMIT;
+        var steerConfig = moduleConstants.SteerMotorInitialConfigs;
+        steerConfig.CurrentLimits.SupplyCurrentLimit = STEER_CURRENT_LIMIT;
         steerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
-        steerTalon.setInverted(moduleConfigs.getIntConfig("steeringMotorInverted") != 0);
+        steerTalon.setInverted(moduleConstants.SteerMotorInverted);
         setSteerBrake(true);
 
         driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
@@ -77,7 +78,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon.optimizeBusUtilization();
         steerTalon.optimizeBusUtilization();
 
-        this.DRIVE_GEAR_RATIO = generalConfigs.getDoubleConfig("overallGearRatio");
+        this.DRIVE_GEAR_RATIO = moduleConstants.DriveMotorGearRatio;
     }
 
     @Override
