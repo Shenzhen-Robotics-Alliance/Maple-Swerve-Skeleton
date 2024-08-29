@@ -34,7 +34,6 @@ public class ModuleIOTalon implements ModuleIO {
 
     private final BaseStatusSignal[] periodicallyRefreshedSignals;
 
-    private final Rotation2d absoluteEncoderOffset;
     private final double DRIVE_GEAR_RATIO;
 
     public ModuleIOTalon(SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants moduleConstants, String name) {
@@ -42,12 +41,12 @@ public class ModuleIOTalon implements ModuleIO {
         driveTalon = new TalonFX(moduleConstants.DriveMotorId, drivetrainConstants.CANbusName);
         steerTalon = new TalonFX(moduleConstants.SteerMotorId, drivetrainConstants.CANbusName);
         cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANbusName);
-        absoluteEncoderOffset = Rotation2d.fromRotations(moduleConstants.CANcoderOffset);
 
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
         driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_CURRENT_LIMIT;
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
+        driveTalon.setInverted(moduleConstants.DriveMotorInverted);
         setDriveBrake(true);
 
         var steerConfig = moduleConstants.SteerMotorInitialConfigs;
@@ -56,6 +55,10 @@ public class ModuleIOTalon implements ModuleIO {
         steerTalon.getConfigurator().apply(steerConfig);
         steerTalon.setInverted(moduleConstants.SteerMotorInverted);
         setSteerBrake(true);
+
+        var encoderConfig = moduleConstants.CANcoderInitialConfigs;
+        encoderConfig.MagnetSensor.MagnetOffset = moduleConstants.CANcoderOffset;
+        cancoder.getConfigurator().apply(encoderConfig);
 
         driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
         driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
@@ -109,7 +112,7 @@ public class ModuleIOTalon implements ModuleIO {
     }
 
     private Rotation2d getSteerFacingFromCANCoderReading(double canCoderReadingRotations) {
-        return Rotation2d.fromRotations(canCoderReadingRotations).minus(absoluteEncoderOffset);
+        return Rotation2d.fromRotations(canCoderReadingRotations);
     }
 
     @Override

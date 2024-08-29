@@ -10,7 +10,6 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import org.opencv.calib3d.StereoBM;
 
 import java.util.Queue;
 
@@ -33,7 +32,10 @@ public class GyroIOPigeon2 implements GyroIO {
 
     public GyroIOPigeon2(int Pigeon2Id, String CANbusName, Pigeon2Configuration Pigeon2Configs) {
         pigeon = new Pigeon2(Pigeon2Id, CANbusName);
-        pigeon.getConfigurator().apply(Pigeon2Configs);
+        if (Pigeon2Configs != null)
+            pigeon.getConfigurator().apply(Pigeon2Configs);
+        else
+            pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
 
         yaw = pigeon.getYaw();
