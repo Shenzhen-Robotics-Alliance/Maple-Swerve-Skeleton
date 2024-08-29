@@ -24,5 +24,5 @@ public class JoystickConfigs {
     public static final double ANGULAR_ACCELERATION_SMOOTH_OUT_SECONDS = 0.1;
 
     /** the amount of time that the chassis waits after the pilot's last rotational input, before it starts to "lock" its rotation with PID */
-    public static final double TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS = 0.3;
+    public static final double TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS = 0.6;
 }
