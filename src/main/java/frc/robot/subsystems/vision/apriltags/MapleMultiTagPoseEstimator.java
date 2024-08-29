@@ -8,7 +8,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.constants.Constants;
 import frc.robot.Robot;
-import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
 import frc.robot.utils.CustomMaths.Statistics;
 import org.littletonrobotics.junction.Logger;
 
@@ -72,12 +71,18 @@ public class MapleMultiTagPoseEstimator {
         });
     }
 
-    final List<Pose2d> filteredRobotPoseEstimations = new ArrayList<>();
+    final List<Pose3d> validRobotPoseEstimations = new ArrayList<>();
+    final List<Pose3d> invalidRobotPoseEstimations = new ArrayList<>();
     private void applyFilteringToRawRobotPose3dEstimations() {
-        filteredRobotPoseEstimations.clear();
-        for (Pose3d pose3d:robotPose3dObservations)
-            if (filter.test(pose3d))
-                filteredRobotPoseEstimations.add(pose3d.toPose2d());
+        validRobotPoseEstimations.clear();
+        invalidRobotPoseEstimations.clear();
+        for (int i = 0; i < observedAprilTagsIDs.size(); i++) {
+            final Pose3d estimation = robotPose3dObservations.get(i);
+            if (filter.isResultValid(estimation, observedAprilTagsIDs.get(i)))
+                validRobotPoseEstimations.add(estimation);
+            else
+                invalidRobotPoseEstimations.add(estimation);
+        }
     }
 
     /**
@@ -113,21 +118,21 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
-        final int n = filteredRobotPoseEstimations.size();
+        final int n = validRobotPoseEstimations.size();
         if (n == 0)
             return Optional.empty();
         if (n == 1)
             return Optional.of(new RobotPoseEstimationResult(
-                    filteredRobotPoseEstimations.get(0),
+                    validRobotPoseEstimations.get(0).toPose2d(),
                     TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION,
                     TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION,
                     ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION
             ));
 
         final double[]
-                robotPoseEstimationsXMeters = filteredRobotPoseEstimations.stream().mapToDouble(Pose2d::getX).toArray(),
-                robotPoseEstimationsYMeters = filteredRobotPoseEstimations.stream().mapToDouble(Pose2d::getY).toArray(),
-                robotPoseEstimatorThetaRadians = filteredRobotPoseEstimations.stream().mapToDouble(pose2d -> pose2d.getRotation().getRadians()).toArray();
+                robotPoseEstimationsXMeters = validRobotPoseEstimations.stream().mapToDouble(Pose3d::getX).toArray(),
+                robotPoseEstimationsYMeters = validRobotPoseEstimations.stream().mapToDouble(Pose3d::getY).toArray(),
+                robotPoseEstimatorThetaRadians = validRobotPoseEstimations.stream().mapToDouble(pose3d -> pose3d.toPose2d().getRotation().getRadians()).toArray();
 
         final Translation2d translationPointEstimate = new Translation2d(
                 Statistics.getMean(robotPoseEstimationsXMeters),
@@ -157,10 +162,9 @@ public class MapleMultiTagPoseEstimator {
         if (!LOG_DETAILED_FILTERING_DATA) return;
 
         /* these are the detailed filtering data, logging them on RobotRIO1.0 is a bad idea, if you want them, replay the log */
-        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/RobotPose2dObservationsFiltered", filteredRobotPoseEstimations.toArray(Pose2d[]::new));
-        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/RobotPose3dsResults", robotPose3dObservations.toArray(Pose3d[]::new));
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/ValidPoseEstimations", validRobotPoseEstimations.toArray(Pose3d[]::new));
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/InvalidPoseEstimations", invalidRobotPoseEstimations.toArray(Pose3d[]::new));
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/VisibleFieldTargets", observedVisionTargetPoseInFieldLayout.toArray(Pose3d[]::new));
-        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/AprilTag ID", observedAprilTagsIDs.stream().mapToInt(i -> i).toArray());
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/", observedAprilTagsPoses.toArray(Pose3d[]::new));
     }
 }

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import edu.wpi.first.net.PortForwarder;
-import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
 import frc.robot.utils.MapleTimeUtils;
 import org.photonvision.PhotonCamera;
 

@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.Arrays;
 

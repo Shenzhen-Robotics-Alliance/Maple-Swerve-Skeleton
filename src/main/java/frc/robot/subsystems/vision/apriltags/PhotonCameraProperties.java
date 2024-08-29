@@ -1,10 +1,8 @@
-package frc.robot.utils.CustomConfigs;
+package frc.robot.subsystems.vision.apriltags;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import org.photonvision.simulation.SimCameraProperties;
 
 import java.io.IOException;
@@ -20,6 +18,31 @@ public class PhotonCameraProperties {
     public final Rotation2d cameraFOVDiag;
     public final int captureWidthPixels, captureHeightPixels;
     public final Transform3d robotToCamera;
+
+    public PhotonCameraProperties(
+            String name,
+            double frameRate, double averageLatencyMS, double latencyStandardDeviationMS,
+            double cameraFOVDegreesDiag,
+            double calibrationAverageErrorPixel, double calibrationErrorStandardDeviation,
+            int captureWidthPixels, int captureHeightPixels,
+            Translation2d mountPositionOnRobotMeters,
+            double mountHeightMeters,
+            Rotation2d cameraFacing,
+            double cameraPitchDegrees,
+            double rotateImageDegrees
+    ) {
+        this(
+                name, frameRate, averageLatencyMS, latencyStandardDeviationMS, Rotation2d.fromDegrees(cameraFOVDegreesDiag), calibrationAverageErrorPixel, calibrationErrorStandardDeviation, captureWidthPixels, captureHeightPixels,
+                new Transform3d(mountPositionOnRobotMeters.getX(), mountPositionOnRobotMeters.getY(), mountHeightMeters,
+                        new Rotation3d(
+                                0,
+                                -Math.toRadians(cameraPitchDegrees),
+                                cameraFacing.getRadians()
+                        ))
+                        .plus(new Transform3d(new Translation3d(), new Rotation3d(
+                                Math.toRadians(rotateImageDegrees), 0, 0)))
+        );
+    }
 
     public PhotonCameraProperties(
             String name,

@@ -12,9 +12,9 @@ public class CameraHeightAndPitchRollAngleFilter implements VisionResultsFilter 
     }
 
     @Override
-    public boolean test(Pose3d pose3d) {
-        return Math.abs(pose3d.getZ()) < ROBOT_HEIGHT_TOLERANCE
-                && Math.abs(pose3d.getRotation().getX()) < ROBOT_ROLL_TOLERANCE_RADIANS
-                && Math.abs(pose3d.getRotation().getY()) < ROBOT_PITCH_TOLERANCE_RADIANS;
+    public boolean isResultValid(Pose3d robotPoseEstimation, int aprilTagID) {
+        return Math.abs(robotPoseEstimation.getZ()) < ROBOT_HEIGHT_TOLERANCE
+                && Math.abs(robotPoseEstimation.getRotation().getX()) < ROBOT_ROLL_TOLERANCE_RADIANS
+                && Math.abs(robotPoseEstimation.getRotation().getY()) < ROBOT_PITCH_TOLERANCE_RADIANS;
     }
 }

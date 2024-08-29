@@ -24,6 +24,7 @@ import frc.robot.commands.drive.*;
 import frc.robot.constants.Constants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.TunerConstants;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
@@ -39,7 +40,7 @@ import frc.robot.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulat
 import frc.robot.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.OpponentRobotSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
-import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
+import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -85,7 +86,9 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        final List<PhotonCameraProperties> camerasProperties = PhotonCameraProperties.loadCamerasPropertiesFromConfig(Constants.ROBOT_NAME);
+        final List<PhotonCameraProperties> camerasProperties =
+                // PhotonCameraProperties.loadCamerasPropertiesFromConfig("5516-2024-OffSeason-Vision"); // loads camera properties from deploy/PhotonCamerasProperties/5516-2024-OffSeason-Vision.xml
+                VisionConstants.photonVisionCameras; // load configs stored directly in VisionConstants.java
 
         this.ledStatusLight = new LEDStatusLight(0, 155);
         switch (Robot.CURRENT_ROBOT_MODE) {

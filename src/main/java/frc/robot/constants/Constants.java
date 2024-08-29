@@ -6,10 +6,6 @@ package frc.robot.constants;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
-import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.photonvision.PhotonPoseEstimator;
 
 /**
@@ -37,8 +33,6 @@ public final class Constants {
          */
         REPLAY
     }
-
-    public static final String ROBOT_NAME = "5516-2024-OffSeason";
 
     public static final class VisionConfigs {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();

@@ -2,7 +2,6 @@ package frc.robot.subsystems.vision.apriltags;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.utils.CustomConfigs.PhotonCameraProperties;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.VisionSystemSim;
 
