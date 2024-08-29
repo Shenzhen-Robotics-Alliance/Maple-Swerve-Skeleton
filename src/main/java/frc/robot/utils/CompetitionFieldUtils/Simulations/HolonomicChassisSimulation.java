@@ -93,16 +93,16 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
             super.setLinearVelocity(new Vector2());
     }
 
-    private void simulateChassisRotationalBehavior(double desiredRotationalMotionPercent) {
+    protected void simulateChassisRotationalBehavior(double desiredRotationalMotionPercent) {
         final double maximumTorque = this.profile.maxAngularAcceleration * super.getMass().getInertia();
-        if (Math.abs(desiredRotationalMotionPercent) > 0.03) {
+        if (Math.abs(desiredRotationalMotionPercent) > 0.01) {
             super.applyTorque(desiredRotationalMotionPercent * maximumTorque);
             return;
         }
 
         final double actualRotationalMotionPercent = Math.abs(getAngularVelocity() / profile.maxAngularVelocity),
                 frictionalTorqueMagnitude = this.profile.angularFrictionAcceleration * super.getMass().getInertia();
-        if (actualRotationalMotionPercent > 0.03)
+        if (actualRotationalMotionPercent > 0.01)
             super.applyTorque(Math.copySign(frictionalTorqueMagnitude, -super.getAngularVelocity()));
         else
             super.setAngularVelocity(0);
@@ -158,10 +158,10 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
             this.robotMass = robotMass;
             this.propellingForce = robotMaxAcceleration * robotMass;
             this.frictionForce = DriveTrainConstants.MAX_FRICTION_ACCELERATION * robotMass;
-            this.linearVelocityDamping = robotMaxAcceleration / robotMaxVelocity;
+            this.linearVelocityDamping = robotMaxAcceleration / robotMaxVelocity * 0.3;
             this.maxAngularVelocity = maxAngularVelocity;
             this.maxAngularAcceleration = robotMaxAcceleration / (Math.hypot(width, height) / 2);
-            this.angularDamping = maxAngularAcceleration / maxAngularVelocity;
+            this.angularDamping = maxAngularAcceleration / maxAngularVelocity * 0.3;
             this.angularFrictionAcceleration = DriveTrainConstants.CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION;
             this.width = width;
             this.height = height;

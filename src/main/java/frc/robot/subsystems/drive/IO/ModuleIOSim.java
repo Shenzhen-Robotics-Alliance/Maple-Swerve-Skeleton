@@ -74,12 +74,33 @@ public class ModuleIOSim implements ModuleIO {
         steerSim.update(periodSecs);
     }
 
-    public double getDriveAppliedVolts() {
+    public double getSimulationTorque() {
+        return DRIVE_MOTOR.getTorque(DRIVE_MOTOR.getCurrent(
+                physicsSimulationResults.driveWheelFinalVelocityRadPerSec * DRIVE_GEAR_RATIO,
+                driveAppliedVolts
+        ));
+    }
+
+    public double getAppliedVolts() {
         return driveAppliedVolts;
     }
 
-    public Rotation2d getSteerFacing() {
+    public Rotation2d getSimulationSteerFacing() {
         return Rotation2d.fromRadians(steerSim.getAngularPositionRad());
+    }
+
+    public SwerveModuleState getSimulationSwerveState() {
+        return new SwerveModuleState(
+                physicsSimulationResults.driveWheelFinalVelocityRadPerSec * WHEEL_RADIUS_METERS,
+                getSimulationSteerFacing()
+        );
+    }
+
+    public SwerveModuleState getDesiredSwerveState() {
+        return new SwerveModuleState(
+                driveAppliedVolts * CHASSIS_MAX_VELOCITY,
+                getSimulationSteerFacing()
+        );
     }
 
     /**

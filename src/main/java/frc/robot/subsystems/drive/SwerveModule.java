@@ -17,6 +17,7 @@ import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.Alert;
 import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.constants.DriveControlLoops.*;
 
@@ -54,7 +55,7 @@ public class SwerveModule extends MapleSubsystem {
 
     public void updateOdometryInputs() {
         io.updateInputs(inputs);
-        // Logger.processInputs("Drive/Module-" + name, inputs);
+        Logger.processInputs("Drive/Module-" + name, inputs);
         this.hardwareFaultAlert.setActivated(!inputs.hardwareConnected);
     }
 

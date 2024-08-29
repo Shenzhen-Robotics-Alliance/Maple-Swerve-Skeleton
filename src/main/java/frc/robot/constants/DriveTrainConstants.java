@@ -8,8 +8,6 @@ import edu.wpi.first.math.util.Units;
 /**
  * stores the constants and PID configs for chassis
  * because we want an all-real simulation for the chassis, the numbers are required to be considerably precise
- * TODO: you need to change some of these numbers to fit your robot!
- * TODO: If you are using REV Chassis, please remove ALL the references to {@link TunerConstants} and enter your numbers by hand
  * */
 public class DriveTrainConstants {
     /* dead configs, don't change them */
@@ -29,6 +27,7 @@ public class DriveTrainConstants {
 
 
     /**
+     * numbers that needs to be changed to fit each robot
      * TODO: change these numbers to match your robot
      *  for REV chassis, replace ALL references to {@link TunerConstants} with actual numbers
      *  */
@@ -40,27 +39,12 @@ public class DriveTrainConstants {
             ROBOT_MASS_KG = 40, // with bumpers
             STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
             DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
+            DRIVE_INERTIA = 0.01,
             STEER_INERTIA = 0.01;
 
-    /* don't change the equations */
-    private static final double GRAVITY_CONSTANT = 9.8;
-    public static final double
-            DRIVE_BASE_RADIUS = Math.hypot(TunerConstants.kFrontLeftXPosInches, TunerConstants.kFrontLeftYPosInches),
-            /* friction_force = normal_force * coefficient_of_friction */
-            MAX_FRICTION_ACCELERATION = GRAVITY_CONSTANT * WHEEL_COEFFICIENT_OF_FRICTION,
-            /* force = torque / distance */
-            MAX_PROPELLING_FORCE_NEWTONS = DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT) * DRIVE_GEAR_RATIO / WHEEL_RADIUS_METERS,
-            /* floor_speed = wheel_angular_velocity * wheel_radius */
-            CHASSIS_MAX_VELOCITY = DRIVE_MOTOR.freeSpeedRadPerSec / DRIVE_GEAR_RATIO * WHEEL_RADIUS_METERS , // calculate using choreo
-            CHASSIS_MAX_ACCELERATION_MPS_SQ = Math.min(
-                    MAX_FRICTION_ACCELERATION, // cannot exceed max friction
-                    MAX_PROPELLING_FORCE_NEWTONS / ROBOT_MASS_KG
-            ),
-            CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = CHASSIS_MAX_VELOCITY / DRIVE_BASE_RADIUS,
-            CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS,
-            CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION = MAX_FRICTION_ACCELERATION / DRIVE_BASE_RADIUS;
-
-    /* translations of the modules to the robot center, in FL, FR, BL, BR */
+    /**
+     * translations of the modules to the robot center, in FL, FR, BL, BR
+     * */
     public static final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
             new Translation2d(
                     Units.inchesToMeters(TunerConstants.kFrontLeftXPosInches),
@@ -79,6 +63,25 @@ public class DriveTrainConstants {
                     Units.inchesToMeters(TunerConstants.kBackRightYPosInches)
             )
     };
+
+    /* equations that calculates some constants for the simulator (don't modify) */
+    private static final double GRAVITY_CONSTANT = 9.8;
+    public static final double
+            DRIVE_BASE_RADIUS = MODULE_TRANSLATIONS[0].getNorm(),
+            /* friction_force = normal_force * coefficient_of_friction */
+            MAX_FRICTION_ACCELERATION = GRAVITY_CONSTANT * WHEEL_COEFFICIENT_OF_FRICTION,
+            MAX_FRICTION_FORCE_PER_MODULE = MAX_FRICTION_ACCELERATION * ROBOT_MASS_KG / MODULE_TRANSLATIONS.length,
+            /* force = torque / distance */
+            MAX_PROPELLING_FORCE_NEWTONS = DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT) * DRIVE_GEAR_RATIO / WHEEL_RADIUS_METERS,
+            /* floor_speed = wheel_angular_velocity * wheel_radius */
+            CHASSIS_MAX_VELOCITY = DRIVE_MOTOR.freeSpeedRadPerSec / DRIVE_GEAR_RATIO * WHEEL_RADIUS_METERS , // calculate using choreo
+            CHASSIS_MAX_ACCELERATION_MPS_SQ = Math.min(
+                    MAX_FRICTION_ACCELERATION, // cannot exceed max friction
+                    MAX_PROPELLING_FORCE_NEWTONS / ROBOT_MASS_KG
+            ),
+            CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = CHASSIS_MAX_VELOCITY / DRIVE_BASE_RADIUS,
+            CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS,
+            CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION = MAX_FRICTION_ACCELERATION / DRIVE_BASE_RADIUS;
 
     public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
 
