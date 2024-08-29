@@ -40,7 +40,6 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
     private final SwerveModule[] swerveModules;
 
-    public final SwerveDriveKinematics kinematics;
     private Rotation2d rawGyroRotation;
     private final SwerveModulePosition[] lastModulePositions;
     private final SwerveDrivePoseEstimator poseEstimator;
@@ -59,10 +58,9 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 new SwerveModule(backRightModuleIO, "BackRight"),
         };
 
-        kinematics = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
         lastModulePositions = new SwerveModulePosition[] {new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()};
         this.poseEstimator = new SwerveDrivePoseEstimator(
-                kinematics, rawGyroRotation, lastModulePositions, new Pose2d(),
+                DRIVE_KINEMATICS, rawGyroRotation, lastModulePositions, new Pose2d(),
                 VecBuilder.fill(ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS),
                 VecBuilder.fill(TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION, ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION)
         );
@@ -161,13 +159,13 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
      * @param modulesDelta the delta of the swerve modules calculated from the odometry
      * */
     private void updateRobotFacingWithOdometry(SwerveModulePosition[] modulesDelta) {
-        Twist2d twist = kinematics.toTwist2d(modulesDelta);
+        Twist2d twist = DRIVE_KINEMATICS.toTwist2d(modulesDelta);
         rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
     }
 
     @Override
     public void runRawChassisSpeeds(ChassisSpeeds speeds) {
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
+        SwerveModuleState[] setpointStates = DRIVE_KINEMATICS.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, CHASSIS_MAX_VELOCITY);
 
         // Send setpoints to modules
@@ -184,7 +182,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         Rotation2d[] swerveHeadings = new Rotation2d[swerveModules.length];
         for (int i = 0; i < swerveHeadings.length; i++)
             swerveHeadings[i] = new Rotation2d();
-        kinematics.resetHeadings(swerveHeadings);
+        DRIVE_KINEMATICS.resetHeadings(swerveHeadings);
         HolonomicDriveSubsystem.super.stop();
     }
 
@@ -196,7 +194,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         Rotation2d[] swerveHeadings = new Rotation2d[swerveModules.length];
         for (int i = 0; i < swerveHeadings.length; i++)
             swerveHeadings[i] = MODULE_TRANSLATIONS[i].getAngle();
-        kinematics.resetHeadings(swerveHeadings);
+        DRIVE_KINEMATICS.resetHeadings(swerveHeadings);
         HolonomicDriveSubsystem.super.stop();
     }
 
@@ -236,7 +234,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
-        return kinematics.toChassisSpeeds(getModuleStates());
+        return DRIVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
     @Override public double getChassisMaxLinearVelocityMetersPerSec() {return CHASSIS_MAX_VELOCITY;}

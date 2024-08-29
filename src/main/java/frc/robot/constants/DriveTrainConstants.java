@@ -1,6 +1,7 @@
 package frc.robot.constants;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
@@ -27,13 +28,19 @@ public class DriveTrainConstants {
     public static final double STEER_CURRENT_LIMIT = 20;
 
 
-    /* change these numbers to match your robot */
+    /**
+     * TODO: change these numbers to match your robot
+     *  for REV chassis, replace ALL references to {@link TunerConstants} with actual numbers
+     *  */
     public static final double
             WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
             WHEEL_COEFFICIENT_OF_FRICTION = 0.8,
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
             STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
-            ROBOT_MASS_KG = 40; // with bumpers
+            ROBOT_MASS_KG = 40, // with bumpers
+            STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
+            DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
+            STEER_INERTIA = 0.01;
 
     /* don't change the equations */
     private static final double GRAVITY_CONSTANT = 9.8;
@@ -73,6 +80,8 @@ public class DriveTrainConstants {
             )
     };
 
+    public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
+
     /* for collision detection in simulation */
     public static final double
             BUMPER_WIDTH_METERS = Units.inchesToMeters(34.5),
@@ -81,13 +90,6 @@ public class DriveTrainConstants {
             BUMPER_COEFFICIENT_OF_FRICTION = 0.75,
             /* https://simple.wikipedia.org/wiki/Coefficient_of_restitution */
             BUMPER_COEFFICIENT_OF_RESTITUTION = 0.08;
-
-    public static final double STEER_FRICTION_VOLTAGE = 0.15;
-    public static final double DRIVE_FRICTION_VOLTAGE = 0.1;
-    public static final double STEER_INERTIA = 0.015;
-    public static final double DRIVE_INERTIA = 0.01;
-
-
 
     /* Gyro Sim */
     public static final double GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ = 100;

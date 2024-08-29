@@ -127,7 +127,6 @@ public class RobotContainer {
                 final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
                         gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight,
-                        drive.kinematics,
                         new Pose2d(3, 3, new Rotation2d()),
                         drive::setPose
                 );

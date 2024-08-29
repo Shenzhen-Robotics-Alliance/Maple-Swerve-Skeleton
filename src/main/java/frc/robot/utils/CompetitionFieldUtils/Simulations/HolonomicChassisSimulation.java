@@ -2,7 +2,6 @@ package frc.robot.utils.CompetitionFieldUtils.Simulations;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.constants.Constants;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.CompetitionFieldUtils.Objects.RobotOnFieldDisplay;
 import frc.robot.utils.CustomMaths.GeometryConvertor;
@@ -76,14 +75,14 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
         final boolean robotRequestedToMoveLinearly = desiredLinearMotionPercent.getMagnitude() > 0.03;
         if (!robotRequestedToMoveLinearly) {
-            simulateTranslationalFriction();
+            simulateTranslationalFrictionNoMotion();
             return;
         }
         final Vector2 forceVec = desiredLinearMotionPercent.copy().multiply(this.profile.propellingForce);
         super.applyForce(new Force(forceVec));
     }
 
-    protected void simulateTranslationalFriction() {
+    protected void simulateTranslationalFrictionNoMotion() {
         final double actualLinearPercent = getLinearVelocity().getMagnitude() / profile.robotMaxVelocity;
         final boolean robotActuallyMovingLinearly = actualLinearPercent > 0.03;
         if (robotActuallyMovingLinearly)
@@ -125,7 +124,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
     /**
      * called in every iteration of sub-period
      * */
-    public abstract void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds);
+    public abstract void updateSimulationSubTick(int iterationNum, double subPeriodSeconds);
 
     public static final class RobotSimulationProfile {
         public final double

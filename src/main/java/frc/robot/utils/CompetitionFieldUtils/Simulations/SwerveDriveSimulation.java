@@ -1,20 +1,16 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulations;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import frc.robot.Robot;
 import frc.robot.constants.LogPaths;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
-import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.MapleTimeUtils;
-import org.dyn4j.geometry.Vector2;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -34,12 +30,10 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
 
     private final GyroIOSim gyroIOSim;
     private final ModuleIOSim[] modules;
-    private final SwerveDriveKinematics kinematics;
     private final Consumer<Pose2d> resetOdometryCallBack;
     public SwerveDriveSimulation(
             GyroIOSim gyroIOSim,
             ModuleIOSim frontLeft, ModuleIOSim frontRight, ModuleIOSim backLeft, ModuleIOSim backRight,
-            SwerveDriveKinematics kinematics,
             Pose2d startingPose,
             Consumer<Pose2d> resetOdometryCallBack
     ) {
@@ -48,7 +42,6 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
         ), startingPose);
         this.gyroIOSim = gyroIOSim;
         this.modules = new ModuleIOSim[] {frontLeft, frontRight, backLeft, backRight};
-        this.kinematics = kinematics;
         this.resetOdometryCallBack = resetOdometryCallBack;
         resetOdometryToActualRobotPose();
         System.out.println("swerve drive sim profile: " + new RobotSimulationProfile());
@@ -59,93 +52,51 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     }
 
     @Override
-    public void updateSimulationSubPeriod(int iterationNum, double subPeriodSeconds) {
-        for (ModuleIOSim module:modules)
-            module.updateSim(subPeriodSeconds);
-        final ChassisSpeeds swerveWheelFreeSpeeds = kinematics.toChassisSpeeds(
-                Arrays.stream(modules)
-                        .map(ModuleIOSim::getFreeSwerveSpeed)
-                        .toArray(SwerveModuleState[]::new)
-        );
-        super.simulateChassisBehaviorWithRobotRelativeSpeeds(swerveWheelFreeSpeeds);
+    public void updateSimulationSubTick(int tickNum, double tickSeconds) {
+        for (int i = 0; i < modules.length; i++)
+            moduleSimulationSubTick(
+                    modules[i],
+                    MODULE_TRANSLATIONS[i],
+                    tickNum, tickSeconds
+            );
 
-        final ChassisSpeeds instantVelocityRobotRelative = getMeasuredChassisSpeedsRobotRelative();
-        final SwerveModuleState[] actualModuleFloorSpeeds = kinematics.toSwerveModuleStates(instantVelocityRobotRelative);
+        final ChassisSpeeds chassisFreeSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(Arrays.stream(modules).map((
+                moduleIOSim -> new SwerveModuleState(
+                        moduleIOSim.physicsSimulationResults.driveWheelFinalVelocityRadPerSec * WHEEL_RADIUS_METERS,
+                        moduleIOSim.getSteerFacing()
+                ))).toArray(SwerveModuleState[]::new));
 
-        updateGyroSimulationResults(
+        // TODO: here we apply the friction force that brings the chassis from its floor speed to free speed
+        
+
+        gyroSimulationSubTick(
                 gyroIOSim,
                 super.getObjectOnFieldPose2d().getRotation(),
                 super.getAngularVelocity(),
-                iterationNum
+                tickNum
         );
-        for (int moduleIndex = 0; moduleIndex < modules.length; moduleIndex++)
-            updateModuleSimulationResults(
-                    modules[moduleIndex],
-                    actualModuleFloorSpeeds[moduleIndex],
-                    iterationNum, subPeriodSeconds
-            );
     }
 
-    private final Vector2 previousDesiredLinearMotionPercent = new Vector2();
-    @Override
-    protected void simulateChassisTranslationalBehavior(Vector2 desiredLinearMotionPercent) {
-        super.simulateChassisTranslationalBehavior(desiredLinearMotionPercent);
-        
-        final double
-                dt = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD,
-                dTheta = previousDesiredLinearMotionPercent.getAngleBetween(desiredLinearMotionPercent),
-                desiredMotionDirectionChangingRateOmega = dTheta / dt,
-                centripetalForce = desiredMotionDirectionChangingRateOmega * getLinearVelocity().getMagnitude() * profile.robotMass;
-
-        super.applyForce(Vector2.create(
-                MathUtil.clamp(centripetalForce, -profile.frictionForce, profile.frictionForce),
-                getLinearVelocity().getDirection() + Math.toRadians(90)
-        ));
-        previousDesiredLinearMotionPercent.set(desiredLinearMotionPercent);
+    private static void moduleSimulationSubTick(
+            ModuleIOSim module,
+            Translation2d moduleTranslation,
+            int tickNum,
+            double tickPeriodSeconds
+    ) {
+        // TODO: here, apply the propelling force of each module on the robot
+        //  and feed its odometry drive position and velocity back to the results
     }
 
-    private static void updateGyroSimulationResults(
+    private static void gyroSimulationSubTick(
             GyroIOSim gyroIOSim,
             Rotation2d currentFacing,
             double angularVelocityRadPerSec,
-            int iterationNum) {
+            int tickNum
+    ) {
         final GyroIOSim.GyroPhysicsSimulationResults results = gyroIOSim.gyroPhysicsSimulationResults;
         results.robotAngularVelocityRadPerSec = angularVelocityRadPerSec;
-        results.odometryYawPositions[iterationNum] = currentFacing;
+        results.odometryYawPositions[tickNum] = currentFacing;
         results.hasReading = true;
-    }
-
-    private static void updateModuleSimulationResults(
-            ModuleIOSim module,
-            SwerveModuleState actualModuleFloorSpeed,
-            int simulationIteration, double periodSeconds) {
-        final SwerveModuleState moduleFreeSwerveSpeed = module.getFreeSwerveSpeed();
-        final ModuleIOSim.SwerveModulePhysicsSimulationResults results = module.physicsSimulationResults;
-        final double projectedModuleFloorSpeedMetersPerSecond = SwerveStateProjection.project(
-                actualModuleFloorSpeed,
-                moduleFreeSwerveSpeed.angle
-        );
-
-        results.driveWheelFinalVelocityRevolutionsPerSec = getActualDriveMotorRotterSpeedRevPerSec(
-                projectedModuleFloorSpeedMetersPerSecond,
-                moduleFreeSwerveSpeed.speedMetersPerSecond
-        );
-        results.odometrySteerPositions[simulationIteration] = moduleFreeSwerveSpeed.angle;
-        results.driveWheelFinalRevolutions += results.driveWheelFinalVelocityRevolutionsPerSec * periodSeconds;
-        results.odometryDriveWheelRevolutions[simulationIteration] = results.driveWheelFinalRevolutions;
-    }
-
-
-    private static double getActualDriveMotorRotterSpeedRevPerSec(double moduleSpeedProjectedOnSwerveHeadingMPS, double moduleFreeSpeedMPS) {
-        final double FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED = 0.8, rotterSpeedMPS;
-        if (Math.abs(moduleFreeSpeedMPS - moduleSpeedProjectedOnSwerveHeadingMPS) < 2)
-            rotterSpeedMPS = moduleSpeedProjectedOnSwerveHeadingMPS;
-        else rotterSpeedMPS =
-                moduleSpeedProjectedOnSwerveHeadingMPS * FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED
-                        + moduleFreeSpeedMPS * (1 - FLOOR_SPEED_WEIGHT_IN_ACTUAL_MOTOR_SPEED);
-
-        final double rotterSpeedRadPerSec = rotterSpeedMPS / WHEEL_RADIUS_METERS;
-        return Units.radiansToRotations(rotterSpeedRadPerSec);
     }
 
     public static final class OdometryThreadSim implements OdometryThread {

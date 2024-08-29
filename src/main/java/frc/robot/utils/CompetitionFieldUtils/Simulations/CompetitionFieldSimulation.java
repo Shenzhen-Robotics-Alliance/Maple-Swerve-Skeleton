@@ -54,7 +54,7 @@ public abstract class CompetitionFieldSimulation {
         for (int i = 0; i < SIMULATION_TICKS_IN_1_PERIOD; i++) {
             this.physicsWorld.step(1, subPeriodSeconds);
             for (HolonomicChassisSimulation robotSimulation:robotSimulations)
-                robotSimulation.updateSimulationSubPeriod(i, subPeriodSeconds);
+                robotSimulation.updateSimulationSubTick(i, subPeriodSeconds);
         }
 
         for (IntakeSimulation intakeSimulation:intakeSimulations)
