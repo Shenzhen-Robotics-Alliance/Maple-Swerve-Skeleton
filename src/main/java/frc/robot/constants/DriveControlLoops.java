@@ -11,7 +11,7 @@ public class DriveControlLoops {
         Math.toRadians(60),
         0.02,
         Math.toRadians(3),
-        0.12,
+        0.15,
         true,
         0
 );
