@@ -8,7 +8,6 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Robot;
-import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 
 import java.util.ArrayList;
@@ -21,8 +20,8 @@ import static frc.robot.constants.DriveControlLoops.*;
  * this replaces AutoBuilder because in our code, opponent robots are simulated using path-planner drive commands
  * only the main robot should use AutoBuilder, opponent robots should use this
  * */
-public class FollowPathPP extends FollowPathHolonomic {
-    public FollowPathPP(BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem, double speedMultiplier, Rotation2d endingRotation, Pose2d... poses) {
+public class OpponentRobotFollowPath extends FollowPathHolonomic {
+    public OpponentRobotFollowPath(BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem, double speedMultiplier, Rotation2d endingRotation, Pose2d... poses) {
         this(
                 new PathPlannerPath(
                         PathPlannerPath.bezierFromPoses(poses),
@@ -34,7 +33,7 @@ public class FollowPathPP extends FollowPathHolonomic {
         );
     }
 
-    public FollowPathPP(PathPlannerPath path, BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem) {
+    public OpponentRobotFollowPath(PathPlannerPath path, BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem) {
         super(
                 path,
                 driveSubsystem::getPose,

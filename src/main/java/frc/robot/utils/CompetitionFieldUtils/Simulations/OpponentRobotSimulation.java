@@ -11,8 +11,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.constants.Constants;
-import frc.robot.commands.drive.CustomFollowPathOnFly;
+import frc.robot.commands.drive.OpponentRobotFollowPath;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
@@ -112,22 +111,8 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
                         constraints,
                         new GoalEndState(0, cycleForwardPath.getPreviewStartingHolonomicPose().getRotation()));
         final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cycleBackwardPath.getPreviewStartingHolonomicPose()), this),
-                cycleForward = new CustomFollowPathOnFly(
-                        this,
-                        () -> FieldConstants.isSidePresentedAsRed() ? cycleForwardPath.flipPath() : cycleForwardPath,
-                        tolerance,
-                        1,
-                        false,
-                        "Field/Opponent"+robotID+"Cycle"
-                ),
-                cycleBackWards = new CustomFollowPathOnFly(
-                        this,
-                        () -> FieldConstants.isSidePresentedAsRed() ? cycleBackwardPath.flipPath() : cycleBackwardPath,
-                        tolerance,
-                        1,
-                        false,
-                        "Field/Opponent"+robotID+"Cycle"
-                );
+                cycleForward = new OpponentRobotFollowPath(cycleForwardPath, FieldConstants::isSidePresentedAsRed, this),
+                cycleBackward = new OpponentRobotFollowPath(cycleBackwardPath, FieldConstants::isSidePresentedAsRed, this);
 
         final Runnable end = () -> {
             stop();
@@ -137,7 +122,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         final Command cycleRepeatedlyAndStop = new SequentialCommandGroup(
                 teleportToStartingPose,
                 new SequentialCommandGroup(
-                        cycleBackWards,
+                        cycleBackward,
                         cycleForward
                 ).repeatedly()
         ).finallyDo(end);
