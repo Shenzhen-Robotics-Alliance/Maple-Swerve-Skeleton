@@ -17,6 +17,11 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
+/**
+ * <h1>Custom Drive Command</h1>
+ * <p>The chassis will automatically face to a target on field (eg. the speaker) while the pilot controls its movements</p>
+ * The chassis will also adjust its facing in-advance, with respect to the flight time calculated from {@link MapleShooterOptimization} (this is for shooting-on-the-move)
+ * */
 public class JoystickDriveAndAimAtTarget extends Command {
     private final MapleJoystickDriveInput input;
     private final Supplier<Translation2d> targetPositionSupplier;

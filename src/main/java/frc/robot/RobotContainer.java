@@ -198,6 +198,13 @@ public class RobotContainer {
         configureAutoNamedCommands();
     }
 
+    private void configureAutoNamedCommands() {
+        // TODO: bind your named commands during auto here
+        NamedCommands.registerCommand("my named command", Commands.runOnce(
+                () -> System.out.println("my named command executing!!!")
+        ));
+    }
+
     private static LoggedDashboardChooser<Auto> buildAutoChooser() {
         final LoggedDashboardChooser<Auto> autoSendableChooser = new LoggedDashboardChooser<>("Select Auto");
         autoSendableChooser.addDefaultOption("None", Auto.none());
@@ -257,25 +264,28 @@ public class RobotContainer {
      * JoystickButton}.
      */
     public void configureButtonBindings() {
-        System.out.println("configuring key bindings...  mode:" + driverModeChooser.get());
+        /* joystick drive command */
         final MapleJoystickDriveInput driveInput = JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get()) ?
                 MapleJoystickDriveInput.rightHandedJoystick(driverXBox)
                 : MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
-
         final JoystickDrive joystickDrive = new JoystickDrive(
                 driveInput,
                 () -> true,
                 drive
         );
         drive.setDefaultCommand(joystickDrive);
+
+        /* lock chassis with x-formation */
         driverXBox.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
+
+        /* reset gyro heading manually (in case the vision does not work) */
         driverXBox.start().onTrue(Commands.runOnce(
                         () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                         drive
                 ).ignoringDisable(true)
         );
 
-        /* aim at target and drive example, delete it for your project */
+        /* TODO: aim at target and drive example, delete it for your project */
         final JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
                 driveInput, drive,
                 FieldConstants.SPEAKER_POSITION_SUPPLIER,
@@ -290,13 +300,7 @@ public class RobotContainer {
                 /* (position of AMP) */
                 () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.6, Rotation2d.fromDegrees(90)))
         );
-    }
-
-    private void configureAutoNamedCommands() {
-        // bind your named commands during auto here
-        NamedCommands.registerCommand("my named command", Commands.runOnce(
-                () -> System.out.println("my named command executing!!!")
-        ));
+        driverXBox.b().whileTrue(exampleAutoAlignment);
     }
 
     /**

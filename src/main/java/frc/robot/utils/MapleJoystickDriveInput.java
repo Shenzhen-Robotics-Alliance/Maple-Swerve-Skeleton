@@ -12,7 +12,7 @@ import java.util.function.DoubleSupplier;
 import static frc.robot.constants.JoystickConfigs.*;
 
 /**
- * Some optimizations to the pilot's input, including
+ * Some optimizations to the pilot's input, including a linear dead band and
  * */
 public class MapleJoystickDriveInput {
     public final DoubleSupplier joystickXSupplier, joystickYSupplier, joystickOmegaSupplier;
