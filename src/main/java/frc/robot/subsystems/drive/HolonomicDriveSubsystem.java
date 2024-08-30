@@ -111,6 +111,11 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param speeds a continuous chassis speed, robot-centric
      * */
     default void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
+        final double PERCENT_DEADBAND = 0.03;
+        if (Math.abs(speeds.omegaRadiansPerSecond) < PERCENT_DEADBAND * getChassisMaxAngularVelocity()
+            && Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) < PERCENT_DEADBAND * getChassisMaxLinearVelocityMetersPerSec())
+            speeds = new ChassisSpeeds();
+
         runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02));
     }
 
