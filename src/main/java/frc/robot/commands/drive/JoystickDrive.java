@@ -8,12 +8,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.Constants;
 import frc.robot.Robot;
 import frc.robot.constants.DriveControlLoops;
+import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static frc.robot.subsystems.drive.HolonomicDriveSubsystem.isZero;
 import static frc.robot.constants.JoystickConfigs.*;
@@ -21,6 +23,7 @@ import static frc.robot.constants.JoystickConfigs.*;
 public class JoystickDrive extends Command {
     protected MapleJoystickDriveInput input;
     private final BooleanSupplier useDriverStationCentricSwitch;
+    private final Supplier<Integer> povButtonSupplier;
     private final HolonomicDriveSubsystem driveSubsystem;
     private final PIDController chassisRotationController;
 
@@ -29,10 +32,11 @@ public class JoystickDrive extends Command {
     protected Rotation2d currentRotationMaintenanceSetpoint;
 
     private double translationalSensitivity = 1, rotationalSensitivity = 0.5;
-    public JoystickDrive(MapleJoystickDriveInput input, BooleanSupplier useDriverStationCentricSwitch, HolonomicDriveSubsystem driveSubsystem) {
+    public JoystickDrive(MapleJoystickDriveInput input, BooleanSupplier useDriverStationCentricSwitch, Supplier<Integer> povButtonSupplier, HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
         this.useDriverStationCentricSwitch = useDriverStationCentricSwitch;
+        this.povButtonSupplier = povButtonSupplier;
         this.driveSubsystem = driveSubsystem;
         this.previousChassisUsageTimer = new Timer();
         this.previousChassisUsageTimer.start();
@@ -66,20 +70,16 @@ public class JoystickDrive extends Command {
                 newestPilotInputSpeed,
                 Robot.defaultPeriodSecs
         );
-        if (!isZero(currentPilotInputSpeeds))
-            previousChassisUsageTimer.reset();
+
         if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05)
             previousRotationalInputTimer.reset();
-        Logger.recordOutput("JoystickDrive/current pilot input speeds", currentPilotInputSpeeds.toString());
 
-        if (previousChassisUsageTimer.hasElapsed(NON_USAGE_TIME_RESET_WHEELS)) {
-            driveSubsystem.stop();
-            return;
-        }
-
-        if (Math.hypot(currentPilotInputSpeeds.vxMetersPerSecond, currentPilotInputSpeeds.vyMetersPerSecond) < 0.01
-                && Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) < 0.01)
-            currentPilotInputSpeeds = new ChassisSpeeds();
+        if (povButtonSupplier.get() != -1)
+            setCurrentRotationalMaintenance(
+                    FieldConstants
+                            .getDriverStationFacing()
+                            .minus(Rotation2d.fromDegrees(povButtonSupplier.get()))
+            );
 
         final ChassisSpeeds chassisSpeedsWithRotationMaintenance;
         final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(
@@ -101,6 +101,15 @@ public class JoystickDrive extends Command {
         Logger.recordOutput("JoystickDrive/rotation maintenance set-point (deg)", currentRotationMaintenanceSetpoint.getDegrees());
         Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
         Logger.recordOutput("JoystickDrive/rotation closed loop velocity (deg per sec)", Math.toDegrees(rotationCorrectionAngularVelocity));
+
+        if (!isZero(chassisSpeedsWithRotationMaintenance))
+            previousChassisUsageTimer.reset();
+        Logger.recordOutput("JoystickDrive/current pilot input speeds", currentPilotInputSpeeds.toString());
+
+        if (previousChassisUsageTimer.hasElapsed(NON_USAGE_TIME_RESET_WHEELS)) {
+            driveSubsystem.stop();
+            return;
+        }
 
         if (useDriverStationCentricSwitch.getAsBoolean())
             driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);

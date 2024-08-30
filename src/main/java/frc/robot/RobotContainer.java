@@ -271,6 +271,7 @@ public class RobotContainer {
         final JoystickDrive joystickDrive = new JoystickDrive(
                 driveInput,
                 () -> true,
+                driverXBox.getHID()::getPOV,
                 drive
         );
         drive.setDefaultCommand(joystickDrive);
