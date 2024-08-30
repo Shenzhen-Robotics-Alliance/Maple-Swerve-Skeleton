@@ -148,20 +148,21 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
                     DriveTrainConstants.CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
                     DriveTrainConstants.ROBOT_MASS_KG,
                     DriveTrainConstants.BUMPER_WIDTH_METERS,
-                    DriveTrainConstants.BUMPER_LENGTH_METERS
+                    DriveTrainConstants.BUMPER_LENGTH_METERS,
+                    0.3
             );
         }
 
-        public RobotSimulationProfile(double robotMaxVelocity, double robotMaxAcceleration, double maxAngularVelocity, double robotMass, double width, double height) {
+        public RobotSimulationProfile(double robotMaxVelocity, double robotMaxAcceleration, double maxAngularVelocity, double robotMass, double width, double height, double dampingCoefficient) {
             this.robotMaxVelocity = robotMaxVelocity;
             this.robotMaxAcceleration = robotMaxAcceleration;
             this.robotMass = robotMass;
             this.propellingForce = robotMaxAcceleration * robotMass;
             this.frictionForce = DriveTrainConstants.MAX_FRICTION_ACCELERATION * robotMass;
-            this.linearVelocityDamping = robotMaxAcceleration / robotMaxVelocity * 0.3;
+            this.linearVelocityDamping = robotMaxAcceleration / robotMaxVelocity * dampingCoefficient;
             this.maxAngularVelocity = maxAngularVelocity;
             this.maxAngularAcceleration = robotMaxAcceleration / (Math.hypot(width, height) / 2);
-            this.angularDamping = maxAngularAcceleration / maxAngularVelocity * 0.3;
+            this.angularDamping = maxAngularAcceleration / maxAngularVelocity * dampingCoefficient;
             this.angularFrictionAcceleration = DriveTrainConstants.CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION;
             this.width = width;
             this.height = height;

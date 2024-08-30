@@ -33,7 +33,7 @@ public class DriveTrainConstants {
      *  */
     public static final double
             WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
-            WHEEL_COEFFICIENT_OF_FRICTION = 0.8,
+            WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
             STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
             ROBOT_MASS_KG = 40, // with bumpers

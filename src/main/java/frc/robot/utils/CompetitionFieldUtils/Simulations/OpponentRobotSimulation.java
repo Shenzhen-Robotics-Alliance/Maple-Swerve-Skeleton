@@ -44,7 +44,8 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
             Math.toRadians(360),
             Units.lbsToKilograms(125),
             DriveTrainConstants.BUMPER_WIDTH_METERS,
-            DriveTrainConstants.BUMPER_LENGTH_METERS
+            DriveTrainConstants.BUMPER_LENGTH_METERS,
+            1
     );
 
     private final int robotID;
