@@ -30,7 +30,7 @@ public class JoystickDrive extends Command {
     private ChassisSpeeds currentPilotInputSpeeds;
     protected Rotation2d currentRotationMaintenanceSetpoint;
 
-    private double translationalSensitivity = 1, rotationalSensitivity = 0.5;
+    private double translationalSensitivity = DEFAULT_TRANSLATIONAL_SENSITIVITY, rotationalSensitivity = DEFAULT_ROTATIONAL_SENSITIVITY;
     public JoystickDrive(MapleJoystickDriveInput input, BooleanSupplier useDriverStationCentricSwitch, Supplier<Integer> povButtonSupplier, HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
