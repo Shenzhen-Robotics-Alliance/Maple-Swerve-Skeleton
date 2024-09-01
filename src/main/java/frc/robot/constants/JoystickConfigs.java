@@ -22,7 +22,7 @@ public class JoystickConfigs {
      * it's sort of a "smooth out" of the pilot's input
      * this dramatically reduces over-current and brownouts
      * */
-    public static final double LINEAR_ACCELERATION_SMOOTH_OUT_SECONDS = 0.3;
+    public static final double LINEAR_ACCELERATION_SMOOTH_OUT_SECONDS = 0.1;
     /** same thing for rotation */
     public static final double ANGULAR_ACCELERATION_SMOOTH_OUT_SECONDS = 0.1;
 

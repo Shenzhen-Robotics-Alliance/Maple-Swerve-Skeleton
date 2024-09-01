@@ -37,6 +37,7 @@ public class DriveTrainConstants {
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
             STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
             ROBOT_MASS_KG = 40, // with bumpers
+            TIME_ROBOT_STOP_ROTATING_SECONDS = 0.06,
             STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
             DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
             DRIVE_INERTIA = 0.01,
@@ -81,7 +82,7 @@ public class DriveTrainConstants {
             ),
             CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = CHASSIS_MAX_VELOCITY / DRIVE_BASE_RADIUS,
             CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS,
-            CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION = MAX_FRICTION_ACCELERATION / DRIVE_BASE_RADIUS;
+            CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION = CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC / TIME_ROBOT_STOP_ROTATING_SECONDS;
 
     public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
 
