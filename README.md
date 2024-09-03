@@ -17,9 +17,7 @@ In our simulator, the robot can collide with field obstacles, interact with oppo
 ![robot_physics_simulation.gif](media/robot_physics_simulation.gif)
 
 ### Swerve-Drive Physics Simulation
-Previous swerve drive simulation models the drivetrain using a few [DCMotorSim](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html) instances.
-
-Previous swerve drive simulations modeled the drivetrain using several DCMotorSim instances. In contrast, this project's drivetrain simulation calculates the frictional and propelling forces on each swerve module. These forces are then used to model the drivetrain as a rigid body within the physics engine.
+Previous swerve drive simulations modeled the drivetrain using several [DCMotorSim](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html) instances. In contrast, this project's drivetrain simulation calculates the frictional and propelling forces on each swerve module. These forces are then used to model the drivetrain as a rigid body within the physics engine.
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CompetitionFieldUtils/Simulations/SwerveDriveSimulation.java)]
 ![swervedrivesim.gif](media/swervedrivesim.gif)
 
@@ -42,7 +40,9 @@ By modeling the interaction between the wheels and the floor, our simulation can
 Additionally, the IMU simulation incorporates drifting.  Hard impacts on the virtual robot will cause the IMU to drift, just like in real-world.
 
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/subsystems/drive/IO/ModuleIOSim.java) | [Video](https://youtu.be/ersRWIzC0zc)]
+
 ![Odometry Sim](media/odometrysim.gif)
+
 ### Vision Simulation
 Building on the [PhotonLib Camera Sim](https://docs.photonvision.org/en/latest/docs/simulation/simulation.html), this project features a fully realistic simulation of our custom AprilTag vision odometry.
 
