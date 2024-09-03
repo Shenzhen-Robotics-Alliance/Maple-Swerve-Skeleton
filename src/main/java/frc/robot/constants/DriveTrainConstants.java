@@ -10,38 +10,39 @@ import edu.wpi.first.math.util.Units;
  * because we want an all-real simulation for the chassis, the numbers are required to be considerably precise
  * */
 public class DriveTrainConstants {
-    /* dead configs, don't change them */
-    public static final int ODOMETRY_CACHE_CAPACITY = 10;
-    public static final double ODOMETRY_FREQUENCY = 250;
-    public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
-    public static final int SIMULATION_TICKS_IN_1_PERIOD = 5;
+    /**
+     * numbers that needs to be changed to fit each robot
+     * TODO: change these numbers to match your robot
+     *  */
+    public static final double
+            WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
+            ROBOT_MASS_KG = 40; // with bumpers
 
-    /* change motor type to match your robot */
+    /**
+     *  TODO: change motor type to match your robot
+     *  */
     public static final DCMotor
             DRIVE_MOTOR = DCMotor.getKrakenX60(1),
             STEER_MOTOR = DCMotor.getFalcon500(1);
 
-    /* adjust current limit */
-    public static final double DRIVE_CURRENT_LIMIT = 60;
-    public static final double STEER_CURRENT_LIMIT = 20;
-
-
     /**
-     * numbers that needs to be changed to fit each robot
-     * TODO: change these numbers to match your robot
-     *  for REV chassis, replace ALL references to {@link TunerConstants} with actual numbers
-     *  */
+     * numbers imported from {@link TunerConstants}
+     * TODO: for REV chassis, replace them with actual numbers
+     * */
     public static final double
             WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
-            WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
             STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
-            ROBOT_MASS_KG = 40, // with bumpers
             TIME_ROBOT_STOP_ROTATING_SECONDS = 0.06,
             STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
             DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
             DRIVE_INERTIA = 0.01,
             STEER_INERTIA = 0.01;
+
+    /* adjust current limit */
+    public static final double DRIVE_CURRENT_LIMIT = 60;
+    public static final double STEER_CURRENT_LIMIT = 20;
+
 
     /**
      * translations of the modules to the robot center, in FL, FR, BL, BR
@@ -107,4 +108,10 @@ public class DriveTrainConstants {
      * */
     public static final double NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD = Math.toRadians(1.2);
     public static final double AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST = Math.toRadians(60);
+
+    /* dead configs, don't change them */
+    public static final int ODOMETRY_CACHE_CAPACITY = 10;
+    public static final double ODOMETRY_FREQUENCY = 250;
+    public static final double ODOMETRY_WAIT_TIMEOUT_SECONDS = 0.02;
+    public static final int SIMULATION_TICKS_IN_1_PERIOD = 5;
 }

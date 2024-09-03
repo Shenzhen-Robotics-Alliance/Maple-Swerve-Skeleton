@@ -74,7 +74,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         );
         behaviorChooser.onChange((selectedCommand) -> CommandScheduler.getInstance().schedule(selectedCommand));
 
-        SmartDashboard.putData("FieldSimulation/OpponentRobot"+robotID+" Behavior", behaviorChooser);
+        SmartDashboard.putData("FieldSimulation/OpponentRobot"+(robotID+1)+" Behavior", behaviorChooser);
     }
 
     private ChassisSpeeds speedSetPoint = new ChassisSpeeds();

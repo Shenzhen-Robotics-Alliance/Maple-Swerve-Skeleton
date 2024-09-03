@@ -28,10 +28,7 @@ import frc.robot.constants.TunerConstants;
 import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.drive.IO.GyroIOPigeon2;
-import frc.robot.subsystems.drive.IO.GyroIOSim;
-import frc.robot.subsystems.drive.IO.ModuleIOSim;
-import frc.robot.subsystems.drive.IO.ModuleIOTalon;
+import frc.robot.subsystems.drive.IO.*;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
@@ -96,6 +93,8 @@ public class RobotContainer {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
                 powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
+
+                /* CTRE Chassis: */
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.CTRE_ON_CANIVORE,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
@@ -104,6 +103,16 @@ public class RobotContainer {
                         new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
                         new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight")
                 );
+
+                /* REV Chassis */
+//                drive = new SwerveDrive(
+//                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
+//                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
+//                        new ModuleIOSpark(0),
+//                        new ModuleIOSpark(1),
+//                        new ModuleIOSpark(2),
+//                        new ModuleIOSpark(3)
+//                );
 
                 aprilTagVision = new AprilTagVision(
                         new AprilTagVisionIOReal(camerasProperties),
