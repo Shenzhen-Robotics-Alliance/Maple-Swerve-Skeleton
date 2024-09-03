@@ -2,8 +2,7 @@
 
 ---
 
-6328 ([TBA](https://www.thebluealliance.com/team/6328/2024) | [Github](https://github.com/mechanical-advantage) | [Website](http://team6328.org/))'s [Advanced Swerve Drive Project](https://www.chiefdelphi.com/t/advantagekit-2024-log-replay-again/442968/54#advanced-swerve-drive-project-2) with enhanced physics simulation.
-
+6328 ([TBA](https://www.thebluealliance.com/team/6328/2024) | [Github](https://github.com/mechanical-advantage) | [Website](http://team6328.org/))'s [Advanced Swerve Drive Project](https://www.chiefdelphi.com/t/advantagekit-2024-log-replay-again/442968/54#advanced-swerve-drive-project-2) with More Enhanced Physics Simulation (Collision Detection and More)
 > 🙏 We extend our deepest appreciation to [Team 6328](https://www.littletonrobotics.org/) for their [open source project](https://github.com/Mechanical-Advantage), which have made this project possible.
 >
 > ⚖️ This project is based on an example from [AdvantageKit](https://github.com/Mechanical-Advantage/AdvantageKit/), which is under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text) license. All teams are welcome to use it, provided that you adhere to the [Advantage Kit License](./AdvantageKit-License.md).
@@ -11,38 +10,45 @@
 ## Simulation Details
 
 ### The Field has Collision Space
-The greatest distinction of the project is the implementation of [dyn4j](https://github.com/dyn4j/dyn4j), an open-source java physics engine, which enables us to add a collision detection for everything on the field, including obstacles, robots and game pieces.
+The standout feature of this project is the integration of the [dyn4j physics engine](https://github.com/dyn4j/dyn4j), which allows for the creation of a highly realistic and interactive simulation environment.
+
+In our simulator, the robot can collide with field obstacles, interact with opposing robots, and engage with game pieces, providing a dynamic and immersive experience.
+
 ![robot_physics_simulation.gif](media/robot_physics_simulation.gif)
 
 ### Swerve-Drive Physics Simulation
-Fine-tuned with data measured in our training field, the swerve drive simulation provides an incredibly realistic drivetrain characteristics.
-It simulates the behavior of each individual swerve module using [WPILib DCMotorSim](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html) and use the data from 4 modules together to simulate the force on the drivetrain. 
+Previous swerve drive simulation models the drivetrain using a few [DCMotorSim](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html) instances.
+
+Previous swerve drive simulations modeled the drivetrain using several DCMotorSim instances. In contrast, this project's drivetrain simulation calculates the frictional and propelling forces on each swerve module. These forces are then used to model the drivetrain as a rigid body within the physics engine.
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CompetitionFieldUtils/Simulations/SwerveDriveSimulation.java)]
 ![swervedrivesim.gif](media/swervedrivesim.gif)
 
 ### Game Pieces and Intake Simulation
-In our simulation, game pieces on the field has collision spaces and can interact with the robot.
-It also allows teams to simulate a fixed intake module on the robot that grabs a game pieces whenever in-contact.
+
+In our simulation, game pieces on the field have collision boundaries and can interact with the robot. The simulator also supports a fixed intake module on the robot, enabling it to automatically grab game pieces upon contact.
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CompetitionFieldUtils/Simulations/IntakeSimulation.java) | [Example Code](https://github.com/Shenzhen-Robotics-Alliance/5516-2024-OffSeason/blob/main/src/main/java/frc/robot/subsystems/intake/IntakeIOSim.java)]
 ![intakesim.gif](media/intakesim.gif)
 
 ### Opponent Robots Simulation
-Simulated robots that can either be controlled by a gamepad to play defense or follow pre-stored cycle paths.
-Just as real robots, opponent robots have collision spaces.
-This allows drivers to practice defense/offense.
+
+Simulated opponent robots can be either manually controlled using a gamepad for defensive play or set to follow pre-programmed cycle paths. Like real robots, these opponents have collision boundaries, allowing drivers to practice both defensive and offensive strategies effectively.
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CompetitionFieldUtils/Simulations/OpponentRobotSimulation.java)]
 ![opponentrobotsim.gif](media/opponentrobotsim.gif)
 
 ### Odometry Simulation
 
-Odometry Simulation with realistic characteristics such as skidding and the IMU drifts.  
+By modeling the interaction between the wheels and the floor, our simulation can replicate odometry measurement errors caused by skidding.
+
+Additionally, the IMU simulation incorporates drifting.  Hard impacts on the virtual robot will cause the IMU to drift, just like in real-world.
+
 [[Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/subsystems/drive/IO/ModuleIOSim.java) | [Video](https://youtu.be/ersRWIzC0zc)]
 ![Odometry Sim](media/odometrysim.gif)
 ### Vision Simulation
-Built Upon [PhotonLib Camera Sim](https://docs.photonvision.org/en/latest/docs/simulation/simulation.html), our vision simulation behaves exactly the same as a real vision system
-The system uses April Tags to position the robot on field, and teams can tune the system without a field
+Building on the [PhotonLib Camera Sim](https://docs.photonvision.org/en/latest/docs/simulation/simulation.html), this project features a fully realistic simulation of our custom AprilTag vision odometry.
+
+We've also optimized the vision odometry by incorporating 6328's Log-Replay Technology, which allows for adjustments to our pose estimation strategy during replay, as detailed [in this talk](https://www.youtube.com/watch?v=BrzPw6ngx4o&t=2038s).
 ![visionsim1.gif](media/visionsim1.gif)
-We also Provide a convenient feature that generates [Advantage Scope Fix Camera Config](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CustomConfigs/PhotonCameraProperties.java) automatically, which allows you to see the camera's view in advantage scope with easy steps to set up, [Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CustomConfigs/PhotonCameraProperties.java)
+We also offer a convenient feature that automatically generates the [Advantage Scope Fix Camera Config](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/tabs/3D-FIELD.md#fixed-camera), making it easy to set up and view the camera's perspective in Advantage Scope. [Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CustomConfigs/PhotonCameraProperties.java).
 ![visionsim2.gif](media/visionsim2.gif)
 
 ## Setup Guide
@@ -131,4 +137,7 @@ add a new [3D Field Widget](https://github.com/Mechanical-Advantage/AdvantageSco
 5. Open three [Sendable Choosers](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program-from-smartdashboard.html) in `SmartDashboard/FieldSimulation/` called `OpponentRobot1/2/3 Behavior` in the dashboard.  Select `Auto Cycle` to let AI control these robots to do cycles, or select `Joystick Control Left/Right-Handed` to control them manually with another gamepad (port 1/2/3 for opponent robot 1/2/3)
 
 ## Setting Up Vision
+
+> TODO: documentation for custom vision odometry
+
 Drag `AdvantageKit/RealOutputs/Odometry/ValidPoseEstimations` to `3D Poses`, make it `Blue Ghost` (this is where the robot think it is)
