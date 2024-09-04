@@ -143,7 +143,9 @@ add a new [3D Field Widget](https://github.com/Mechanical-Advantage/AdvantageSco
 > ⚠️ For teams that already have a reliable vision odometry solution in place, we recommend deleting this package and continuing to use the approach that best suits your needs.
 ### 1. Configure PhotonVision Coprocessors
 On the vision coprocessors, please [enable MultiTag](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html#enabling-multitag) and [update the correct field layout](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html#updating-the-field-layout) according to the [PhotonVision documentation](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/index.html).
+
 ![enabling multitag.webp](media/enabling multitag.webp)
+
 Optionally, if you want to view the individual `camera-to-target` transform calculated by `SolvePNP` for each target during replay, please turn on `Always Do Single-Target Estimation`. *Note that this hurts performance a little.*
 
 ### 2. Configuring Camera Constants in The Code
