@@ -157,9 +157,50 @@ public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
 ```
 Example:
 ![cameraproperties.png](media/cameraproperties.png)
-> ⚠️ TODO: Finish the rest of the documentations
-### 3. Visualizing the Filtering Process During Replay
-Drag `AdvantageKit/RealOutputs/Odometry/ValidPoseEstimations` to `3D Poses`, make it `Blue Ghost` (this is where the robot think it is)
+
+Now the vision system is good to go! Additionally, when a `PhotonCameraProperties` instance is created, it will automatically print a line of `JSON` code containing the position of the [Fixed Camera](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/tabs/3D-FIELD.md#fixed-camera).
+You can use this output to easily [configure a custom robot asset for Advantage Scope](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/CUSTOM-ASSETS.md).
+![jsonconfigprint.png](media/jsonconfigprint.png)
+
+### 3. Debugging the Vision During Replay
+The vision odometry uses a technique called [selective logging](https://youtu.be/BrzPw6ngx4o?si=SRhAgu99mGOL1mYB&t=1594) developed by [Team 6328](https://github.com/Mechanical-Advantage/).
+
+It only logs the raw inputs from the cameras and the final pose estimation result. If there's an issue with the result and you need to debug it, you must [replay the code](https://github.com/Mechanical-Advantage/AdvantageKit/blob/main/docs/WHAT-IS-ADVANTAGEKIT.md) to observe the detailed filtering process and pinpoint the problem.
+
+Open the log file using [AdvantageScope](https://github.com/Mechanical-Advantage/AdvantageScope). And change java sim mode to `Replay` in `Robot.java`.  Run **Simulate Java**.
+```java
+// Run Replay
+private static final Constants.RobotMode JAVA_SIM_MODE = Constants.RobotMode.REPLAY;
+```
+
+Now Open the Replayed Log in AdvantageScope.  The replayed log is named `ORIGINAL-LOG-FILE-NAME_replayed.wpilog`
+
+Drag Field `AdvantageKit/RealOutputs/AprilTags/Filtering/VisibleFieldTargets` to `3D Poses`, make it `Vision Target` (these are the AprilTags on the field that are seen by one or more cameras).
+
+Drag Field `AdvantageKit/RealOutputs/AprilTags/Filtering/AprilTagsObservedPositions` to `3D Poses`, make it `AprilTag 36h11` (this represents the observed positions of the tags on the field, assuming the current odometry pose is correct)
+
+Drag Field `AdvantageKit/RealOutputs/AprilTags/Filtering/ValidPoseEstimations` to `3D Poses`, make it `Green Ghost` (these are the pose estimation results that the filtering mechanism has deemed **valid**)
+
+Drag Field `AdvantageKit/RealOutputs/AprilTags/Filtering/InvalidPoseEstimations` to `3D Poses`, make it `Red Ghost` (these are the pose estimation results that the filtering mechanism has marked as **invalid** or **noisy**)
+
+This is how it should look: (log file during [WRC Beijing Off-season Event](https://www.thebluealliance.com/event/2024xxcha), Elimination 4)
+
+![filteringcheck.gif](media/filteringcheck.gif)
+
+You can see a lot of red results in the output, indicating that something is wrong.
+
+Many AprilTags observed on the right-hand side of the robot appear to be floating in midair, likely due to an issue with the front-right camera.
+
+To troubleshoot, we removed the `FrontRightCam` from the  [camera configuration](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/?tab=readme-ov-file#2-configuring-camera-constants-in-the-code),
+effectively disabling the camera for the replay.
+
+Upon running the replay again, the red "ghost" errors disappeared.
+
+It turns out the camera stand was bent.
+
+This is a great example of how log-replay can quickly help you identify and resolve issues.
 
 ### 4. Enhanced Log-Replay Techniques
 Since the vision odometry logs all the raw camera inputs, you will be able to change your pose estimation code and filtering mechanism during replay.
+
+> TODO: write the documents on how to fine tune the filtering mechanism using replay
