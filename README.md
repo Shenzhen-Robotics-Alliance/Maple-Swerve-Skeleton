@@ -54,9 +54,9 @@ We also offer a convenient feature that automatically generates the [Advantage S
 ## Setup Guide
 
 - ### CTRE Chassis
-  1. Generate [TunerConstants.java](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/constants/TunerConstants.java) Using [CTRE's Swerve Project Generator](https://v6.docs.ctr-electronics.com/en/latest/docs/tuner/tuner-swerve/index.html).
-  2. in your IDE, replace all `private` tags with `public`
-  3. delete the last two lines 
+  1. Generate [TunerConstants.java](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/constants/TunerConstants.java) using [CTRE's Swerve Project Generator](https://v6.docs.ctr-electronics.com/en/latest/docs/tuner/tuner-swerve/index.html) and drop it to `src/main/java/constants/` .
+  2. In vscode, use `Control` + `H` to replace all `private` tags in `TunerConstants` with `public`
+  3. Delete the last two lines 
     ``` Java
     // TODO: the last two lines MUST be removed
     public static final CommandSwerveDrivetrain DriveTrain = new CommandSwerveDrivetrain(DrivetrainConstants, FrontLeft,
@@ -79,7 +79,7 @@ We also offer a convenient feature that automatically generates the [Advantage S
       DRIVE_MOTOR = DCMotor.getKrakenX60(1),
       STEER_MOTOR = DCMotor.getFalcon500(1);
     ```
-    5. Try Driving Your Chassis On Field!!!
+    5. Try Driving Your Chassis On Field !!!
 - ### Rev Chassis
     > ⚠️ This project **supports** Rev hardware.  However, it has not been tested on a physical Rev Chassis simply because **we don't have one**.  If your team has an Rev Chassis and willing to test and debug our code, you are absolutely welcome and appreciated.
     
@@ -137,7 +137,27 @@ add a new [3D Field Widget](https://github.com/Mechanical-Advantage/AdvantageSco
 5. Open three [Sendable Choosers](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program-from-smartdashboard.html) in `SmartDashboard/FieldSimulation/` called `OpponentRobot1/2/3 Behavior` in the dashboard.  Select `Auto Cycle` to let AI control these robots to do cycles, or select `Joystick Control Left/Right-Handed` to control them manually with another gamepad (port 1/2/3 for opponent robot 1/2/3)
 
 ## Setting Up Vision
+> 💡 The `subsystems/vision/apriltags` package is our team's implementation of an apriltag vision odometry, which is built on top of [Photon Vision](https://photonvision.org/).
+> We've implemented [custom filtering mechanisms]() that enhance accuracy.  We've also provide improved support for [6328's Log-Replay Technique](https://github.com/Mechanical-Advantage/AdvantageKit/blob/main/docs/WHAT-IS-ADVANTAGEKIT.md).
+> 
+> ⚠️ For teams that already have a reliable vision odometry solution in place, we recommend deleting this package and continuing to use the approach that best suits your needs.
+### 1. Configure PhotonVision Coprocessors
+On the vision coprocessors, please [enable MultiTag](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html#enabling-multitag) and [update the correct field layout](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html#updating-the-field-layout) according to the [PhotonVision documentation](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/index.html).
+![enabling multitag.webp](media/enabling multitag.webp)
+Optionally, if you want to view the individual `camera-to-target` transform calculated by `SolvePNP` for each target during replay, please turn on `Always Do Single-Target Estimation`. *Note that this hurts performance a little.*
 
-> TODO: documentation for custom vision odometry
-
+### 2. Configuring Camera Constants in The Code
+In `constants/VisionConstants.java`, put the infos about your camera here:
+```java 
+public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
+        // declare all the photon cameras here
+);
+```
+Example:
+![cameraproperties.png](media/cameraproperties.png)
+> ⚠️ TODO: Finish the rest of the documentations
+### 3. Visualizing the Filtering Process During Replay
 Drag `AdvantageKit/RealOutputs/Odometry/ValidPoseEstimations` to `3D Poses`, make it `Blue Ghost` (this is where the robot think it is)
+
+### 4. Enhanced Log-Replay Techniques
+Since the vision odometry logs all the raw camera inputs, you will be able to change your pose estimation code and filtering mechanism during replay.
