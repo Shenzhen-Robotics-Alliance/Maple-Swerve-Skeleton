@@ -7,5 +7,5 @@ import java.util.function.Predicate;
 public interface VisionResultsFilter {
     String getFilterImplementationName();
 
-    boolean isResultValid(Pose3d robotPoseEstimation, int aprilTagID);
+    boolean isResultValid(Pose3d robotPoseEstimation);
 }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision.apriltags;
 
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import org.littletonrobotics.junction.LogTable;
@@ -7,6 +8,7 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 public interface AprilTagVisionIO {
     class CameraInputs {
@@ -16,6 +18,7 @@ public interface AprilTagVisionIO {
         public int currentTargetsCount;
         public final int[] fiducialMarksID;
         public final Transform3d[] bestCameraToTargets;
+        public Optional<Transform3d> bestCameraToField = Optional.empty();
 
         public CameraInputs() {
             this.fiducialMarksID = new int[MAX_TARGET_PER_CAMERA];
@@ -41,8 +44,12 @@ public interface AprilTagVisionIO {
                 this.fiducialMarksID[i] = pipelineResult.getTargets().get(i).getFiducialId();
                 this.bestCameraToTargets[i] = pipelineResult.getTargets().get(i).getBestCameraToTarget();
             }
+            this.bestCameraToField = pipelineResult.getMultiTagResult().estimatedPose.isPresent
+                    ? Optional.of(pipelineResult.getMultiTagResult().estimatedPose.best)
+                    : Optional.empty();
         }
 
+        private static final Transform3d NULL_TRANSFORM = new Transform3d(-114514, -114514, -114514, new Rotation3d());
         public void fromLog(LogTable table, int cameraID) {
             final String cameraKey = "camera" + cameraID;
             this.cameraConnected = table.get(cameraKey+"Connected", false);
@@ -56,6 +63,10 @@ public interface AprilTagVisionIO {
                 fiducialMarksID[i] = fiducialMarkIDLogged[i];
                 bestCameraToTargets[i] = bestCameraToTargetsLogged[i];
             }
+            Transform3d bestCameraToFieldTransform = table.get(cameraKey+"bestCameraToField", NULL_TRANSFORM);
+            this.bestCameraToField = bestCameraToFieldTransform.equals(NULL_TRANSFORM) ?
+                    Optional.empty()
+                    :Optional.of(bestCameraToFieldTransform);
         }
 
         public void writeToLog(LogTable table, int cameraID) {
@@ -65,13 +76,13 @@ public interface AprilTagVisionIO {
             table.put(cameraKey+"CurrentTargetsCount", currentTargetsCount);
             table.put(cameraKey+"FiducialMarksID", fiducialMarksID);
             table.put(cameraKey+"bestCameraToTargets", bestCameraToTargets);
+            table.put(cameraKey+"bestCameraToField", bestCameraToField.orElse(NULL_TRANSFORM));
         }
     }
     class VisionInputs implements LoggableInputs {
         public final int camerasAmount;
         public final CameraInputs[] camerasInputs;
         public double inputsFetchedRealTimeStampSeconds = 0;
-        public boolean coprocessorConnected = false;
 
         public VisionInputs(int camerasAmount) {
             this.camerasAmount = camerasAmount;

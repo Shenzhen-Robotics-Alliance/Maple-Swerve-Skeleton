@@ -50,6 +50,8 @@ public class Robot extends LoggedRobot {
             }
             case SIM -> {
                 // Running a physics simulator
+                // Log to CodeDirectory/logs if you want to test logging system in a simulation
+                // Logger.addDataReceiver(new WPILOGWriter());
                 Logger.addDataReceiver(new NT4Publisher());
             }
             case REPLAY -> {

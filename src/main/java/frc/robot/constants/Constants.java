@@ -37,10 +37,11 @@ public final class Constants {
     public static final class VisionConfigs {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
         public static final PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy = PhotonPoseEstimator.PoseStrategy.AVERAGE_BEST_TARGETS;
+        public static final int MINIMUM_TAGS_NUM = 2;
         /* default standard error for vision observation, if only one apriltag observed */
         public static final double
-                TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.6,
-                ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = 0.5,
+                TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.3,
+                ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(10),
 
                 // only do odometry calibration if translational standard error if it is not greater than
                 TRANSLATIONAL_STANDARD_ERROR_THRESHOLD = 0.5,
