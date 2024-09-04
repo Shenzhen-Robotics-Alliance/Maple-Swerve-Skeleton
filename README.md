@@ -196,7 +196,7 @@ effectively disabling the camera for the replay.
 
 Upon running the replay again, the red "ghost" errors disappeared.
 
-It turns out the camera stand was bent.
+> It turns out the camera stand was bent.
 
 This is a great example of how log-replay can quickly help you identify and resolve issues.
 
