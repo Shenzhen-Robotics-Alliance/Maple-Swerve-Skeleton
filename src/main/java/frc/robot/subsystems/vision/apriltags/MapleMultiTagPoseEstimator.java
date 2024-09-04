@@ -118,7 +118,7 @@ public class MapleMultiTagPoseEstimator {
 
     private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
         final int n = validRobotPoseEstimations.size();
-        if (n == 0 || robotPose3dObservations.size() < MINIMUM_TAGS_NUM)
+        if (n == 0 || observedVisionTargetPoseInFieldLayout.size() < MINIMUM_TAGS_NUM)
             return Optional.empty();
         if (n == 1)
             return Optional.of(new RobotPoseEstimationResult(

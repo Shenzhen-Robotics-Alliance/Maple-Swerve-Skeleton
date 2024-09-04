@@ -36,7 +36,6 @@ public final class Constants {
 
     public static final class VisionConfigs {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
-        public static final PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy = PhotonPoseEstimator.PoseStrategy.AVERAGE_BEST_TARGETS;
         public static final int MINIMUM_TAGS_NUM = 2;
         /* default standard error for vision observation, if only one apriltag observed */
         public static final double
@@ -47,6 +46,7 @@ public final class Constants {
                 TRANSLATIONAL_STANDARD_ERROR_THRESHOLD = 0.5,
                 // only do gyro calibration if rotational standard error is very, very small
                 ROTATIONAL_STANDARD_ERROR_THRESHOLD = Math.toRadians(5),
+                ROTATIONAL_ERROR_WITH_GYRO_DISCARD_RESULT = Math.toRadians(15),
 
                 ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.02,
                 // we trust the IMU very much (recommend 0.1 for Pigeon2, 0.5 for NavX)

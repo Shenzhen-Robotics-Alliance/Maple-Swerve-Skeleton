@@ -81,8 +81,13 @@ public class AprilTagVision extends MapleSubsystem {
         if (standardDeviationX > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD || standardDeviationY > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
             return Optional.empty();
         /* don't calibrate gyro if rotation error is not inside range */
-        if (standardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
+        if (standardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD) {
             standardDeviationTheta = Double.POSITIVE_INFINITY;
+            if (Math.abs(driveSubsystem.getPose().getRotation()
+                    .minus(result.get().pointEstimation.getRotation())
+                    .getRadians()) > ROTATIONAL_ERROR_WITH_GYRO_DISCARD_RESULT
+            ) return Optional.empty();
+        }
 
         return Optional.of(new RobotPoseEstimationResult(
                 result.get().pointEstimation,
