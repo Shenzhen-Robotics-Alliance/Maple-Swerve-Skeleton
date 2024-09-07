@@ -27,11 +27,11 @@ import static frc.robot.constants.DriveTrainConstants.*;
  * should only be created during a robot simulation (not in real or replay mode)
  * */
 public abstract class CompetitionFieldSimulation {
-    private final World<Body> physicsWorld;
-    private final CompetitionFieldVisualizer competitionField;
-    private final Set<HolonomicChassisSimulation> robotSimulations = new HashSet<>();
-    private final HolonomicChassisSimulation mainRobot;
-    private final Set<GamePieceInSimulation> gamePieces;
+    protected final World<Body> physicsWorld;
+    protected final CompetitionFieldVisualizer competitionField;
+    protected final Set<HolonomicChassisSimulation> robotSimulations = new HashSet<>();
+    protected final HolonomicChassisSimulation mainRobot;
+    protected final Set<GamePieceInSimulation> gamePieces;
 
     private List<IntakeSimulation> intakeSimulations = new ArrayList<>();
 
@@ -49,6 +49,7 @@ public abstract class CompetitionFieldSimulation {
     }
 
     public void updateSimulationWorld() {
+        competitionPeriodic();
         final double subPeriodSeconds = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD;
         // move through 5 sub-periods in each update
         for (int i = 0; i < SIMULATION_TICKS_IN_1_PERIOD; i++) {
@@ -77,6 +78,7 @@ public abstract class CompetitionFieldSimulation {
     public void addGamePiece(GamePieceInSimulation gamePieceInSimulation) {
         this.physicsWorld.addBody(gamePieceInSimulation);
         this.competitionField.addObject(gamePieceInSimulation);
+        this.gamePieces.add(gamePieceInSimulation);
     }
 
     public void removeGamePiece(GamePieceInSimulation gamePieceInSimulation) {
@@ -100,9 +102,15 @@ public abstract class CompetitionFieldSimulation {
         placeGamePiecesOnField();
     }
     /**
-     * place all game pieces on the field (for autonomous)
+     * do field reset by placing all the game-pieces on field(for autonomous)
      * */
     public abstract void placeGamePiecesOnField();
+
+    /**
+     * update the score counts & human players periodically
+     * implement this method in current year's simulation
+     * */
+    public abstract void competitionPeriodic();
 
     /**
      * stores the obstacles on a competition field, which includes the border and the game pieces
