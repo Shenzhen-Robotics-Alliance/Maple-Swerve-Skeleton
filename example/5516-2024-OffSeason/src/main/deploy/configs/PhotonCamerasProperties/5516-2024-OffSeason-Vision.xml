@@ -1,0 +1,88 @@
+<PhotonCamerasProperties>
+    <GeneralInfo>
+        <camerasAmount type="int">5</camerasAmount>
+        <cameraFPS type="double">50</cameraFPS>
+        <averageLatencyMS type="double">12</averageLatencyMS>
+        <latencyStandardDeviationMS type="double">4</latencyStandardDeviationMS>
+    </GeneralInfo>
+
+    <Camera0>
+        <name type="string">FrontCam</name>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
+        <cameraFOVDegrees type="double">60</cameraFOVDegrees>
+        <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
+        <mountPositionToRobotCenterForwardsMeters type="double">0.3</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">0</mountPositionToRobotCenterLeftwardsMeters>
+        <mountHeightMeters type="double">0.2</mountHeightMeters>
+        <cameraPitchDegrees type="double">30</cameraPitchDegrees>
+        <cameraYawDegrees type="double">0</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
+    </Camera0>
+
+    <Camera1>
+        <name type="string">FrontLeftCam</name>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
+        <cameraFOVDegrees type="double">60</cameraFOVDegrees>
+        <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
+        <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">0.3</mountPositionToRobotCenterLeftwardsMeters>
+        <mountHeightMeters type="double">0.2</mountHeightMeters>
+        <cameraPitchDegrees type="double">30</cameraPitchDegrees>
+        <cameraYawDegrees type="double">30</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
+    </Camera1>
+
+    <Camera2>
+        <name type="string">FrontRightCam</name>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
+        <cameraFOVDegrees type="double">60</cameraFOVDegrees>
+        <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
+        <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">-0.3</mountPositionToRobotCenterLeftwardsMeters>
+        <mountHeightMeters type="double">0.2</mountHeightMeters>
+        <cameraPitchDegrees type="double">30</cameraPitchDegrees>
+        <cameraYawDegrees type="double">-30</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
+    </Camera2>
+
+    <Camera3>
+        <name type="string">BackLeftCam</name>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
+        <cameraFOVDegrees type="double">60</cameraFOVDegrees>
+        <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
+        <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">0.05</mountPositionToRobotCenterLeftwardsMeters>
+        <mountHeightMeters type="double">0.2</mountHeightMeters>
+        <cameraPitchDegrees type="double">35</cameraPitchDegrees>
+        <cameraYawDegrees type="double">150</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
+    </Camera3>
+
+    <Camera4>
+        <name type="string">BackRightCam</name>
+        <captureWidthPixels type="int">1280</captureWidthPixels>
+        <captureHeightPixels type="int">720</captureHeightPixels>
+        <cameraFOVDegrees type="double">60</cameraFOVDegrees>
+        <calibrationAverageErrorPixel type="double">0.5</calibrationAverageErrorPixel>
+        <calibrationErrorStandardDeviationPixel type="double">0.8</calibrationErrorStandardDeviationPixel>
+        <mountPositionToRobotCenterForwardsMeters type="double">0.25</mountPositionToRobotCenterForwardsMeters>
+        <mountPositionToRobotCenterLeftwardsMeters type="double">-0.05</mountPositionToRobotCenterLeftwardsMeters>
+        <mountHeightMeters type="double">0.2</mountHeightMeters>
+        <cameraPitchDegrees type="double">35</cameraPitchDegrees>
+        <cameraYawDegrees type="double">-150</cameraYawDegrees>
+        <!-- 0 for up-right, 1 for upside-down, 2 for 90 degrees clockwise rotated image, 3 for 90 degrees counter-clockwise rotated -->
+        <captureOrientation type="int">1</captureOrientation>
+    </Camera4>
+</PhotonCamerasProperties>
