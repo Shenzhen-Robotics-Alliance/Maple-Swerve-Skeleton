@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -34,6 +35,7 @@ import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
+import frc.robot.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.OpponentRobotSimulation;
@@ -312,6 +314,12 @@ public class RobotContainer {
                 () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.6, Rotation2d.fromDegrees(90)))
         );
         driverXBox.b().whileTrue(exampleAutoAlignment);
+
+        /* TODO: example shooter visualization, delete it for your project */
+        if (Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
+            driverXBox.rightTrigger(0.5).onTrue(Commands.runOnce(() -> fieldSimulation.getCompetitionField().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteOnFly(
+                    new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3), 0.5
+            ))));
     }
 
     /**
