@@ -4,4 +4,6 @@ public class LogPaths {
     public static final String SYSTEM_PERFORMANCE_PATH = "SystemPerformance/";
     public static final String PHYSICS_SIMULATION_PATH = "MaplePhysicsSimulation/";
     public static final String APRIL_TAGS_VISION_PATH = "Vision/AprilTags/";
+
+    public static final String SHOOTER_PATH = "Shooter/";
 }

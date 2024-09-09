@@ -6,8 +6,8 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import frc.robot.constants.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.RobotMode;
 import frc.robot.utils.CustomMaths.Statistics;
 import org.littletonrobotics.junction.Logger;
 
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static frc.robot.constants.Constants.VisionConfigs.*;
+import static frc.robot.constants.VisionConstants.*;
 import static frc.robot.constants.LogPaths.APRIL_TAGS_VISION_PATH;
 
 public class MapleMultiTagPoseEstimator {
@@ -33,7 +33,7 @@ public class MapleMultiTagPoseEstimator {
         }
     }
 
-    public static final boolean LOG_DETAILED_FILTERING_DATA = Robot.CURRENT_ROBOT_MODE != Constants.RobotMode.REAL;
+    public static final boolean LOG_DETAILED_FILTERING_DATA = Robot.CURRENT_ROBOT_MODE != RobotMode.REAL;
 
     private final AprilTagFieldLayout fieldLayout;
     private final VisionResultsFilter filter;
@@ -110,7 +110,7 @@ public class MapleMultiTagPoseEstimator {
 
         applyFilteringToRawRobotPose3dEstimations();
 
-        if (Robot.CURRENT_ROBOT_MODE != Constants.RobotMode.REAL)
+        if (Robot.CURRENT_ROBOT_MODE != RobotMode.REAL)
             logFilteringData();
 
         return getEstimationResultFromValidObservations();

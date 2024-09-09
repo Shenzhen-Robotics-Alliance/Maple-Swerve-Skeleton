@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.constants.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.utils.LEDAnimation;
 import org.littletonrobotics.junction.Logger;
@@ -29,7 +29,7 @@ public class LEDStatusLight extends MapleSubsystem {
     public LEDStatusLight(int port, int length) {
         super("LED");
         if (led != null) led.close();
-        led = Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.REAL ? new AddressableLED(port) : null;
+        led = Robot.CURRENT_ROBOT_MODE == RobotMode.REAL ? new AddressableLED(port) : null;
         if (led != null) led.setLength(length);
         this.buffer = new AddressableLEDBuffer(length);
         this.bufferForDashboard = new AddressableLEDBuffer(DASHBOARD_DISPLAY_LENGTH);
@@ -38,9 +38,9 @@ public class LEDStatusLight extends MapleSubsystem {
         if (led != null) led.start();
 
         super.setDefaultCommand(Commands.run(
-                        () -> setAnimation(DriverStation.isEnabled() ? (
-                                notePresent ? ENABLED_HOLDING_NOTE : ENABLED): DISABLED),
-                        this)
+                () -> setAnimation(DriverStation.isEnabled() ? (
+                        notePresent ? ENABLED_HOLDING_NOTE : ENABLED): DISABLED),
+                this)
                 .ignoringDisable(true));
     }
 
@@ -53,9 +53,9 @@ public class LEDStatusLight extends MapleSubsystem {
             colors[i] = bufferForDashboard.getLED(DASHBOARD_DISPLAY_LENGTH/2 + i).toHexString();
 
         if (led != null) led.setData(buffer);
-        if (Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
+        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
             SmartDashboard.putStringArray("Status Light", colors);
-        else if (Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.REPLAY)
+        else if (Robot.CURRENT_ROBOT_MODE == RobotMode.REPLAY)
             Logger.recordOutput("Status Light", colors);
     }
 

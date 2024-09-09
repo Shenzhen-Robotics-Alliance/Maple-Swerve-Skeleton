@@ -30,7 +30,7 @@ public class JoystickDrive extends Command {
     private ChassisSpeeds currentPilotInputSpeeds;
     protected Rotation2d currentRotationMaintenanceSetpoint;
 
-    private double translationalSensitivity = DEFAULT_TRANSLATIONAL_SENSITIVITY, rotationalSensitivity = DEFAULT_ROTATIONAL_SENSITIVITY;
+    private double translationalSensitivity, rotationalSensitivity;
     public JoystickDrive(MapleJoystickDriveInput input, BooleanSupplier useDriverStationCentricSwitch, Supplier<Integer> povButtonSupplier, HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
@@ -44,6 +44,7 @@ public class JoystickDrive extends Command {
         this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
 
         super.addRequirements(driveSubsystem);
+        resetSensitivity();
     }
 
     @Override
@@ -124,5 +125,9 @@ public class JoystickDrive extends Command {
     public void setSensitivity(double translationalSensitivity, double rotationalSensitivity) {
         this.translationalSensitivity = translationalSensitivity;
         this.rotationalSensitivity = rotationalSensitivity;
+    }
+
+    public void resetSensitivity() {
+        setSensitivity(DEFAULT_TRANSLATIONAL_SENSITIVITY, DEFAULT_ROTATIONAL_SENSITIVITY);
     }
 }

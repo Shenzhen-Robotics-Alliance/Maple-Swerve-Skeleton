@@ -3,11 +3,13 @@ package frc.robot.utils;
 import com.pathplanner.lib.auto.CommandUtil;
 import com.pathplanner.lib.path.*;
 import com.pathplanner.lib.util.PPLibTelemetry;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.constants.FieldConstants;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,6 +20,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class MaplePathPlannerLoader {
     /**
@@ -298,5 +301,13 @@ public class MaplePathPlannerLoader {
         double pos = ((Number) markerJson.get("waypointRelativePos")).doubleValue();
         Command cmd = CommandUtil.commandFromJson((JSONObject) markerJson.get("command"), false);
         return new EventMarker(pos, cmd);
+    }
+
+    public static Supplier<Pose2d> getEndingRobotPoseInCurrentAllianceSupplier(PathPlannerPath pathAtBlueAlliance) {
+        final List<Pose2d> pathPoses =  pathAtBlueAlliance.getPathPoses();
+        final Rotation2d endingRotation = pathAtBlueAlliance.getGoalEndState().getRotation();
+        final Pose2d lastPathPose = pathPoses.get(pathPoses.size()-1);
+
+        return () -> FieldConstants.toCurrentAlliancePose(new Pose2d(lastPathPose.getTranslation(), endingRotation));
     }
 }
