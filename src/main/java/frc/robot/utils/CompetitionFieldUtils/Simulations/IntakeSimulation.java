@@ -15,16 +15,14 @@ import org.dyn4j.world.listener.ContactListener;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.function.BooleanSupplier;
 
 import static frc.robot.utils.CustomMaths.GeometryConvertor.*;
 
-public class IntakeSimulation extends BodyFixture {
+public abstract class IntakeSimulation extends BodyFixture {
     private final int capacity;
-    private int gamePieceCount;
+    protected int gamePieceCount;
 
     private final Queue<GamePieceInSimulation> gamePiecesToRemove;
-    private final BooleanSupplier intakeRunningSupplier;
 
     /**
      * Creates an intake simulation
@@ -33,14 +31,13 @@ public class IntakeSimulation extends BodyFixture {
      *
      * @param startPointOnRobot     the start point of the segment, in relative to the robot
      * @param endPointOnRobot       the end point of the segment, in relative to the robot
-     * @param capacity              the amount of game-pieces that can be hold in the intake\
-     * @param intakeRunningSupplier whether is intake is running now
+     * @param capacity              the amount of game-pieces that can be hold in the intake
      */
-    public IntakeSimulation(Translation2d startPointOnRobot, Translation2d endPointOnRobot, int capacity, BooleanSupplier intakeRunningSupplier) {
+    public IntakeSimulation(Translation2d startPointOnRobot, Translation2d endPointOnRobot, int capacity) {
         this(
                 new Segment(toDyn4jVector2(startPointOnRobot), toDyn4jVector2(endPointOnRobot)),
-                capacity,
-                intakeRunningSupplier);
+                capacity
+        );
     }
 
     /**
@@ -50,11 +47,9 @@ public class IntakeSimulation extends BodyFixture {
      *
      * @param shape the shape of the intake
      * @param capacity              the amount of game-pieces that can be hold in the intake\
-     * @param intakeRunningSupplier whether is intake is running now
      */
-    public IntakeSimulation(Convex shape, int capacity, BooleanSupplier intakeRunningSupplier) {
+    public IntakeSimulation(Convex shape, int capacity) {
         super(shape);
-        this.intakeRunningSupplier = intakeRunningSupplier;
         if (capacity > 100)
             throw new IllegalArgumentException("capacity too large, max is 100");
         this.capacity = capacity;
@@ -62,10 +57,12 @@ public class IntakeSimulation extends BodyFixture {
         this.gamePiecesToRemove = new ArrayDeque<>(capacity);
     }
 
+    protected abstract boolean isIntakeRunning();
+
     public final class GamePieceContactListener implements ContactListener<Body> {
         @Override
         public void begin(ContactCollisionData collision, Contact contact) {
-            if (!intakeRunningSupplier.getAsBoolean()) return;
+            if (!isIntakeRunning()) return;
             if (gamePieceCount == capacity) return;
 
             final CollisionBody<?> collisionBody1 = collision.getBody1(), collisionBody2 = collision.getBody2();

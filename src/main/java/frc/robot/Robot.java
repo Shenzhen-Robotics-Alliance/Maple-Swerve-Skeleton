@@ -6,7 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.constants.Constants;
+import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -16,8 +16,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
-    private static final Constants.RobotMode JAVA_SIM_MODE = Constants.RobotMode.SIM;
-    public static final Constants.RobotMode CURRENT_ROBOT_MODE = isReal() ? Constants.RobotMode.REAL : JAVA_SIM_MODE;
+    private static final RobotMode JAVA_SIM_MODE = RobotMode.SIM;
+    public static final RobotMode CURRENT_ROBOT_MODE = isReal() ? RobotMode.REAL : JAVA_SIM_MODE;
     private Command autonomousCommand;
     private RobotContainer robotContainer;
 
@@ -76,7 +76,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void robotPeriodic() {
-        if (CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
+        if (CURRENT_ROBOT_MODE == RobotMode.SIM)
             robotContainer.updateFieldSimAndDisplay();
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();

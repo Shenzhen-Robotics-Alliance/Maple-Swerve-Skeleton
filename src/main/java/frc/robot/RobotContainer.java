@@ -23,14 +23,10 @@ import frc.robot.autos.Auto;
 import frc.robot.autos.ExampleAuto;
 import frc.robot.autos.PathPlannerAuto;
 import frc.robot.commands.drive.*;
-import frc.robot.constants.Constants;
-import frc.robot.constants.FieldConstants;
-import frc.robot.constants.TunerConstants;
-import frc.robot.constants.VisionConstants;
+import frc.robot.constants.*;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
-import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
@@ -60,7 +56,6 @@ public class RobotContainer {
     // Subsystems
     public final SwerveDrive drive;
     public final AprilTagVision aprilTagVision;
-    public final LEDStatusLight ledStatusLight;
 
     /* an example shooter optimization */
     public final MapleShooterOptimization exampleShooterOptimization;
@@ -90,7 +85,6 @@ public class RobotContainer {
                 // PhotonCameraProperties.loadCamerasPropertiesFromConfig("5516-2024-OffSeason-Vision"); // loads camera properties from deploy/PhotonCamerasProperties/5516-2024-OffSeason-Vision.xml
                 VisionConstants.photonVisionCameras; // load configs stored directly in VisionConstants.java
 
-        this.ledStatusLight = new LEDStatusLight(0, 155);
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
@@ -151,7 +145,7 @@ public class RobotContainer {
                 aprilTagVision = new AprilTagVision(
                         new ApriltagVisionIOSim(
                                 camerasProperties,
-                                Constants.VisionConfigs.fieldLayout,
+                                VisionConstants.fieldLayout,
                                 driveSimulation::getObjectOnFieldPose2d
                         ),
                         camerasProperties,
@@ -316,7 +310,7 @@ public class RobotContainer {
         driverXBox.b().whileTrue(exampleAutoAlignment);
 
         /* TODO: example shooter visualization, delete it for your project */
-        if (Robot.CURRENT_ROBOT_MODE == Constants.RobotMode.SIM)
+        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
             driverXBox.rightTrigger(0.5).onTrue(Commands.runOnce(() -> fieldSimulation.getCompetitionField().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteOnFly(
                     new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3), 0.5
             ))));

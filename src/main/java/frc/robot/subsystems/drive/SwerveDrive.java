@@ -25,7 +25,7 @@ import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.constants.Constants.VisionConfigs.*;
+import static frc.robot.constants.VisionConstants.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 
 public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {

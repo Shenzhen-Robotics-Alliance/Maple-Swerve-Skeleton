@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static frc.robot.constants.Constants.VisionConfigs.*;
+import static frc.robot.constants.VisionConstants.*;
 import static frc.robot.constants.LogPaths.*;
 import static frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator.RobotPoseEstimationResult;
 

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.constants.Constants;
 import frc.robot.Robot;
 import frc.robot.constants.LogPaths;
 import frc.robot.utils.CustomMaths.MapleCommonMath;
