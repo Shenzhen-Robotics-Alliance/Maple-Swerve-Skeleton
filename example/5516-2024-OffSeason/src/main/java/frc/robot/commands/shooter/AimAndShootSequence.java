@@ -1,6 +1,7 @@
 package frc.robot.commands.shooter;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -9,6 +10,8 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.shooter.FlyWheels;
 import frc.robot.subsystems.shooter.Pitch;
+import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
+import frc.robot.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects;
 import frc.robot.utils.MapleShooterOptimization;
 
 import java.util.function.BooleanSupplier;
@@ -21,7 +24,8 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
             HolonomicDriveSubsystem drive,
             Supplier<Translation2d> targetPositionSupplier,
             BooleanSupplier externalShootCondition,
-            LEDStatusLight statusLight) {
+            LEDStatusLight statusLight,
+            CompetitionFieldVisualizer visualizer) {
         this(
                 pitch, flyWheels, intake,
                 shooterOptimization,
@@ -29,7 +33,8 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
                 () -> drive.getPose().getTranslation(),
                 targetPositionSupplier,
                 externalShootCondition,
-                statusLight
+                statusLight,
+                visualizer
         );
     }
 
@@ -46,7 +51,8 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
             Supplier<Translation2d> robotScoringPositionSupplier,
             Supplier<Translation2d> targetPositionSupplier,
             BooleanSupplier externalShootCondition,
-            LEDStatusLight ledStatusLight) {
+            LEDStatusLight ledStatusLight,
+            CompetitionFieldVisualizer visualizer) {
 
         super();
         super.addRequirements(pitch, flyWheels, intake);
@@ -62,5 +68,9 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         final Command waitForRightTimingAndShoot = Commands.waitUntil(aimAtSpeakerContinuously::readyToShoot)
                 .andThen(intake.executeLaunch());
         super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));
+        super.addCommands(Commands.runOnce(() -> visualizer.addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToShooter(
+                new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3),
+                0.5
+        ))));
     }
 }

@@ -84,6 +84,7 @@ public abstract class CompetitionFieldSimulation {
     public void removeGamePiece(GamePieceInSimulation gamePieceInSimulation) {
         this.physicsWorld.removeBody(gamePieceInSimulation);
         this.competitionField.deleteObject(gamePieceInSimulation);
+        this.gamePieces.remove(gamePieceInSimulation);
     }
 
     public CompetitionFieldVisualizer getCompetitionField() {return competitionField;}

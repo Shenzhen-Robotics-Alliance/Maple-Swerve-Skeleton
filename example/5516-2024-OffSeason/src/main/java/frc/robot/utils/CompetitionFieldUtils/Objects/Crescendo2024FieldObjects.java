@@ -67,8 +67,8 @@ public final class Crescendo2024FieldObjects {
      * a note that is flying from a shooter to the speaker
      * the flight is simulated by a simple linear animation
      * */
-    public static class NoteOnFly extends GamePieceOnFlyDisplay {
-        public NoteOnFly(Translation3d shooterPosition, double flightTimeSeconds) {
+    public static class NoteFlyingToShooter extends GamePieceOnFlyDisplay {
+        public NoteFlyingToShooter(Translation3d shooterPosition, double flightTimeSeconds) {
             super(
                     shooterPosition,
                     FieldConstants.toCurrentAllianceTranslation(FieldConstants.SPEAKER_POSE_BLUE),

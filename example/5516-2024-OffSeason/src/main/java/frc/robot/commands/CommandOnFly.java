@@ -10,7 +10,7 @@ import java.util.function.Supplier;
  * */
 public class CommandOnFly extends Command {
     private final Supplier<Command> supplier;
-    protected CommandOnFly(Supplier<Command> supplier) {
+    public CommandOnFly(Supplier<Command> supplier) {
         super();
         this.supplier = supplier;
     }

@@ -7,11 +7,11 @@ import static frc.robot.constants.DriveTrainConstants.DRIVE_FRICTION_VOLTAGE;
 
 public class DriveControlLoops {
     public static final MaplePIDController.MaplePIDConfig CHASSIS_ROTATION_CLOSE_LOOP = new MaplePIDController.MaplePIDConfig(
-        Math.toRadians(360),
+        Math.toRadians(540),
         Math.toRadians(60),
         0.02,
         Math.toRadians(3),
-        0.15,
+        0.12,
         true,
         0
 );

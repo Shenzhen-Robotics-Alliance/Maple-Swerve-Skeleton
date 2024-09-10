@@ -10,6 +10,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.shooter.FlyWheels;
 import frc.robot.subsystems.shooter.Pitch;
+import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.MapleShooterOptimization;
 
 import java.util.function.Supplier;
@@ -22,7 +23,8 @@ public class PathFindToPoseAndShootSequence extends AutoAlignment {
             Supplier<Translation2d> robotPrepareToShootPositionSupplier,
             Supplier<Translation2d> robotShootingPositionSupplier,
             Supplier<Translation2d> speaerPositionSupplier,
-            LEDStatusLight statusLight
+            LEDStatusLight statusLight,
+            CompetitionFieldVisualizer visualizer
     ) {
         super(
                 driveSubsystem,
@@ -48,7 +50,8 @@ public class PathFindToPoseAndShootSequence extends AutoAlignment {
                         robotShootingPositionSupplier,
                         speaerPositionSupplier,
                         () -> isChassisSlowEnough(driveSubsystem),
-                        statusLight
+                        statusLight,
+                        visualizer
                 )
         );
 

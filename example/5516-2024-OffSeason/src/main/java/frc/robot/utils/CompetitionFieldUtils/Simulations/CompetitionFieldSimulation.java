@@ -84,9 +84,10 @@ public abstract class CompetitionFieldSimulation {
     public void removeGamePiece(GamePieceInSimulation gamePieceInSimulation) {
         this.physicsWorld.removeBody(gamePieceInSimulation);
         this.competitionField.deleteObject(gamePieceInSimulation);
+        this.gamePieces.remove(gamePieceInSimulation);
     }
 
-    public CompetitionFieldVisualizer getCompetitionField() {return competitionField;}
+    public CompetitionFieldVisualizer getVisualizer() {return competitionField;}
     public HolonomicChassisSimulation getMainRobot() {return mainRobot;}
 
     public void clearGamePieces() {
@@ -101,6 +102,7 @@ public abstract class CompetitionFieldSimulation {
         clearGamePieces();
         placeGamePiecesOnField();
     }
+
     /**
      * do field reset by placing all the game-pieces on field(for autonomous)
      * */
