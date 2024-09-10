@@ -38,6 +38,7 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         );
     }
 
+    private final Intake intake;
     /**
      * creates a sequence to shoot at speaker in the following steps:
      * 1. runs a {@link PrepareToAim} command, until the shooter is prepared
@@ -55,6 +56,7 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
             CompetitionFieldVisualizer visualizer) {
 
         super();
+        this.intake = intake;
         super.addRequirements(pitch, flyWheels, intake);
         super.addCommands(Commands.runOnce(intake::runIdle));
 
@@ -70,7 +72,11 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));
         super.addCommands(Commands.runOnce(() -> visualizer.addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToShooter(
                 new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3),
-                0.5
+                8
         ))));
+    }
+
+    public Command ifNotePresent() {
+        return this.onlyIf(intake::isNotePresent);
     }
 }

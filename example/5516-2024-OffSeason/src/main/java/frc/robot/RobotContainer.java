@@ -379,7 +379,7 @@ public class RobotContainer {
                 faceTargetWhileDrivingLowSpeed::chassisRotationInPosition,
                 ledStatusLight,
                 visualizerForShooter
-        );
+        ).ifNotePresent();
         driverXBox.rightTrigger(0.5).whileTrue(semiAutoAimAndShoot.deadlineWith(faceTargetWhileDrivingLowSpeed));
 
         driverXBox.rightBumper().whileTrue(new PathFindToPoseAndShootSequence(

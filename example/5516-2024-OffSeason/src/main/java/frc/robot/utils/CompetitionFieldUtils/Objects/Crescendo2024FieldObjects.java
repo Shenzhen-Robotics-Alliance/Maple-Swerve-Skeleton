@@ -68,11 +68,11 @@ public final class Crescendo2024FieldObjects {
      * the flight is simulated by a simple linear animation
      * */
     public static class NoteFlyingToShooter extends GamePieceOnFlyDisplay {
-        public NoteFlyingToShooter(Translation3d shooterPosition, double flightTimeSeconds) {
+        public NoteFlyingToShooter(Translation3d shooterPosition, double speedMPS) {
             super(
                     shooterPosition,
                     FieldConstants.toCurrentAllianceTranslation(FieldConstants.SPEAKER_POSE_BLUE),
-                    flightTimeSeconds
+                    FieldConstants.toCurrentAllianceTranslation(FieldConstants.SPEAKER_POSE_BLUE).getDistance(shooterPosition) / speedMPS
             );
         }
 

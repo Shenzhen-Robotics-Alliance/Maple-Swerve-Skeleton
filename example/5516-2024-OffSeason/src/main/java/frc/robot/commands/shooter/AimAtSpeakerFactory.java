@@ -23,7 +23,7 @@ public class AimAtSpeakerFactory {
                 chassisAimAtSpeaker::isFinished,
                 statusLight,
                 visualizer
-        );
+        ).ifNotePresent();
 
         final Command aimAtSpeakerStill = semiAutoAimAndShoot.deadlineWith(chassisAimAtSpeaker);
         aimAtSpeakerStill.addRequirements(drive, pitch, flyWheels);

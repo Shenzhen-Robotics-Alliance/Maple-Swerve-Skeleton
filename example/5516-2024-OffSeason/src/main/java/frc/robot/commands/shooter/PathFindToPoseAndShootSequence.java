@@ -52,7 +52,7 @@ public class PathFindToPoseAndShootSequence extends AutoAlignment {
                         () -> isChassisSlowEnough(driveSubsystem),
                         statusLight,
                         visualizer
-                )
+                ).ifNotePresent()
         );
 
         super.addRequirements(driveSubsystem, pitch, flyWheels, intake);

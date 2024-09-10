@@ -68,6 +68,7 @@ public class AimAtSpeakerContinuously extends Command {
 
     public boolean readyToShoot() {
         return shooterOptimizationRunning
+                && shooterOptimization.isTargetInRange(targetPositionSupplier.get(), drive.getPose().getTranslation())
                 && additionalCondition.getAsBoolean()
                 && flyWheels.flyWheelsReady()
                 && pitch.inPosition();
