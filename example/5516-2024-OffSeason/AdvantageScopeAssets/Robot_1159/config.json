@@ -1,0 +1,49 @@
+{
+  "name": "11:59",
+  "sourceUrl": "https://cad.onshape.com/documents/d1d8a74cdad94615e6265909/w/d173f5c242a2bf0fdc1ca946/e/c17f437f2c40923b29cb45e3",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "z",
+      "degrees": 0
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0.04
+  ],
+  "cameras": [
+    {"name":"FrontCam","position":[0.3,0.0,0.2],"fov":59.99999999999999,"rotations":[{"axis":"y","degrees":-29.999999999999996},{"axis":"z","degrees":0.0}],"resolution":[640,480]},
+    {"name":"FrontLeftCam","position":[0.25,0.3,0.2],"fov":59.99999999999999,"rotations":[{"axis":"y","degrees":-30.000000000000004},{"axis":"z","degrees":29.999999999999996}],"resolution":[640,480]},
+    {"name":"FrontRightCam","position":[0.25,-0.3,0.2],"fov":59.99999999999999,"rotations":[{"axis":"y","degrees":-29.999999999999996},{"axis":"z","degrees":-30.000000000000004}],"resolution":[640,480]},
+    {"name":"BackLeftCam","position":[0.25,0.05,0.2],"fov":59.99999999999999,"rotations":[{"axis":"y","degrees":-35.000000000000014},{"axis":"z","degrees":150.0}],"resolution":[640,480]},
+    {"name":"BackRightCam","position":[0.25,-0.05,0.2],"fov":59.99999999999999,"rotations":[{"axis":"y","degrees":-35.00000000000001},{"axis":"z","degrees":-150.0}],"resolution":[640,480]}
+  ],
+  "components": [
+    {
+      "zeroedRotations": [
+        {
+          "axis": "x",
+          "degrees": 180
+        },
+        {
+          "axis": "y",
+          "degrees": 60
+        },
+        {
+          "axis": "z",
+          "degrees": 0
+        }
+      ],
+      "zeroedPosition": [
+        0.25,
+        0,
+        -0.02
+      ]
+    }
+  ]
+}
