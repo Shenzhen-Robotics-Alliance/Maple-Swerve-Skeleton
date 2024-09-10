@@ -1,0 +1,64 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.01,
+        "y": 7.449717390537984
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.426704281641067,
+        "y": 7.313382693194805
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.0,
+        "y": 5.8
+      },
+      "prevControl": {
+        "x": 4.803459950929391,
+        "y": 7.206262573853738
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [
+    {
+      "name": "slow down to shoot",
+      "minWaypointRelativePos": 0.8,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.2,
+        "maxAcceleration": 7.5,
+        "maxAngularVelocity": 670.0,
+        "maxAngularAcceleration": 1080.0
+      }
+    }
+  ],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.2,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 670.0,
+    "maxAngularAcceleration": 1080.0
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": -178.34366447921664,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Amp Side Six Note",
+  "previewStartingState": {
+    "rotation": 179.20404091066868,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

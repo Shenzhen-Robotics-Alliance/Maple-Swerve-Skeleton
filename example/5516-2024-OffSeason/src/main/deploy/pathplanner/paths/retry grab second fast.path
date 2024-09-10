@@ -1,0 +1,86 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.007325338494093,
+        "y": 7.459455583205354
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.663454750397046,
+        "y": 7.235477151855846
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.578844861129818,
+        "y": 6.086370417106196
+      },
+      "prevControl": {
+        "x": 6.895186408263061,
+        "y": 6.45749929151958
+      },
+      "nextControl": {
+        "x": 7.919681604487764,
+        "y": 5.901344756426168
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.552664127866809,
+        "y": 5.64815174707455
+      },
+      "prevControl": {
+        "x": 8.124183650502532,
+        "y": 5.794224637085098
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.8,
+      "rotationDegrees": 156.90755197239994,
+      "rotateFast": true
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "slow down to turn",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 0.2,
+      "constraints": {
+        "maxVelocity": 1.4,
+        "maxAcceleration": 7.5,
+        "maxAngularVelocity": 670.0,
+        "maxAngularAcceleration": 1080.0
+      }
+    }
+  ],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.2,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 670.0,
+    "maxAngularAcceleration": 1080.0
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 158.96248897457835,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Amp Side Six Note",
+  "previewStartingState": {
+    "rotation": 177.31622484053108,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

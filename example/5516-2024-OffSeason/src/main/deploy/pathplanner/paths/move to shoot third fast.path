@@ -1,0 +1,107 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.270256540517947,
+        "y": 5.765010059087858
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.257484503104291,
+        "y": 6.09610860977815
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.718850061659844,
+        "y": 6.495374509140316
+      },
+      "prevControl": {
+        "x": 6.357734877103481,
+        "y": 6.586643768489407
+      },
+      "nextControl": {
+        "x": 5.173511272287129,
+        "y": 6.417468967801356
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.00492815220506,
+        "y": 6.294767740187914
+      },
+      "prevControl": {
+        "x": 4.604909256650227,
+        "y": 6.2995294949859115
+      },
+      "nextControl": {
+        "x": 3.704937599982476,
+        "y": 6.292386862788915
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 1.9,
+        "y": 6.3
+      },
+      "prevControl": {
+        "x": 2.484291560042195,
+        "y": 6.307727735776344
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 2.0,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    },
+    {
+      "waypointRelativePos": 2.8,
+      "rotationDegrees": 180.0,
+      "rotateFast": false
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "slow down for accuracy",
+      "minWaypointRelativePos": 2.0,
+      "maxWaypointRelativePos": 3.0,
+      "constraints": {
+        "maxVelocity": 1.3,
+        "maxAcceleration": 7.5,
+        "maxAngularVelocity": 670.0,
+        "maxAngularAcceleration": 1080.0
+      }
+    }
+  ],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.2,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 670.0,
+    "maxAngularAcceleration": 1080.0
+  },
+  "goalEndState": {
+    "velocity": 1.5,
+    "rotation": -157.1521759318685,
+    "rotateFast": true
+  },
+  "reversed": false,
+  "folder": "Amp Side Six Note",
+  "previewStartingState": {
+    "rotation": 163.94001269283933,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}

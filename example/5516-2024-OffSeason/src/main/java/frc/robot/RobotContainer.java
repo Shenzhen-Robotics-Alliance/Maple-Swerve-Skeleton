@@ -258,7 +258,7 @@ public class RobotContainer {
     private static LoggedDashboardChooser<Auto> buildAutoChooser() {
         final LoggedDashboardChooser<Auto> autoSendableChooser = new LoggedDashboardChooser<>("Select Auto");
         autoSendableChooser.addDefaultOption("None", Auto.none());
-        autoSendableChooser.addOption("Example Custom Auto", new ExampleAuto());
+        autoSendableChooser.addOption("Amp Side Six Notes Fast", new AmpSideSixNotesFast());
         autoSendableChooser.addOption("Example Pathplanner Auto", new PathPlannerAuto("Example Auto", new Pose2d(1.3, 7.2, new Rotation2d())));
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
 

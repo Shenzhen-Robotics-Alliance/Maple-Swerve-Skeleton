@@ -1,0 +1,58 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.6869572379813143,
+        "y": 5.533450842404673
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.702819405638812,
+        "y": 5.186561414645751
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.6869572379813143,
+        "y": 4.259485472712135
+      },
+      "prevControl": {
+        "x": 1.5236366605592058,
+        "y": 4.937263682361081
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.8,
+      "rotationDegrees": 150.83036216050985,
+      "rotateFast": true
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.2,
+    "maxAcceleration": 7.0,
+    "maxAngularVelocity": 670.0,
+    "maxAngularAcceleration": 1080.0
+  },
+  "goalEndState": {
+    "velocity": 0.0,
+    "rotation": 150.0130531320794,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "Amp Side Six Note",
+  "previewStartingState": {
+    "rotation": 178.5593878174664,
+    "velocity": 0
+  },
+  "useDefaultConstraints": true
+}
