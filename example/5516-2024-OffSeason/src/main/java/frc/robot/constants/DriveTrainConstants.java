@@ -18,12 +18,16 @@ public class DriveTrainConstants {
             WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
             ROBOT_MASS_KG = 37.35; // with bumpers
 
+    private static final DCMotor KRAKEN_X60 = new DCMotor(
+            12, 7.09, 366, 2, Units.rotationsPerMinuteToRadiansPerSecond(4800), 1);
+    private static final DCMotor FALCON_500 = new DCMotor(
+        12, 4.69, 257, 1.5, Units.rotationsPerMinuteToRadiansPerSecond(5104), 1);
     /**
      *  TODO: change motor type to match your robot
      *  */
     public static final DCMotor
-            DRIVE_MOTOR = DCMotor.getKrakenX60(1),
-            STEER_MOTOR = DCMotor.getFalcon500(1);
+            DRIVE_MOTOR = KRAKEN_X60,
+            STEER_MOTOR = FALCON_500;
 
     /**
      * numbers imported from {@link TunerConstants}

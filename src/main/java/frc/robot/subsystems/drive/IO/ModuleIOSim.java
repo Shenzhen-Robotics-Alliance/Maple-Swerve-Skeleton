@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
@@ -23,7 +24,7 @@ import static frc.robot.constants.DriveTrainConstants.*;
 public class ModuleIOSim implements ModuleIO {
     public final SwerveModulePhysicsSimulationResults physicsSimulationResults;
     private final DCMotorSim steerSim;
-    private double driveDesiredVolts = 0.0, steerAppliedVolts = 0.0;
+    private double driveDesiredVolts = 0.0, driveAppliedVolts = 0.0, driveActualCurrent = 0.0, steerAppliedVolts = 0.0;
 
     public ModuleIOSim() {
         this.steerSim = new DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA);
@@ -35,11 +36,8 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         inputs.driveWheelFinalRevolutions = physicsSimulationResults.driveWheelFinalRevolutions;
         inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.radiansToRotations(physicsSimulationResults.driveWheelFinalVelocityRadPerSec);
-        inputs.driveMotorAppliedVolts = driveDesiredVolts;
-        inputs.driveMotorCurrentAmps = Math.abs(DRIVE_MOTOR.getCurrent(
-                physicsSimulationResults.driveWheelFinalVelocityRadPerSec,
-                driveDesiredVolts
-        ));
+        inputs.driveMotorAppliedVolts = driveAppliedVolts;
+        inputs.driveMotorCurrentAmps = Math.abs(driveActualCurrent);
 
         inputs.steerFacing = Rotation2d.fromRadians(steerSim.getAngularPositionRad());
         inputs.steerVelocityRadPerSec = steerSim.getAngularVelocityRadPerSec();
@@ -80,24 +78,27 @@ public class ModuleIOSim implements ModuleIO {
                         * DRIVE_GEAR_RATIO;
         final double currentAtDesiredVolts = DRIVE_MOTOR.getCurrent(
                 driveMotorRotterSpeedRadPerSec,
-                driveDesiredVolts
+                driveAppliedVolts
         );
 
         // apply smart current limit
-        final double SMART_CURRENT_LIMIT_MINIMUM_VOLTAGE_RATE = 0.5;
-        double actualAppliedVolts = driveDesiredVolts;
+        driveAppliedVolts = driveDesiredVolts;
         if (Math.abs(currentAtDesiredVolts) > DRIVE_CURRENT_LIMIT
                 && driveDesiredVolts * physicsSimulationResults.driveWheelFinalVelocityRadPerSec > 0) {
-            final double currentLimitRate = DRIVE_CURRENT_LIMIT / Math.abs(currentAtDesiredVolts);
-            actualAppliedVolts *= Math.max(currentLimitRate, SMART_CURRENT_LIMIT_MINIMUM_VOLTAGE_RATE);
+            final double limitedCurrent = Math.copySign(DRIVE_CURRENT_LIMIT, currentAtDesiredVolts);
+            driveAppliedVolts = DRIVE_MOTOR.getVoltage(
+                    DRIVE_MOTOR.getTorque(limitedCurrent),
+                    driveMotorRotterSpeedRadPerSec
+            );
         }
 
-        final double actualCurrent = DRIVE_MOTOR.getCurrent(
+        driveActualCurrent = DRIVE_MOTOR.getCurrent(
                 driveMotorRotterSpeedRadPerSec,
-                actualAppliedVolts
+                driveAppliedVolts
         );
 
-        return DRIVE_MOTOR.getTorque(actualCurrent);
+
+        return DRIVE_MOTOR.getTorque(driveActualCurrent) * DRIVE_GEAR_RATIO;
     }
 
     public Rotation2d getSimulationSteerFacing() {
