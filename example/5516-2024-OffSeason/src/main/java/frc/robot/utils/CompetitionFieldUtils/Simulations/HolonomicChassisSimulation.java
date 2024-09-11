@@ -149,7 +149,7 @@ public abstract class HolonomicChassisSimulation extends Body implements RobotOn
                     DriveTrainConstants.ROBOT_MASS_KG,
                     DriveTrainConstants.BUMPER_WIDTH_METERS,
                     DriveTrainConstants.BUMPER_LENGTH_METERS,
-                    0.3
+                    0.1
             );
         }
 

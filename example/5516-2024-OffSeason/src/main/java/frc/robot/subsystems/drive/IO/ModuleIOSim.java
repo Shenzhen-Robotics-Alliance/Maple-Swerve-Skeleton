@@ -23,7 +23,7 @@ import static frc.robot.constants.DriveTrainConstants.*;
 public class ModuleIOSim implements ModuleIO {
     public final SwerveModulePhysicsSimulationResults physicsSimulationResults;
     private final DCMotorSim steerSim;
-    private double driveAppliedVolts = 0.0, steerAppliedVolts = 0.0;
+    private double driveDesiredVolts = 0.0, steerAppliedVolts = 0.0;
 
     public ModuleIOSim() {
         this.steerSim = new DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA);
@@ -35,10 +35,10 @@ public class ModuleIOSim implements ModuleIO {
     public void updateInputs(ModuleIOInputs inputs) {
         inputs.driveWheelFinalRevolutions = physicsSimulationResults.driveWheelFinalRevolutions;
         inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.radiansToRotations(physicsSimulationResults.driveWheelFinalVelocityRadPerSec);
-        inputs.driveMotorAppliedVolts = driveAppliedVolts;
+        inputs.driveMotorAppliedVolts = driveDesiredVolts;
         inputs.driveMotorCurrentAmps = Math.abs(DRIVE_MOTOR.getCurrent(
                 physicsSimulationResults.driveWheelFinalVelocityRadPerSec,
-                driveAppliedVolts
+                driveDesiredVolts
         ));
 
         inputs.steerFacing = Rotation2d.fromRadians(steerSim.getAngularPositionRad());
@@ -61,7 +61,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVoltage(double volts) {
-        driveAppliedVolts = volts;
+        driveDesiredVolts = volts;
     }
 
     @Override
@@ -75,14 +75,29 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     public double getSimulationTorque() {
-        return DRIVE_MOTOR.getTorque(DRIVE_MOTOR.getCurrent(
-                physicsSimulationResults.driveWheelFinalVelocityRadPerSec * DRIVE_GEAR_RATIO,
-                driveAppliedVolts
-        ));
-    }
+        final double driveMotorRotterSpeedRadPerSec =
+                physicsSimulationResults.driveWheelFinalVelocityRadPerSec
+                        * DRIVE_GEAR_RATIO;
+        final double currentAtDesiredVolts = DRIVE_MOTOR.getCurrent(
+                driveMotorRotterSpeedRadPerSec,
+                driveDesiredVolts
+        );
 
-    public double getAppliedVolts() {
-        return driveAppliedVolts;
+        // apply smart current limit
+        final double SMART_CURRENT_LIMIT_MINIMUM_VOLTAGE_RATE = 0.5;
+        double actualAppliedVolts = driveDesiredVolts;
+        if (Math.abs(currentAtDesiredVolts) > DRIVE_CURRENT_LIMIT
+                && driveDesiredVolts * physicsSimulationResults.driveWheelFinalVelocityRadPerSec > 0) {
+            final double currentLimitRate = DRIVE_CURRENT_LIMIT / Math.abs(currentAtDesiredVolts);
+            actualAppliedVolts *= Math.max(currentLimitRate, SMART_CURRENT_LIMIT_MINIMUM_VOLTAGE_RATE);
+        }
+
+        final double actualCurrent = DRIVE_MOTOR.getCurrent(
+                driveMotorRotterSpeedRadPerSec,
+                actualAppliedVolts
+        );
+
+        return DRIVE_MOTOR.getTorque(actualCurrent);
     }
 
     public Rotation2d getSimulationSteerFacing() {
@@ -98,7 +113,7 @@ public class ModuleIOSim implements ModuleIO {
 
     public SwerveModuleState getDesiredSwerveState() {
         return new SwerveModuleState(
-                driveAppliedVolts * CHASSIS_MAX_VELOCITY,
+                DRIVE_MOTOR.getSpeed(0, driveDesiredVolts) * WHEEL_RADIUS_METERS,
                 getSimulationSteerFacing()
         );
     }

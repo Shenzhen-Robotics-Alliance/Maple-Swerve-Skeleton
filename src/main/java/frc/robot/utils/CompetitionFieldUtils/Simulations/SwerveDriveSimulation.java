@@ -1,6 +1,5 @@
 package frc.robot.utils.CompetitionFieldUtils.Simulations;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -15,6 +14,7 @@ import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.CustomMaths.GeometryConvertor;
 import frc.robot.utils.MapleTimeUtils;
 import org.dyn4j.geometry.Vector2;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -62,7 +62,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
                     getObjectOnFieldPose2d(),
                     modules[i],
                     MODULE_TRANSLATIONS[i],
-                    tickNum, tickSeconds
+                    i, tickNum, tickSeconds
             );
 
         simulateFrictionForce();
@@ -78,6 +78,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
             Pose2d robotWorldPose,
             ModuleIOSim module,
             Translation2d moduleTranslationOnRobot,
+            int moduleIndex,
             int tickNum,
             double tickPeriodSeconds
     ) {
@@ -106,10 +107,11 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
 
         if (skidding)
             /* if the chassis is skidding, the toque will cause the wheels to spin freely */
-            module.physicsSimulationResults.driveWheelFinalVelocityRadPerSec += module.getSimulationTorque() / DRIVE_INERTIA * tickPeriodSeconds;
-        else
-            /* otherwise, the floor velocity is projected to the wheel */
+            module.physicsSimulationResults.driveWheelFinalVelocityRadPerSec += module.getSimulationTorque() / DRIVE_INERTIA * tickPeriodSeconds * 0.3;
+        else /* otherwise, the floor velocity is projected to the wheel */
             module.physicsSimulationResults.driveWheelFinalVelocityRadPerSec = floorVelocityProjectionOnWheelDirectionMPS / WHEEL_RADIUS_METERS;
+        Logger.recordOutput("MaplePhysicsSimulation/module" + moduleIndex + "propelling force", actualPropellingForceOnFloorNewtons);
+        Logger.recordOutput("MaplePhysicsSimulation/module" + moduleIndex + "skidding", skidding);
 
         module.physicsSimulationResults.odometrySteerPositions[tickNum] = module.getSimulationSteerFacing();
         module.physicsSimulationResults.driveWheelFinalRevolutions += Units.radiansToRotations(
@@ -119,32 +121,42 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
     }
 
     private void simulateFrictionForce() {
-        final ChassisSpeeds speedsDifference = getDifferenceBetweenFloorAndFreeSpeed();
-        final Translation2d translationalSpeedsDifference = new Translation2d(speedsDifference.vxMetersPerSecond, speedsDifference.vyMetersPerSecond);
+        final Translation2d translationalSpeedsDifference = getDifferenceBetweenFloorAndFreeSpeed();
         final double forceMultiplier = Math.min(translationalSpeedsDifference.getNorm() * 3, 1);
         super.applyForce(Vector2.create(
                 forceMultiplier * MAX_FRICTION_ACCELERATION * ROBOT_MASS_KG,
                 translationalSpeedsDifference.getAngle().getRadians()
         ));
 
-        if (Math.abs(getDesiredSpeedsFieldRelative().omegaRadiansPerSecond)
-                / CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC
-                < 0.01)
-            simulateChassisRotationalBehavior(0);
+        final double desiredRotationalMotionPercent = Math.abs(
+                getDesiredSpeedsFieldRelative().omegaRadiansPerSecond
+                        / profile.maxAngularVelocity),
+                angularVelocityDifference = getSwerveSpeedsFieldRelative().omegaRadiansPerSecond - getAngularVelocity(),
+                actualRotationalMotionPercent = Math.abs(getAngularVelocity() / profile.maxAngularVelocity),
+                frictionalTorqueMagnitude = this.profile.angularFrictionAcceleration * super.getMass().getInertia(),
+                frictionalTorqueMultiplier = Math.min(Math.abs(angularVelocityDifference), 1);
+        if (actualRotationalMotionPercent < 0.01 && desiredRotationalMotionPercent < 0.02)
+            super.setAngularVelocity(0); // angular velocity headband
+        else super.applyTorque(Math.copySign(
+                frictionalTorqueMultiplier * frictionalTorqueMagnitude,
+                angularVelocityDifference
+        ));
     }
 
-    private ChassisSpeeds getDifferenceBetweenFloorAndFreeSpeed() {
-        ChassisSpeeds chassisFreeSpeedsFieldRelative = getFreeSpeedsFieldRelative();
+    private Translation2d getDifferenceBetweenFloorAndFreeSpeed() {
+        ChassisSpeeds chassisFreeSpeedsFieldRelative = getSwerveSpeedsFieldRelative();
 
         final double freeSpeedMagnitude = Math.hypot(chassisFreeSpeedsFieldRelative.vxMetersPerSecond, chassisFreeSpeedsFieldRelative.vyMetersPerSecond),
                 floorSpeedMagnitude = Math.hypot(getMeasuredChassisSpeedsFieldRelative().vxMetersPerSecond, getMeasuredChassisSpeedsFieldRelative().vyMetersPerSecond);
         if (freeSpeedMagnitude > floorSpeedMagnitude)
             chassisFreeSpeedsFieldRelative = chassisFreeSpeedsFieldRelative.times(floorSpeedMagnitude / freeSpeedMagnitude);
 
-        return chassisFreeSpeedsFieldRelative.minus(getMeasuredChassisSpeedsFieldRelative());
+        final ChassisSpeeds difference = chassisFreeSpeedsFieldRelative.minus(getMeasuredChassisSpeedsFieldRelative());
+
+        return new Translation2d(difference.vxMetersPerSecond, difference.vyMetersPerSecond);
     }
 
-    private ChassisSpeeds getFreeSpeedsFieldRelative() {
+    private ChassisSpeeds getSwerveSpeedsFieldRelative() {
         return ChassisSpeeds.fromRobotRelativeSpeeds(
                 DRIVE_KINEMATICS.toChassisSpeeds(
                         Arrays.stream(modules)
