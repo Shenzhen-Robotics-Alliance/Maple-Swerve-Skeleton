@@ -5,9 +5,9 @@ import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.MapleTimeUtils;
 
 public abstract class GamePieceOnFlyDisplay implements CompetitionFieldVisualizer.ObjectOnFieldDisplay {
-    private final Translation3d shooterPosition, targetedPosition;
-    private final double flightTimeSeconds, startTimeSeconds;
-    private final Rotation3d gamePieceRotation;
+    protected final Translation3d shooterPosition, targetedPosition;
+    protected final double flightTimeSeconds, startTimeSeconds;
+    protected final Rotation3d gamePieceRotation;
 
     public GamePieceOnFlyDisplay(Translation3d shooterPosition, Translation3d targetedPosition, double flightTimeSeconds) {
         this.shooterPosition = shooterPosition;

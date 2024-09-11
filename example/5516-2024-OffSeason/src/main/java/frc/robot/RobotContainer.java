@@ -87,7 +87,7 @@ public class RobotContainer {
     // Simulation and Field Visualization
     private final CompetitionFieldVisualizer competitionFieldVisualizer;
     public final CompetitionFieldVisualizer visualizerForShooter;
-    private CompetitionFieldSimulation fieldSimulation;
+    private CompetitionFieldSimulation fieldSimulation = null;
 
     private final LoggedDashboardChooser<Double> shootingDistanceChooser;
 
@@ -382,7 +382,9 @@ public class RobotContainer {
                 .whileTrue(Commands.run(() -> joystickDrive.setCurrentRotationalMaintenance(
                         FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(-90))
                 )))
-                .onFalse(new ScoreAmp(intake, pitch, flyWheels, ledStatusLight));
+                .onFalse(new ScoreAmp(intake, pitch, flyWheels, ledStatusLight)
+                        .withVisualization(visualizerForShooter, fieldSimulation, drive)
+                );
 
         /* feed shot */
         driverXBox.b()
