@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.AmpSideSixNotesFast;
 import frc.robot.autos.Auto;
 import frc.robot.autos.PathPlannerAuto;
@@ -228,31 +229,40 @@ public class RobotContainer {
         driverModeChooser.addDefaultOption(JoystickMode.LEFT_HANDED.name(), JoystickMode.LEFT_HANDED);
         driverModeChooser.addOption(JoystickMode.RIGHT_HANDED.name(), JoystickMode.RIGHT_HANDED);
 
-        /* you can tune the numbers on dashboard and copy-paste them to here */
+        /* you can tune these shooter params on the dashboard, changes will apply real-time */
         this.shooterOptimization = new MapleShooterOptimization(
                 "MainShooter",
-                new double[] {1.4, 2, 3, 3.5, 4, 4.5, 4.8},
-                new double[] {54, 47, 35, 33, 30.5, 25, 25},
-                new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500},
-                new double[] {0.1, 0.1, 0.1, 0.12, 0.12, 0.15, 0.15}
+                /* shooting distances */
+                new double[] {1.4, 2, 3, 3.5, 4, 4.5, 5, 5.5},
+                /* corresponding shooter angles (degrees) */
+                new double[] {54, 47, 35, 33, 30.5, 25, 25, 25},
+                /* corresponding flywheels RPM */
+                new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500, 4700},
+                /*
+                * flight-time in seconds
+                * this affects how much system will "think ahead"
+                * it also affects the animation of the flying note
+                * to measure this number precisely, record a 120fps video with your phone of your robot shooting
+                * */
+                new double[] {0.22, 0.25, 0.28, 0.3, 0.34, 0.36, 0.4, 0.42}
         );
 
         this.shootingDistanceChooser = new LoggedDashboardChooser<>("Select Shooting Distance");
-        this.shootingDistanceChooser.addDefaultOption("1.4", 1.4);
-        this.shootingDistanceChooser.addOption("2", 2.0);
-        this.shootingDistanceChooser.addOption("3", 3.0);
+        this.shootingDistanceChooser.addDefaultOption("4", 4.0);
         this.shootingDistanceChooser.addOption("3.5", 3.5);
-        this.shootingDistanceChooser.addOption("4", 4.0);
+        this.shootingDistanceChooser.addOption("3", 3.0);
+        this.shootingDistanceChooser.addOption("2", 2.0);
+        this.shootingDistanceChooser.addOption("1.5", 2.0);
 
         configureButtonBindings();
         configureAutoNamedCommands();
     }
 
     private void configureAutoNamedCommands() {
-        // TODO: bind your named commands during auto here
-        NamedCommands.registerCommand("my named command", Commands.runOnce(
-                () -> System.out.println("my named command executing!!!")
-        ));
+        /*
+        * our auto is built from custom auto builder
+        * so there is no named commands
+        *  */
     }
 
     private static LoggedDashboardChooser<Auto> buildAutoChooser() {
@@ -261,15 +271,31 @@ public class RobotContainer {
         autoSendableChooser.addOption("Amp Side Six Notes Fast", new AmpSideSixNotesFast());
         autoSendableChooser.addOption("Example Pathplanner Auto", new PathPlannerAuto("Example Auto", new Pose2d(1.3, 7.2, new Rotation2d())));
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
-
-        // TODO: add your autos here
         return autoSendableChooser;
     }
 
-    private static SendableChooser<Supplier<Command>> buildTestsChooser() {
+    private SendableChooser<Supplier<Command>> buildTestsChooser() {
         final SendableChooser<Supplier<Command>> testsChooser = new SendableChooser<>();
         testsChooser.setDefaultOption("None", Commands::none);
-        // TODO add your tests here (system identification and etc.)
+
+        /* flywheels system identifications */
+        /* select the test in SmartDashBoard/SelectTest and enable the robot in test mode to start them */
+        testsChooser.addOption(
+                "FlyWheel1 SysId Dynamic (Forward)",
+                () -> flyWheels.sysIdRoutines[1].dynamic(SysIdRoutine.Direction.kForward)
+        );
+        testsChooser.addOption(
+                "FlyWheel1 SysId Dynamic (Reverse)",
+                () -> flyWheels.sysIdRoutines[1].dynamic(SysIdRoutine.Direction.kReverse)
+        );
+        testsChooser.addOption(
+                "FlyWheel1 SysId Quasi Static (Forward)",
+                () -> flyWheels.sysIdRoutines[1].quasistatic(SysIdRoutine.Direction.kForward)
+        );
+        testsChooser.addOption(
+                "FlyWheel1 SysId Quasi Static (Reverse)",
+                () -> flyWheels.sysIdRoutines[1].quasistatic(SysIdRoutine.Direction.kReverse)
+        );
         return testsChooser;
     }
 

@@ -72,7 +72,7 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));
         super.addCommands(Commands.runOnce(() -> visualizer.addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToShooter(
                 new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3),
-                8
+                shooterOptimization.getFlightTimeSeconds(targetPositionSupplier.get(), robotScoringPositionSupplier.get())
         ))));
     }
 

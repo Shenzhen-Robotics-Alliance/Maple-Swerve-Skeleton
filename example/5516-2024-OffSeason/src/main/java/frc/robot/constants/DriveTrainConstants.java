@@ -16,7 +16,7 @@ public class DriveTrainConstants {
      *  */
     public static final double
             WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
-            ROBOT_MASS_KG = 40; // with bumpers
+            ROBOT_MASS_KG = 37.35; // with bumpers
 
     /**
      *  TODO: change motor type to match your robot
@@ -33,7 +33,7 @@ public class DriveTrainConstants {
             WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
             STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
-            TIME_ROBOT_STOP_ROTATING_SECONDS = 0.06,
+            TIME_ROBOT_STOP_ROTATING_SECONDS = 0.2,
             STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
             DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
             DRIVE_INERTIA = 0.01,

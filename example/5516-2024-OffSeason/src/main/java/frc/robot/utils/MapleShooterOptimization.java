@@ -18,6 +18,11 @@ import java.util.function.Supplier;
 
 import static frc.robot.utils.CustomConfigs.MapleInterpolationTable.Variable;
 
+/**
+ * Iron Maple's Custom Shooter Optimization Code
+ * Optimizes the shooter state (angle and flywheels speed) according to distance to target
+ * Works with an interpolation table, which can be tuned real-time on the dashboard
+ * */
 public class MapleShooterOptimization {
     public static final class ShooterState {
         public final double shooterAngleDegrees;
