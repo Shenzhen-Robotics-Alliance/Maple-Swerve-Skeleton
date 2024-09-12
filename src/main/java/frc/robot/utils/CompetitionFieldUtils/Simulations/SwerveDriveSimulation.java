@@ -187,6 +187,11 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
         results.hasReading = true;
     }
 
+    @Override
+    public String getTypeName() {
+        return "Robot";
+    }
+
     public static final class OdometryThreadSim implements OdometryThread {
         @Override
         public void updateInputs(OdometryThreadInputs inputs) {

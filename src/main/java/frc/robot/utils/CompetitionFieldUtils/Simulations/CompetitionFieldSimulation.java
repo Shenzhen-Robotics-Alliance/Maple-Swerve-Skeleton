@@ -87,7 +87,7 @@ public abstract class CompetitionFieldSimulation {
         this.gamePieces.remove(gamePieceInSimulation);
     }
 
-    public CompetitionFieldVisualizer getCompetitionField() {return competitionField;}
+    public CompetitionFieldVisualizer getVisualizer() {return competitionField;}
     public HolonomicChassisSimulation getMainRobot() {return mainRobot;}
 
     public void clearGamePieces() {

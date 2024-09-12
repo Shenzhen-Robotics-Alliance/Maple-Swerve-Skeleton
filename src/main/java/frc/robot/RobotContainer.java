@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -41,6 +40,7 @@ import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -76,6 +76,7 @@ public class RobotContainer {
     // Simulation and Field Visualization
     private final CompetitionFieldVisualizer competitionFieldVisualizer;
     private CompetitionFieldSimulation fieldSimulation;
+    private List<OpponentRobotSimulation> opponentRobotSimulations = new ArrayList<>();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -116,7 +117,7 @@ public class RobotContainer {
                         drive
                 );
 
-                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive::getPose);
+                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
             }
 
             case SIM -> {
@@ -140,7 +141,7 @@ public class RobotContainer {
                         drive::setPose
                 );
                 fieldSimulation = new Crescendo2024FieldSimulation(driveSimulation);
-                this.competitionFieldVisualizer = fieldSimulation.getCompetitionField();
+                this.competitionFieldVisualizer = fieldSimulation.getVisualizer();
 
                 aprilTagVision = new AprilTagVision(
                         new ApriltagVisionIOSim(
@@ -154,9 +155,16 @@ public class RobotContainer {
 
                 fieldSimulation.placeGamePiecesOnField();
 
-                fieldSimulation.addRobot(new OpponentRobotSimulation(0));
-                fieldSimulation.addRobot(new OpponentRobotSimulation(1));
-                fieldSimulation.addRobot(new OpponentRobotSimulation(2));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(0, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(0));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(1, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(1));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(2, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(2));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(3, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(3));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(4, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(4));
             }
 
             default -> {
@@ -177,7 +185,7 @@ public class RobotContainer {
                         drive
                 );
 
-                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive::getPose);
+                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
             }
         }
 
@@ -311,9 +319,19 @@ public class RobotContainer {
 
         /* TODO: example shooter visualization, delete it for your project */
         if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
-            driverXBox.rightTrigger(0.5).onTrue(Commands.runOnce(() -> fieldSimulation.getCompetitionField().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteOnFly(
-                    new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3), 0.5
+            driverXBox.rightTrigger(0.5).onTrue(Commands.runOnce(() -> fieldSimulation.getVisualizer().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToSpeaker(
+                    new Translation3d(
+                            drive.getPose().getX(),
+                            drive.getPose().getY(),
+                            0.3
+                    ),
+                    0.5
             ))));
+    }
+
+    public void teleOpInit() {
+        for (OpponentRobotSimulation opponentRobotSimulation:opponentRobotSimulations)
+            opponentRobotSimulation.teleOpInit();
     }
 
     /**

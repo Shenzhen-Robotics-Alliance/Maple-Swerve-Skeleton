@@ -12,6 +12,8 @@ import frc.robot.utils.MapleTimeUtils;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Geometry;
 
+import static frc.robot.constants.FieldConstants.FIELD_WIDTH;
+
 /**
  * a set of game pieces of the 2024 game "Crescendo"
  * */
@@ -76,9 +78,18 @@ public final class Crescendo2024FieldObjects {
      * */
     public static class NoteFlyingToSpeaker extends GamePieceOnFlyDisplay {
         public NoteFlyingToSpeaker(Translation3d shooterPosition, double flightTimeSeconds) {
+            this(shooterPosition, flightTimeSeconds, false);
+        }
+        public NoteFlyingToSpeaker(Translation3d shooterPosition, double flightTimeSeconds, boolean reverseSide) {
             super(
                     shooterPosition,
-                    FieldConstants.toCurrentAllianceTranslation(FieldConstants.SPEAKER_POSE_BLUE),
+                    FieldConstants.toCurrentAllianceTranslation(
+                            reverseSide ? new Translation3d(
+                                    FIELD_WIDTH - FieldConstants.SPEAKER_POSE_BLUE.getX(),
+                                    FieldConstants.SPEAKER_POSE_BLUE.getY(),
+                                    FieldConstants.SPEAKER_POSE_BLUE.getZ())
+                                    : FieldConstants.SPEAKER_POSE_BLUE
+                    ),
                     flightTimeSeconds
             );
         }

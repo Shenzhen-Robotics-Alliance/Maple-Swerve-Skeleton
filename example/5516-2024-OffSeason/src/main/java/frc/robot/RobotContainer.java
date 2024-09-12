@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -47,6 +46,7 @@ import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -87,6 +87,7 @@ public class RobotContainer {
     private final CompetitionFieldVisualizer competitionFieldVisualizer;
     public final CompetitionFieldVisualizer visualizerForShooter;
     private CompetitionFieldSimulation fieldSimulation = null;
+    private List<OpponentRobotSimulation> opponentRobotSimulations = new ArrayList<>();
 
     private final LoggedDashboardChooser<Double> shootingDistanceChooser;
 
@@ -122,7 +123,7 @@ public class RobotContainer {
                         drive
                 );
 
-                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive::getPose);
+                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
 
                 this.intake = new Intake(
                         new IntakeIOReal(16, 2, 1),
@@ -173,9 +174,16 @@ public class RobotContainer {
 
                 fieldSimulation.placeGamePiecesOnField();
 
-                fieldSimulation.addRobot(new OpponentRobotSimulation(0));
-                fieldSimulation.addRobot(new OpponentRobotSimulation(1));
-                fieldSimulation.addRobot(new OpponentRobotSimulation(2));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(0, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(0));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(1, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(1));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(2, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(2));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(3, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(3));
+                opponentRobotSimulations.add(new OpponentRobotSimulation(4, fieldSimulation));
+                fieldSimulation.addRobot(opponentRobotSimulations.get(4));
 
                 final IntakeIOSim intakeIOSim = new IntakeIOSim();
                 fieldSimulation.registerIntake(intakeIOSim);
@@ -205,7 +213,7 @@ public class RobotContainer {
                         drive
                 );
 
-                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive::getPose);
+                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
 
                 this.intake = new Intake((inputs) -> {}, noteInShooterConsumer);
                 this.pitch = new Pitch((inputs) -> {});
@@ -255,6 +263,11 @@ public class RobotContainer {
 
         configureButtonBindings();
         configureAutoNamedCommands();
+    }
+
+    public void teleOpInit() {
+        for (OpponentRobotSimulation opponentRobotSimulation: opponentRobotSimulations)
+            opponentRobotSimulation.teleOpInit();
     }
 
     private void configureAutoNamedCommands() {

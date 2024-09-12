@@ -4,11 +4,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.CompetitionFieldUtils.Objects.GamePieceOnFlyDisplay;
-import frc.robot.utils.CompetitionFieldUtils.Objects.RobotOnFieldDisplay;
+import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * visualizes a competition field on dashboard & Advantage Scope
@@ -34,9 +36,15 @@ public class CompetitionFieldVisualizer {
 
     private final Map<String, Set<ObjectOnFieldDisplay>> objectsOnFieldWithGivenType;
     private final Map<String, Set<GamePieceOnFlyDisplay>> gamePiecesOnFlyDisplayWithGivenType;
-    public final RobotOnFieldDisplay mainRobot;
+    public final Object2dOnFieldDisplay mainRobot;
     private final Field2d dashboardField2d;
-    public CompetitionFieldVisualizer(RobotOnFieldDisplay mainRobot) {
+    public CompetitionFieldVisualizer(HolonomicDriveSubsystem driveSubsystem) {
+        this(new CompetitionFieldVisualizer.Object2dOnFieldDisplay() {
+            @Override public Pose2d getObjectOnFieldPose2d() {return driveSubsystem.getPose();}
+            @Override public String getTypeName() {return "Robot";}
+        });
+    }
+    public CompetitionFieldVisualizer(Object2dOnFieldDisplay mainRobot) {
         this.mainRobot = mainRobot;
         this.objectsOnFieldWithGivenType = new HashMap<>();
         this.gamePiecesOnFlyDisplayWithGivenType = new HashMap<>();

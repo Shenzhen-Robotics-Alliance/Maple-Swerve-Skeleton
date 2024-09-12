@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 import frc.robot.Robot;
+import frc.robot.constants.LogPaths;
 import frc.robot.utils.CompetitionFieldUtils.Objects.GamePieceInSimulation;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.CustomMaths.GeometryConvertor;
@@ -14,6 +15,7 @@ import org.dyn4j.geometry.Geometry;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.world.PhysicsWorld;
 import org.dyn4j.world.World;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +51,7 @@ public abstract class CompetitionFieldSimulation {
     }
 
     public void updateSimulationWorld() {
+        final long t0 = System.nanoTime();
         competitionPeriodic();
         final double subPeriodSeconds = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD;
         // move through 5 sub-periods in each update
@@ -61,6 +64,11 @@ public abstract class CompetitionFieldSimulation {
         for (IntakeSimulation intakeSimulation:intakeSimulations)
             while (!intakeSimulation.getGamePiecesToRemove().isEmpty())
                 this.removeGamePiece(intakeSimulation.getGamePiecesToRemove().poll());
+
+        Logger.recordOutput(
+                LogPaths.PHYSICS_SIMULATION_PATH + "dyn4j simulator time millis",
+                (System.nanoTime() - t0) / 1000000.0
+        );
     }
 
     public void addRobot(HolonomicChassisSimulation chassisSimulation) {

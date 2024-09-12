@@ -3,10 +3,10 @@ package frc.robot.utils.CompetitionFieldUtils.Simulations;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,6 +15,7 @@ import frc.robot.commands.drive.OpponentRobotFollowPath;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
+import frc.robot.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MaplePathPlannerLoader;
 
@@ -29,13 +30,17 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     /* if an opponent robot is not requested to be on field, it queens outside the field for performance */
     public static final Pose2d[] ROBOT_QUEENING_POSITIONS = new Pose2d[] {
             new Pose2d(-6, 0, new Rotation2d()),
+            new Pose2d(-5, 0, new Rotation2d()),
             new Pose2d(-4, 0, new Rotation2d()),
+            new Pose2d(-3, 0, new Rotation2d()),
             new Pose2d(-2, 0, new Rotation2d())
     };
-    public static final Pose2d[] RED_ROBOTS_STARTING_POSITIONS = new Pose2d[] {
-            new Pose2d(15.2, 6.5, new Rotation2d()),
-            new Pose2d(15.2, 6, new Rotation2d()),
-            new Pose2d(15.2, 5.5, new Rotation2d())
+    public static final Pose2d[] ROBOTS_STARTING_POSITIONS = new Pose2d[] {
+            new Pose2d(15, 6, Rotation2d.fromDegrees(180)),
+            new Pose2d(15, 4, Rotation2d.fromDegrees(180)),
+            new Pose2d(15, 2, Rotation2d.fromDegrees(180)),
+            new Pose2d(1.6, 6, new Rotation2d()),
+            new Pose2d(1.6, 4, new Rotation2d())
     };
     public static final RobotSimulationProfile opponentRobotProfile = new RobotSimulationProfile(
             4,
@@ -53,7 +58,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     /**
      * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
-    public OpponentRobotSimulation(int id) {
+    public OpponentRobotSimulation(int id, CompetitionFieldSimulation simulation) {
         super(opponentRobotProfile, ROBOT_QUEENING_POSITIONS[id]);
         this.robotID = id;
         this.disable = () -> {
@@ -61,8 +66,25 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
             setSimulationWorldPose(ROBOT_QUEENING_POSITIONS[robotID]);
         };
 
-        behaviorChooser.setDefaultOption("Disabled", Commands.runOnce(disable, this));
-        behaviorChooser.addOption("Auto Cycle", getAutoCyleRepeadtelyCommand());
+        behaviorChooser.addOption("Disabled", Commands.runOnce(disable, this));
+        behaviorChooser.setDefaultOption("Auto Cycle", this.getAutoCyleRepeadtelyCommand(
+                switch (robotID) {
+                    case 3 -> Commands.runOnce(() -> simulation.addGamePiece(new Crescendo2024FieldObjects.FeedShotLowNote(
+                            getPose().getTranslation(),
+                            getFacing()
+                    )));
+                    case 4 -> Commands.runOnce(() -> simulation.getVisualizer().addGamePieceOnFly(new Crescendo2024FieldObjects.FeedShotHighNote(
+                            getPose().getTranslation(),
+                            FieldConstants.toCurrentAllianceTranslation(new Translation2d(2.27, 6.33)),
+                            simulation
+                    )));
+                    default -> Commands.runOnce(() -> simulation.getVisualizer().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToSpeaker(
+                            new Translation3d(getPose().getX(), getPose().getY(), 0.2),
+                            0.2,
+                            true
+                    )));
+                }
+        ));
         final XboxController xboxController = new XboxController(1+robotID);
         behaviorChooser.addOption(
                 "Joystick Control Left-Handed",
@@ -72,7 +94,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
                 "Joystick Control Right-Handed",
                 getJoystickDrive(MapleJoystickDriveInput.rightHandedJoystick(xboxController))
         );
-        behaviorChooser.onChange((selectedCommand) -> CommandScheduler.getInstance().schedule(selectedCommand));
+        behaviorChooser.onChange(Command::schedule);
 
         SmartDashboard.putData("FieldSimulation/OpponentRobot"+(robotID+1)+" Behavior", behaviorChooser);
     }
@@ -103,11 +125,10 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     }
 
     private static final PathConstraints constraints = new PathConstraints(3.5, 8, Math.toRadians(180), Math.toRadians(360));
-    private static final Pose2d tolerance = new Pose2d(3, 3, Rotation2d.fromDegrees(20));
-    public Command getAutoCyleRepeadtelyCommand() {
-        final PathPlannerPath cycleForwardPath = MaplePathPlannerLoader.fromPathFile("opponent cycle path " + robotID, constraints),
+    public Command getAutoCyleRepeadtelyCommand(Command toRunAtEndOfCycle) {
+        final PathPlannerPath cycleForwardPath = MaplePathPlannerLoader.fromPathFile("other robot cycle path " + robotID, constraints),
                 cycleBackwardPath = MaplePathPlannerLoader.fromPathFileReversed(
-                        "opponent cycle path " + robotID,
+                        "other robot cycle path " + robotID,
                         constraints,
                         new GoalEndState(0, cycleForwardPath.getPreviewStartingHolonomicPose().getRotation()));
         final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(cycleBackwardPath.getPreviewStartingHolonomicPose()), this),
@@ -123,7 +144,8 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
                 teleportToStartingPose,
                 new SequentialCommandGroup(
                         cycleBackward,
-                        cycleForward
+                        cycleForward,
+                        toRunAtEndOfCycle
                 ).repeatedly()
         ).finallyDo(end);
         cycleRepeatedlyAndStop.addRequirements(this);
@@ -131,7 +153,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     }
 
     public Command getJoystickDrive(MapleJoystickDriveInput joystickDriveInput) {
-        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(RED_ROBOTS_STARTING_POSITIONS[robotID]),
+        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(ROBOTS_STARTING_POSITIONS[robotID]),
                 queeningPose = ROBOT_QUEENING_POSITIONS[robotID];
         final Command teleportToStartingPose = Commands.runOnce(() -> setSimulationWorldPose(startingPose), this);
         Runnable end = () -> {
@@ -151,15 +173,15 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         HolonomicDriveSubsystem.super.runDriverStationCentricChassisSpeeds(gamePadSpeedsInOurDriverStationReference);
     }
 
-    /**
-     * a method to test the driving physics
-     * just for testing
-     * in the formal code, we should be using holonomic drive commands
-     * */
-    @Deprecated
-    public void testDrivingPhysicsWithJoystick(XboxController xboxController) {
-        final MapleJoystickDriveInput mapleJoystickDriveInput = MapleJoystickDriveInput.leftHandedJoystick(xboxController);
-        final ChassisSpeeds gamePadSpeeds = mapleJoystickDriveInput.getJoystickChassisSpeeds(5, 10);
-        HolonomicDriveSubsystem.super.runDriverStationCentricChassisSpeeds(gamePadSpeeds);
+    public void teleOpInit() {
+        behaviorChooser.getSelected().schedule();
+    }
+
+    @Override
+    public String getTypeName() {
+        final boolean isOpponent = robotID < 3,
+                isRed = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)
+                        == isOpponent;
+        return "Robot" + (isRed ? "Red" : "Blue");
     }
 }
