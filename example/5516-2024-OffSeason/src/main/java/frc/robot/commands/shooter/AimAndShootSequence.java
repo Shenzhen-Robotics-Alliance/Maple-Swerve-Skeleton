@@ -67,13 +67,19 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         final AimAtSpeakerContinuously aimAtSpeakerContinuously = new AimAtSpeakerContinuously(
                 flyWheels, pitch, ledStatusLight, shooterOptimization, drive, targetPositionSupplier, externalShootCondition
         );
-        final Command waitForRightTimingAndShoot = Commands.waitUntil(aimAtSpeakerContinuously::readyToShoot)
-                .andThen(intake.executeLaunch());
-        super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));
-        super.addCommands(Commands.runOnce(() -> visualizer.addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToShooter(
+
+        /* visualization */
+        final Command visualizeNote;
+        if (visualizer == null)
+            visualizeNote = Commands.none();
+        else visualizeNote = Commands.runOnce(() -> visualizer.addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToSpeaker(
                 new Translation3d(drive.getPose().getX(), drive.getPose().getY(), 0.3),
                 shooterOptimization.getFlightTimeSeconds(targetPositionSupplier.get(), robotScoringPositionSupplier.get())
-        ))));
+        )));
+
+        final Command waitForRightTimingAndShoot = Commands.waitUntil(aimAtSpeakerContinuously::readyToShoot)
+                .andThen(intake.executeLaunch().alongWith(visualizeNote));
+        super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));
     }
 
     public Command ifNotePresent() {

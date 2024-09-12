@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SelectCommand;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.subsystems.intake.Intake;
@@ -87,10 +86,9 @@ public class ScoreAmp extends Command {
 
     private static final double
             SHOOTER_HEIGHT_AMP = 0.4,
-            AMP_HEIGHT = 0.8,
-            AMP_INITIAL_VELOCITY = 4,
+            AMP_INITIAL_VELOCITY = 3.5,
             AMP_FLIGHT_TIME_SECONDS = 0.8;
-    private static final Translation3d AMP_POSITION = new Translation3d(1.81, 8.41, AMP_HEIGHT);
+    private static final Translation3d AMP_POSITION = new Translation3d(1.81, 8.35, 0);
     private static final Pose2d CORRECT_SCORE_AMP_ROBOT_POSE_BLUE = new Pose2d(1.81, 7.71, Rotation2d.fromDegrees(-90));
     private static final class AmpSuccessNote extends GamePieceOnFlyDisplay {
         public AmpSuccessNote(Translation2d robotPosition) {
@@ -112,8 +110,9 @@ public class ScoreAmp extends Command {
             * the amplified note follows the free-fall law
             * h = h0 + v*t - 1/2*t^2*g;
             *  */
-            final double height = SHOOTER_HEIGHT_AMP + AMP_INITIAL_VELOCITY * getT()
-                            - 1.0/2.0 * getT() * getT() * 10;
+            final double t = getTimeSinceLaunchSeconds(),
+                    height = SHOOTER_HEIGHT_AMP + AMP_INITIAL_VELOCITY * t
+                            - 1.0/2.0 * t * t * 10;
             return new Pose3d(
                     new Translation3d(super.getPose3d().getX(), super.getPose3d().getY(), height),
                     new Rotation3d(Math.toRadians(90), 0, 0)
@@ -157,8 +156,9 @@ public class ScoreAmp extends Command {
 
         @Override
         public Pose3d getPose3d() {
-            final double height = SHOOTER_HEIGHT_AMP + AMP_INITIAL_VELOCITY * getT()
-                            - 1.0/2.0 * getT() * getT() * 10;
+            final double t = getTimeSinceLaunchSeconds(),
+                    height = SHOOTER_HEIGHT_AMP + AMP_INITIAL_VELOCITY * t
+                            - 1.0/2.0 * t * t * 10;
             return new Pose3d(
                     new Translation3d(super.getPose3d().getX(), super.getPose3d().getY(), height),
                     new Rotation3d(0, Math.toRadians(90), robotFacingWhenLaunching.getRadians())

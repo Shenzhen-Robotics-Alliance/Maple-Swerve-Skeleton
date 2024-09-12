@@ -393,7 +393,7 @@ public class RobotContainer {
                 .whileTrue(Commands.run(() -> joystickDrive.setCurrentRotationalMaintenance(
                         FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(180))
                 )))
-                .onFalse(FeedShot.shootFeed(pitch, flyWheels, intake));
+                .onFalse(FeedShot.shootFeed(pitch, flyWheels, intake, fieldSimulation, drive));
 
         /* aim and shoot command */
         final JoystickDriveAndAimAtTarget faceTargetWhileDrivingLowSpeed = new JoystickDriveAndAimAtTarget(
