@@ -103,33 +103,15 @@ public class Intake extends MapleSubsystem {
         return Commands.run(() -> {
                     if (inputs.lowerBeamBreakBlocked)
                         runMinimumPropellingVoltage();
-                    else
-                        runFullIntakeVoltage();
+                    else runFullIntakeVoltage();
                 }, this)
                 .until(() -> inputs.upperBeamBreakerBlocked)
                 .onlyIf(() -> !inputs.upperBeamBreakerBlocked)
                 .finallyDo(this::runIdle);
     }
 
-    public Command executeIntakeNote(JoystickDrive joystickDrive) {
-        return Commands.run(() -> {
-                    if (inputs.lowerBeamBreakBlocked) {
-                        runMinimumPropellingVoltage();
-                        joystickDrive.resetSensitivity();
-                    }
-                    else {
-                        runFullIntakeVoltage();
-                        joystickDrive.setSensitivity(0.4, 0.4);
-                    }
-                }, this)
-                .until(() -> inputs.upperBeamBreakerBlocked)
-                .onlyIf(() -> !inputs.upperBeamBreakerBlocked)
-                .finallyDo(joystickDrive::resetSensitivity)
-                .finallyDo(this::runIdle);
-    }
-
-    public Command executeIntakeNote(JoystickDrive joystickDrive, LEDStatusLight statusLight, XboxController xboxController) {
-        return executeIntakeNote(joystickDrive)
+    public Command executeIntakeNote(LEDStatusLight statusLight, XboxController xboxController) {
+        return executeIntakeNote()
                 .raceWith(Commands.run(() -> statusLight.setAnimation(RUNNING), statusLight))
                 .andThen(statusLight.playAnimationAndStop(GRABBED_NOTE, 1.5)
                         .deadlineWith(rumbleGamepad(xboxController))

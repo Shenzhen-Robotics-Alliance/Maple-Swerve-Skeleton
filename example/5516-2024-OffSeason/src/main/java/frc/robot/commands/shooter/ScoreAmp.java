@@ -61,21 +61,25 @@ public class ScoreAmp extends Command {
 
     // Visualization
     public Command withVisualization(CompetitionFieldVisualizer visualizer, CompetitionFieldSimulation simulation, HolonomicDriveSubsystem driveSubsystem) {
-        final Command visualizeAmpNote = Commands.run(() -> {
+        final Command visualizeAmpNote = Commands.runOnce(() -> {
             final Transform2d poseError = FieldConstants
                     .toCurrentAlliancePose(CORRECT_SCORE_AMP_ROBOT_POSE_BLUE)
                     .minus(driveSubsystem.getPose());
+            final Translation2d shooterPositionOnField = driveSubsystem.getPose()
+                    .getTranslation()
+                    .plus(new Translation2d(-0.3, 0).rotateBy(driveSubsystem.getFacing()));
             if (poseError.getTranslation().getNorm() < 0.25
                     && Math.abs(poseError.getRotation().getDegrees()) < 8)
-                visualizer.addGamePieceOnFly(new AmpSuccessNote(driveSubsystem.getPose().getTranslation()));
+                visualizer.addGamePieceOnFly(new AmpSuccessNote(shooterPositionOnField));
             else
                 visualizer.addGamePieceOnFly(new AmpFailedNote(
-                        driveSubsystem.getPose(),
+                        driveSubsystem.getPose().getRotation(),
+                        shooterPositionOnField,
                         simulation
                 ));
         });
         final Command visualizationCommand = Commands
-                .waitSeconds(0.5)
+                .waitSeconds(0.3)
                 .andThen(visualizeAmpNote)
                 .onlyIf(() -> hasNote && visualizer != null);
         return this.alongWith(visualizationCommand);
@@ -84,8 +88,9 @@ public class ScoreAmp extends Command {
     private static final double
             SHOOTER_HEIGHT_AMP = 0.4,
             AMP_HEIGHT = 0.8,
+            AMP_INITIAL_VELOCITY = 4,
             AMP_FLIGHT_TIME_SECONDS = 0.8;
-    private static final Translation3d AMP_POSITION = new Translation3d(1.81, 8.11, AMP_HEIGHT);
+    private static final Translation3d AMP_POSITION = new Translation3d(1.81, 8.41, AMP_HEIGHT);
     private static final Pose2d CORRECT_SCORE_AMP_ROBOT_POSE_BLUE = new Pose2d(1.81, 7.71, Rotation2d.fromDegrees(-90));
     private static final class AmpSuccessNote extends GamePieceOnFlyDisplay {
         public AmpSuccessNote(Translation2d robotPosition) {
@@ -105,14 +110,9 @@ public class ScoreAmp extends Command {
         public Pose3d getPose3d() {
             /*
             * the amplified note follows the free-fall law
-            * dx = v * t - 1/2 * t ^ 2 * g;
-            * solve for v = (dx + 1/2 * t ^ 2 * g) / t
+            * h = h0 + v*t - 1/2*t^2*g;
             *  */
-
-            final double initialVelocity = (
-                    (AMP_HEIGHT - SHOOTER_HEIGHT_AMP)
-                    + 1.0/2.0 * AMP_FLIGHT_TIME_SECONDS * AMP_FLIGHT_TIME_SECONDS * 10),
-                    height = initialVelocity * getT()
+            final double height = SHOOTER_HEIGHT_AMP + AMP_INITIAL_VELOCITY * getT()
                             - 1.0/2.0 * getT() * getT() * 10;
             return new Pose3d(
                     new Translation3d(super.getPose3d().getX(), super.getPose3d().getY(), height),
@@ -122,17 +122,17 @@ public class ScoreAmp extends Command {
     }
 
     private static final class AmpFailedNote extends GamePieceOnFlyDisplay {
-        private final Rotation2d robotYawWhenLaunching;
-        public AmpFailedNote(Pose2d robotPoseWhenLaunching, CompetitionFieldSimulation simulation) {
+        private final Rotation2d robotFacingWhenLaunching;
+        public AmpFailedNote(Rotation2d robotFacingWhenLaunching, Translation2d shooterPositionOnField, CompetitionFieldSimulation simulation) {
             super(
-                    new Translation3d(robotPoseWhenLaunching.getX(), robotPoseWhenLaunching.getY(), SHOOTER_HEIGHT_AMP),
+                    new Translation3d(shooterPositionOnField.getX(), shooterPositionOnField.getY(), SHOOTER_HEIGHT_AMP),
                     getNoteTouchGroundTranslation3d(
-                            robotPoseWhenLaunching.getTranslation().plus(
-                                    new Translation2d(-0.2, robotPoseWhenLaunching.getRotation())
+                            shooterPositionOnField.plus(
+                                    new Translation2d(-0.7, 0).rotateBy(robotFacingWhenLaunching)
                             )),
                     AMP_FLIGHT_TIME_SECONDS
             );
-            this.robotYawWhenLaunching = robotPoseWhenLaunching.getRotation();
+            this.robotFacingWhenLaunching = robotFacingWhenLaunching;
             if (simulation != null) CommandScheduler.getInstance().schedule(
                     Commands.waitSeconds(AMP_FLIGHT_TIME_SECONDS).andThen(Commands.runOnce(
                             () -> simulation.addGamePiece(new Crescendo2024FieldObjects.NoteOnFieldSimulated(
@@ -157,20 +157,11 @@ public class ScoreAmp extends Command {
 
         @Override
         public Pose3d getPose3d() {
-            /*
-             * the amplified note follows the free-fall law
-             * dx = v * t - 1/2 * t ^ 2 * g;
-             * solve for v = (dx + 1/2 * t ^ 2 * g) / t
-             *  */
-
-            final double initialVelocity = (
-                    (AMP_HEIGHT - SHOOTER_HEIGHT_AMP)
-                            + 1.0/2.0 * AMP_FLIGHT_TIME_SECONDS * AMP_FLIGHT_TIME_SECONDS * 10),
-                    height = initialVelocity * getT()
+            final double height = SHOOTER_HEIGHT_AMP + AMP_INITIAL_VELOCITY * getT()
                             - 1.0/2.0 * getT() * getT() * 10;
             return new Pose3d(
                     new Translation3d(super.getPose3d().getX(), super.getPose3d().getY(), height),
-                    new Rotation3d(Math.toRadians(90), 0, robotYawWhenLaunching.getRadians())
+                    new Rotation3d(0, Math.toRadians(90), robotFacingWhenLaunching.getRadians())
             );
         }
     }

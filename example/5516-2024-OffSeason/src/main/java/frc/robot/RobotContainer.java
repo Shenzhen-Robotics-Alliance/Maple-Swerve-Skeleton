@@ -38,7 +38,6 @@ import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
-import frc.robot.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.OpponentRobotSimulation;
@@ -362,12 +361,12 @@ public class RobotContainer {
                 ).ignoringDisable(true)
         );
 
-        /* intake commands */
-        driverXBox.leftTrigger(0.5).whileTrue(intake.executeIntakeNote(
-                joystickDrive,
-                ledStatusLight,
-                driverXBox.getHID()
-        ));
+        /* drive slowly and intake note, rumble game-pad when note detected */
+        driverXBox
+                .leftTrigger(0.5)
+                .whileTrue(intake.executeIntakeNote(ledStatusLight, driverXBox.getHID()))
+                .onTrue(Commands.runOnce(() -> joystickDrive.setSensitivity(0.6, 0.4)))
+                .onFalse(Commands.runOnce(joystickDrive::resetSensitivity));
         /* split note from bottom */
         driverXBox.a().whileTrue(Commands.run(
                 () -> {
@@ -379,9 +378,11 @@ public class RobotContainer {
         /* amp command */
         driverXBox.y()
                 .onTrue(new PrepareToAmp(pitch, flyWheels, ledStatusLight))
-                .whileTrue(Commands.run(() -> joystickDrive.setCurrentRotationalMaintenance(
-                        FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(-90))
-                )))
+                .whileTrue(Commands.run(() -> {
+                    joystickDrive.setCurrentRotationalMaintenance(
+                        FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(-90)));
+                    joystickDrive.setSensitivity(0.7, 1);
+                }).finallyDo(joystickDrive::resetSensitivity))
                 .onFalse(new ScoreAmp(intake, pitch, flyWheels, ledStatusLight)
                         .withVisualization(visualizerForShooter, fieldSimulation, drive)
                 );
