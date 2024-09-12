@@ -77,8 +77,13 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
                 shooterOptimization.getFlightTimeSeconds(targetPositionSupplier.get(), robotScoringPositionSupplier.get())
         )));
 
+
+        final Command visualizeNoteFullCommand = Commands
+                .waitUntil(() -> !intake.isNotePresent())
+                .andThen(visualizeNote)
+                .onlyIf(() -> intake.isNotePresent());
         final Command waitForRightTimingAndShoot = Commands.waitUntil(aimAtSpeakerContinuously::readyToShoot)
-                .andThen(intake.executeLaunch().alongWith(visualizeNote));
+                .andThen(intake.executeLaunch().alongWith(visualizeNoteFullCommand));
         super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));
     }
 
