@@ -140,7 +140,7 @@ public abstract class CompetitionFieldSimulation {
             final Body obstacle = new Body();
             obstacle.setMass(MassType.INFINITE);
             final BodyFixture fixture = obstacle.addFixture(shape);
-            fixture.setFriction(0.8);
+            fixture.setFriction(0.6);
             fixture.setRestitution(0.6);
             return obstacle;
         }

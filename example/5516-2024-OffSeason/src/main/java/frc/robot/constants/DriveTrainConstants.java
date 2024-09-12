@@ -15,7 +15,7 @@ public class DriveTrainConstants {
      * TODO: change these numbers to match your robot
      *  */
     public static final double
-            WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
+            WHEEL_COEFFICIENT_OF_FRICTION = 1.05, // yeah, I know this is against the law of physics, but it feels realistic
             ROBOT_MASS_KG = 37.35; // with bumpers
 
     private static final DCMotor KRAKEN_X60 = new DCMotor(
@@ -96,7 +96,7 @@ public class DriveTrainConstants {
             BUMPER_WIDTH_METERS = Units.inchesToMeters(34.5),
             BUMPER_LENGTH_METERS = Units.inchesToMeters(36),
             /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
-            BUMPER_COEFFICIENT_OF_FRICTION = 0.75,
+            BUMPER_COEFFICIENT_OF_FRICTION = 0.65,
             /* https://simple.wikipedia.org/wiki/Coefficient_of_restitution */
             BUMPER_COEFFICIENT_OF_RESTITUTION = 0.08;
 
