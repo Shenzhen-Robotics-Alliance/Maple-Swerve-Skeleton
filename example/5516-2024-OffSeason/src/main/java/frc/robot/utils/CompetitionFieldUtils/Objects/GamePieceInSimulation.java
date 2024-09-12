@@ -20,7 +20,7 @@ public abstract class GamePieceInSimulation extends Body implements GamePieceOnF
      * */
     public static final double
             DEFAULT_MASS = 0.2,
-            LINEAR_DAMPING = 2.5,
+            LINEAR_DAMPING = 3.5,
             ANGULAR_DAMPING = 5,
             EDGE_COEFFICIENT_OF_FRICTION = 0.8,
             EDGE_COEFFICIENT_OF_RESTITUTION = 0.3;

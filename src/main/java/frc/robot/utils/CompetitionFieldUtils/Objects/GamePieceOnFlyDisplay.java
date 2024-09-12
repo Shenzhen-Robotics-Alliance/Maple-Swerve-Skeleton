@@ -30,7 +30,12 @@ public abstract class GamePieceOnFlyDisplay implements CompetitionFieldVisualize
         return getT() >= 1;
     }
 
+    public double getTimeSinceLaunchSeconds() {
+        return MapleTimeUtils.getLogTimeSeconds() - startTimeSeconds;
+    }
+
+
     public double getT() {
-        return (MapleTimeUtils.getLogTimeSeconds() - startTimeSeconds) / flightTimeSeconds;
+        return getTimeSinceLaunchSeconds() / flightTimeSeconds;
     }
 }
