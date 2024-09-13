@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.Robot;
+import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.CompetitionFieldUtils.Simulations.IntakeSimulation;
 
 public class IntakeIOSim extends IntakeSimulation implements IntakeIO {
@@ -17,8 +18,8 @@ public class IntakeIOSim extends IntakeSimulation implements IntakeIO {
     private boolean shooterRunning = false;
     public IntakeIOSim() {
         super(
-                new Translation2d(-0.9144/2-0.01, 0.3),
-                new Translation2d(-0.9144/2-0.01, -0.3),
+                new Translation2d(-DriveTrainConstants.BUMPER_LENGTH_METERS/2, 0.3),
+                new Translation2d(-DriveTrainConstants.BUMPER_LENGTH_METERS/2, -0.3),
                 1
         );
     }

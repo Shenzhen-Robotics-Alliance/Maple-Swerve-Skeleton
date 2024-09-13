@@ -62,11 +62,6 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1,
-      "rotationDegrees": 180.0,
-      "rotateFast": false
-    },
-    {
       "waypointRelativePos": 0.25,
       "rotationDegrees": 180.0,
       "rotateFast": true
@@ -74,6 +69,11 @@
     {
       "waypointRelativePos": 2.8,
       "rotationDegrees": -171.25383773744474,
+      "rotateFast": true
+    },
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 180.0,
       "rotateFast": true
     }
   ],
@@ -114,9 +114,9 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Amp Side Six Note",
+  "folder": null,
   "previewStartingState": {
-    "rotation": -151.29115678153866,
+    "rotation": -155.55562093631892,
     "velocity": 0
   },
   "useDefaultConstraints": true

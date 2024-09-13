@@ -413,7 +413,7 @@ public class RobotContainer {
                 driveInput, drive,
                 FieldConstants.SPEAKER_POSITION_SUPPLIER,
                 shooterOptimization,
-                0.5
+                0.3
         );
         final Command semiAutoAimAndShoot = new AimAndShootSequence(
                 pitch, flyWheels, intake, shooterOptimization, drive,
@@ -422,7 +422,10 @@ public class RobotContainer {
                 ledStatusLight,
                 visualizerForShooter
         ).ifNotePresent();
-        driverXBox.rightTrigger(0.5).whileTrue(semiAutoAimAndShoot.deadlineWith(faceTargetWhileDrivingLowSpeed));
+        driverXBox.rightTrigger(0.5).whileTrue(semiAutoAimAndShoot
+                        .deadlineWith(faceTargetWhileDrivingLowSpeed)
+                        .finallyDo(() -> joystickDrive.setCurrentRotationalMaintenance(drive.getFacing()))
+        );
 
         driverXBox.rightBumper().whileTrue(new PathFindToPoseAndShootSequence(
                 intake, pitch, flyWheels, shooterOptimization, drive,

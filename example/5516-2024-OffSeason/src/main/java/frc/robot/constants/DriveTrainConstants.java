@@ -93,8 +93,8 @@ public class DriveTrainConstants {
 
     /* for collision detection in simulation */
     public static final double
-            BUMPER_WIDTH_METERS = Units.inchesToMeters(34.5),
-            BUMPER_LENGTH_METERS = Units.inchesToMeters(36),
+            BUMPER_WIDTH_METERS = Units.inchesToMeters(32),
+            BUMPER_LENGTH_METERS = Units.inchesToMeters(32),
             /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
             BUMPER_COEFFICIENT_OF_FRICTION = 0.65,
             /* https://simple.wikipedia.org/wiki/Coefficient_of_restitution */
