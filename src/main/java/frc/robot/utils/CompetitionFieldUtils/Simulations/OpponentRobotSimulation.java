@@ -144,11 +144,12 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         final Command cycleRepeatedlyAndStop = new SequentialCommandGroup(
                 teleportToStartingPose,
                 new SequentialCommandGroup(
-                        cycleBackward.withTimeout(4),
+                        cycleBackward.withTimeout(8),
                         Commands.waitSeconds(1),
-                        cycleForward.withTimeout(4),
-                        Commands.waitSeconds(0.5),
-                        toRunAtEndOfCycle
+                        cycleForward
+                                .andThen(Commands.waitSeconds(0.5).andThen(toRunAtEndOfCycle))
+                                .withTimeout(8),
+                        Commands.waitSeconds(0.5)
                 ).repeatedly()
         ).finallyDo(end);
         cycleRepeatedlyAndStop.addRequirements(this);
