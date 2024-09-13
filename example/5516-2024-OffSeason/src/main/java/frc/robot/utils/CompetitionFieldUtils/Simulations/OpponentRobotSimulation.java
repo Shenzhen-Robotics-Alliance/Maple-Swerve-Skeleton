@@ -69,6 +69,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         behaviorChooser.addOption("Disabled", Commands.runOnce(disable, this));
         behaviorChooser.setDefaultOption("Auto Cycle", this.getAutoCyleRepeadtelyCommand(
                 switch (robotID) {
+                    case 0 -> Commands.none();
                     case 3 -> Commands.runOnce(() -> simulation.addGamePiece(new Crescendo2024FieldObjects.FeedShotLowNote(
                             getPose().getTranslation(),
                             getFacing()
@@ -143,8 +144,10 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
         final Command cycleRepeatedlyAndStop = new SequentialCommandGroup(
                 teleportToStartingPose,
                 new SequentialCommandGroup(
-                        cycleBackward,
-                        cycleForward,
+                        cycleBackward.withTimeout(4),
+                        Commands.waitSeconds(1),
+                        cycleForward.withTimeout(4),
+                        Commands.waitSeconds(0.5),
                         toRunAtEndOfCycle
                 ).repeatedly()
         ).finallyDo(end);
