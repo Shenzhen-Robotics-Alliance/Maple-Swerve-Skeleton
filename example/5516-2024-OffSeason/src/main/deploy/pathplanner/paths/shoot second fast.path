@@ -32,10 +32,10 @@
   "constraintZones": [
     {
       "name": "slow down to shoot",
-      "minWaypointRelativePos": 0.8,
+      "minWaypointRelativePos": 0.9,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.2,
+        "maxVelocity": 1.6,
         "maxAcceleration": 7.5,
         "maxAngularVelocity": 670.0,
         "maxAngularAcceleration": 1080.0
@@ -55,7 +55,7 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Amp Side Six Note",
+  "folder": null,
   "previewStartingState": {
     "rotation": 179.20404091066868,
     "velocity": 0

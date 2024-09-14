@@ -54,14 +54,14 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
 
     private final int robotID;
     private final SendableChooser<Command> behaviorChooser = new SendableChooser<>();
-    private final Runnable disable;
+
     /**
      * @param id the id of the robot, 0 to 2, this determines where the robot "respawns"
      * */
     public OpponentRobotSimulation(int id, CompetitionFieldSimulation simulation) {
         super(opponentRobotProfile, ROBOT_QUEENING_POSITIONS[id]);
         this.robotID = id;
-        this.disable = () -> {
+        final Runnable disable = () -> {
             stop();
             setSimulationWorldPose(ROBOT_QUEENING_POSITIONS[robotID]);
         };

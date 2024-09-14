@@ -12,7 +12,7 @@ public class IntakeIOSim extends IntakeSimulation implements IntakeIO {
             VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION
             + 4 * 0.5;
     /* the integral of the voltage of the intake ever since the note touches the lower gate */
-    private double voltageIntegralSinceNoteInIntake = 0.0;
+    private double voltageIntegralSinceNoteInIntake;
 
     private double intakeVoltage = 0.0;
     private boolean shooterRunning = false;
@@ -22,6 +22,9 @@ public class IntakeIOSim extends IntakeSimulation implements IntakeIO {
                 new Translation2d(-DriveTrainConstants.BUMPER_LENGTH_METERS/2, -0.3),
                 1
         );
+        // initial preload
+        super.gamePieceCount = 1;
+        voltageIntegralSinceNoteInIntake = VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION;
     }
 
     @Override

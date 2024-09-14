@@ -81,7 +81,7 @@
     {
       "name": "slow down to turn",
       "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 0.85,
+      "maxWaypointRelativePos": 0.25,
       "constraints": {
         "maxVelocity": 1.6,
         "maxAcceleration": 7.5,
