@@ -323,26 +323,31 @@ public class RobotContainer {
         final boolean isLeftHandedSelected = !JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get());
         if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
             configureButtonBindings();
-        isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
         isLeftHanded = isLeftHandedSelected;
 
         final Auto selectedAuto = autoChooser.get();
-        if (selectedAuto != previouslySelectedAuto) {
+        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || selectedAuto != previouslySelectedAuto) {
             this.autonomousCommand = selectedAuto
                     .getAutoCommand(this)
-                    .beforeStarting(() -> resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance()))
                     .finallyDo(MapleSubsystem::disableAllSubsystems);
+            resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
         }
+
         previouslySelectedAuto = selectedAuto;
+        isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
     }
 
     private void resetFieldAndOdometryForAuto(Pose2d robotStartingPoseAtBlueAlliance) {
         final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
-        drive.setPose(startingPose);
 
-        if (fieldSimulation == null) return;
-        fieldSimulation.getMainRobot().setSimulationWorldPose(startingPose);
-        fieldSimulation.resetFieldForAuto();
+        if (fieldSimulation != null) {
+            fieldSimulation.getMainRobot().setSimulationWorldPose(startingPose);
+            fieldSimulation.resetFieldForAuto();
+            updateFieldSimAndDisplay();
+        }
+
+        drive.periodic();
+        drive.setPose(startingPose);
     }
 
     /**
