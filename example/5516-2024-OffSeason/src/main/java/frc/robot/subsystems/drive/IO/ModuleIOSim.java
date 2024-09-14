@@ -83,7 +83,7 @@ public class ModuleIOSim implements ModuleIO {
 
         // apply smart current limit
         driveAppliedVolts = driveDesiredVolts;
-        if (Math.abs(currentAtDesiredVolts) > DRIVE_CURRENT_LIMIT
+        if (Math.abs(currentAtDesiredVolts) >  1.5 * DRIVE_CURRENT_LIMIT
                 && driveDesiredVolts * physicsSimulationResults.driveWheelFinalVelocityRadPerSec > 0) {
             final double limitedCurrent = Math.copySign(DRIVE_CURRENT_LIMIT, currentAtDesiredVolts);
             driveAppliedVolts = DRIVE_MOTOR.getVoltage(
