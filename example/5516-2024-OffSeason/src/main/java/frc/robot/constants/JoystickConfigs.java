@@ -6,7 +6,7 @@ package frc.robot.constants;
  * */
 public class JoystickConfigs {
     public static final double DEFAULT_TRANSLATIONAL_SENSITIVITY = 1;
-    public static final double DEFAULT_ROTATIONAL_SENSITIVITY = 0.7;
+    public static final double DEFAULT_ROTATIONAL_SENSITIVITY = 0.85;
 
     /** the amount of time that the chassis waits after the pilot's last input, before it places all the swerve wheels to standby-state (facing forward) */
     public static final double NON_USAGE_TIME_RESET_WHEELS = 1;
