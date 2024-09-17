@@ -185,7 +185,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
     public String getTypeName() {
         final boolean isOpponent = robotID < 3,
             isRed = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)
-                    == isOpponent;
+                    != isOpponent;
         return "Robot" + (isRed ? "Red" : "Blue");
     }
 }
