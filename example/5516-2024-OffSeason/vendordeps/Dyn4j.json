@@ -1,0 +1,23 @@
+{
+  "fileName": "Dyn4j.json",
+  "name": "MapleSim",
+  "version": "0.0.1",
+  "uuid": "123e4567-e89b-12d3-a456-426614174000",
+  "frcYear": "2024",
+  "mavenUrls": [],
+  "jsonUrl": "https://github.com/Mechanical-Advantage/AdvantageKit/releases/latest/download/AdvantageKit.json",
+  "javaDependencies": [
+    {
+      "groupId": "junit",
+      "artifactId": "junit",
+      "version": "4.13.1"
+    },
+    {
+      "groupId": "org.dyn4j",
+      "artifactId": "dyn4j",
+      "version": "5.0.2"
+    }
+  ],
+  "jniDependencies": [],
+  "cppDependencies": []
+}

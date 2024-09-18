@@ -86,10 +86,6 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
-    // for 2d Physics Simulation
-    implementation group: 'junit', name: 'junit', version: '4.13.1'
-    implementation group: 'org.dyn4j', name: 'dyn4j', version: '5.0.2'
-
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
 
