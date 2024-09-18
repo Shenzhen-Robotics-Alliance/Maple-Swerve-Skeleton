@@ -16,7 +16,7 @@ public class DriveTrainConstants {
      *  */
     public static final double
             WHEEL_COEFFICIENT_OF_FRICTION = 1.05, // yeah, I know this is against the law of physics, but it feels realistic
-            ROBOT_MASS_KG = 37.35; // with bumpers
+            ROBOT_MASS_KG = 32; // with bumpers
 
     private static final DCMotor KRAKEN_X60 = new DCMotor(
             12, 7.09, 366, 2, Units.rotationsPerMinuteToRadiansPerSecond(4800), 1);

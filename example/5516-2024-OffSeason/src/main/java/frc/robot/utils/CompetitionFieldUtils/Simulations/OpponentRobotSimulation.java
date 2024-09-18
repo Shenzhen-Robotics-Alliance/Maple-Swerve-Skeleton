@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.drive.OpponentRobotFollowPath;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.constants.FieldConstants;
@@ -183,9 +184,7 @@ public class OpponentRobotSimulation extends HolonomicChassisSimulation implemen
 
     @Override
     public String getTypeName() {
-        final boolean isOpponent = robotID < 3,
-            isRed = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)
-                    != isOpponent;
-        return "Robot" + (isRed ? "Red" : "Blue");
+        final boolean isOpponent = robotID < 3;
+        return (isOpponent ? "Opponent" : "AlliancePartner") + "Robot";
     }
 }

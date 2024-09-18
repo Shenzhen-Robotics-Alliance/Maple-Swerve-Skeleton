@@ -85,7 +85,7 @@ public class ModuleIOSim implements ModuleIO {
         driveAppliedVolts = driveDesiredVolts;
         if (Math.abs(currentAtDesiredVolts) >  1.5 * DRIVE_CURRENT_LIMIT
                 && driveDesiredVolts * physicsSimulationResults.driveWheelFinalVelocityRadPerSec > 0) {
-            final double limitedCurrent = Math.copySign(DRIVE_CURRENT_LIMIT, currentAtDesiredVolts);
+            final double limitedCurrent = Math.copySign(DRIVE_CURRENT_LIMIT * 1.2, currentAtDesiredVolts);
             driveAppliedVolts = DRIVE_MOTOR.getVoltage(
                     DRIVE_MOTOR.getTorque(limitedCurrent),
                     driveMotorRotterSpeedRadPerSec
