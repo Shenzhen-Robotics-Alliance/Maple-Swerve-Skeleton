@@ -33,7 +33,7 @@ public abstract class GamePieceInSimulation extends Body implements GamePieceOnF
         super();
         BodyFixture bodyFixture = super.addFixture(shape);
         bodyFixture.setFriction(EDGE_COEFFICIENT_OF_FRICTION);
-        bodyFixture.setFriction(EDGE_COEFFICIENT_OF_RESTITUTION);
+        bodyFixture.setRestitution(EDGE_COEFFICIENT_OF_RESTITUTION);
         bodyFixture.setDensity(mass / shape.getArea());
         super.setMass(MassType.NORMAL);
 
