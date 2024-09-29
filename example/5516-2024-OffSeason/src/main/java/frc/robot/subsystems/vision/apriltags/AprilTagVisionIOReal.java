@@ -23,7 +23,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
     public void updateInputs(VisionInputs inputs) {
         if (inputs.camerasAmount != cameras.length)
             throw new IllegalStateException("inputs camera amount (" + inputs.camerasAmount + ") does not match actual cameras amount");
-
         for (int i = 0; i < cameras.length; i++)
             if (cameras[i].isConnected())
                 inputs.camerasInputs[i].fromPhotonPipeLine(
