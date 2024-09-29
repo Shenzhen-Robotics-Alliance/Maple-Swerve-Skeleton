@@ -40,8 +40,8 @@ public class DriveControlLoops {
             12/DriveTrainConstants.CHASSIS_MAX_VELOCITY
     );
     public static final MaplePIDController.MaplePIDConfig DRIVE_CLOSE_LOOP = new MaplePIDController.MaplePIDConfig(
-            5,
-            2,
+            3,
+            3,
             0,
             0,
             0,
