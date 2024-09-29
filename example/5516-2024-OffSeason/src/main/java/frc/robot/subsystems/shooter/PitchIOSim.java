@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.Robot;
@@ -13,7 +14,7 @@ public class PitchIOSim implements PitchIO {
         this.armSim = new SingleJointedArmSim(
                 DCMotor.getFalcon500(2),
                 GEAR_RATIO,
-                SingleJointedArmSim.estimateMOI(0.5, 11),
+                SingleJointedArmSim.estimateMOI(0.5, 15),
                 0.5,
                 PITCH_LOWEST_ROTATION_RAD,
                 PITCH_HIGHER_LIMIT_RAD,
@@ -33,6 +34,6 @@ public class PitchIOSim implements PitchIO {
 
     @Override
     public void runPitchVoltage(double volts) {
-        armSim.setInputVoltage(volts);
+        armSim.setInputVoltage(MathUtil.clamp(volts, -12, 12));
     }
 }

@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Robot;
-import frc.robot.constants.LogPaths;
 import frc.robot.subsystems.drive.IO.GyroIOSim;
 import frc.robot.subsystems.drive.IO.ModuleIOSim;
 import frc.robot.subsystems.drive.IO.OdometryThread;
@@ -30,8 +29,6 @@ import static frc.robot.constants.DriveTrainConstants.*;
  * and feed the result of the physics simulation back to ModuleIOSim, to simulate the odometry encoders' readings
  * */
 public class SwerveDriveSimulation extends HolonomicChassisSimulation {
-    private static final String LOG_PATH = LogPaths.PHYSICS_SIMULATION_PATH + "SwerveDriveSim/";
-
     private final GyroIOSim gyroIOSim;
     private final ModuleIOSim[] modules;
     private final Consumer<Pose2d> resetOdometryCallBack;
@@ -87,10 +84,7 @@ public class SwerveDriveSimulation extends HolonomicChassisSimulation {
 
         /* simulate the propelling force of the module */
         final Rotation2d moduleWorldFacing = module.getSimulationSteerFacing().plus(robotWorldPose.getRotation());
-        final Vector2 moduleWorldPosition = GeometryConvertor.toDyn4jVector2(
-                robotWorldPose.getTranslation()
-                        .plus(moduleTranslationOnRobot.rotateBy(robotWorldPose.getRotation()))
-        );
+        final Vector2 moduleWorldPosition = getWorldPoint(GeometryConvertor.toDyn4jVector2(moduleTranslationOnRobot));
         double actualPropellingForceOnFloorNewtons = module.getSimulationTorque() / WHEEL_RADIUS_METERS;
         final boolean skidding = Math.abs(actualPropellingForceOnFloorNewtons) > MAX_FRICTION_FORCE_PER_MODULE;
         if (skidding)

@@ -9,13 +9,13 @@ public class PitchConstants {
     public static final double PITCH_HIGHER_LIMIT_RAD = Math.toRadians(100);
 
     public static final double PITCH_KS = 0.03;
-    public static final double PITCH_KG = 0.1;
-    public static final double PITCH_KV = 3.2;
-    public static final double PITCH_KA = 0.01;
+    public static final double PITCH_KG = 0.17;
+    public static final double PITCH_KV = 3.5;
+    public static final double PITCH_KA = 0.03;
 
     public static final MaplePIDController.MaplePIDConfig PITCH_PID = new MaplePIDController.MaplePIDConfig(
             7.5,
-            Math.toRadians(26),
+            Math.toRadians(15),
             0,
             Math.toRadians(2),
             0.05,
@@ -24,6 +24,6 @@ public class PitchConstants {
     );
 
     public static final TrapezoidProfile.Constraints PITCH_PROFILE_CONSTRAIN = new TrapezoidProfile.Constraints(
-            Math.toRadians(360), Math.toRadians(720)
+            Math.toRadians(360.0), Math.toRadians(360.0 / 0.2)
     );
 }

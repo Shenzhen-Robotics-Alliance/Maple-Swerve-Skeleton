@@ -38,7 +38,7 @@ public class ShooterVisualizer {
         final Pose3d shooterPoseToRobot = new Pose3d(
                 SHOOTER_TRANSLATION_ON_ROBOT,
                 new Rotation3d(0, -pitchAngleRad, 0));
-        Logger.recordOutput(LogPaths.SHOOTER_PATH + "MechanismPose", shooterPoseToRobot);
+        Logger.recordOutput(LogPaths.SHOOTER_PATH + "MechanismPose", new Pose3d[] {shooterPoseToRobot});
         final Transform3d robotToNote = new Transform3d(
                 NOTE_AT_SHOOTER_AXLE_TRANSLATION_ON_ROBOT,
                 new Rotation3d(0, -pitchAngleRad, 0)

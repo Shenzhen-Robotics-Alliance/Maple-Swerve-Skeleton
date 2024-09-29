@@ -28,6 +28,10 @@ public class AimAtSpeakerFactory {
         final Command aimAtSpeakerStill = semiAutoAimAndShoot.deadlineWith(chassisAimAtSpeaker);
         aimAtSpeakerStill.addRequirements(drive, pitch, flyWheels);
 
-        return aimAtSpeakerStill.onlyIf(intake::isNotePresent);
+        return aimAtSpeakerStill.onlyIf(intake::isNotePresent).finallyDo(() -> {
+            pitch.runIdle();
+            intake.runIdle();
+            flyWheels.runIdle();
+        });
     }
 }

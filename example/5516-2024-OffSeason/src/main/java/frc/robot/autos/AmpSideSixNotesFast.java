@@ -12,6 +12,8 @@ import frc.robot.commands.CommandOnFly;
 import frc.robot.commands.shooter.AimAtSpeakerFactory;
 import frc.robot.commands.shooter.FollowPathGrabAndShootStill;
 
+import java.util.HashSet;
+
 
 public class AmpSideSixNotesFast implements Auto {
     @Override
@@ -24,7 +26,6 @@ public class AmpSideSixNotesFast implements Auto {
                 robot.drive, robot.intake, robot.pitch, robot.flyWheels, robot.shooterOptimization, robot.ledStatusLight,
                 robot.visualizerForShooter
         ));
-        commands.addCommands(AutoUtils.setIdleForSuperStructureCommand(robot));
 
         /* grab second */
         final Command chassisMoveToSecond = AutoBuilder.followPath(PathPlannerPath.fromPathFile("move to second and grab fast"))
@@ -34,7 +35,7 @@ public class AmpSideSixNotesFast implements Auto {
                         .finallyDo(() -> noteFightFailed[0] = !robot.intake.isNotePresent())
         );
         commands.addCommands(grabSecondWhenClose.deadlineWith(
-                chassisMoveToSecond.alongWith(robot.pitch.getPitchDefaultCommand())
+                chassisMoveToSecond.alongWith(AutoUtils.getSuperStructureIdleCommand(robot))
         ));
 
         /* retry grab second */
@@ -54,7 +55,6 @@ public class AmpSideSixNotesFast implements Auto {
                 robot.drive, robot.intake, robot.pitch, robot.flyWheels, robot.shooterOptimization, robot.ledStatusLight,
                 robot.visualizerForShooter
         ));
-        commands.addCommands(AutoUtils.setIdleForSuperStructureCommand(robot));
 
 
         /* move to third and grab */
@@ -63,7 +63,7 @@ public class AmpSideSixNotesFast implements Auto {
         final Command moveToThirdAlter = AutoBuilder.followPath(PathPlannerPath.fromPathFile("move to third fast alter"))
                 .andThen(Commands.runOnce(robot.drive::stop, robot.drive));
         final Command moveToThirdDecisive = new CommandOnFly(() -> noteFightFailed[0] ? moveToThirdAlter : moveToThirdNormal)
-                .deadlineWith(robot.pitch.getPitchDefaultCommand());
+                .deadlineWith(AutoUtils.getSuperStructureIdleCommand(robot));
         final Command intakeThird = Commands.waitSeconds(1)
                 .andThen(robot.intake.suckNoteUntilTouching().withTimeout(4));
         commands.addCommands(intakeThird.deadlineWith(moveToThirdDecisive));
@@ -104,6 +104,7 @@ public class AmpSideSixNotesFast implements Auto {
     }
     @Override
     public Pose2d getStartingPoseAtBlueAlliance() {
+        // return new Pose2d(1.47, 6.32, Rotation2d.fromDegrees(180));
         return new Pose2d(1.47, 6.32, Rotation2d.fromDegrees(-150));
     }
 }

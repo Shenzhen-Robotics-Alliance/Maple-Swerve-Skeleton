@@ -43,7 +43,6 @@ public class AprilTagVision extends MapleSubsystem {
         this.driveSubsystem = driveSubsystem;
     }
 
-    private Optional<RobotPoseEstimationResult> result = Optional.empty();
     @Override
     public void periodic(double dt, boolean enabled) {
         io.updateInputs(inputs);
@@ -52,7 +51,7 @@ public class AprilTagVision extends MapleSubsystem {
         for (int i = 0; i < inputs.camerasInputs.length; i++)
             this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
 
-        result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
+        Optional<RobotPoseEstimationResult> result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
         result = discardResultIfOverThreshold(result);
         result.ifPresent(robotPoseEstimationResult -> driveSubsystem.addVisionMeasurement(
                 robotPoseEstimationResult.pointEstimation,

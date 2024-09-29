@@ -7,10 +7,10 @@ import frc.robot.utils.CompetitionFieldUtils.Simulations.IntakeSimulation;
 
 public class IntakeIOSim extends IntakeSimulation implements IntakeIO {
     /* running the intake in full voltage for 0.5 seconds is what it takes to get the note from bottom to top  */
-    private static final double VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION = 4 * 0.5;
+    private static final double VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION = 4 * 0.3;
     private static final double VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_LEAVE =
             VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION
-            + 4 * 0.5;
+            + 4 * 0.3;
     /* the integral of the voltage of the intake ever since the note touches the lower gate */
     private double voltageIntegralSinceNoteInIntake;
 

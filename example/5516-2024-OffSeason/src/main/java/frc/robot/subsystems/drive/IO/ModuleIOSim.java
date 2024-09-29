@@ -97,7 +97,6 @@ public class ModuleIOSim implements ModuleIO {
                 driveAppliedVolts
         );
 
-
         return DRIVE_MOTOR.getTorque(driveActualCurrent) * DRIVE_GEAR_RATIO;
     }
 

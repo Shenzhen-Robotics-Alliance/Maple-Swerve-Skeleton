@@ -26,6 +26,8 @@ public class FollowPathGrabAndShootStill extends SequentialCommandGroup {
                 () -> MaplePathPlannerLoader.getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get().getTranslation()
                         .getDistance(driveSubsystem.getPose().getTranslation()) < distanceToTargetMetersStartPreparing
                 )
+                .deadlineWith(pitch.run(pitch::runIdle))
+                .deadlineWith(flyWheels.getFlyWheelsDefaultCommand())
                 .andThen(new PrepareToAim(
                         flyWheels, pitch, shooterOptimization, statusLight,
                         () -> MaplePathPlannerLoader.getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get().getTranslation(),
@@ -39,5 +41,11 @@ public class FollowPathGrabAndShootStill extends SequentialCommandGroup {
         super.addCommands(AimAtSpeakerFactory.shootAtSpeakerStill(
                 driveSubsystem, intake, pitch, flyWheels, shooterOptimization, statusLight, visualizer
         ));
+
+        super.addCommands(Commands.runOnce(() -> {
+            intake.runIdle();
+            flyWheels.runIdle();
+            pitch.runIdle();
+        }, intake, pitch, flyWheels));
     }
 }

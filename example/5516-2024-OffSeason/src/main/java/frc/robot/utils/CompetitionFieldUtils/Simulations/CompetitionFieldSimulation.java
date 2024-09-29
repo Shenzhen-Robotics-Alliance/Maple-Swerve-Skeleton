@@ -35,7 +35,7 @@ public abstract class CompetitionFieldSimulation {
     protected final HolonomicChassisSimulation mainRobot;
     protected final Set<GamePieceInSimulation> gamePieces;
 
-    private List<IntakeSimulation> intakeSimulations = new ArrayList<>();
+    private final List<IntakeSimulation> intakeSimulations = new ArrayList<>();
 
     public CompetitionFieldSimulation(HolonomicChassisSimulation mainRobot, FieldObstaclesMap obstaclesMap) {
         this.competitionField = new CompetitionFieldVisualizer(mainRobot);
