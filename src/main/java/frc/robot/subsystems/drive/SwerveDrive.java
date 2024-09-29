@@ -249,10 +249,6 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     private double previousMeasurementTimeStamp = -1;
-    @Override
-    public double getPreviousVisionMeasurementTimeStamp() {
-        return previousMeasurementTimeStamp;
-    }
 
     private void startDashboardDisplay() {
         SmartDashboard.putData("Swerve Drive", builder -> {
