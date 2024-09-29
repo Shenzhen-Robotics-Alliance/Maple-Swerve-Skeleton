@@ -67,6 +67,7 @@ public class FlyWheels extends MapleSubsystem {
             flyWheelPeriodic(i);
 
         Logger.recordOutput("Shooter/FlyWheelsGoalRPM", goalRPM);
+        Logger.recordOutput("Shooter/Control Loop Profiled Set point (RPM)", currentStateRPM.position);
         SmartDashboard.putBoolean("FlyWheels Ready", flyWheelsReady());
         SmartDashboard.putNumber("FlyWheels Actual RPM", inputs[0].flyWheelVelocityRevsPerSec * 60);
     }
@@ -93,6 +94,7 @@ public class FlyWheels extends MapleSubsystem {
 
     public void runIdle() {
         for (FlyWheelIO io : IOs) io.runVoltage(0);
+        currentStateRPM = speedRPMProfile.calculate(Robot.defaultPeriodSecs, currentStateRPM, new TrapezoidProfile.State(0, 0));
         goalRPM = 0;
     }
 
@@ -123,8 +125,6 @@ public class FlyWheels extends MapleSubsystem {
     }
 
     private void runControlLoops() {
-        Logger.recordOutput("Shooter/Control Loop Setpoint (RPM)", currentStateRPM.position);
-
         for (int i = 0; i < IOs.length; i++) {
             final double flyWheelVelocityRevPerSec = currentStateRPM.position / 60,
                     flyWheelAccelerationRevPerSec = currentStateRPM.velocity / 60,

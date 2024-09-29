@@ -41,7 +41,7 @@ public class Pitch extends MapleSubsystem {
     }
 
     public Command getPitchDefaultCommand() {
-        return Commands.run(() -> runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this);
+        return Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class Pitch extends MapleSubsystem {
         SmartDashboard.putBoolean("Pitch In Position", inPosition());
     }
 
-    public void setIdle() {
+    public void runIdle() {
         io.runPitchVoltage(0);
     }
 

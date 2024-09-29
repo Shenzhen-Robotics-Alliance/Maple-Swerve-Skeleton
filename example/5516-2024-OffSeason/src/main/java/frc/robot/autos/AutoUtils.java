@@ -6,11 +6,11 @@ import frc.robot.RobotContainer;
 
 public class AutoUtils {
     public static Command setIdleForSuperStructureCommand(RobotContainer robot) {
-        return Commands.runOnce(() -> setIdleForSuperStructuer(robot), robot.intake, robot.pitch, robot.flyWheels);
+        return Commands.runOnce(() -> setIdleForSuperStructure(robot), robot.intake, robot.pitch, robot.flyWheels);
     }
-    public static void setIdleForSuperStructuer(RobotContainer robot) {
+    public static void setIdleForSuperStructure(RobotContainer robot) {
         robot.intake.runIdle();
         robot.flyWheels.runIdle();
-        robot.pitch.setIdle();
+        robot.pitch.runIdle();
     }
 }
