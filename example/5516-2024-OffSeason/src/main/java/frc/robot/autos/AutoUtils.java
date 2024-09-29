@@ -5,12 +5,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 
 public class AutoUtils {
-    public static Command setIdleForSuperStructureCommand(RobotContainer robot) {
-        return Commands.runOnce(() -> setIdleForSuperStructure(robot), robot.intake, robot.pitch, robot.flyWheels);
-    }
-    public static void setIdleForSuperStructure(RobotContainer robot) {
-        robot.intake.runIdle();
-        robot.flyWheels.runIdle();
-        robot.pitch.runIdle();
+    public static Command getSuperStructureIdleCommand(RobotContainer robot) {
+        return robot.flyWheels.getFlyWheelsDefaultCommand()
+                .alongWith(robot.pitch.run(robot.pitch::runIdle));
     }
 }

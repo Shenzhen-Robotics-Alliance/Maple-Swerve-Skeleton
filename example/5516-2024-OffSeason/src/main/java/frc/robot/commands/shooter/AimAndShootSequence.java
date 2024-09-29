@@ -60,10 +60,6 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         super.addRequirements(pitch, flyWheels, intake);
         super.addCommands(Commands.runOnce(intake::runIdle));
 
-        super.addCommands(
-                new PrepareToAim(flyWheels, pitch, shooterOptimization, ledStatusLight,  robotScoringPositionSupplier, targetPositionSupplier)
-                        .untilReady()
-        );
         final AimAtSpeakerContinuously aimAtSpeakerContinuously = new AimAtSpeakerContinuously(
                 flyWheels, pitch, ledStatusLight, shooterOptimization, drive, targetPositionSupplier, externalShootCondition
         );
@@ -81,7 +77,7 @@ public class AimAndShootSequence extends SequentialCommandGroup  {
         final Command visualizeNoteFullCommand = Commands
                 .waitUntil(() -> !intake.isNotePresent())
                 .andThen(visualizeNote)
-                .onlyIf(() -> intake.isNotePresent());
+                .onlyIf(intake::isNotePresent);
         final Command waitForRightTimingAndShoot = Commands.waitUntil(aimAtSpeakerContinuously::readyToShoot)
                 .andThen(intake.executeLaunch().alongWith(visualizeNoteFullCommand));
         super.addCommands(aimAtSpeakerContinuously.raceWith(waitForRightTimingAndShoot));

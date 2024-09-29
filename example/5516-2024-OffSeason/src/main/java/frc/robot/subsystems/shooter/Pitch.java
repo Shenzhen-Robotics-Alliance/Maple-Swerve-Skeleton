@@ -37,11 +37,7 @@ public class Pitch extends MapleSubsystem {
 
         notCalibratedAlert.setActivated(false);
 
-        setDefaultCommand(getPitchDefaultCommand());
-    }
-
-    public Command getPitchDefaultCommand() {
-        return Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this);
+        setDefaultCommand(Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this));
     }
 
     @Override
@@ -98,6 +94,9 @@ public class Pitch extends MapleSubsystem {
             return;
         }
 
+        if (Math.abs(setPointRad - inputs.pitchAngleRad) < Math.toRadians(7))
+            runSetPointProfiled(setPointRad);
+
         this.setPointRad = setPointRad;
         this.currentState = new TrapezoidProfile.State(setPointRad, velocitySetPointRadPerSec);
         this.previousStateVelocity = velocitySetPointRadPerSec;
@@ -135,9 +134,5 @@ public class Pitch extends MapleSubsystem {
     @AutoLogOutput(key = "Shooter/PitchInPosition")
     public boolean inPosition() {
         return Math.abs(inputs.pitchAngleRad - setPointRad) < PITCH_PID.errorTolerance;
-    }
-
-    public boolean roughlyInPosition() {
-        return Math.abs(inputs.pitchAngleRad - setPointRad) < Math.toRadians(7);
     }
 }

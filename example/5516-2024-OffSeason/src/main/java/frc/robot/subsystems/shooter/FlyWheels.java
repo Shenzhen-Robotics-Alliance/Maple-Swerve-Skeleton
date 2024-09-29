@@ -8,6 +8,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
@@ -17,6 +18,8 @@ import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static frc.robot.constants.ShooterConstants.*;
@@ -58,7 +61,7 @@ public class FlyWheels extends MapleSubsystem {
         this.currentStateRPM = new TrapezoidProfile.State(0, 0);
         this.goalRPM = 0;
 
-        setDefaultCommand(Commands.run(this::runIdle, this));
+        setDefaultCommand(getFlyWheelsDefaultCommand());
     }
 
     @Override
@@ -92,9 +95,17 @@ public class FlyWheels extends MapleSubsystem {
         return (voltageMeasure -> runVolts(index, voltageMeasure.in(Units.Volt)));
     }
 
+    public Command getFlyWheelsDefaultCommand() {
+        return Commands.run(this::runIdle, this);
+    }
     public void runIdle() {
-        for (FlyWheelIO io : IOs) io.runVoltage(0);
-        currentStateRPM = speedRPMProfile.calculate(Robot.defaultPeriodSecs, currentStateRPM, new TrapezoidProfile.State(0, 0));
+        for (FlyWheelIO io : IOs)
+            io.runVoltage(0);
+
+        double totalRPM = 0.0;
+        for (FlyWheelIO.FlyWheelsInputs input:inputs)
+            totalRPM += input.flyWheelVelocityRevsPerSec * 60;
+        currentStateRPM = new TrapezoidProfile.State(totalRPM / inputs.length, 0);
         goalRPM = 0;
     }
 
@@ -144,13 +155,6 @@ public class FlyWheels extends MapleSubsystem {
     public boolean flyWheelsReady() {
         for (FlyWheelIO.FlyWheelsInputs input:inputs)
             if (Math.abs(input.flyWheelVelocityRevsPerSec * 60 - goalRPM) > TOLERANCE_RPM)
-                return false;
-        return true;
-    }
-
-    public boolean flyWheelsRoughlyReady() {
-        for (FlyWheelIO.FlyWheelsInputs input:inputs)
-            if (Math.abs(input.flyWheelVelocityRevsPerSec * 60 - goalRPM) > 300)
                 return false;
         return true;
     }
