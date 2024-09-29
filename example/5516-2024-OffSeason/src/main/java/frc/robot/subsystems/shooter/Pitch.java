@@ -136,4 +136,8 @@ public class Pitch extends MapleSubsystem {
     public boolean inPosition() {
         return Math.abs(inputs.pitchAngleRad - setPointRad) < PITCH_PID.errorTolerance;
     }
+
+    public boolean roughlyInPosition() {
+        return Math.abs(inputs.pitchAngleRad - setPointRad) < Math.toRadians(7);
+    }
 }

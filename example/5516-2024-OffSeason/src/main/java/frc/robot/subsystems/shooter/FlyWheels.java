@@ -147,4 +147,11 @@ public class FlyWheels extends MapleSubsystem {
                 return false;
         return true;
     }
+
+    public boolean flyWheelsRoughlyReady() {
+        for (FlyWheelIO.FlyWheelsInputs input:inputs)
+            if (Math.abs(input.flyWheelVelocityRevsPerSec * 60 - goalRPM) > 300)
+                return false;
+        return true;
+    }
 }

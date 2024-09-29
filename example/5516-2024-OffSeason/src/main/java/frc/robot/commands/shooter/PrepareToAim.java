@@ -75,6 +75,6 @@ public class PrepareToAim extends Command {
     }
 
     public boolean isReady() {
-        return running && flyWheels.flyWheelsReady() && pitch.inPosition();
+        return running && flyWheels.flyWheelsRoughlyReady() && pitch.roughlyInPosition();
     }
 }
