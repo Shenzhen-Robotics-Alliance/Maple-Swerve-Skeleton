@@ -6,8 +6,10 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -29,18 +31,17 @@ import frc.robot.subsystems.drive.IO.*;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
-import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
-import frc.robot.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects;
-import frc.robot.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation;
-import frc.robot.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation;
-import frc.robot.utils.CompetitionFieldUtils.Simulations.OpponentRobotSimulation;
-import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
 import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import java.util.ArrayList;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -73,10 +74,8 @@ public class RobotContainer {
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
 
-    // Simulation and Field Visualization
-    private final CompetitionFieldVisualizer competitionFieldVisualizer;
-    private CompetitionFieldSimulation fieldSimulation;
-    private List<OpponentRobotSimulation> opponentRobotSimulations = new ArrayList<>();
+    // Simulated drive
+    private final SwerveDriveSimulation driveSimulation;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -89,6 +88,8 @@ public class RobotContainer {
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
+                driveSimulation = null;
+
                 powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
 
                 /* CTRE Chassis: */
@@ -116,58 +117,63 @@ public class RobotContainer {
                         camerasProperties,
                         drive
                 );
-
-                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
             }
 
             case SIM -> {
+                final GyroSimulation gyroSimulation = GyroSimulation.createPigeon2();
+                this.driveSimulation = new SwerveDriveSimulation(
+                        DriveTrainConstants.ROBOT_MASS_KG,
+                        DriveTrainConstants.TRACK_WIDTH_METERS,
+                        DriveTrainConstants.TRACK_LENGTH_METERS,
+                        DriveTrainConstants.BUMPER_WIDTH_METERS,
+                        DriveTrainConstants.BUMPER_LENGTH_METERS,
+                        () -> new SwerveModuleSimulation(
+                                DriveTrainConstants.DRIVE_MOTOR,
+                                DriveTrainConstants.STEER_MOTOR,
+                                DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                DriveTrainConstants.DRIVE_GEAR_RATIO,
+                                DriveTrainConstants.STEER_GEAR_RATIO,
+                                DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
+                                DriveTrainConstants.STEER_FRICTION_VOLTAGE,
+                                DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
+                                DriveTrainConstants.WHEEL_RADIUS_METERS,
+                                DriveTrainConstants.STEER_INERTIA
+                        ),
+                        gyroSimulation,
+                        new Pose2d(3, 3, new Rotation2d())
+                );
+                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+
                 powerDistribution = new PowerDistribution();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim
-                        frontLeft = new ModuleIOSim(),
-                        frontRight = new ModuleIOSim(),
-                        backLeft = new ModuleIOSim(),
-                        backRight = new ModuleIOSim();
-                final GyroIOSim gyroIOSim = new GyroIOSim();
+                        frontLeft = new ModuleIOSim(driveSimulation.getModules()[0]),
+                        frontRight = new ModuleIOSim(driveSimulation.getModules()[1]),
+                        backLeft = new ModuleIOSim(driveSimulation.getModules()[2]),
+                        backRight = new ModuleIOSim(driveSimulation.getModules()[3]);
+                final GyroIOSim gyroIOSim = new GyroIOSim(gyroSimulation);
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.GENERIC,
                         gyroIOSim,
                         frontLeft, frontRight, backLeft, backRight
                 );
-                final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
-                        gyroIOSim,
-                        frontLeft, frontRight, backLeft, backRight,
-                        new Pose2d(3, 3, new Rotation2d()),
-                        drive::setPose
-                );
-                fieldSimulation = new Crescendo2024FieldSimulation(driveSimulation);
-                this.competitionFieldVisualizer = fieldSimulation.getVisualizer();
 
                 aprilTagVision = new AprilTagVision(
                         new ApriltagVisionIOSim(
                                 camerasProperties,
                                 VisionConstants.fieldLayout,
-                                driveSimulation::getObjectOnFieldPose2d
+                                driveSimulation::getSimulatedDriveTrainPose
                         ),
                         camerasProperties,
                         drive
                 );
 
-                fieldSimulation.placeGamePiecesOnField();
-
-                opponentRobotSimulations.add(new OpponentRobotSimulation(0, fieldSimulation));
-                fieldSimulation.addRobot(opponentRobotSimulations.get(0));
-                opponentRobotSimulations.add(new OpponentRobotSimulation(1, fieldSimulation));
-                fieldSimulation.addRobot(opponentRobotSimulations.get(1));
-                opponentRobotSimulations.add(new OpponentRobotSimulation(2, fieldSimulation));
-                fieldSimulation.addRobot(opponentRobotSimulations.get(2));
-                opponentRobotSimulations.add(new OpponentRobotSimulation(3, fieldSimulation));
-                fieldSimulation.addRobot(opponentRobotSimulations.get(3));
-                opponentRobotSimulations.add(new OpponentRobotSimulation(4, fieldSimulation));
-                fieldSimulation.addRobot(opponentRobotSimulations.get(4));
+                SimulatedArena.getInstance().resetFieldForAuto();
             }
 
             default -> {
+                this.driveSimulation = null;
+
                 powerDistribution = new PowerDistribution();
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
@@ -184,12 +190,10 @@ public class RobotContainer {
                         camerasProperties,
                         drive
                 );
-
-                this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
             }
         }
 
-        this.drive.configHolonomicPathPlannerAutoBuilder(competitionFieldVisualizer);
+        this.drive.configHolonomicPathPlannerAutoBuilder();
 
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
         autoChooser = buildAutoChooser();
@@ -266,9 +270,9 @@ public class RobotContainer {
     private void resetFieldAndOdometryForAuto(Pose2d robotStartingPoseAtBlueAlliance) {
         final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
 
-        if (fieldSimulation != null) {
-            fieldSimulation.getMainRobot().setSimulationWorldPose(startingPose);
-            fieldSimulation.resetFieldForAuto();
+        if (driveSimulation != null) {
+            driveSimulation.setSimulationWorldPose(startingPose);
+            SimulatedArena.getInstance().resetFieldForAuto();
             updateFieldSimAndDisplay();
         }
 
@@ -321,22 +325,6 @@ public class RobotContainer {
                 () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.6, Rotation2d.fromDegrees(90)))
         );
         driverXBox.b().whileTrue(exampleAutoAlignment);
-
-        /* TODO: example shooter visualization, delete it for your project */
-        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
-            driverXBox.rightTrigger(0.5).onTrue(Commands.runOnce(() -> fieldSimulation.getVisualizer().addGamePieceOnFly(new Crescendo2024FieldObjects.NoteFlyingToSpeaker(
-                    new Translation3d(
-                            drive.getPose().getX(),
-                            drive.getPose().getY(),
-                            0.3
-                    ),
-                    0.5
-            ))));
-    }
-
-    public void teleOpInit() {
-        for (OpponentRobotSimulation opponentRobotSimulation:opponentRobotSimulations)
-            opponentRobotSimulation.teleOpInit();
     }
 
     /**
@@ -353,9 +341,9 @@ public class RobotContainer {
     }
 
     public void updateFieldSimAndDisplay() {
-        if (fieldSimulation != null)
-            fieldSimulation.updateSimulationWorld();
-
-        competitionFieldVisualizer.updateObjectsToDashboardAndTelemetry();
+        if (driveSimulation == null)
+            return;
+        Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+        Logger.recordOutput("FieldSimulation/Notes", SimulatedArena.getInstance().getGamePiecesByType("Note").toArray(Pose3d[]::new));
     }
 }

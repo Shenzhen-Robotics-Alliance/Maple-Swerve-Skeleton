@@ -17,7 +17,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.FieldConstants;
-import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.LocalADStarAK;
 import org.littletonrobotics.junction.Logger;
 
@@ -117,7 +116,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02));
     }
 
-    default void configHolonomicPathPlannerAutoBuilder(CompetitionFieldVisualizer fieldVisualizer) {
+    default void configHolonomicPathPlannerAutoBuilder() {
         AutoBuilder.configureHolonomic(
                 this::getPose,
                 this::setPose,
@@ -138,7 +137,6 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 (activePath) -> {
                     final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
                     Logger.recordOutput("Odometry/Trajectory", trajectory);
-                    fieldVisualizer.displayTrajectory(trajectory);
                 }
         );
         PathPlannerLogging.setLogTargetPoseCallback(

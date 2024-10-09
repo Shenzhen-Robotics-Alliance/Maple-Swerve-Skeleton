@@ -15,7 +15,7 @@ public class DriveTrainConstants {
      * TODO: change these numbers to match your robot
      *  */
     public static final double
-            WHEEL_COEFFICIENT_OF_FRICTION = 1.05, // yeah, I know this is against the law of physics, but it feels realistic
+            WHEEL_COEFFICIENT_OF_FRICTION = 1.25, // 1.15 for tire wheels
             ROBOT_MASS_KG = 40; // robot weight with bumpers
 
     /**
@@ -36,8 +36,7 @@ public class DriveTrainConstants {
             TIME_ROBOT_STOP_ROTATING_SECONDS = 0.06,
             STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
             DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
-            DRIVE_INERTIA = 0.01,
-            STEER_INERTIA = 0.01;
+            STEER_INERTIA = 0.025;
 
     /* adjust current limit */
     public static final double DRIVE_CURRENT_LIMIT = 60;
@@ -65,6 +64,8 @@ public class DriveTrainConstants {
                     Units.inchesToMeters(TunerConstants.kBackRightYPosInches)
             )
     };
+    public static final double TRACK_LENGTH_METERS = Units.inchesToMeters(TunerConstants.kFrontLeftXPosInches - TunerConstants.kBackLeftXPosInches),
+            TRACK_WIDTH_METERS = Units.inchesToMeters(TunerConstants.kFrontLeftYPosInches - TunerConstants.kFrontRightYPosInches);
 
     /* equations that calculates some constants for the simulator (don't modify) */
     private static final double GRAVITY_CONSTANT = 9.8;

@@ -1,11 +1,13 @@
 {
-  "fileName": "Dyn4j.json",
+  "fileName": "maple-sim.json",
   "name": "MapleSim",
   "version": "0.0.1",
   "uuid": "123e4567-e89b-12d3-a456-426614174000",
   "frcYear": "2024",
-  "mavenUrls": [],
-  "jsonUrl": "https://github.com/Mechanical-Advantage/AdvantageKit/releases/latest/download/AdvantageKit.json",
+  "mavenUrls": [
+    "https://3015rangerrobotics.github.io/pathplannerlib/repo"
+  ],
+  "jsonUrl": "",
   "javaDependencies": [
     {
       "groupId": "junit",
@@ -16,6 +18,16 @@
       "groupId": "org.dyn4j",
       "artifactId": "dyn4j",
       "version": "5.0.2"
+    },
+    {
+      "groupId": "com.pathplanner.lib",
+      "artifactId": "PathplannerLib-java",
+      "version": "2024.2.8"
+    },
+    {
+      "groupId": "org.ironmaple",
+      "artifactId": "maple-sim",
+      "version": "0.0.6"
     }
   ],
   "jniDependencies": [],

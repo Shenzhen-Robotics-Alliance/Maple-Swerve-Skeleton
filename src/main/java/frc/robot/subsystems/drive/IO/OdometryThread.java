@@ -5,7 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
 import frc.robot.subsystems.drive.SwerveDrive;
-import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
+import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLog;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public interface OdometryThread {
                     registeredInputs.toArray(new OdometryDoubleInput[0]),
                     registeredStatusSignals.toArray(new BaseStatusSignal[0])
             );
-            case SIM -> new SwerveDriveSimulation.OdometryThreadSim();
+            case SIM -> new OdometryThreadSim();
             case REPLAY -> inputs -> {};
         };
     }
@@ -68,4 +68,15 @@ public interface OdometryThread {
     default void lockOdometry() {}
 
     default void unlockOdometry() {}
+
+    final class OdometryThreadSim implements OdometryThread {
+        @Override
+        public void updateInputs(OdometryThreadInputs inputs) {
+            inputs.measurementTimeStamps = new double[SIMULATION_TICKS_IN_1_PERIOD];
+            final double robotStartingTimeStamps = MapleTimeUtils.getLogTimeSeconds(),
+                    iterationPeriodSeconds = Robot.defaultPeriodSecs/SIMULATION_TICKS_IN_1_PERIOD;
+            for (int i =0; i < SIMULATION_TICKS_IN_1_PERIOD; i++)
+                inputs.measurementTimeStamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds;
+        }
+    }
 }
