@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": 302,
-      "y": 184,
-      "width": 1106,
-      "height": 650,
+      "x": -8,
+      "y": -8,
+      "width": 1722,
+      "height": 1034,
       "state": {
         "sidebar": {
           "width": 300,
@@ -12,19 +12,26 @@
             "/LiveWindow",
             "/AdvantageKit",
             "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/RealOutputs/Field",
-            "/AdvantageKit/RealOutputs/Shooter",
-            "/AdvantageKit/RealOutputs/SwerveStates",
             "/AdvantageKit/RealOutputs/Odometry",
             "/AdvantageKit/RealOutputs/FieldSimulation",
-            "/SmartDashboard",
             "/SmartDashboard/MaplePhysicsSimulation",
-            "/SmartDashboard/MapleArenaSimulation",
-            "/AdvantageKit/RealOutputs/Odometry/Robot"
+            "/AdvantageKit/RealOutputs/Odometry/Robot",
+            "/AdvantageKit/RealOutputs/Intake",
+            "/SmartDashboard/VisionSystemSim-main",
+            "/SmartDashboard/VisionSystemSim-main/Sim Field",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimations",
+            "/AdvantageKit/Pitch",
+            "/AdvantageKit/RealOutputs/Shooter",
+            "/AdvantageKit/RealOutputs/FaceToRotationCommand",
+            "/AdvantageKit/Intake",
+            "/AdvantageKit/FlyWheels",
+            "/SmartDashboard"
           ]
         },
         "tabs": {
-          "selected": 2,
+          "selected": 3,
           "tabs": [
             {
               "type": 0,
@@ -38,8 +45,40 @@
               "type": 1,
               "title": "Line Graph",
               "controller": {
-                "leftSources": [],
-                "rightSources": [],
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/brushless motor vel",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/DC motor vel",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/SmartDashboard/voltage out",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  }
+                ],
                 "discreteSources": [],
                 "leftLockedRange": null,
                 "rightLockedRange": null,
@@ -55,6 +94,61 @@
                 "rightFilter": 0
               },
               "controllerUUID": "a40mbm1463684stb0lw9q99k08q674jn",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Shooter/FlyWheel0 Measured RPM",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Shooter/FlyWheel1 Measured RPM",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Shooter/Control Loop Profiled Set point (RPM)",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "vyegnfkc4rc2pomtoyfy1o2tc7sq5gy5",
               "renderer": null,
               "controlsHeight": 200
             },
@@ -83,10 +177,20 @@
                     "type": "swerveStates",
                     "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
                     "logType": "SwerveModuleState[]",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#ff0000",
                       "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
                     }
                   },
                   {
@@ -120,7 +224,7 @@
                     "type": "trajectory",
                     "logKey": "NT:/AdvantageKit/RealOutputs/Odometry/Trajectory",
                     "logType": "Pose2d[]",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#00ffff",
                       "size": "normal"
@@ -132,8 +236,51 @@
                     "logType": "Pose3d[]",
                     "visible": true,
                     "options": {
-                      "model": "2024 KitBot"
+                      "model": "Presto"
                     }
+                  },
+                  {
+                    "type": "aprilTag",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions/",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "family": "36h11"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimations",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "model": "11:59",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Shooter/MechanismPose",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/InvalidPoseEstimations",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "model": "11:59",
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Shooter/MechanismPose",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {}
                   }
                 ],
                 "game": "2024 Field",
@@ -144,28 +291,17 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -13.099515367064587,
-                  5.622905314106006,
-                  -1.1187082198216616
+                  -17.939654263489018,
+                  10.61076904687794,
+                  -5.2203064690915575
                 ],
                 "cameraTarget": [
-                  2.1564592708968564,
-                  -3.4497661190395785,
-                  1.6037949750703593
+                  -4.327065223467969,
+                  -3.246548676818176,
+                  2.1123662949541395
                 ]
               },
               "controlsHeight": 200
-            },
-            {
-              "type": 4,
-              "title": "Table",
-              "controller": [
-                "NT:/SmartDashboard/MapleArenaSimulation/difference",
-                "NT:/SmartDashboard/MapleArenaSimulation/chassisFrictionForce"
-              ],
-              "controllerUUID": "lx7skwjvbdch6kn71vxrmu6561rbc2q3",
-              "renderer": null,
-              "controlsHeight": 0
             },
             {
               "type": 9,
