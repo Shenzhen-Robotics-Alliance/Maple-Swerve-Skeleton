@@ -8,21 +8,14 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.autos.Auto;
-import frc.robot.autos.ExampleAuto;
-import frc.robot.autos.PathPlannerAuto;
+import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
 import frc.robot.constants.*;
 import frc.robot.subsystems.MapleSubsystem;
@@ -42,6 +35,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -226,11 +220,16 @@ public class RobotContainer {
     private static LoggedDashboardChooser<Auto> buildAutoChooser() {
         final LoggedDashboardChooser<Auto> autoSendableChooser = new LoggedDashboardChooser<>("Select Auto");
         autoSendableChooser.addDefaultOption("None", Auto.none());
-        autoSendableChooser.addOption("Example Custom Auto", new ExampleAuto());
-        autoSendableChooser.addOption("Example Pathplanner Auto", new PathPlannerAuto("Example Auto", new Pose2d(1.3, 7.2, new Rotation2d())));
-        SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
-
+        autoSendableChooser.addOption("Example Custom Auto With PathPlanner Trajectories", new ExampleCustomAutoWithPathPlannerTrajectories());
+        autoSendableChooser.addOption("Example Custom Auto With Choreo Trajectories: Rush", new ExampleCustomAutoWithChoreoTrajectories());
+        autoSendableChooser.addOption("Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories2());
+        autoSendableChooser.addOption(
+                "Example Pathplanner Auto",
+                new PathPlannerAuto("Example Auto", new Pose2d(1.3, 7.2, Rotation2d.fromDegrees(180)))
+        );
         // TODO: add your autos here
+
+        SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
         return autoSendableChooser;
     }
 
@@ -257,9 +256,14 @@ public class RobotContainer {
 
         final Auto selectedAuto = autoChooser.get();
         if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || selectedAuto != previouslySelectedAuto) {
-            this.autonomousCommand = selectedAuto
-                    .getAutoCommand(this)
-                    .finallyDo(MapleSubsystem::disableAllSubsystems);
+            try {
+                this.autonomousCommand = selectedAuto
+                        .getAutoCommand(this)
+                        .finallyDo(MapleSubsystem::disableAllSubsystems);
+            } catch (Exception e) {
+                this.autonomousCommand = Commands.none();
+                DriverStation.reportError("Error Occurred while obtaining autonomous command: \n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()), false);
+            }
             resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
         }
 

@@ -33,9 +33,9 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.2,
-    "maxAcceleration": 7.0,
-    "maxAngularVelocity": 670.0,
-    "maxAngularAcceleration": 1080.0
+    "maxAcceleration": 10.0,
+    "maxAngularVelocity": 300.0,
+    "maxAngularAcceleration": 600.0
   },
   "goalEndState": {
     "velocity": 0,
@@ -43,7 +43,7 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Cycle Path",
+  "folder": null,
   "previewStartingState": {
     "rotation": 120.0,
     "velocity": 0

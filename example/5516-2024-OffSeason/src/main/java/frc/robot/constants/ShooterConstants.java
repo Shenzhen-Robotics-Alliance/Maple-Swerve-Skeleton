@@ -13,12 +13,12 @@ public class ShooterConstants {
             6000/0.5, 6000/0.3
     );
 
-    public static final double TOLERANCE_RPM = 65;
+    public static final double TOLERANCE_RPM = 40;
     public static final MaplePIDController.MaplePIDConfig FLYWHEEL_PID_CONFIG_REV_PER_SEC = new MaplePIDController.MaplePIDConfig(
             7,
             30,
             0,
-            2,
+            0,
             0, false, 0
     );
 }

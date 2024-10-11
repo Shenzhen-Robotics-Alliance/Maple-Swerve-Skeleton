@@ -9,9 +9,9 @@ public class DriveControlLoops {
     public static final MaplePIDController.MaplePIDConfig CHASSIS_ROTATION_CLOSE_LOOP = new MaplePIDController.MaplePIDConfig(
         Math.toRadians(540),
         Math.toRadians(45),
-        0.02,
-        Math.toRadians(3),
-        0.09,
+        0.01,
+        Math.toRadians(1),
+        0.05,
         true,
         0
 );

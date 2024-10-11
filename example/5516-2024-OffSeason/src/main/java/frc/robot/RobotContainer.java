@@ -240,18 +240,18 @@ public class RobotContainer {
         this.shooterOptimization = new MapleShooterOptimization(
                 "MainShooter",
                 /* shooting distances */
-                new double[] {1.4, 2, 3, 3.5, 4, 4.5, 5, 5.5},
+                new double[] {1.4, 2, 3, 3.5, 4, 4.5, 5},
                 /* corresponding shooter angles (degrees) */
-                new double[] {54, 47, 35, 33, 30.5, 25, 25, 25},
+                new double[] {54, 47, 35, 33, 30.5, 27, 26},
                 /* corresponding flywheels RPM */
-                new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500, 4700},
+                new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500},
                 /*
                 * flight-time in seconds
                 * this affects how much system will "think ahead"
                 * it also affects the animation of the flying note
                 * to measure this number precisely, record a 120fps video with your phone of your robot shooting
                 * */
-                new double[] {0.22, 0.25, 0.28, 0.3, 0.34, 0.36, 0.4, 0.42}
+                new double[] {0.22, 0.25, 0.28, 0.3, 0.34, 0.36, 0.4}
         );
 
         this.shootingDistanceChooser = new LoggedDashboardChooser<>("Select Shooting Distance");

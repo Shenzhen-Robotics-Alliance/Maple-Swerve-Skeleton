@@ -1,0 +1,43 @@
+{
+  "version": 1.0,
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rush first"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rush second"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rush third"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "grab fourth"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "shoot fourth"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

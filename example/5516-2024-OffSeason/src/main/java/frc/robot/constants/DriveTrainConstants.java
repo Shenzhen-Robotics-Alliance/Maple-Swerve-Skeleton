@@ -20,6 +20,8 @@ public class DriveTrainConstants {
 
     private static final DCMotor KRAKEN_X60 = new DCMotor(
             12, 7.09, 366, 2, Units.rotationsPerMinuteToRadiansPerSecond(4800), 1);
+    private static final DCMotor NEO_VORTEX = new DCMotor(
+            12, 3.60, 211, 3.6, Units.rotationsPerMinuteToRadiansPerSecond(6784 * 0.8), 1);
     private static final DCMotor FALCON_500 = new DCMotor(
         12, 4.69, 257, 1.5, Units.rotationsPerMinuteToRadiansPerSecond(5104), 1);
     /**

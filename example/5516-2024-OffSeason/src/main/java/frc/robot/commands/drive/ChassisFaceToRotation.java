@@ -59,6 +59,6 @@ public class ChassisFaceToRotation extends Command {
         return new ChassisFaceToRotation(
                 driveSubsystem,
                 () -> targetPositionSupplier.get().minus(driveSubsystem.getPose().getTranslation()).getAngle(),
-                Rotation2d.fromDegrees(3));
+                Rotation2d.fromDegrees(2));
     }
 }

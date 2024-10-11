@@ -39,9 +39,9 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.2,
-    "maxAcceleration": 7.0,
-    "maxAngularVelocity": 670.0,
-    "maxAngularAcceleration": 1080.0
+    "maxAcceleration": 10.0,
+    "maxAngularVelocity": 300.0,
+    "maxAngularAcceleration": 600.0
   },
   "goalEndState": {
     "velocity": 0.0,
@@ -49,7 +49,7 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Amp Side Six Note",
+  "folder": null,
   "previewStartingState": {
     "rotation": -151.83829108404882,
     "velocity": 0

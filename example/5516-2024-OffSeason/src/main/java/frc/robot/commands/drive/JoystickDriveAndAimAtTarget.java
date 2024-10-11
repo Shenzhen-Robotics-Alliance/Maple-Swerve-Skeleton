@@ -66,7 +66,7 @@ public class JoystickDriveAndAimAtTarget extends Command {
         super.execute();
     }
 
-    public static double FEED_FORWARD_RATE = 0.5, ROTATION_TOLERANCE_DEGREES = 3;
+    public static double FEED_FORWARD_RATE = 0.5, ROTATION_TOLERANCE_DEGREES = 2;
     public double getRotationalCorrectionVelocityRadPerSec() {
         final Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
         final ChassisSpeeds robotVelocityFieldRelative = driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
