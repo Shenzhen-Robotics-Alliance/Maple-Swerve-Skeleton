@@ -3,11 +3,13 @@
 package frc.robot.subsystems.drive;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.DriveFeedforward;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,9 +18,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Robot;
+import frc.robot.constants.DriveTrainConstants;
 import frc.robot.constants.FieldConstants;
 import frc.robot.utils.LocalADStarAK;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.Consumer;
 
 import static frc.robot.constants.JoystickConfigs.*;
 import static frc.robot.constants.DriveControlLoops.*;
@@ -29,6 +36,15 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param speeds a discrete chassis speed, robot-centric
      * */
     void runRawChassisSpeeds(ChassisSpeeds speeds);
+
+    /**
+     * runs a ChassisSpeeds and a set of motor feedforwards without doing any pre-processing
+     * @param speeds a discrete chassis speed, robot-centric
+     * @param driveFeedforwards a set of {@link DriveFeedforward} to run on the drive motors, on default it is ignored
+     * */
+    default void runRawChassisSpeeds(ChassisSpeeds speeds, DriveFeedforward[] driveFeedforwards) {
+        runRawChassisSpeeds(speeds);
+    }
 
     /**
      * Returns the current odometry Pose.
@@ -108,28 +124,39 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param speeds a continuous chassis speed, robot-centric
      * */
     default void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
-        final double PERCENT_DEADBAND = 0.03;
+        final double PERCENT_DEADBAND = 0.02;
         if (Math.abs(speeds.omegaRadiansPerSecond) < PERCENT_DEADBAND * getChassisMaxAngularVelocity()
             && Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) < PERCENT_DEADBAND * getChassisMaxLinearVelocityMetersPerSec())
             speeds = new ChassisSpeeds();
 
-        runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02));
+        runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs));
     }
 
     default void configHolonomicPathPlannerAutoBuilder() {
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configure(
                 this::getPose,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
-                this::runRobotCentricChassisSpeeds,
-                new HolonomicPathFollowerConfig(
-                        CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
-                        CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
-                        getChassisMaxLinearVelocityMetersPerSec(),
-                        getChassisMaxLinearVelocityMetersPerSec() / getChassisMaxAngularVelocity(),
-                        new ReplanningConfig(false, true)
+                (speeds, feedForwards) -> this.runRawChassisSpeeds(
+                        ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs),
+                        feedForwards
                 ),
-                FieldConstants::isSidePresentedAsRed,
+                new PPHolonomicDriveController(CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(), CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),
+                new RobotConfig(
+                        DriveTrainConstants.ROBOT_MASS_KG,
+                        6.0,
+                        new ModuleConfig(
+                                DriveTrainConstants.WHEEL_RADIUS_METERS,
+                                DriveTrainConstants.CHASSIS_MAX_VELOCITY,
+                                DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
+                                DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
+                                DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                1
+                        ),
+                        DriveTrainConstants.TRACK_WIDTH_METERS,
+                        DriveTrainConstants.TRACK_LENGTH_METERS
+                ),
+                FieldMirroringUtils::isSidePresentedAsRed,
                 this
         );
         Pathfinding.setPathfinder(new LocalADStarAK());
