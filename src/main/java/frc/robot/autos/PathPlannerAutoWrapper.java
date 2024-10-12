@@ -1,18 +1,19 @@
 package frc.robot.autos;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 
-public class PathPlannerAuto implements Auto {
+public class PathPlannerAutoWrapper implements Auto {
+    private final Pose2d startingPose;
     private final String name;
-    private final Pose2d robotPlacementPoseAtBlue;
 
-    public PathPlannerAuto(String name, Pose2d robotPlacementPoseAtBlue) {
+    public PathPlannerAutoWrapper(String name) {
         this.name = name;
-        this.robotPlacementPoseAtBlue = robotPlacementPoseAtBlue;
+        final PathPlannerAuto auto = new PathPlannerAuto(name);
+        this.startingPose = auto.getStartingPose();
     }
 
     @Override
@@ -22,6 +23,6 @@ public class PathPlannerAuto implements Auto {
 
     @Override
     public Pose2d getStartingPoseAtBlueAlliance() {
-        return robotPlacementPoseAtBlue;
+        return startingPose;
     }
 }

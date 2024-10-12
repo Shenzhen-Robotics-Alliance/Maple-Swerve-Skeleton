@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -217,7 +218,14 @@ public class RobotContainer {
         ));
     }
 
-    private static LoggedDashboardChooser<Auto> buildAutoChooser() {
+    private void configureAutoTriggers(PathPlannerAuto pathPlannerAuto) {
+
+        pathPlannerAuto.event("hello world").onTrue(Commands.runOnce(
+                () -> System.out.println("hello world!!!")
+        ));
+    }
+
+    private LoggedDashboardChooser<Auto> buildAutoChooser() {
         final LoggedDashboardChooser<Auto> autoSendableChooser = new LoggedDashboardChooser<>("Select Auto");
         autoSendableChooser.addDefaultOption("None", Auto.none());
         autoSendableChooser.addOption("Example Custom Auto With PathPlanner Trajectories", new ExampleCustomAutoWithPathPlannerTrajectories());
@@ -225,7 +233,7 @@ public class RobotContainer {
         autoSendableChooser.addOption("Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories2());
         autoSendableChooser.addOption(
                 "Example Pathplanner Auto",
-                new PathPlannerAuto("Example Auto", new Pose2d(1.3, 7.2, Rotation2d.fromDegrees(180)))
+                new PathPlannerAutoWrapper("Example Auto")
         );
         // TODO: add your autos here
 
@@ -260,9 +268,11 @@ public class RobotContainer {
                 this.autonomousCommand = selectedAuto
                         .getAutoCommand(this)
                         .finallyDo(MapleSubsystem::disableAllSubsystems);
+                configureAutoTriggers(new PathPlannerAuto(autonomousCommand, selectedAuto.getStartingPoseAtBlueAlliance()));
             } catch (Exception e) {
                 this.autonomousCommand = Commands.none();
                 DriverStation.reportError("Error Occurred while obtaining autonomous command: \n" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()), false);
+                throw new RuntimeException(e);
             }
             resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
         }

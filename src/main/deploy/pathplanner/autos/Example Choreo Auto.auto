@@ -1,5 +1,5 @@
 {
-  "version": 1.0,
+  "version": "2025.0",
   "command": {
     "type": "sequential",
     "data": {
@@ -25,13 +25,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "grab fourth"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "shoot fourth"
+            "pathName": "rush fourth and shoot"
           }
         }
       ]

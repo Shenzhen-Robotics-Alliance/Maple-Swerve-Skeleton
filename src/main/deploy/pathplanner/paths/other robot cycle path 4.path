@@ -1,5 +1,5 @@
 {
-  "version": 1.0,
+  "version": "2025.0",
   "waypoints": [
     {
       "anchor": {
@@ -36,14 +36,16 @@
     "maxVelocity": 4.5,
     "maxAcceleration": 12.0,
     "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
     "rotation": 150.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "opponent robots",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

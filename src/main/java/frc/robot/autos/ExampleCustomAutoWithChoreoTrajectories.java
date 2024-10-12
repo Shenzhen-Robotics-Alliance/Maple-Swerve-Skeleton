@@ -26,11 +26,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
         );
 
         commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab fourth")).asProxy()
-        );
-
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("shoot fourth")).asProxy()
+                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush fourth and shoot")).asProxy()
         );
         return commandGroup;
     }

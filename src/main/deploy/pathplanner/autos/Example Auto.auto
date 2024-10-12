@@ -1,32 +1,37 @@
 {
-  "version": 1.0,
+  "version": "2025.0",
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Example Path"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "my named command"
-                }
-              }
-            ]
+            "pathName": "rush first pp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rush second pp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rush third pp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rush fourth and shoot pp"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }
