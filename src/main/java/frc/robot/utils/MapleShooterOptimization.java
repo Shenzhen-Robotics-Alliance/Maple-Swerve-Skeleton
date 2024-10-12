@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.utils.CustomConfigs.MapleConfigFile;
 import frc.robot.utils.CustomConfigs.MapleInterpolationTable;
 import org.littletonrobotics.junction.Logger;
 
@@ -69,11 +68,6 @@ public class MapleShooterOptimization {
 
         this.minShootingDistance = table.minX;
         this.maxShootingDistance = table.maxX;
-
-        SmartDashboard.putData(
-                "InterpolationTables/" + table.tableName + "/SaveConfigsToUSB",
-                Commands.runOnce(this::saveConfigsToUSBIfExist)
-        );
     }
 
     public double getFlightTimeSeconds(Translation2d targetPosition, Translation2d robotPosition) {
@@ -122,17 +116,6 @@ public class MapleShooterOptimization {
     public boolean isTargetInRange(Translation2d targetPosition, Translation2d robotPosition) {
         final double distanceToTarget = targetPosition.getDistance(robotPosition);
         return minShootingDistance <= distanceToTarget && maxShootingDistance >= distanceToTarget;
-    }
-
-    public static MapleShooterOptimization fromDeployDirectory(String name) throws IOException {
-        final MapleInterpolationTable interpolationTable = MapleInterpolationTable.fromConfigFile(
-                MapleConfigFile.fromDeployedConfig("ShooterOptimization", name)
-        );
-        return new MapleShooterOptimization(name, interpolationTable);
-    }
-
-    public void saveConfigsToUSBIfExist() {
-        table.toConfigFile("ShooterOptimization").saveConfigToUSBSafe();
     }
 
     public static class ChassisAimAtSpeakerDuringAuto extends Command {
