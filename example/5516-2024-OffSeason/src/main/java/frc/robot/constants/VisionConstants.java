@@ -29,7 +29,7 @@ public class VisionConstants {
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             new PhotonCameraProperties(
                     "FrontCam",
-                        30, 18, 5,
+                        60, 18, 5,
                        68,
                         0.6, 0.2,
                         1280, 720,
@@ -37,11 +37,11 @@ public class VisionConstants {
                         0.3, // the mounting height, in meters
                         Rotation2d.fromDegrees(0), // the camera facing, 0 is front, positive is counter-clockwise
                         24, // camera pitch angle, in degrees
-                        180 // camera roll angle, 0 for up-right and 180 for upside-down
+                        0 // camera roll angle, 0 for up-right and 180 for upside-down
             ),
             new PhotonCameraProperties(
                     "FrontLeftCam",
-                    30, 18, 5,
+                    60, 18, 5,
                     68,
                     0.6, 0.2,
                     1280, 720,
@@ -53,7 +53,7 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "FrontRightCam",
-                    30, 18, 5,
+                    60, 18, 5,
                     68,
                     0.6, 0.2,
                     1280, 720,
@@ -65,7 +65,7 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "BackLeftCam",
-                    30, 18, 5,
+                    60, 18, 5,
                     68,
                     0.6, 0.2,
                     1280, 720,
@@ -77,7 +77,7 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "BackRightCam",
-                    30, 18, 5,
+                    60, 18, 5,
                     68,
                     0.6, 0.2,
                     1280, 720,
