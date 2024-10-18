@@ -85,7 +85,7 @@ public class AprilTagVision extends MapleSubsystem {
             standardDeviationTheta = Double.POSITIVE_INFINITY;
             if (Math.abs(driveSubsystem.getPose().getRotation()
                     .minus(result.get().pointEstimation.getRotation())
-                    .getRadians()) > ROTATIONAL_ERROR_WITH_GYRO_DISCARD_RESULT
+                    .getRadians()) > ROTATIONAL_UNMATCHING_WITH_GYRO_DISCARD_RESULT
             ) return Optional.empty();
         }
 

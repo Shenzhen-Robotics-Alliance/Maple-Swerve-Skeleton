@@ -18,7 +18,7 @@ public interface AprilTagVisionIO {
         public int currentTargetsCount;
         public final int[] fiducialMarksID;
         public final Transform3d[] bestCameraToTargets;
-        public Optional<Transform3d> bestCameraToField = Optional.empty();
+        public Optional<Transform3d> bestFieldToCamera = Optional.empty();
 
         public CameraInputs() {
             this.fiducialMarksID = new int[MAX_TARGET_PER_CAMERA];
@@ -44,7 +44,7 @@ public interface AprilTagVisionIO {
                 this.fiducialMarksID[i] = pipelineResult.getTargets().get(i).getFiducialId();
                 this.bestCameraToTargets[i] = pipelineResult.getTargets().get(i).getBestCameraToTarget();
             }
-            this.bestCameraToField = pipelineResult.getMultiTagResult().estimatedPose.isPresent
+            this.bestFieldToCamera = pipelineResult.getMultiTagResult().estimatedPose.isPresent
                     ? Optional.of(pipelineResult.getMultiTagResult().estimatedPose.best)
                     : Optional.empty();
         }
@@ -64,7 +64,7 @@ public interface AprilTagVisionIO {
                 bestCameraToTargets[i] = bestCameraToTargetsLogged[i];
             }
             Transform3d bestCameraToFieldTransform = table.get(cameraKey+"bestCameraToField", NULL_TRANSFORM);
-            this.bestCameraToField = bestCameraToFieldTransform.equals(NULL_TRANSFORM) ?
+            this.bestFieldToCamera = bestCameraToFieldTransform.equals(NULL_TRANSFORM) ?
                     Optional.empty()
                     :Optional.of(bestCameraToFieldTransform);
         }
@@ -76,7 +76,7 @@ public interface AprilTagVisionIO {
             table.put(cameraKey+"CurrentTargetsCount", currentTargetsCount);
             table.put(cameraKey+"FiducialMarksID", fiducialMarksID);
             table.put(cameraKey+"bestCameraToTargets", bestCameraToTargets);
-            table.put(cameraKey+"bestCameraToField", bestCameraToField.orElse(NULL_TRANSFORM));
+            table.put(cameraKey+"bestCameraToField", bestFieldToCamera.orElse(NULL_TRANSFORM));
         }
     }
     class VisionInputs implements LoggableInputs {

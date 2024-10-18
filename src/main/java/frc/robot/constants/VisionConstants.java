@@ -10,21 +10,23 @@ import java.util.List;
 
 public class VisionConstants {
     public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
-    public static final int MINIMUM_TAGS_NUM = 2;
-    /* default standard error for vision observation, if only one apriltag observed */
     public static final double
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.2,
+            /* default standard error for vision observation, if only one apriltag observed */
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.6,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(10),
 
-    // only do odometry calibration if translational standard error if it is not greater than
-    TRANSLATIONAL_STANDARD_ERROR_THRESHOLD = 0.5,
-    // only do gyro calibration if rotational standard error is very, very small
-    ROTATIONAL_STANDARD_ERROR_THRESHOLD = Math.toRadians(5),
-            ROTATIONAL_ERROR_WITH_GYRO_DISCARD_RESULT = Math.toRadians(15),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.2,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(3.5),
 
-    ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.015,
-    // we trust the IMU very much (recommend 0.1 for Pigeon2, 0.5 for NavX)
-    GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.1);
+            /* only do odometry calibration if standard error is not greater than */
+            TRANSLATIONAL_STANDARD_ERROR_THRESHOLD = 0.4,
+            ROTATIONAL_STANDARD_ERROR_THRESHOLD = Math.toRadians(5),
+            ROTATIONAL_UNMATCHING_WITH_GYRO_DISCARD_RESULT = Double.POSITIVE_INFINITY,
+
+            /* standard deviation for odometry and gyros */
+            ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
+            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.5);
+
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             new PhotonCameraProperties(
@@ -71,7 +73,7 @@ public class VisionConstants {
                     640, 480,
                     new Translation2d(-0.2, 0.15),
                     0.3,
-                    Rotation2d.fromDegrees(60),
+                    Rotation2d.fromDegrees(120),
                     30,
                     180 // upside-down
             ),
@@ -83,7 +85,7 @@ public class VisionConstants {
                     640, 480,
                     new Translation2d(-0.2, -0.15),
                     0.3,
-                    Rotation2d.fromDegrees(-60),
+                    Rotation2d.fromDegrees(-120),
                     30,
                     180 // upside-down
             )

@@ -1,5 +1,7 @@
 package frc.robot.utils.CustomMaths;
 
+import java.util.List;
+
 public final class Statistics {
     public static double getMean(double[] dataSet) {
         double sum = 0;
@@ -53,5 +55,34 @@ public final class Statistics {
     public static double getBestFitLineIntersect(double[] dataSetX, double[] dataSetY) {
         final double slope = getBestFitLineSlope(dataSetX, dataSetY);
         return getMean(dataSetY) - slope * getMean(dataSetX);
+    }
+
+    public record Estimation(double center, double standardDeviation) {}
+
+    public static Estimation linearFilter(List<Estimation> estimations) {
+        return linearFilter(estimations.toArray(Estimation[]::new));
+    }
+
+    public static Estimation linearFilter(Estimation... estimations) {
+        if (estimations == null || estimations.length == 0)
+            throw new IllegalArgumentException("At least one estimation is required.");
+
+        double sumWeightedCenters = 0.0;
+        double sumWeights = 0.0;
+
+        for (Estimation estimation : estimations) {
+            double variance = estimation.standardDeviation * estimation.standardDeviation;
+            if (variance == 0) {
+                throw new IllegalArgumentException("Standard deviation cannot be zero.");
+            }
+            double weight = 1.0 / variance;
+            sumWeightedCenters += weight * estimation.center;
+            sumWeights += weight;
+        }
+
+        double combinedCenter = sumWeightedCenters / sumWeights;
+        double combinedStandardDeviation = Math.sqrt(1.0 / sumWeights);
+
+        return new Estimation(combinedCenter, combinedStandardDeviation);
     }
 }
