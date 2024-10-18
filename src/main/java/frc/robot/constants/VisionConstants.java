@@ -12,7 +12,7 @@ public class VisionConstants {
     public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.6,
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.45,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(10),
 
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.2,
@@ -35,10 +35,10 @@ public class VisionConstants {
                     68,
                     0.6, 0.2,
                     640, 480,
-                    new Translation2d(0.2, 0), // the outing position of the camera in relative to the robot center
-                    0.3, // the mounting height, in meters
+                    new Translation2d(0.330, -0.127), // the outing position of the camera in relative to the robot center
+                    0.254, // the mounting height, in meters
                     Rotation2d.fromDegrees(0), // the camera facing, 0 is front, positive is counter-clockwise
-                    24, // camera pitch angle, in degrees
+                    35, // camera pitch angle, in degrees
                     180 // camera roll angle, 0 for up-right and 180 for upside-down
             ),
             new PhotonCameraProperties(
@@ -47,9 +47,9 @@ public class VisionConstants {
                     68,
                     0.6, 0.2,
                     640, 480,
-                    new Translation2d(0.2, 0.15),
-                    0.3,
-                    Rotation2d.fromDegrees(35),
+                    new Translation2d(0.229, 0.348),
+                    0.2,
+                    Rotation2d.fromDegrees(30),
                     30,
                     180 // upside-down
             ),
@@ -59,9 +59,9 @@ public class VisionConstants {
                     68,
                     0.6, 0.2,
                     640, 480,
-                    new Translation2d(0.2, -0.15),
-                    0.3,
-                    Rotation2d.fromDegrees(-35),
+                    new Translation2d(0.229, -0.348),
+                    0.2,
+                    Rotation2d.fromDegrees(-30),
                     30,
                     180 // upside-down
             ),
@@ -71,10 +71,10 @@ public class VisionConstants {
                     68,
                     0.6, 0.2,
                     640, 480,
-                    new Translation2d(-0.2, 0.15),
-                    0.3,
-                    Rotation2d.fromDegrees(120),
-                    30,
+                    new Translation2d(-0.229, 0.330),
+                    0.2,
+                    Rotation2d.fromDegrees(150),
+                    35,
                     180 // upside-down
             ),
             new PhotonCameraProperties(
@@ -83,10 +83,10 @@ public class VisionConstants {
                     68,
                     0.6, 0.2,
                     640, 480,
-                    new Translation2d(-0.2, -0.15),
-                    0.3,
-                    Rotation2d.fromDegrees(-120),
-                    30,
+                    new Translation2d(-0.229, -0.330),
+                    0.2,
+                    Rotation2d.fromDegrees(-150),
+                    35,
                     180 // upside-down
             )
     );
