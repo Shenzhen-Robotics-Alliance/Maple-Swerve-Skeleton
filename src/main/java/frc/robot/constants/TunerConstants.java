@@ -59,37 +59,44 @@ public class TunerConstants {
     // Initial configs for the drive and steer motors and the CANcoder; these cannot be null.
     // TODO: ALL current limits here will be overridden
     public static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration();
-    public static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration();
+    public static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
+            .withCurrentLimits(
+                    new CurrentLimitsConfigs()
+                            // Swerve azimuth does not require much torque output, so we can set a relatively low
+                            // stator current limit to help avoid brownouts without impacting performance.
+                            .withStatorCurrentLimit(60)
+                            .withStatorCurrentLimitEnable(true)
+            );
     public static final CANcoderConfiguration cancoderInitialConfigs = new CANcoderConfiguration();
     // Configs for the Pigeon 2; leave this null to skip applying Pigeon 2 configs
     public static final Pigeon2Configuration pigeonConfigs = null;
 
     // Theoretical free speed (m/s) at 12v applied output;
     // This needs to be tuned to your individual robot
-    public static final double kSpeedAt12VoltsMps = 3.92;
+    public static final double kSpeedAt12VoltsMps = 4.73;
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
     public static final double kCoupleRatio = 3.5714285714285716;
 
     public static final double kDriveGearRatio = 5.9;
-    public static final double kSteerGearRatio = 12.8;
+    public static final double kSteerGearRatio = 21.428571428571427;
     public static final double kWheelRadiusInches = 2;
 
-    public static final boolean kInvertLeftSide = true;
-    public static final boolean kInvertRightSide = false;
+    public static final boolean kInvertLeftSide = false;
+    public static final boolean kInvertRightSide = true;
 
     public static final String kCANbusName = "ChassisCanivore";
-    public static final int kPigeonId = 15;
+    public static final int kPigeonId = 0;
 
 
     // These are only used for simulation
     public static final double kSteerInertia = 0.00001;
     public static final double kDriveInertia = 0.001;
     // Simulated voltage necessary to overcome friction
-    public static final double kSteerFrictionVoltage = 0.35;
+    public static final double kSteerFrictionVoltage = 0.25;
     public static final double kDriveFrictionVoltage = 0.25;
-    
+
     public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
             .withCANbusName(kCANbusName)
             .withPigeon2Id(kPigeonId)
@@ -117,45 +124,46 @@ public class TunerConstants {
 
 
     // Front Left
-    public static final int kFrontLeftDriveMotorId = 2;
-    public static final int kFrontLeftSteerMotorId = 1;
-    public static final int kFrontLeftEncoderId = 9;
-    public static final double kFrontLeftEncoderOffset = -0.181640625;
+    public static final int kFrontLeftDriveMotorId = 1;
+    public static final int kFrontLeftSteerMotorId = 2;
+    public static final int kFrontLeftEncoderId = 1;
+    public static final double kFrontLeftEncoderOffset = 0.305419921875;
     public static final boolean kFrontLeftSteerInvert = true;
 
-    public static final double kFrontLeftXPosInches = 10;
-    public static final double kFrontLeftYPosInches = 10;
+    public static final double kFrontLeftXPosInches = 10.4;
+    public static final double kFrontLeftYPosInches = 11.2;
 
     // Front Right
-    public static final int kFrontRightDriveMotorId = 4;
-    public static final int kFrontRightSteerMotorId = 3;
-    public static final int kFrontRightEncoderId = 10;
-    public static final double kFrontRightEncoderOffset = 0.06982421875;
+    public static final int kFrontRightDriveMotorId = 3;
+    public static final int kFrontRightSteerMotorId = 4;
+    public static final int kFrontRightEncoderId = 2;
+    public static final double kFrontRightEncoderOffset = -0.230712890625;
     public static final boolean kFrontRightSteerInvert = true;
 
-    public static final double kFrontRightXPosInches = 10;
-    public static final double kFrontRightYPosInches = -10;
+    public static final double kFrontRightXPosInches = 10.4;
+    public static final double kFrontRightYPosInches = -11.2;
 
     // Back Left
-    public static final int kBackLeftDriveMotorId = 8;
-    public static final int kBackLeftSteerMotorId = 7;
-    public static final int kBackLeftEncoderId = 12;
-    public static final double kBackLeftEncoderOffset = -0.0263671875;
+    public static final int kBackLeftDriveMotorId = 5;
+    public static final int kBackLeftSteerMotorId = 6;
+    public static final int kBackLeftEncoderId = 3;
+    public static final double kBackLeftEncoderOffset = -0.221435546875;
     public static final boolean kBackLeftSteerInvert = true;
 
-    public static final double kBackLeftXPosInches = -10;
-    public static final double kBackLeftYPosInches = 10;
+    public static final double kBackLeftXPosInches = -10.4;
+    public static final double kBackLeftYPosInches = 11.2;
 
     // Back Right
-    public static final int kBackRightDriveMotorId = 6;
-    public static final int kBackRightSteerMotorId = 5;
-    public static final int kBackRightEncoderId = 11;
-    public static final double kBackRightEncoderOffset = -0.114013671875;
+    public static final int kBackRightDriveMotorId = 7;
+    public static final int kBackRightSteerMotorId = 8;
+    public static final int kBackRightEncoderId = 4;
+    public static final double kBackRightEncoderOffset = -0.05419921875;
     public static final boolean kBackRightSteerInvert = true;
 
-    public static final double kBackRightXPosInches = -10;
-    public static final double kBackRightYPosInches = -10;
-    
+    public static final double kBackRightXPosInches = -10.4;
+    public static final double kBackRightYPosInches = -11.2;
+
+
     public static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
                     kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide)
             .withSteerMotorInverted(kFrontLeftSteerInvert);
