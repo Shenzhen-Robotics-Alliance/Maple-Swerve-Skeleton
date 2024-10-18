@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 15.063358428289977,
-        "y": 0.7220209353608928
+        "x": 14.931180324994104,
+        "y": 0.6719352940485248
       },
       "prevControl": null,
       "nextControl": {
-        "x": 14.58060538897269,
-        "y": 1.5094198634490585
+        "x": 14.448427285676818,
+        "y": 1.4593342221366905
       },
       "isLocked": false,
       "linkedName": null
@@ -48,7 +48,7 @@
   "folder": "opponent robots",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 120.62169355697723
   },
   "useDefaultConstraints": true
 }

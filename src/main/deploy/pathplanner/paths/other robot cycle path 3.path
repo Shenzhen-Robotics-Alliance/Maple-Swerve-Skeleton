@@ -85,7 +85,7 @@
   "folder": "opponent robots",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 120.8608916883497
   },
   "useDefaultConstraints": true
 }
