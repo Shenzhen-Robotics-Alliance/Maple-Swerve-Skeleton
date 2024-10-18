@@ -12,8 +12,7 @@ public class PathPlannerAutoWrapper implements Auto {
 
     public PathPlannerAutoWrapper(String name) {
         this.name = name;
-        final PathPlannerAuto auto = new PathPlannerAuto(name);
-        this.startingPose = auto.getStartingPose();
+        this.startingPose = new PathPlannerAuto(name).getStartingPose();
     }
 
     @Override

@@ -38,15 +38,6 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     void runRawChassisSpeeds(ChassisSpeeds speeds);
 
     /**
-     * runs a ChassisSpeeds and a set of motor feedforwards without doing any pre-processing
-     * @param speeds a discrete chassis speed, robot-centric
-     * @param driveFeedforwards a set of {@link DriveFeedforward} to run on the drive motors, on default it is ignored
-     * */
-    default void runRawChassisSpeeds(ChassisSpeeds speeds, DriveFeedforward[] driveFeedforwards) {
-        runRawChassisSpeeds(speeds);
-    }
-
-    /**
      * Returns the current odometry Pose.
      */
     Pose2d getPose();
@@ -137,10 +128,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::getPose,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
-                (speeds, feedForwards) -> this.runRawChassisSpeeds(
-                        ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs),
-                        feedForwards
-                ),
+                this::runRawChassisSpeeds,
                 new PPHolonomicDriveController(CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(), CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),
                 new RobotConfig(
                         DriveTrainConstants.ROBOT_MASS_KG,
