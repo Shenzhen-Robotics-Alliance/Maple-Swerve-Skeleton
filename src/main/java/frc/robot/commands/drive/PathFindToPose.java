@@ -8,10 +8,11 @@ import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import java.util.function.Supplier;
 
 public class PathFindToPose extends CommandOnFly {
-    public PathFindToPose(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> targetPose, double speedMultiplier) {
+    public PathFindToPose(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> targetPose, double speedMultiplier, double goalEndVelocity) {
         super(() -> AutoBuilder.pathfindToPose(
                 targetPose.get(),
-                driveSubsystem.getChassisConstrains(speedMultiplier)
+                driveSubsystem.getChassisConstrains(speedMultiplier),
+                goalEndVelocity
         ));
     }
 }

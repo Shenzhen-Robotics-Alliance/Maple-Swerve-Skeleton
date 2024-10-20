@@ -1,16 +1,18 @@
 package frc.robot.commands.drive;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.constants.DriveControlLoops;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
+import frc.robot.utils.MapleJoystickDriveInput;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
@@ -24,7 +26,11 @@ public class JoystickDrive extends Command {
     private final BooleanSupplier useDriverStationCentricSwitch;
     private final Supplier<Integer> povButtonSupplier;
     private final HolonomicDriveSubsystem driveSubsystem;
+
+    private final TrapezoidProfile rotationProfile;
     private final PIDController chassisRotationController;
+    private TrapezoidProfile.State currentRotationState;
+
 
     protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
     private ChassisSpeeds currentPilotInputSpeeds;
@@ -41,7 +47,13 @@ public class JoystickDrive extends Command {
         this.previousChassisUsageTimer.start();
         this.previousRotationalInputTimer = new Timer();
         this.previousRotationalInputTimer.start();
+
+        this.rotationProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
+                driveSubsystem.getChassisMaxAngularVelocity(),
+                driveSubsystem.getChassisMaxAngularAccelerationRadPerSecSq()
+        ));
         this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
+        this.chassisRotationController.enableContinuousInput(-Math.PI, Math.PI);
 
         super.addRequirements(driveSubsystem);
         resetSensitivity();
@@ -54,7 +66,15 @@ public class JoystickDrive extends Command {
         this.currentPilotInputSpeeds = new ChassisSpeeds();
         this.currentRotationMaintenanceSetpoint = driveSubsystem.getRawGyroYaw();
 
-        this.chassisRotationController.calculate(driveSubsystem.getRawGyroYaw().getRadians()); // activate controller
+        syncRotationControllerToCurrentRobotFacing();
+    }
+
+    public void syncRotationControllerToCurrentRobotFacing() {
+        this.chassisRotationController.reset();
+        this.currentRotationState = new TrapezoidProfile.State(
+                driveSubsystem.getRawGyroYaw().getRadians(),
+                driveSubsystem.getMeasuredChassisSpeedsRobotRelative().omegaRadiansPerSecond
+        );
     }
 
     @Override
@@ -71,8 +91,10 @@ public class JoystickDrive extends Command {
                 Robot.defaultPeriodSecs
         );
 
-        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05)
+        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) {
             previousRotationalInputTimer.reset();
+            syncRotationControllerToCurrentRobotFacing();
+        }
 
         if (povButtonSupplier.get() != -1)
             setCurrentRotationalMaintenance(
@@ -82,10 +104,15 @@ public class JoystickDrive extends Command {
             );
 
         final ChassisSpeeds chassisSpeedsWithRotationMaintenance;
+        this.currentRotationState = rotationProfile.calculate(
+                Robot.defaultPeriodSecs,
+                currentRotationState,
+                getRotationProfileGoal()
+        );
         final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(
                 driveSubsystem.getRawGyroYaw().getRadians(),
-                currentRotationMaintenanceSetpoint.getRadians()
-        );
+                currentRotationState.position
+        ) + currentRotationState.velocity;
         Logger.recordOutput("previousRotationalInputTimer.get()", previousRotationalInputTimer.get());
         if (previousRotationalInputTimer.get() > TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS)
             chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
@@ -115,6 +142,18 @@ public class JoystickDrive extends Command {
             driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
         else
             driveSubsystem.runRobotCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
+
+        Logger.recordOutput("rotationMaintain", new Pose2d(
+                driveSubsystem.getPose().getTranslation(),
+                Rotation2d.fromRadians(currentRotationState.position)
+        ));
+    }
+
+    private TrapezoidProfile.State getRotationProfileGoal() {
+        final Rotation2d currentRotationStateRotation = Rotation2d.fromRadians(currentRotationState.position),
+                difference = currentRotationMaintenanceSetpoint.minus(currentRotationStateRotation);
+        final double goalRotationRad = currentRotationState.position + difference.getRadians();
+        return new TrapezoidProfile.State(goalRotationRad, 0);
     }
 
     public void setCurrentRotationalMaintenance(Rotation2d setPointAbsoluteFacing) {

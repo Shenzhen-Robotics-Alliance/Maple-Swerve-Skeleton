@@ -3,12 +3,14 @@ package frc.robot.commands.drive;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.struct.Pose2dStruct;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import frc.robot.utils.CustomPIDs.MapleProfiledPIDController;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.Supplier;
 
@@ -40,15 +42,20 @@ public class DriveToPose extends Command {
 
     @Override
     public void initialize() {
-        getFeedBackSpeeds();
+        positionController.getThetaController().reset(
+                driveSubsystem.getFacing().getRadians(),
+                driveSubsystem.getMeasuredChassisSpeedsRobotRelative().omegaRadiansPerSecond
+        );
     }
 
     @Override
     public void execute() {
         ChassisSpeeds feedBackSpeeds = getFeedBackSpeeds();
         final double feedBackSpeedMagnitude = Math.hypot(feedBackSpeeds.vxMetersPerSecond, feedBackSpeeds.vyMetersPerSecond);
-        if (feedBackSpeedMagnitude < speedConstrainMPS)
-            feedBackSpeeds = feedBackSpeeds.times(speedConstrainMPS / feedBackSpeedMagnitude);
+        if (feedBackSpeedMagnitude < speedConstrainMPS) {
+            feedBackSpeeds.vxMetersPerSecond *= speedConstrainMPS / feedBackSpeedMagnitude;
+            feedBackSpeeds.vyMetersPerSecond *= speedConstrainMPS / feedBackSpeedMagnitude;
+        }
         driveSubsystem.runRobotCentricChassisSpeeds(feedBackSpeeds);
     }
 
@@ -61,6 +68,10 @@ public class DriveToPose extends Command {
      * @return the feed-back speed, robot-relative
      * */
     private ChassisSpeeds getFeedBackSpeeds() {
+        Logger.recordOutput("Odometry/TrajectorySetpoint", new Pose2d(
+                desiredPoseSupplier.get().getTranslation(),
+                Rotation2d.fromRadians(positionController.getThetaController().getSetpoint().position)
+        ));
         return positionController.calculate(driveSubsystem.getPose(), desiredPoseSupplier.get(), 0, desiredPoseSupplier.get().getRotation());
     }
 

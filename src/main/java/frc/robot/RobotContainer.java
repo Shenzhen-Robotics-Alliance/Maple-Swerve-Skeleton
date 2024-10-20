@@ -336,7 +336,11 @@ public class RobotContainer {
         final AutoAlignment exampleAutoAlignment = new AutoAlignment(
                 drive,
                 /* (position of AMP) */
-                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.6, Rotation2d.fromDegrees(90)))
+                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.3, Rotation2d.fromDegrees(90))),
+                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.74, Rotation2d.fromDegrees(90))),
+                new Pose2d(0.04, 0.04, Rotation2d.fromDegrees(2)),
+                0.8,
+                2
         );
         driverXBox.b().whileTrue(exampleAutoAlignment);
     }

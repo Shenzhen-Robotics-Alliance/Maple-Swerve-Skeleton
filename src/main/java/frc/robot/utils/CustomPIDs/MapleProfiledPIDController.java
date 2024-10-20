@@ -9,6 +9,8 @@ public class MapleProfiledPIDController extends ProfiledPIDController {
     public MapleProfiledPIDController(MaplePIDController.MaplePIDConfig pidConfig, TrapezoidProfile.Constraints constraints) {
         super(pidConfig.Kp, pidConfig.Ki, pidConfig.Kd, constraints);
         this.pidConfig = pidConfig;
+        if (pidConfig.isCircularLoop)
+            super.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     @Override

@@ -92,6 +92,11 @@ public class SwerveModule extends MapleSubsystem {
     public SwerveModuleState runSetPoint(SwerveModuleState state) {
         this.setPoint = SwerveModuleState.optimize(state, getSteerFacing());
 
+        if (Math.abs(state.speedMetersPerSecond) < 0.04) {
+            io.setDriveVoltage(0);
+            io.setSteerPowerPercent(0);
+            return this.getMeasuredState();
+        }
         runDriveControlLoop();
         runSteerCloseLoop();
 

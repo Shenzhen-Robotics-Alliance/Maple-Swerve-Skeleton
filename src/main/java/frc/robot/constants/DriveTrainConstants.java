@@ -33,7 +33,6 @@ public class DriveTrainConstants {
             WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
             STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
-            TIME_ROBOT_STOP_ROTATING_SECONDS = 0.06,
             STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
             DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
             STEER_INERTIA = 0.025;
@@ -73,7 +72,6 @@ public class DriveTrainConstants {
             DRIVE_BASE_RADIUS = MODULE_TRANSLATIONS[0].getNorm(),
             /* friction_force = normal_force * coefficient_of_friction */
             MAX_FRICTION_ACCELERATION = GRAVITY_CONSTANT * WHEEL_COEFFICIENT_OF_FRICTION,
-            MAX_FRICTION_FORCE_PER_MODULE = MAX_FRICTION_ACCELERATION * ROBOT_MASS_KG / MODULE_TRANSLATIONS.length,
             /* force = torque / distance */
             MAX_PROPELLING_FORCE_NEWTONS = DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT) * DRIVE_GEAR_RATIO / WHEEL_RADIUS_METERS,
             /* floor_speed = wheel_angular_velocity * wheel_radius */
@@ -83,15 +81,14 @@ public class DriveTrainConstants {
                     MAX_PROPELLING_FORCE_NEWTONS / ROBOT_MASS_KG
             ),
             CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = CHASSIS_MAX_VELOCITY / DRIVE_BASE_RADIUS,
-            CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS,
-            CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION = CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC / TIME_ROBOT_STOP_ROTATING_SECONDS;
+            CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS * 3;
 
     public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
 
     /* for collision detection in simulation */
     public static final double
-            BUMPER_WIDTH_METERS = Units.inchesToMeters(34.5),
-            BUMPER_LENGTH_METERS = Units.inchesToMeters(36),
+            BUMPER_WIDTH_METERS = Units.inchesToMeters(30),
+            BUMPER_LENGTH_METERS = Units.inchesToMeters(30),
             /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
             BUMPER_COEFFICIENT_OF_FRICTION = 0.65,
             /* https://simple.wikipedia.org/wiki/Coefficient_of_restitution */
