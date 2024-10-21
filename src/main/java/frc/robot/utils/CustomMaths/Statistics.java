@@ -1,5 +1,6 @@
 package frc.robot.utils.CustomMaths;
 
+import java.util.Arrays;
 import java.util.List;
 
 public final class Statistics {
@@ -63,6 +64,9 @@ public final class Statistics {
         return linearFilter(estimations.toArray(Estimation[]::new));
     }
 
+    /**
+     * Given a set of estimations towards a value, calculates the overall estimation
+     * */
     public static Estimation linearFilter(Estimation... estimations) {
         if (estimations == null || estimations.length == 0)
             throw new IllegalArgumentException("At least one estimation is required.");
@@ -72,9 +76,6 @@ public final class Statistics {
 
         for (Estimation estimation : estimations) {
             double variance = estimation.standardDeviation * estimation.standardDeviation;
-            if (variance == 0) {
-                throw new IllegalArgumentException("Standard deviation cannot be zero.");
-            }
             double weight = 1.0 / variance;
             sumWeightedCenters += weight * estimation.center;
             sumWeights += weight;
@@ -84,5 +85,17 @@ public final class Statistics {
         double combinedStandardDeviation = Math.sqrt(1.0 / sumWeights);
 
         return new Estimation(combinedCenter, combinedStandardDeviation);
+    }
+
+    public static double getStandardDeviation(List<Estimation> estimations) {
+        return getStandardDeviation(estimations.toArray(Estimation[]::new));
+    }
+
+    public static double getStandardDeviation(Estimation... estimations) {
+        return getStandardDeviation(
+                Arrays.stream(estimations)
+                        .mapToDouble(estimation -> estimation.center)
+                        .toArray()
+        );
     }
 }

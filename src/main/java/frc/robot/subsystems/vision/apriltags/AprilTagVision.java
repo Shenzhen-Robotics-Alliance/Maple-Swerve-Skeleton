@@ -3,13 +3,11 @@ package frc.robot.subsystems.vision.apriltags;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.MapleSubsystem;
-import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Alert;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static frc.robot.constants.VisionConstants.*;
 import static frc.robot.constants.LogPaths.*;
@@ -59,11 +57,6 @@ public class AprilTagVision extends MapleSubsystem {
                 getResultsTimeStamp(),
                 robotPoseEstimationResult.estimationStandardError
         ));
-
-        Logger.recordOutput(
-                APRIL_TAGS_VISION_PATH + "Results/Standard Error",
-                result.map(printStandardError).orElse(null)
-        );
 
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
         SmartDashboard.putBoolean("Vision Result Trustable", result.isPresent());
@@ -117,15 +110,4 @@ public class AprilTagVision extends MapleSubsystem {
 
         return totalLatencySeconds / camerasInputs.length;
     }
-
-    private static final Function<RobotPoseEstimationResult, String> printStandardError = result ->
-            String.format(
-                    "Standard Error : { \n"
-                            + "Translation X (Meters) %.2f, \n"
-                            + "Translation Y (Meters) %.2f, \n"
-                            + "Rotation Theta (Degrees) %.2f, \n }",
-                    result.estimationStandardError.get(0, 0),
-                    result.estimationStandardError.get(1, 0),
-                    Math.toDegrees(result.estimationStandardError.get(2, 0))
-            );
 }

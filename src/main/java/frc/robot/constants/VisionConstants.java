@@ -31,10 +31,10 @@ public class VisionConstants {
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             new PhotonCameraProperties(
                     "FrontCam",
-                    60, 18, 5,
-                    68,
+                    30, 18, 5,
+                    75,
                     0.6, 0.2,
-                    640, 480,
+                    1280, 720,
                     new Translation2d(0.330, -0.127), // the outing position of the camera in relative to the robot center
                     0.254, // the mounting height, in meters
                     Rotation2d.fromDegrees(0), // the camera facing, 0 is front, positive is counter-clockwise
@@ -43,10 +43,10 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "FrontLeftCam",
-                    60, 18, 5,
-                    68,
+                    30, 18, 5,
+                    75,
                     0.6, 0.2,
-                    640, 480,
+                    1280, 720,
                     new Translation2d(0.229, 0.348),
                     0.2,
                     Rotation2d.fromDegrees(30),
@@ -55,10 +55,10 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "FrontRightCam",
-                    60, 18, 5,
-                    68,
+                    30, 18, 5,
+                    75,
                     0.6, 0.2,
-                    640, 480,
+                    1280, 720,
                     new Translation2d(0.229, -0.348),
                     0.2,
                     Rotation2d.fromDegrees(-30),
@@ -67,10 +67,10 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "BackLeftCam",
-                    60, 18, 5,
-                    68,
+                    30, 18, 5,
+                    75,
                     0.6, 0.2,
-                    640, 480,
+                    1280, 720,
                     new Translation2d(-0.229, 0.330),
                     0.2,
                     Rotation2d.fromDegrees(150),
@@ -79,10 +79,10 @@ public class VisionConstants {
             ),
             new PhotonCameraProperties(
                     "BackRightCam",
-                    60, 18, 5,
-                    68,
+                    30, 18, 5,
+                    75,
                     0.6, 0.2,
-                    640, 480,
+                    1280, 720,
                     new Translation2d(-0.229, -0.330),
                     0.2,
                     Rotation2d.fromDegrees(-150),

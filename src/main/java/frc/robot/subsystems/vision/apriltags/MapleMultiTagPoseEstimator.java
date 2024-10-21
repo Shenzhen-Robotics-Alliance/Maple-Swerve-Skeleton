@@ -202,15 +202,32 @@ public class MapleMultiTagPoseEstimator {
                 robotPoseFinalEstimationThetaRadians.center()
         );
 
-        double estimationStandardDeviationX = robotPoseFinalEstimationXMeters.standardDeviation(),
-                estimationStandardDeviationY = robotPoseFinalEstimationYMeters.standardDeviation(),
-                estimationStandardDeviationTheta = robotPoseFinalEstimationThetaRadians.standardDeviation();
+        double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
+                estimationStandardErrorY = robotPoseFinalEstimationYMeters.standardDeviation(),
+                estimationStandardErrorTheta = robotPoseFinalEstimationThetaRadians.standardDeviation();
+
+        final double
+                rotationalStandardDev = Statistics.getStandardDeviation(robotPoseEstimationsThetaRadians),
+                translationalStandardDev = Math.hypot(
+                        Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
+                        Statistics.getStandardDeviation(robotPoseEstimationsYMeters)
+                );
+
+        if (translationalStandardDev > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
+            estimationStandardErrorX = estimationStandardErrorY = estimationStandardErrorTheta = Double.POSITIVE_INFINITY;
+        if (rotationalStandardDev > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
+            estimationStandardErrorTheta = Double.POSITIVE_INFINITY;
+
+        Logger.recordOutput("Vision/MeasurementErrors/translationalStandardError", Math.hypot(estimationStandardErrorX, estimationStandardErrorY));
+        Logger.recordOutput("Vision/MeasurementErrors/rotationalStandardError", estimationStandardErrorTheta);
+        Logger.recordOutput("Vision/MeasurementErrors/translationalStandardDevs", translationalStandardDev);
+        Logger.recordOutput("Vision/MeasurementErrors/rotationalStandardDevs", rotationalStandardDev);
 
         return Optional.of(new RobotPoseEstimationResult(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
-                estimationStandardDeviationX,
-                estimationStandardDeviationY,
-                estimationStandardDeviationTheta
+                estimationStandardErrorX,
+                estimationStandardErrorY,
+                estimationStandardErrorTheta
         ));
     }
 
