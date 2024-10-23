@@ -8,6 +8,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.AbstractDriveTrainSimulation;
 import org.ironmaple.simulation.drivesims.SimplifiedHolonomicDriveSimulation;
+import org.ironmaple.simulation.seasonspecific.crescendo2024.NoteOnFly;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 import java.util.Arrays;
@@ -80,7 +82,7 @@ public class AIRobotInSimulation {
             );
             instances[1] = new AIRobotInSimulation(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 1"),
-                    Commands.none(),
+                    shootAtSpeaker(1),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 1 backwards"),
                     Commands.none(),
                     ROBOT_QUEENING_POSITIONS[1],
@@ -88,7 +90,7 @@ public class AIRobotInSimulation {
             );
             instances[2] = new AIRobotInSimulation(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 2"),
-                    Commands.none(),
+                    shootAtSpeaker(2),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 2 backwards"),
                     Commands.none(),
                     ROBOT_QUEENING_POSITIONS[2],
@@ -96,7 +98,7 @@ public class AIRobotInSimulation {
             );
             instances[3] = new AIRobotInSimulation(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 3"),
-                    Commands.none(),
+                    feedShotLow(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 3 backwards"),
                     Commands.none(),
                     ROBOT_QUEENING_POSITIONS[3],
@@ -104,7 +106,7 @@ public class AIRobotInSimulation {
             );
             instances[4] = new AIRobotInSimulation(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 4"),
-                    Commands.none(),
+                    feedShotHigh(),
                     PathPlannerPath.fromPathFile("opponent robot cycle path 4 backwards"),
                     Commands.none(),
                     ROBOT_QUEENING_POSITIONS[4],
@@ -114,6 +116,47 @@ public class AIRobotInSimulation {
             DriverStation.reportError("failed to load opponent robot simulation path, error:" + e.getMessage(), false);
         }
     }
+
+    private static Command shootAtSpeaker(int index) {
+        return Commands.runOnce(() -> SimulatedArena.getInstance().addGamePieceProjectile(new NoteOnFly(
+                instances[index].driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                new Translation2d(0.3, 0),
+                instances[index].driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                instances[index].driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                0.5,
+                10,
+                Math.toRadians(60)
+                ).asSpeakerShotNote(() -> {})
+        ));
+    }
+    private static Command feedShotLow() {
+        final int index = 3;
+        return Commands.runOnce(() -> SimulatedArena.getInstance().addGamePieceProjectile(new NoteOnFly(
+                instances[index].driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                new Translation2d(0.3, 0),
+                instances[index].driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                instances[index].driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                0.5,
+                10,
+                Math.toRadians(20)
+                ).enableBecomeNoteOnFieldAfterTouchGround()
+        ));
+    }
+
+    private static Command feedShotHigh() {
+        final int index = 4;
+        return Commands.runOnce(() -> SimulatedArena.getInstance().addGamePieceProjectile(new NoteOnFly(
+                        instances[index].driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                        new Translation2d(0.3, 0),
+                        instances[index].driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        instances[index].driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                        0.5,
+                        10,
+                        Math.toRadians(55)
+                ).enableBecomeNoteOnFieldAfterTouchGround()
+        ));
+    }
+
 
     private final SimplifiedHolonomicDriveSimulation driveSimulation;
     private final int id;
@@ -134,8 +177,12 @@ public class AIRobotInSimulation {
                 getJoystickDriveCommand()
         );
         behaviorChooser.onChange((Command::schedule));
-        RobotModeTriggers.teleop().whileTrue(behaviorChooser.getSelected());
-        RobotModeTriggers.disabled().onTrue(Commands.run(() -> driveSimulation.setSimulationWorldPose(queeningPose), driveSimulation));
+        RobotModeTriggers.teleop().onTrue(Commands.runOnce(() -> behaviorChooser.getSelected().schedule()));
+        RobotModeTriggers.disabled().onTrue(Commands.runOnce(() -> {
+            driveSimulation.setSimulationWorldPose(queeningPose);
+            driveSimulation.runChassisSpeeds(new ChassisSpeeds(), false);
+            System.out.println("disabled!!!");
+        }, driveSimulation).ignoringDisable(true));
 
         SmartDashboard.putData("AIRobotBehaviors/Opponent Robot " + id + " Behavior", behaviorChooser);
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
@@ -149,11 +196,11 @@ public class AIRobotInSimulation {
         );
         cycle.addCommands(opponentRobotFollowPath(segment0)
                 .andThen(toRunAtEndOfSegment0)
-                .withTimeout(5)
+                .withTimeout(10)
         );
         cycle.addCommands(opponentRobotFollowPath(segment1)
                 .andThen(toRunAtEndOfSegment1)
-                .withTimeout(5)
+                .withTimeout(10)
         );
 
         return cycle.repeatedly()

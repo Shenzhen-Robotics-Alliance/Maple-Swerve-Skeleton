@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 150.0
+    "rotation": 129.28940686300254
   },
   "reversed": false,
   "folder": "opponent robots",
