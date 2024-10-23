@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 9.614127128610129,
+        "y": 6.310348848455705
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 12.564799506823212,
+        "y": 6.553803665139952
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 13.976837443591847,
+        "y": 5.463126086394522
+      },
+      "prevControl": {
+        "x": 13.24415249786625,
+        "y": 6.012639795688719
+      },
+      "nextControl": {
+        "x": 14.794845627650922,
+        "y": 4.849619948350218
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 15.836832243059506,
+        "y": 1.1685831200843904
+      },
+      "prevControl": {
+        "x": 15.340184417023641,
+        "y": 2.726693946863577
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 12.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 120.57922687248863
+  },
+  "reversed": false,
+  "folder": "opponent robots",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -178.8065105760179
+  },
+  "useDefaultConstraints": true
+}

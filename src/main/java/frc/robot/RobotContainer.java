@@ -28,6 +28,7 @@ import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
+import frc.robot.utils.AIRobotInSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -164,6 +165,7 @@ public class RobotContainer {
                 );
 
                 SimulatedArena.getInstance().resetFieldForAuto();
+                AIRobotInSimulation.startOpponentRobotSimulations();
             }
 
             default -> {
@@ -363,5 +365,7 @@ public class RobotContainer {
             return;
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput("FieldSimulation/Notes", SimulatedArena.getInstance().getGamePiecesByType("Note").toArray(Pose3d[]::new));
+        Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation.getOpponentRobotPoses());
+        Logger.recordOutput("FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation.getAlliancePartnerRobotPoses());
     }
 }
