@@ -6,8 +6,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import frc.robot.Robot;
-import frc.robot.constants.RobotMode;
 import frc.robot.utils.CustomMaths.Statistics;
 import org.littletonrobotics.junction.Logger;
 
@@ -20,16 +18,18 @@ import static frc.robot.constants.LogPaths.APRIL_TAGS_VISION_PATH;
 
 public class MapleMultiTagPoseEstimator {
     public static final class RobotPoseEstimationResult {
-        public final Pose2d pointEstimation;
-        public final Matrix<N3, N1> estimationStandardError;
-        public final double translationXStandardDeviationMeters, translationYStandardDeviationMeters, rotationalStandardDeviationRadians;
+        public Pose2d pointEstimation;
+        public double translationXStandardDeviationMeters, translationYStandardDeviationMeters, rotationalStandardDeviationRadians;
 
         public RobotPoseEstimationResult(Pose2d pointEstimation, double translationXStandardDeviationMeters, double translationYStandardDeviationMeters, double rotationalStandardDeviationRadians) {
             this.pointEstimation = pointEstimation;
-            this.estimationStandardError = VecBuilder.fill(translationXStandardDeviationMeters, translationYStandardDeviationMeters, rotationalStandardDeviationRadians);
             this.translationXStandardDeviationMeters = translationXStandardDeviationMeters;
             this.translationYStandardDeviationMeters = translationYStandardDeviationMeters;
             this.rotationalStandardDeviationRadians = rotationalStandardDeviationRadians;
+        }
+
+        public Matrix<N3, N1> getEstimationStandardError() {
+            return VecBuilder.fill(translationXStandardDeviationMeters, translationYStandardDeviationMeters, rotationalStandardDeviationRadians);
         }
     }
 
@@ -153,7 +153,11 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
-        if (validRobotPoseEstimationsSingleTag.isEmpty() && validRobotPoseEstimationsMultiTag.isEmpty())
+        final boolean resultsCountSufficient =
+                validRobotPoseEstimationsSingleTag.size() >= 2
+                || (!validRobotPoseEstimationsMultiTag.isEmpty());
+
+        if (!resultsCountSufficient)
             return Optional.empty();
 
         final List<Statistics.Estimation> robotPoseEstimationsXMeters = new ArrayList<>(),
@@ -202,26 +206,22 @@ public class MapleMultiTagPoseEstimator {
                 robotPoseFinalEstimationThetaRadians.center()
         );
 
-        double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
+        final double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
                 estimationStandardErrorY = robotPoseFinalEstimationYMeters.standardDeviation(),
                 estimationStandardErrorTheta = robotPoseFinalEstimationThetaRadians.standardDeviation();
 
-        final double
-                rotationalStandardDev = Statistics.getStandardDeviation(robotPoseEstimationsThetaRadians),
-                translationalStandardDev = Math.hypot(
-                        Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
-                        Statistics.getStandardDeviation(robotPoseEstimationsYMeters)
-                );
-
-        if (translationalStandardDev > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
-            estimationStandardErrorX = estimationStandardErrorY = estimationStandardErrorTheta = Double.POSITIVE_INFINITY;
-        if (rotationalStandardDev > ROTATIONAL_STANDARD_ERROR_THRESHOLD)
-            estimationStandardErrorTheta = Double.POSITIVE_INFINITY;
-
         Logger.recordOutput("Vision/MeasurementErrors/translationalStandardError", Math.hypot(estimationStandardErrorX, estimationStandardErrorY));
-        Logger.recordOutput("Vision/MeasurementErrors/rotationalStandardError", estimationStandardErrorTheta);
-        Logger.recordOutput("Vision/MeasurementErrors/translationalStandardDevs", translationalStandardDev);
-        Logger.recordOutput("Vision/MeasurementErrors/rotationalStandardDevs", rotationalStandardDev);
+        Logger.recordOutput("Vision/MeasurementErrors/rotationalStandardError", Math.toDegrees(estimationStandardErrorTheta));
+
+        final double translationStdDev = Math.hypot(
+                Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
+                Statistics.getStandardDeviation(robotPoseEstimationsYMeters)
+        );
+        final double rotationStdDev = Statistics.getStandardDeviation(robotPoseEstimationsThetaRadians);
+        Logger.recordOutput("Vision/MeasurementErrors/translationalStdDev", translationStdDev);
+        Logger.recordOutput("Vision/MeasurementErrors/rotationalStdDev", Math.toDegrees(rotationStdDev));
+        if (translationStdDev > TRANSLATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT || rotationStdDev > ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT)
+            return Optional.empty();
 
         return Optional.of(new RobotPoseEstimationResult(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),

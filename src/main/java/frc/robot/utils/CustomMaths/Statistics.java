@@ -71,6 +71,9 @@ public final class Statistics {
         if (estimations == null || estimations.length == 0)
             throw new IllegalArgumentException("At least one estimation is required.");
 
+        if (estimations.length == 1)
+            return estimations[0];
+
         double sumWeightedCenters = 0.0;
         double sumWeights = 0.0;
 

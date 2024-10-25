@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
@@ -52,11 +53,9 @@ public class AprilTagVision extends MapleSubsystem {
             this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
 
         result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
-        result = discardResultIfOverThreshold(result);
         result.ifPresent(robotPoseEstimationResult -> driveSubsystem.addVisionMeasurement(
-                robotPoseEstimationResult.pointEstimation,
-                getResultsTimeStamp(),
-                robotPoseEstimationResult.estimationStandardError
+                robotPoseEstimationResult,
+                getResultsTimeStamp()
         ));
 
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
@@ -64,35 +63,9 @@ public class AprilTagVision extends MapleSubsystem {
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Presented", result.isPresent());
     }
 
-    private Optional<RobotPoseEstimationResult> discardResultIfOverThreshold(Optional<RobotPoseEstimationResult> result) {
-        if (result.isEmpty())
-            return result;
-
-        double standardDeviationX = result.get().translationXStandardDeviationMeters,
-                standardDeviationY = result.get().translationYStandardDeviationMeters,
-                standardDeviationTheta = result.get().rotationalStandardDeviationRadians;
-        /* don't calibrate odometry if translation error is not inside range */
-        if (standardDeviationX > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD || standardDeviationY > TRANSLATIONAL_STANDARD_ERROR_THRESHOLD)
-            return Optional.empty();
-        /* don't calibrate gyro if rotation error is not inside range */
-        if (standardDeviationTheta > ROTATIONAL_STANDARD_ERROR_THRESHOLD) {
-            standardDeviationTheta = Double.POSITIVE_INFINITY;
-            if (Math.abs(driveSubsystem.getPose().getRotation()
-                    .minus(result.get().pointEstimation.getRotation())
-                    .getRadians()) > ROTATIONAL_UNMATCHING_WITH_GYRO_DISCARD_RESULT
-            ) return Optional.empty();
-        }
-
-        return Optional.of(new RobotPoseEstimationResult(
-                result.get().pointEstimation,
-                standardDeviationX,
-                standardDeviationY,
-                standardDeviationTheta
-        ));
-    }
 
     private Pose2d displayVisionPointEstimateResult(Optional<RobotPoseEstimationResult> result) {
-        if (result.isEmpty()) return null;
+        if (result.isEmpty()) return new Pose2d(-114514, -114514, new Rotation2d());
 
         if (Double.isInfinite(result.get().rotationalStandardDeviationRadians))
             return new Pose2d(result.get().pointEstimation.getTranslation(), driveSubsystem.getFacing());

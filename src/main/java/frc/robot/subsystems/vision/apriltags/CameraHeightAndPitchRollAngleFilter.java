@@ -4,7 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 
 
 public class CameraHeightAndPitchRollAngleFilter implements VisionResultsFilter  {
-    private static final double ROBOT_HEIGHT_TOLERANCE = 0.2, ROBOT_PITCH_TOLERANCE_RADIANS = Math.toRadians(12), ROBOT_ROLL_TOLERANCE_RADIANS = Math.toRadians(12);
+    private static final double ROBOT_HEIGHT_TOLERANCE = 0.3, ROBOT_PITCH_TOLERANCE_RADIANS = Math.toRadians(12), ROBOT_ROLL_TOLERANCE_RADIANS = Math.toRadians(12);
 
     @Override
     public String getFilterImplementationName() {

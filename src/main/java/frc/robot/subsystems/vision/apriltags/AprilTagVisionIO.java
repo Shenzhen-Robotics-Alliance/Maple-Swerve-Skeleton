@@ -63,10 +63,11 @@ public interface AprilTagVisionIO {
                 fiducialMarksID[i] = fiducialMarkIDLogged[i];
                 bestCameraToTargets[i] = bestCameraToTargetsLogged[i];
             }
-            Transform3d bestCameraToFieldTransform = table.get(cameraKey+"bestCameraToField", NULL_TRANSFORM);
-            this.bestFieldToCamera = bestCameraToFieldTransform.equals(NULL_TRANSFORM) ?
-                    Optional.empty()
-                    :Optional.of(bestCameraToFieldTransform);
+
+            if (table.get(cameraKey+"bestCameraToFieldPresents", false))
+                this.bestFieldToCamera = Optional.of(table.get(cameraKey+"bestCameraToField", new Transform3d()));
+            else
+                this.bestFieldToCamera = Optional.empty();
         }
 
         public void writeToLog(LogTable table, int cameraID) {
@@ -76,7 +77,8 @@ public interface AprilTagVisionIO {
             table.put(cameraKey+"CurrentTargetsCount", currentTargetsCount);
             table.put(cameraKey+"FiducialMarksID", fiducialMarksID);
             table.put(cameraKey+"bestCameraToTargets", bestCameraToTargets);
-            table.put(cameraKey+"bestCameraToField", bestFieldToCamera.orElse(NULL_TRANSFORM));
+            table.put(cameraKey+"bestCameraToFieldPresents", bestFieldToCamera.isPresent());
+            table.put(cameraKey+"bestCameraToField", bestFieldToCamera.orElse(new Transform3d()));
         }
     }
     class VisionInputs implements LoggableInputs {
