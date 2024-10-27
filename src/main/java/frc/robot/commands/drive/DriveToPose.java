@@ -56,7 +56,7 @@ public class DriveToPose extends Command {
             feedBackSpeeds.vxMetersPerSecond *= speedConstrainMPS / feedBackSpeedMagnitude;
             feedBackSpeeds.vyMetersPerSecond *= speedConstrainMPS / feedBackSpeedMagnitude;
         }
-        driveSubsystem.runRobotCentricChassisSpeeds(feedBackSpeeds);
+        driveSubsystem.runRobotCentricChassisSpeeds(feedBackSpeeds, false);
     }
 
     @Override

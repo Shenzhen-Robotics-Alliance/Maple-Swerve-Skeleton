@@ -23,8 +23,8 @@ public class VisionConstants {
             ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT = Math.toRadians(20),
 
             /* standard deviation for odometry and gyros */
-            ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.08,
-            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.5);
+            ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
+            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.1);
 
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(

@@ -36,7 +36,7 @@ public class ChassisFaceToRotation extends Command {
     @Override
     public void execute() {
         final double rotationFeedBack = chassisRotationController.calculate(driveSubsystem.getFacing().getRadians(), targetRotationSupplier.get().getRadians());
-        driveSubsystem.runRobotCentricChassisSpeeds(new ChassisSpeeds(0, 0, rotationFeedBack));
+        driveSubsystem.runRobotCentricChassisSpeeds(new ChassisSpeeds(0, 0, rotationFeedBack), false);
     }
 
     @Override

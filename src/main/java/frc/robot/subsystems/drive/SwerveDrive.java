@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.drive;
 
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,12 +13,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.Alert;
 import frc.robot.utils.MapleTimeUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -242,10 +240,13 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override public double getChassisMaxAngularVelocity() {return CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC;}
     @Override public double getChassisMaxAngularAccelerationRadPerSecSq() {return CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ;}
 
+    public static boolean acceptRotationalMeasurement = true;
     @Override
-    public void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {
-        poseEstimator.addVisionMeasurement(visionPose, timestamp ,measurementStdDevs);
+    public void addVisionMeasurement(MapleMultiTagPoseEstimator.RobotPoseEstimationResult poseEstimationResult, double timestamp) {
         previousMeasurementTimeStamp = Math.max(timestamp, previousMeasurementTimeStamp);
+        if (!acceptRotationalMeasurement)
+            poseEstimationResult.rotationalStandardDeviationRadians = 100;
+        poseEstimator.addVisionMeasurement(poseEstimationResult.pointEstimation, timestamp, poseEstimationResult.getEstimationStandardError());
     }
 
     private double previousMeasurementTimeStamp = -1;

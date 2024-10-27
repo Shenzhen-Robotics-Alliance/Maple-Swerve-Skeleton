@@ -49,7 +49,7 @@ public class JoystickDrive extends Command {
         this.previousRotationalInputTimer.start();
 
         this.rotationProfile = new TrapezoidProfile(new TrapezoidProfile.Constraints(
-                driveSubsystem.getChassisMaxAngularVelocity(),
+                driveSubsystem.getChassisMaxAngularVelocity() * 0.7,
                 driveSubsystem.getChassisMaxAngularAccelerationRadPerSecSq()
         ));
         this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
@@ -139,9 +139,9 @@ public class JoystickDrive extends Command {
         }
 
         if (useDriverStationCentricSwitch.getAsBoolean())
-            driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
+            driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance, true);
         else
-            driveSubsystem.runRobotCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
+            driveSubsystem.runRobotCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance, true);
 
         Logger.recordOutput("rotationMaintain", new Pose2d(
                 driveSubsystem.getPose().getTranslation(),

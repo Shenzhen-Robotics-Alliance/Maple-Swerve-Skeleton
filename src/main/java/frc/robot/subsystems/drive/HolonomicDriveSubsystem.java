@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.constants.FieldConstants;
+import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.LocalADStarAK;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
@@ -54,11 +55,10 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     /**
      * Adds a vision measurement to the pose estimator.
      *
-     * @param visionPose The pose of the robot as measured by the vision camera.
+     * @param poseEstimationResult the pose estimation result
      * @param timestamp  The timestamp of the vision measurement in seconds.
-     * @param measurementStdDevs the standard deviation of the measurement
      */
-    default void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {}
+    default void addVisionMeasurement(MapleMultiTagPoseEstimator.RobotPoseEstimationResult poseEstimationResult, double timestamp) {}
 
     /**
      * @return the measured(actual) velocities of the chassis, robot-relative
@@ -87,40 +87,37 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * runs a driverstation-centric ChassisSpeeds
      * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      * */
-    default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds) {
+    default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds, boolean discretize) {
         final Rotation2d driverStationFacing = FieldConstants.getDriverStationFacing();
         runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 driverStationCentricSpeeds,
                 getPose().getRotation().minus(driverStationFacing)
-        ));
+        ), discretize);
     }
 
     /**
      * runs a field-centric ChassisSpeeds
      * @param fieldCentricSpeeds a continuous chassis speeds, field-centric, normally from a pid position controller
      * */
-    default void runFieldCentricChassisSpeeds(ChassisSpeeds fieldCentricSpeeds) {
+    default void runFieldCentricChassisSpeeds(ChassisSpeeds fieldCentricSpeeds, boolean discretize) {
         runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
                 fieldCentricSpeeds,
                 getPose().getRotation()
-        ));
+        ), discretize);
     }
 
     default void stop() {
-        runRobotCentricChassisSpeeds(new ChassisSpeeds());
+        runRobotCentricChassisSpeeds(new ChassisSpeeds(), false);
     }
 
     /**
      * runs a ChassisSpeeds, pre-processed with ChassisSpeeds.discretize()
      * @param speeds a continuous chassis speed, robot-centric
      * */
-    default void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
-        final double PERCENT_DEADBAND = 0.02;
-        if (Math.abs(speeds.omegaRadiansPerSecond) < PERCENT_DEADBAND * getChassisMaxAngularVelocity()
-            && Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) < PERCENT_DEADBAND * getChassisMaxLinearVelocityMetersPerSec())
-            speeds = new ChassisSpeeds();
-
-        runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs));
+    default void runRobotCentricChassisSpeeds(ChassisSpeeds speeds, boolean discretize) {
+        if (discretize)
+            speeds = ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs);
+        runRawChassisSpeeds(speeds);
     }
 
     default void configHolonomicPathPlannerAutoBuilder() {
