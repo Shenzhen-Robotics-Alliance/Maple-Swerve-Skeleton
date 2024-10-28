@@ -5,7 +5,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.utils.CustomMaths.MapleCommonMath;
+import org.ironmaple.utils.mathutils.MapleCommonMath;
 
 import java.util.function.DoubleSupplier;
 

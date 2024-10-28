@@ -1,7 +1,7 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import frc.robot.utils.CustomMaths.MapleCommonMath;
+import org.ironmaple.utils.mathutils.MapleCommonMath;
 
 /**
  * interface for an LED animation that can be displayed on the dashboard or by an addressable led
