@@ -9,7 +9,7 @@ import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import java.util.List;
 
 public class VisionConstants {
-    public static final AprilTagFieldLayout fieldLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.8,

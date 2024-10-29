@@ -1,6 +1,7 @@
 package frc.robot.utils;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
@@ -53,7 +54,7 @@ public class MapleJoystickDriveInput {
         final double translationalSpeedMagnitudeScaled = Math.pow(originalTranslationalSpeed.getNorm(), LINEAR_SPEED_INPUT_EXPONENT);
         return new Translation2d(
                 translationalSpeedMagnitudeScaled * chassisMaxVelocityMetersPerSec,
-                originalTranslationalSpeed.getAngle()
+                translationalSpeedMagnitudeScaled == 0 ? Rotation2d.fromDegrees(0) : originalTranslationalSpeed.getAngle()
         );
     }
 

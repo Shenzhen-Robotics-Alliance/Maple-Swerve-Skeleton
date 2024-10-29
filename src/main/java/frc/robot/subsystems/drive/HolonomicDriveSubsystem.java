@@ -1,5 +1,3 @@
-// By 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/ under MIT License
-
 package frc.robot.subsystems.drive;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -8,15 +6,11 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.DriveFeedforward;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
@@ -24,9 +18,8 @@ import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.LocalADStarAK;
 import org.ironmaple.utils.FieldMirroringUtils;
+import org.ironmaple.utils.mathutils.MapleCommonMath;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.function.Consumer;
 
 import static frc.robot.constants.JoystickConfigs.*;
 import static frc.robot.constants.DriveControlLoops.*;
@@ -173,7 +166,9 @@ public interface HolonomicDriveSubsystem extends Subsystem {
 
         final double maxLinearVelocityChangeIn1Period = MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
         final boolean desiredLinearVelocityReachableWithin1Period = linearVelocityDifference.getNorm() <= maxLinearVelocityChangeIn1Period;
-        final Translation2d linearVelocityChangeVector = new Translation2d(maxLinearVelocityChangeIn1Period, linearVelocityDifference.getAngle()),
+        final Translation2d linearVelocityChangeVector = new Translation2d(
+                maxLinearVelocityChangeIn1Period,
+                MapleCommonMath.getAngle(linearVelocityDifference)),
                 newLinearVelocity = desiredLinearVelocityReachableWithin1Period ?
                 desiredLinearVelocityMetersPerSec
                 : currentLinearVelocityMetersPerSec.plus(linearVelocityChangeVector);

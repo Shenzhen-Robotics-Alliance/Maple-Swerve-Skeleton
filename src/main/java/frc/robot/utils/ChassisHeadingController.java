@@ -216,7 +216,7 @@ public class ChassisHeadingController {
                 "ChassisHeadingController/Error",
                 error.getDegrees()
         );
-        atSetPoint = Math.abs(error.getRadians()) < chassisRotationCloseLoop.getPositionTolerance();
+        atSetPoint = Math.abs(error.getRadians()) < chassisRotationCloseLoop.getErrorTolerance();
     }
 
     public boolean atSetPoint() {
