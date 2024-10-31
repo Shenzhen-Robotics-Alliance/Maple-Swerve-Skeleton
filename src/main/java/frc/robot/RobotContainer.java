@@ -237,6 +237,7 @@ public class RobotContainer {
                 "Example Pathplanner Auto",
                 new PathPlannerAutoWrapper("Example Auto")
         );
+        autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
