@@ -32,6 +32,7 @@ import frc.robot.utils.AIRobotInSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -116,26 +117,19 @@ public class RobotContainer {
             }
 
             case SIM -> {
-                final GyroSimulation gyroSimulation = GyroSimulation.createPigeon2();
                 this.driveSimulation = new SwerveDriveSimulation(
-                        DriveTrainConstants.ROBOT_MASS_KG,
-                        DriveTrainConstants.TRACK_WIDTH_METERS,
-                        DriveTrainConstants.TRACK_LENGTH_METERS,
-                        DriveTrainConstants.BUMPER_WIDTH_METERS,
-                        DriveTrainConstants.BUMPER_LENGTH_METERS,
-                        () -> new SwerveModuleSimulation(
-                                DriveTrainConstants.DRIVE_MOTOR,
-                                DriveTrainConstants.STEER_MOTOR,
-                                DriveTrainConstants.DRIVE_CURRENT_LIMIT,
-                                DriveTrainConstants.DRIVE_GEAR_RATIO,
-                                DriveTrainConstants.STEER_GEAR_RATIO,
-                                DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
-                                DriveTrainConstants.STEER_FRICTION_VOLTAGE,
-                                DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
-                                DriveTrainConstants.WHEEL_RADIUS_METERS,
-                                DriveTrainConstants.STEER_INERTIA
-                        ),
-                        gyroSimulation,
+                        DriveTrainSimulationConfig.Default()
+                                .withRobotMass(DriveTrainConstants.ROBOT_MASS_KG)
+                                .withBumperSize(DriveTrainConstants.BUMPER_LENGTH_METERS, DriveTrainConstants.BUMPER_WIDTH_METERS)
+                                .withTrackLengthTrackWidth(DriveTrainConstants.TRACK_LENGTH_METERS, DriveTrainConstants.TRACK_WIDTH_METERS)
+                                .withSwerveModule(() -> new SwerveModuleSimulation(
+                                        DriveTrainConstants.DRIVE_MOTOR, DriveTrainConstants.STEER_MOTOR,
+                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                        DriveTrainConstants.DRIVE_GEAR_RATIO, DriveTrainConstants.STEER_GEAR_RATIO,
+                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE, DriveTrainConstants.STEER_FRICTION_VOLTAGE,
+                                        DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION, DriveTrainConstants.WHEEL_RADIUS_METERS,
+                                        DriveTrainConstants.STEER_INERTIA
+                                )),
                         new Pose2d(3, 3, new Rotation2d())
                 );
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
@@ -147,7 +141,7 @@ public class RobotContainer {
                         frontRight = new ModuleIOSim(driveSimulation.getModules()[1]),
                         backLeft = new ModuleIOSim(driveSimulation.getModules()[2]),
                         backRight = new ModuleIOSim(driveSimulation.getModules()[3]);
-                final GyroIOSim gyroIOSim = new GyroIOSim(gyroSimulation);
+                final GyroIOSim gyroIOSim = new GyroIOSim(driveSimulation.getGyroSimulation());
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.GENERIC,
                         gyroIOSim,
