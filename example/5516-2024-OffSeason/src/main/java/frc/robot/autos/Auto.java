@@ -8,6 +8,7 @@ import frc.robot.RobotContainer;
 
 public interface Auto {
     Command getAutoCommand(RobotContainer robot);
+
     Pose2d getStartingPoseAtBlueAlliance();
 
     static Auto none() {

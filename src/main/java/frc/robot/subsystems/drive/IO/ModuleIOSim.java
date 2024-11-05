@@ -5,9 +5,8 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.util.Units;
-import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
-
 import java.util.Arrays;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 
 /**
  * Physics sim implementation of module IO.
@@ -23,11 +22,12 @@ public class ModuleIOSim implements ModuleIO {
         this.moduleSimulation = moduleSimulation;
     }
 
-
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        inputs.driveWheelFinalRevolutions = Units.radiansToRotations(moduleSimulation.getDriveWheelFinalPositionRad());
-        inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.radiansToRotations(moduleSimulation.getDriveWheelFinalSpeedRadPerSec());
+        inputs.driveWheelFinalRevolutions =
+                Units.radiansToRotations(moduleSimulation.getDriveWheelFinalPositionRad());
+        inputs.driveWheelFinalVelocityRevolutionsPerSec =
+                Units.radiansToRotations(moduleSimulation.getDriveWheelFinalSpeedRadPerSec());
         inputs.driveMotorAppliedVolts = moduleSimulation.getDriveMotorAppliedVolts();
         inputs.driveMotorCurrentAmps = moduleSimulation.getDriveMotorSupplyCurrentAmps();
 
@@ -36,15 +36,15 @@ public class ModuleIOSim implements ModuleIO {
         inputs.steerMotorAppliedVolts = moduleSimulation.getSteerMotorAppliedVolts();
         inputs.steerMotorCurrentAmps = moduleSimulation.getSteerMotorSupplyCurrentAmps();
 
-        inputs.odometryDriveWheelRevolutions = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositionsRad())
-                .map(Units::radiansToRotations)
-                .toArray();
+        inputs.odometryDriveWheelRevolutions =
+                Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositionsRad())
+                        .map(Units::radiansToRotations)
+                        .toArray();
 
         inputs.odometrySteerPositions = moduleSimulation.getCachedSteerAbsolutePositions();
 
         inputs.hardwareConnected = true;
     }
-
 
     @Override
     public void setDriveVoltage(double volts) {

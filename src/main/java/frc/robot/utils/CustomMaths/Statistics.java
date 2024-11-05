@@ -64,15 +64,12 @@ public final class Statistics {
         return linearFilter(estimations.toArray(Estimation[]::new));
     }
 
-    /**
-     * Given a set of estimations towards a value, calculates the overall estimation
-     * */
+    /** Given a set of estimations towards a value, calculates the overall estimation */
     public static Estimation linearFilter(Estimation... estimations) {
         if (estimations == null || estimations.length == 0)
             throw new IllegalArgumentException("At least one estimation is required.");
 
-        if (estimations.length == 1)
-            return estimations[0];
+        if (estimations.length == 1) return estimations[0];
 
         double sumWeightedCenters = 0.0;
         double sumWeights = 0.0;
@@ -96,9 +93,6 @@ public final class Statistics {
 
     public static double getStandardDeviation(Estimation... estimations) {
         return getStandardDeviation(
-                Arrays.stream(estimations)
-                        .mapToDouble(estimation -> estimation.center)
-                        .toArray()
-        );
+                Arrays.stream(estimations).mapToDouble(estimation -> estimation.center).toArray());
     }
 }

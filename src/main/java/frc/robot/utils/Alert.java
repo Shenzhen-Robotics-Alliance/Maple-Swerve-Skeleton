@@ -11,14 +11,11 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.littletonrobotics.junction.Logger;
-
 import java.util.*;
 import java.util.function.Predicate;
+import org.littletonrobotics.junction.Logger;
 
-/**
- * Class for managing persistent alerts to be sent over NetworkTables.
- */
+/** Class for managing persistent alerts to be sent over NetworkTables. */
 public class Alert {
     private static Map<String, SendableAlerts> groups = new HashMap<String, SendableAlerts>();
 
@@ -43,8 +40,8 @@ public class Alert {
      * entries will be added to NetworkTables.
      *
      * @param group Group identifier, also used as NetworkTables title
-     * @param text  Text to be displayed when the alert is active.
-     * @param type  Alert level specifying urgency.
+     * @param text Text to be displayed when the alert is active.
+     * @param type Alert level specifying urgency.
      */
     public Alert(String group, String text, AlertType type) {
         if (!groups.containsKey(group)) {
@@ -79,9 +76,7 @@ public class Alert {
         this.active = active;
     }
 
-    /**
-     * Updates current alert text.
-     */
+    /** Updates current alert text. */
     public void setText(String text) {
         if (active && !text.equals(this.text)) {
             switch (type) {
@@ -122,9 +117,7 @@ public class Alert {
         }
     }
 
-    /**
-     * Represents an alert's level of urgency.
-     */
+    /** Represents an alert's level of urgency. */
     public enum AlertType {
         /**
          * High priority alert - displayed first on the dashboard with a red "X" symbol. Use this type

@@ -2,7 +2,6 @@
 package frc.robot.utils.CustomConfigs;
 
 import edu.wpi.first.wpilibj.Filesystem;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,24 +45,37 @@ public class MapleConfigFile {
         public boolean hasStringConfig(String name) {
             return stringConfigs.containsKey(name);
         }
+
         public double getDoubleConfig(String name) throws NullPointerException {
             if (!hasDoubleConfig(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: double");
+                        "Configuration not found for block: "
+                                + blockName
+                                + ", config: "
+                                + name
+                                + ", type: double");
             return doubleConfigs.get(name);
         }
 
         public int getIntConfig(String name) throws NullPointerException {
             if (!hasIntConfig(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: int");
+                        "Configuration not found for block: "
+                                + blockName
+                                + ", config: "
+                                + name
+                                + ", type: int");
             return intConfigs.get(name);
         }
 
         public String getStringConfig(String name) throws NullPointerException {
             if (!hasStringConfig(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: string");
+                        "Configuration not found for block: "
+                                + blockName
+                                + ", config: "
+                                + name
+                                + ", type: string");
             return stringConfigs.get(name);
         }
 
@@ -222,7 +233,8 @@ public class MapleConfigFile {
         }
     }
 
-    private static void writeAllConfigBlocks(MapleConfigFile config, FileWriter writer) throws IOException {
+    private static void writeAllConfigBlocks(MapleConfigFile config, FileWriter writer)
+            throws IOException {
         for (String blockName : config.configBlocksOrder) {
             ConfigBlock block = config.configBlocks.get(blockName);
             writer.write("    <" + block.blockName + ">\n");
@@ -231,47 +243,48 @@ public class MapleConfigFile {
         }
     }
 
-    private static void writeSingleConfigBlock(ConfigBlock block, FileWriter writer) throws IOException {
-        for (String configName:block.configOrders) {
-            if (block.hasStringConfig(configName))
-                writeStringConfig(block, configName, writer);
-            else if (block.hasIntConfig(configName))
-                writeIntConfig(block, configName, writer);
-            else if (block.hasDoubleConfig(configName))
-                writeDoubleConfig(block, configName, writer);
+    private static void writeSingleConfigBlock(ConfigBlock block, FileWriter writer)
+            throws IOException {
+        for (String configName : block.configOrders) {
+            if (block.hasStringConfig(configName)) writeStringConfig(block, configName, writer);
+            else if (block.hasIntConfig(configName)) writeIntConfig(block, configName, writer);
+            else if (block.hasDoubleConfig(configName)) writeDoubleConfig(block, configName, writer);
         }
     }
 
-    private static void writeDoubleConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
-        writer.write("        <"
-                + configName
-                + " type=\"double\">"
-                + block.getDoubleConfig(configName)
-                + "</"
-                + configName
-                + ">\n"
-        );
+    private static void writeDoubleConfig(ConfigBlock block, String configName, FileWriter writer)
+            throws IOException {
+        writer.write(
+                "        <"
+                        + configName
+                        + " type=\"double\">"
+                        + block.getDoubleConfig(configName)
+                        + "</"
+                        + configName
+                        + ">\n");
     }
 
-    private static void writeStringConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
-        writer.write("        <"
-                + configName
-                + " type=\"string\">"
-                + block.getStringConfig(configName)
-                + "</"
-                + configName
-                + ">\n"
-        );
+    private static void writeStringConfig(ConfigBlock block, String configName, FileWriter writer)
+            throws IOException {
+        writer.write(
+                "        <"
+                        + configName
+                        + " type=\"string\">"
+                        + block.getStringConfig(configName)
+                        + "</"
+                        + configName
+                        + ">\n");
     }
 
-    private static void writeIntConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
-        writer.write("        <"
-                + configName
-                + " type=\"int\">"
-                + block.getIntConfig(configName)
-                + "</"
-                + configName
-                + ">\n"
-        );
+    private static void writeIntConfig(ConfigBlock block, String configName, FileWriter writer)
+            throws IOException {
+        writer.write(
+                "        <"
+                        + configName
+                        + " type=\"int\">"
+                        + block.getIntConfig(configName)
+                        + "</"
+                        + configName
+                        + ">\n");
     }
 }

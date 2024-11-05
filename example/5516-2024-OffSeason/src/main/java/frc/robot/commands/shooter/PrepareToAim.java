@@ -9,14 +9,13 @@ import frc.robot.subsystems.shooter.FlyWheels;
 import frc.robot.subsystems.shooter.Pitch;
 import frc.robot.utils.LEDAnimation;
 import frc.robot.utils.MapleShooterOptimization;
-
 import java.util.function.Supplier;
 
 /**
- * runs a static shooter optimization state calculated at the start of the command
- * on default it does not exit automatically, using this.untilReady() can make the command exit when the shooter is prepared
- * this is used to prepare for shooting
- * */
+ * runs a static shooter optimization state calculated at the start of the command on default it
+ * does not exit automatically, using this.untilReady() can make the command exit when the shooter
+ * is prepared this is used to prepare for shooting
+ */
 public class PrepareToAim extends Command {
     private final FlyWheels flyWheels;
     private final Pitch pitch;
@@ -26,16 +25,33 @@ public class PrepareToAim extends Command {
 
     private static final LEDAnimation PREPARING_TO_SHOOT = new LEDAnimation.Charging(255, 0, 255, 2);
 
-
     /**
-     * creates a prepare to aim command
-     * the static shooter state is calculated from the robot's estimated pose when the command is initialized
-     * */
-    public PrepareToAim(FlyWheels flyWheels, Pitch pitch, MapleShooterOptimization shooterOptimization, LEDStatusLight statusLight, HolonomicDriveSubsystem driveSubsystem, Supplier<Translation2d> targetPositionSupplier) {
-        this(flyWheels, pitch, shooterOptimization, statusLight, () -> driveSubsystem.getPose().getTranslation(), targetPositionSupplier);
+     * creates a prepare to aim command the static shooter state is calculated from the robot's
+     * estimated pose when the command is initialized
+     */
+    public PrepareToAim(
+            FlyWheels flyWheels,
+            Pitch pitch,
+            MapleShooterOptimization shooterOptimization,
+            LEDStatusLight statusLight,
+            HolonomicDriveSubsystem driveSubsystem,
+            Supplier<Translation2d> targetPositionSupplier) {
+        this(
+                flyWheels,
+                pitch,
+                shooterOptimization,
+                statusLight,
+                () -> driveSubsystem.getPose().getTranslation(),
+                targetPositionSupplier);
     }
 
-    public PrepareToAim(FlyWheels flyWheels, Pitch pitch, MapleShooterOptimization shooterOptimization, LEDStatusLight statusLight, Supplier<Translation2d> robotPositionSupplier, Supplier<Translation2d> targetPositionSupplier) {
+    public PrepareToAim(
+            FlyWheels flyWheels,
+            Pitch pitch,
+            MapleShooterOptimization shooterOptimization,
+            LEDStatusLight statusLight,
+            Supplier<Translation2d> robotPositionSupplier,
+            Supplier<Translation2d> targetPositionSupplier) {
         this.flyWheels = flyWheels;
         this.pitch = pitch;
         this.statusLight = statusLight;
@@ -48,16 +64,14 @@ public class PrepareToAim extends Command {
 
     private MapleShooterOptimization.ShooterState initialState;
     private boolean running = false;
+
     @Override
     public void initialize() {
         running = false;
-        this.initialState = shooterOptimization.getOptimizedShootingState(
-                targetPositionSupplier.get(),
-                robotPositionSupplier.get(),
-                new ChassisSpeeds()
-        );
+        this.initialState =
+                shooterOptimization.getOptimizedShootingState(
+                        targetPositionSupplier.get(), robotPositionSupplier.get(), new ChassisSpeeds());
     }
-
 
     @Override
     public void execute() {
@@ -65,13 +79,11 @@ public class PrepareToAim extends Command {
         flyWheels.runRPMProfiled(initialState.shooterRPM);
         pitch.runSetPointProfiled(Math.toRadians(initialState.shooterAngleDegrees));
 
-        if (statusLight != null)
-            statusLight.setAnimation(PREPARING_TO_SHOOT);
+        if (statusLight != null) statusLight.setAnimation(PREPARING_TO_SHOOT);
     }
 
     public Command untilReady() {
-        return super.beforeStarting(() -> running = false)
-                .until(this::isReady);
+        return super.beforeStarting(() -> running = false).until(this::isReady);
     }
 
     public boolean isReady() {

@@ -6,29 +6,25 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 /**
- * stores the constants and PID configs for chassis
- * because we want an all-real simulation for the chassis, the numbers are required to be considerably precise
- * */
+ * stores the constants and PID configs for chassis because we want an all-real simulation for the
+ * chassis, the numbers are required to be considerably precise
+ */
 public class DriveTrainConstants {
     /**
-     * numbers that needs to be changed to fit each robot
-     * TODO: change these numbers to match your robot
-     *  */
-    public static final double
-            WHEEL_COEFFICIENT_OF_FRICTION = 1.25, // 1.15 for tire wheels
+     * numbers that needs to be changed to fit each robot TODO: change these numbers to match your
+     * robot
+     */
+    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.25, // 1.15 for tire wheels
             ROBOT_MASS_KG = 40; // robot weight with bumpers
 
-    /**
-     *  TODO: change motor type to match your robot
-     *  */
-    public static final DCMotor
-            DRIVE_MOTOR = DCMotor.getKrakenX60(1),
+    /** TODO: change motor type to match your robot */
+    public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60(1),
             STEER_MOTOR = DCMotor.getFalcon500(1);
 
     /**
-     * numbers imported from {@link TunerConstants}
-     * TODO: for REV chassis, replace them with actual numbers
-     * */
+     * numbers imported from {@link TunerConstants} TODO: for REV chassis, replace them with actual
+     * numbers
+     */
     public static final double
             WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
             DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
@@ -41,53 +37,57 @@ public class DriveTrainConstants {
     public static final double DRIVE_CURRENT_LIMIT = 60;
     public static final double STEER_CURRENT_LIMIT = 20;
 
+    /** translations of the modules to the robot center, in FL, FR, BL, BR */
+    public static final Translation2d[] MODULE_TRANSLATIONS =
+            new Translation2d[] {
+                new Translation2d(
+                        Units.inchesToMeters(TunerConstants.kFrontLeftXPosInches),
+                        Units.inchesToMeters(TunerConstants.kFrontLeftYPosInches)),
+                new Translation2d(
+                        Units.inchesToMeters(TunerConstants.kFrontRightXPosInches),
+                        Units.inchesToMeters(TunerConstants.kFrontRightYPosInches)),
+                new Translation2d(
+                        Units.inchesToMeters(TunerConstants.kBackLeftXPosInches),
+                        Units.inchesToMeters(TunerConstants.kBackLeftYPosInches)),
+                new Translation2d(
+                        Units.inchesToMeters(TunerConstants.kBackRightXPosInches),
+                        Units.inchesToMeters(TunerConstants.kBackRightYPosInches))
+            };
 
-    /**
-     * translations of the modules to the robot center, in FL, FR, BL, BR
-     * */
-    public static final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
-            new Translation2d(
-                    Units.inchesToMeters(TunerConstants.kFrontLeftXPosInches),
-                    Units.inchesToMeters(TunerConstants.kFrontLeftYPosInches)
-            ),
-            new Translation2d(
-                    Units.inchesToMeters(TunerConstants.kFrontRightXPosInches),
-                    Units.inchesToMeters(TunerConstants.kFrontRightYPosInches)
-            ),
-            new Translation2d(
-                    Units.inchesToMeters(TunerConstants.kBackLeftXPosInches),
-                    Units.inchesToMeters(TunerConstants.kBackLeftYPosInches)
-            ),
-            new Translation2d(
-                    Units.inchesToMeters(TunerConstants.kBackRightXPosInches),
-                    Units.inchesToMeters(TunerConstants.kBackRightYPosInches)
-            )
-    };
-    public static final double TRACK_LENGTH_METERS = Units.inchesToMeters(TunerConstants.kFrontLeftXPosInches - TunerConstants.kBackLeftXPosInches),
-            TRACK_WIDTH_METERS = Units.inchesToMeters(TunerConstants.kFrontLeftYPosInches - TunerConstants.kFrontRightYPosInches);
+    public static final double
+            TRACK_LENGTH_METERS =
+                    Units.inchesToMeters(
+                            TunerConstants.kFrontLeftXPosInches - TunerConstants.kBackLeftXPosInches),
+            TRACK_WIDTH_METERS =
+                    Units.inchesToMeters(
+                            TunerConstants.kFrontLeftYPosInches - TunerConstants.kFrontRightYPosInches);
 
     /* equations that calculates some constants for the simulator (don't modify) */
     private static final double GRAVITY_CONSTANT = 9.8;
-    public static final double
-            DRIVE_BASE_RADIUS = MODULE_TRANSLATIONS[0].getNorm(),
+    public static final double DRIVE_BASE_RADIUS = MODULE_TRANSLATIONS[0].getNorm(),
             /* friction_force = normal_force * coefficient_of_friction */
             MAX_FRICTION_ACCELERATION = GRAVITY_CONSTANT * WHEEL_COEFFICIENT_OF_FRICTION,
             /* force = torque / distance */
-            MAX_PROPELLING_FORCE_NEWTONS = DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT) * DRIVE_GEAR_RATIO / WHEEL_RADIUS_METERS,
+            MAX_PROPELLING_FORCE_NEWTONS =
+                    DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT) * DRIVE_GEAR_RATIO / WHEEL_RADIUS_METERS,
             /* floor_speed = wheel_angular_velocity * wheel_radius */
-            CHASSIS_MAX_VELOCITY = DRIVE_MOTOR.freeSpeedRadPerSec / DRIVE_GEAR_RATIO * WHEEL_RADIUS_METERS , // calculate using choreo
-            CHASSIS_MAX_ACCELERATION_MPS_SQ = Math.min(
-                    MAX_FRICTION_ACCELERATION, // cannot exceed max friction
-                    MAX_PROPELLING_FORCE_NEWTONS / ROBOT_MASS_KG
-            ),
+            CHASSIS_MAX_VELOCITY =
+                    DRIVE_MOTOR.freeSpeedRadPerSec
+                            / DRIVE_GEAR_RATIO
+                            * WHEEL_RADIUS_METERS, // calculate using choreo
+            CHASSIS_MAX_ACCELERATION_MPS_SQ =
+                    Math.min(
+                            MAX_FRICTION_ACCELERATION, // cannot exceed max friction
+                            MAX_PROPELLING_FORCE_NEWTONS / ROBOT_MASS_KG),
             CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC = CHASSIS_MAX_VELOCITY / DRIVE_BASE_RADIUS,
-            CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS * 2;
+            CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ =
+                    CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS * 2;
 
-    public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
+    public static final SwerveDriveKinematics DRIVE_KINEMATICS =
+            new SwerveDriveKinematics(MODULE_TRANSLATIONS);
 
     /* for collision detection in simulation */
-    public static final double
-            BUMPER_WIDTH_METERS = Units.inchesToMeters(30),
+    public static final double BUMPER_WIDTH_METERS = Units.inchesToMeters(30),
             BUMPER_LENGTH_METERS = Units.inchesToMeters(30),
             /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
             BUMPER_COEFFICIENT_OF_FRICTION = 0.65,

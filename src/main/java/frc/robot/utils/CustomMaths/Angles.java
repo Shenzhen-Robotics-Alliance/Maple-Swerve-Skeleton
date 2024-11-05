@@ -19,10 +19,10 @@ public class Angles {
      * gets the shortest rotational distance(and its direction) needed to get from the current to
      * targeted rotation
      *
-     * @param currentRotation  the current rotation, in radian
+     * @param currentRotation the current rotation, in radian
      * @param targetedRotation the desired rotation, in radian
      * @return the shortest distance between the two points, in radian and positive is
-     * counter-clockwise
+     *     counter-clockwise
      */
     public static double getActualDifference(double currentRotation, double targetedRotation) {
         final double loopLength = Math.PI * 2;
@@ -34,9 +34,7 @@ public class Angles {
         return difference;
     }
 
-    /**
-     * get the mid point between two points
-     */
+    /** get the mid point between two points */
     public static double findMidPoint(double rotation1, double rotation2) {
         return simplifyAngle(rotation1 + getActualDifference(rotation1, rotation2));
     }

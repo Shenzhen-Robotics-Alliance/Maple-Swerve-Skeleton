@@ -71,71 +71,49 @@ public class Robot extends LoggedRobot {
         Logger.start();
     }
 
-    /**
-     * This function is called periodically during all modes.
-     */
+    /** This function is called periodically during all modes. */
     @Override
     public void robotPeriodic() {
-        if (CURRENT_ROBOT_MODE == RobotMode.SIM)
-            robotContainer.updateFieldSimAndDisplay();
+        if (CURRENT_ROBOT_MODE == RobotMode.SIM) robotContainer.updateFieldSimAndDisplay();
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
     }
 
-    /**
-     * This function is called once when the robot is disabled.
-     */
+    /** This function is called once when the robot is disabled. */
     @Override
-    public void disabledInit() {
-    }
+    public void disabledInit() {}
 
-    /**
-     * This function is called periodically when disabled.
-     */
+    /** This function is called periodically when disabled. */
     @Override
     public void disabledPeriodic() {
         robotContainer.checkForCommandChanges();
     }
 
-    /**
-     * This autonomous runs the autonomous command selected by your {@link RobotContainer} class.
-     */
+    /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
     @Override
     public void autonomousInit() {
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
-        if (autonomousCommand != null)
-            autonomousCommand.schedule();
+        if (autonomousCommand != null) autonomousCommand.schedule();
     }
 
-    /**
-     * This function is called periodically during autonomous.
-     */
+    /** This function is called periodically during autonomous. */
     @Override
-    public void autonomousPeriodic() {
-    }
+    public void autonomousPeriodic() {}
 
-    /**
-     * This function is called once when teleop is enabled.
-     */
+    /** This function is called once when teleop is enabled. */
     @Override
     public void teleopInit() {
         if (autonomousCommand != null) autonomousCommand.cancel();
         robotContainer.teleOpInit();
     }
 
-    /**
-     * This function is called periodically during operator control.
-     */
+    /** This function is called periodically during operator control. */
     @Override
-    public void teleopPeriodic() {
+    public void teleopPeriodic() {}
 
-    }
-
-    /**
-     * This function is called once when test mode is enabled.
-     */
+    /** This function is called once when test mode is enabled. */
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
@@ -143,29 +121,20 @@ public class Robot extends LoggedRobot {
         CommandScheduler.getInstance().schedule(robotContainer.getTestCommand());
     }
 
-    /**
-     * This function is called periodically during test mode.
-     */
+    /** This function is called periodically during test mode. */
     @Override
-    public void testPeriodic() {
-    }
+    public void testPeriodic() {}
 
     @Override
     public void testExit() {
         robotContainer.configureButtonBindings();
     }
 
-    /**
-     * This function is called once when the robot is first started up.
-     */
+    /** This function is called once when the robot is first started up. */
     @Override
-    public void simulationInit() {
-    }
+    public void simulationInit() {}
 
-    /**
-     * This function is called periodically whilst in simulation.
-     */
+    /** This function is called periodically whilst in simulation. */
     @Override
-    public void simulationPeriodic() {
-    }
+    public void simulationPeriodic() {}
 }

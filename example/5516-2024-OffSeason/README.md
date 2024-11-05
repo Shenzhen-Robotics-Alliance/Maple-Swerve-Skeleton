@@ -25,7 +25,7 @@ During the build season, this means you can begin writing robot code as soon as 
 
 ## Playing this demo
 > ⚠️ If you are not used to FRC Java programming, you might need some help from a programmer in your team
-> 
+>
 1. Open the latest build of [Advantage-Scope](https://github.com/Mechanical-Advantage/AdvantageScope), select `Help -> Use Custom Assets Folder`, select `Maple-Swerve-Skelton/example/5516-2024-OffSeason/AdvantageScopeAssets`
 2. In [WPILib Vscode](), run `Simulate Java` according to [this guide](https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/introduction.html#introduction-to-robot-simulation)
 3. In Advantage Scope:

@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.drive.IO;
 
+import static frc.robot.constants.DriveTrainConstants.*;
+
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
@@ -13,10 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
-
 import java.util.Queue;
-
-import static frc.robot.constants.DriveTrainConstants.*;
 
 /**
  * Module IO implementation for SparkMax drive motor controller, SparkMax turn motor controller (NEO
@@ -103,15 +102,12 @@ public class ModuleIOSpark implements ModuleIO {
         steerSparkMax.setCANTimeout(0);
 
         driveSparkMax.setPeriodicFramePeriod(
-                PeriodicFrame.kStatus2,
-                (int) (1000.0 / ODOMETRY_FREQUENCY)
-        );
+                PeriodicFrame.kStatus2, (int) (1000.0 / ODOMETRY_FREQUENCY));
         steerSparkMax.setPeriodicFramePeriod(
-                PeriodicFrame.kStatus2,
-                (int) (1000.0 / ODOMETRY_FREQUENCY)
-        );
+                PeriodicFrame.kStatus2, (int) (1000.0 / ODOMETRY_FREQUENCY));
         this.drivePositionInput = OdometryThread.registerInput(driveEncoder::getPosition);
-        this.steerRelativeEncoderPositionUngeared = OdometryThread.registerInput(steerRelativeEncoder::getPosition);
+        this.steerRelativeEncoderPositionUngeared =
+                OdometryThread.registerInput(steerRelativeEncoder::getPosition);
 
         driveSparkMax.burnFlash();
         steerSparkMax.burnFlash();
@@ -120,38 +116,49 @@ public class ModuleIOSpark implements ModuleIO {
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
         inputs.driveWheelFinalRevolutions = driveEncoder.getPosition() / DRIVE_GEAR_RATIO;
-        final double RPM_TO_REVOLUTIONS_PER_SECOND = 1.0/60.0;
-        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveEncoder.getVelocity() / DRIVE_GEAR_RATIO
-                * RPM_TO_REVOLUTIONS_PER_SECOND;
+        final double RPM_TO_REVOLUTIONS_PER_SECOND = 1.0 / 60.0;
+        inputs.driveWheelFinalVelocityRevolutionsPerSec =
+                driveEncoder.getVelocity() / DRIVE_GEAR_RATIO * RPM_TO_REVOLUTIONS_PER_SECOND;
 
-        inputs.driveMotorAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
+        inputs.driveMotorAppliedVolts =
+                driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
         inputs.driveMotorCurrentAmps = driveSparkMax.getOutputCurrent();
 
-        inputs.steerFacing = Rotation2d.fromRotations(steerRelativeEncoder.getPosition() / STEER_GEAR_RATIO).minus(steerRelativePositionEncoderOffset);
-        inputs.steerVelocityRadPerSec = Units.rotationsPerMinuteToRadiansPerSecond(
-                steerRelativeEncoder.getVelocity() / STEER_GEAR_RATIO
-        );
+        inputs.steerFacing =
+                Rotation2d.fromRotations(steerRelativeEncoder.getPosition() / STEER_GEAR_RATIO)
+                        .minus(steerRelativePositionEncoderOffset);
+        inputs.steerVelocityRadPerSec =
+                Units.rotationsPerMinuteToRadiansPerSecond(
+                        steerRelativeEncoder.getVelocity() / STEER_GEAR_RATIO);
 
-        inputs.steerMotorAppliedVolts = steerSparkMax.getAppliedOutput() * steerSparkMax.getBusVoltage();
+        inputs.steerMotorAppliedVolts =
+                steerSparkMax.getAppliedOutput() * steerSparkMax.getBusVoltage();
         inputs.steerMotorCurrentAmps = steerSparkMax.getOutputCurrent();
 
-        inputs.odometryDriveWheelRevolutions = drivePositionInput.stream()
-                .mapToDouble(value -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
-                .toArray();
+        inputs.odometryDriveWheelRevolutions =
+                drivePositionInput.stream()
+                        .mapToDouble(value -> Units.rotationsToRadians(value) / DRIVE_GEAR_RATIO)
+                        .toArray();
         drivePositionInput.clear();
-        inputs.odometrySteerPositions = steerRelativeEncoderPositionUngeared.stream()
-                .map(value -> Rotation2d.fromRotations(value / STEER_GEAR_RATIO).minus(steerRelativePositionEncoderOffset))
-                .toArray(Rotation2d[]::new);
+        inputs.odometrySteerPositions =
+                steerRelativeEncoderPositionUngeared.stream()
+                        .map(
+                                value ->
+                                        Rotation2d.fromRotations(value / STEER_GEAR_RATIO)
+                                                .minus(steerRelativePositionEncoderOffset))
+                        .toArray(Rotation2d[]::new);
         steerRelativeEncoderPositionUngeared.clear();
     }
 
     private Rotation2d steerRelativePositionEncoderOffset = new Rotation2d();
+
     @Override
     public void calibrate() {
-        final Rotation2d steerActualFacing = Rotation2d.fromRotations(
-                turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V()
-                ).minus(absoluteEncoderOffset);
-        final Rotation2d relativeEncoderReportedFacing = Rotation2d.fromRotations(steerRelativeEncoder.getPosition() / STEER_GEAR_RATIO);
+        final Rotation2d steerActualFacing =
+                Rotation2d.fromRotations(turnAbsoluteEncoder.getVoltage() / RobotController.getVoltage5V())
+                        .minus(absoluteEncoderOffset);
+        final Rotation2d relativeEncoderReportedFacing =
+                Rotation2d.fromRotations(steerRelativeEncoder.getPosition() / STEER_GEAR_RATIO);
         /* reported - offset = actual, so offset = reported - actual */
         steerRelativePositionEncoderOffset = relativeEncoderReportedFacing.minus(steerActualFacing);
     }

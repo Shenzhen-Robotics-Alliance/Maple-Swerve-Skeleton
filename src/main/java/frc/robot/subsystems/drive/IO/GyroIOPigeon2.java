@@ -10,12 +10,9 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-
 import java.util.Queue;
 
-/**
- * IO implementation for Pigeon2
- */
+/** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon;
     private final StatusSignal<Double> yaw;
@@ -26,16 +23,13 @@ public class GyroIOPigeon2 implements GyroIO {
         this(
                 drivetrainConstants.Pigeon2Id,
                 drivetrainConstants.CANbusName,
-                drivetrainConstants.Pigeon2Configs
-        );
+                drivetrainConstants.Pigeon2Configs);
     }
 
     public GyroIOPigeon2(int Pigeon2Id, String CANbusName, Pigeon2Configuration Pigeon2Configs) {
         pigeon = new Pigeon2(Pigeon2Id, CANbusName);
-        if (Pigeon2Configs != null)
-            pigeon.getConfigurator().apply(Pigeon2Configs);
-        else
-            pigeon.getConfigurator().apply(new Pigeon2Configuration());
+        if (Pigeon2Configs != null) pigeon.getConfigurator().apply(Pigeon2Configs);
+        else pigeon.getConfigurator().apply(new Pigeon2Configuration());
         pigeon.getConfigurator().setYaw(0.0);
 
         yaw = pigeon.getYaw();
@@ -53,9 +47,8 @@ public class GyroIOPigeon2 implements GyroIO {
         inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
         inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
 
-        inputs.odometryYawPositions = yawPositionInput.stream()
-                .map(Rotation2d::fromDegrees)
-                .toArray(Rotation2d[]::new);
+        inputs.odometryYawPositions =
+                yawPositionInput.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
         yawPositionInput.clear();
     }
 }

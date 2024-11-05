@@ -7,27 +7,23 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
+import org.json.simple.parser.ParseException;
 
 public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
     @Override
     public Command getAutoCommand(RobotContainer robot) throws IOException, ParseException {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
         commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush first")).asProxy()
-        );
+                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush first")).asProxy());
         commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush second")).asProxy()
-        );
+                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush second")).asProxy());
         commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush third")).asProxy()
-        );
+                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush third")).asProxy());
 
         commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush fourth and shoot")).asProxy()
-        );
+                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush fourth and shoot"))
+                        .asProxy());
         return commandGroup;
     }
 

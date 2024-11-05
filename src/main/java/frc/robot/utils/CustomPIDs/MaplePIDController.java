@@ -7,32 +7,40 @@ import edu.wpi.first.math.util.Units;
 
 public class MaplePIDController extends PIDController {
     private final MaplePIDConfig config;
-    public MaplePIDController(
-            MaplePIDConfig config
-    ) {
+
+    public MaplePIDController(MaplePIDConfig config) {
         super(config.Kp, config.Ki, config.Kd);
-        if (config.isCircularLoop)
-            super.enableContinuousInput(0, Units.rotationsToRadians(1));
+        if (config.isCircularLoop) super.enableContinuousInput(0, Units.rotationsToRadians(1));
         super.setTolerance(config.errorTolerance);
         this.config = config;
     }
 
     @Override
     public double calculate(double measurement) {
-        final double constrainedCorrection = MathUtil.clamp(super.calculate(measurement), -config.maximumPower, config.maximumPower);
+        final double constrainedCorrection =
+                MathUtil.clamp(super.calculate(measurement), -config.maximumPower, config.maximumPower);
 
-        if (Math.abs(constrainedCorrection) < config.deadBand)
-            return 0;
+        if (Math.abs(constrainedCorrection) < config.deadBand) return 0;
         return constrainedCorrection;
-
     }
 
     public static final class MaplePIDConfig {
-        public final double maximumPower, errorStartDecelerate, deadBand, errorTolerance, timeThinkAhead;
+        public final double maximumPower,
+                errorStartDecelerate,
+                deadBand,
+                errorTolerance,
+                timeThinkAhead;
         public final double Kp, Ki, Kd;
         public final boolean isCircularLoop;
 
-        public MaplePIDConfig(double maximumPower, double errorStartDecelerate, double percentDeadBand, double errorTolerance, double timeThinkAhead, boolean isCircularLoop, double ki) {
+        public MaplePIDConfig(
+                double maximumPower,
+                double errorStartDecelerate,
+                double percentDeadBand,
+                double errorTolerance,
+                double timeThinkAhead,
+                boolean isCircularLoop,
+                double ki) {
             this.maximumPower = maximumPower;
             this.errorStartDecelerate = errorStartDecelerate;
             this.deadBand = percentDeadBand * maximumPower;

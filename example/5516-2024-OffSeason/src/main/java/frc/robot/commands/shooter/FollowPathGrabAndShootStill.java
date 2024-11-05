@@ -1,5 +1,7 @@
 package frc.robot.commands.shooter;
 
+import static frc.robot.constants.FieldConstants.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -14,38 +16,72 @@ import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.MaplePathPlannerLoader;
 import frc.robot.utils.MapleShooterOptimization;
 
-import static frc.robot.constants.FieldConstants.*;
-
 public class FollowPathGrabAndShootStill extends SequentialCommandGroup {
-    public FollowPathGrabAndShootStill(PathPlannerPath pathAtBlueAlliance, double distanceToTargetMetersStartPreparing, HolonomicDriveSubsystem driveSubsystem, Intake intake, Pitch pitch, FlyWheels flyWheels, MapleShooterOptimization shooterOptimization, LEDStatusLight statusLight, CompetitionFieldVisualizer visualizer) {
-        final Command followPath = AutoBuilder.followPath(pathAtBlueAlliance)
-                .andThen(Commands.runOnce(driveSubsystem::stop, driveSubsystem))
-                .andThen(Commands.waitUntil(intake::isNotePresent).raceWith(Commands.waitSeconds(1))); // after the robot has stopped, wait for up to 1 sec
+    public FollowPathGrabAndShootStill(
+            PathPlannerPath pathAtBlueAlliance,
+            double distanceToTargetMetersStartPreparing,
+            HolonomicDriveSubsystem driveSubsystem,
+            Intake intake,
+            Pitch pitch,
+            FlyWheels flyWheels,
+            MapleShooterOptimization shooterOptimization,
+            LEDStatusLight statusLight,
+            CompetitionFieldVisualizer visualizer) {
+        final Command followPath =
+                AutoBuilder.followPath(pathAtBlueAlliance)
+                        .andThen(Commands.runOnce(driveSubsystem::stop, driveSubsystem))
+                        .andThen(
+                                Commands.waitUntil(intake::isNotePresent)
+                                        .raceWith(
+                                                Commands.waitSeconds(
+                                                        1))); // after the robot has stopped, wait for up to 1 sec
         final Command intakeDuringFollowPath = intake.executeIntakeNote();
-        final Command prepareToShootDuringFollowPath = Commands.waitUntil(
-                () -> MaplePathPlannerLoader.getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get().getTranslation()
-                        .getDistance(driveSubsystem.getPose().getTranslation()) < distanceToTargetMetersStartPreparing
-                )
-                .deadlineWith(pitch.run(pitch::runIdle))
-                .deadlineWith(flyWheels.getFlyWheelsDefaultCommand())
-                .andThen(new PrepareToAim(
-                        flyWheels, pitch, shooterOptimization, statusLight,
-                        () -> MaplePathPlannerLoader.getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get().getTranslation(),
-                        SPEAKER_POSITION_SUPPLIER)
-                );
+        final Command prepareToShootDuringFollowPath =
+                Commands.waitUntil(
+                                () ->
+                                        MaplePathPlannerLoader.getEndingRobotPoseInCurrentAllianceSupplier(
+                                                                pathAtBlueAlliance)
+                                                        .get()
+                                                        .getTranslation()
+                                                        .getDistance(driveSubsystem.getPose().getTranslation())
+                                                < distanceToTargetMetersStartPreparing)
+                        .deadlineWith(pitch.run(pitch::runIdle))
+                        .deadlineWith(flyWheels.getFlyWheelsDefaultCommand())
+                        .andThen(
+                                new PrepareToAim(
+                                        flyWheels,
+                                        pitch,
+                                        shooterOptimization,
+                                        statusLight,
+                                        () ->
+                                                MaplePathPlannerLoader.getEndingRobotPoseInCurrentAllianceSupplier(
+                                                                pathAtBlueAlliance)
+                                                        .get()
+                                                        .getTranslation(),
+                                        SPEAKER_POSITION_SUPPLIER));
 
-        super.addCommands(followPath.deadlineWith(
-                intakeDuringFollowPath.alongWith(prepareToShootDuringFollowPath)
-        ));
+        super.addCommands(
+                followPath.deadlineWith(intakeDuringFollowPath.alongWith(prepareToShootDuringFollowPath)));
 
-        super.addCommands(AimAtSpeakerFactory.shootAtSpeakerStill(
-                driveSubsystem, intake, pitch, flyWheels, shooterOptimization, statusLight, visualizer
-        ));
+        super.addCommands(
+                AimAtSpeakerFactory.shootAtSpeakerStill(
+                        driveSubsystem,
+                        intake,
+                        pitch,
+                        flyWheels,
+                        shooterOptimization,
+                        statusLight,
+                        visualizer));
 
-        super.addCommands(Commands.runOnce(() -> {
-            intake.runIdle();
-            flyWheels.runIdle();
-            pitch.runIdle();
-        }, intake, pitch, flyWheels));
+        super.addCommands(
+                Commands.runOnce(
+                        () -> {
+                            intake.runIdle();
+                            flyWheels.runIdle();
+                            pitch.runIdle();
+                        },
+                        intake,
+                        pitch,
+                        flyWheels));
     }
 }

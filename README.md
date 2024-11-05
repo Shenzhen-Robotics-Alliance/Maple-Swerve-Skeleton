@@ -56,7 +56,7 @@ We also offer a convenient feature that automatically generates the [Advantage S
 - ### CTRE Chassis
   1. Generate [TunerConstants.java](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/constants/TunerConstants.java) using [CTRE's Swerve Project Generator](https://v6.docs.ctr-electronics.com/en/latest/docs/tuner/tuner-swerve/index.html) and drop it to `src/main/java/constants/` .
   2. In vscode, use `Control` + `H` to replace all `private` tags in `TunerConstants` with `public`
-  3. Delete the last two lines 
+  3. Delete the last two lines
     ``` Java
     // TODO: the last two lines MUST be removed
     public static final CommandSwerveDrivetrain DriveTrain = new CommandSwerveDrivetrain(DrivetrainConstants, FrontLeft,
@@ -71,9 +71,9 @@ We also offer a convenient feature that automatically generates the [Advantage S
     public static final double
       WHEEL_COEFFICIENT_OF_FRICTION = 0.95,
       ROBOT_MASS_KG = 40; // with bumpers
-  
+
     /**
-    * TODO: change motor type to match your robot 
+    * TODO: change motor type to match your robot
     * */
     public static final DCMotor
       DRIVE_MOTOR = DCMotor.getKrakenX60(1),
@@ -82,9 +82,9 @@ We also offer a convenient feature that automatically generates the [Advantage S
     5. Try Driving Your Chassis On Field !!!
 - ### Rev Chassis
     > ⚠️ This project **supports** Rev hardware.  However, it has not been tested on a physical Rev Chassis simply because **we don't have one**.  If your team has an Rev Chassis and willing to test and debug our code, you are absolutely welcome and appreciated.
-    
+
     1. in [RobotContainer.java](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/RobotContainer.java) line 100, change all `ModuleIOTalon` to `ModuleIOSpark`
-       ``` java                 
+       ``` java
        /* CTRE Chassis: */
        drive = new SwerveDrive(
          new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
@@ -114,24 +114,24 @@ We also offer a convenient feature that automatically generates the [Advantage S
     // Run Log-Replay technology
     private static final Constants.RobotMode JAVA_SIM_MODE = Constants.RobotMode.REPLAY;
     ```
-  
+
     > 💡 There is **no need** to change the mode to `REAL` when deploying to real robot as the program will automatically switch to `REAL` mode if it is detected to be running on a real robot
     ```java
     public static final Constants.RobotMode CURRENT_ROBOT_MODE = isReal() ? Constants.RobotMode.REAL : JAVA_SIM_MODE;
     ```
 
 
-2. Run the [WPILib Java Simulation](https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/introduction.html) and connect a gamepad to port 0 
-    
+2. Run the [WPILib Java Simulation](https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/introduction.html) and connect a gamepad to port 0
+
 3. Open [Advantage Scope](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/INDEX.md) and [connect to simulator](https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/introduction.html),
 add a new [3D Field Widget](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/tabs/3D-FIELD.md)
 
 4. Drag `AdvantageKit/RealOutputs/Field/Robot` to `2D Poses`, make it `Robot` (this is where your robot **actually** is in the simulation world)
-    
+
     Drag `AdvantageKit/RealOutputs/Field/Robots` to `2D Poses`, make it `Red Ghost` (these are opponent robots)
-    
+
     Drag `AdvantageKit/RealOutputs/Odometry/Trajectory` to `2D Poses`, make it `Trajectory` (this is the current activate path)
-    
+
     Drag `AdvantageKit/RealOutputs/Odometry/RobotPosition` to `2D Poses`, make it `Blue Ghost` (this is where the odometry think the robot is)
 
 5. Open three [Sendable Choosers](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program-from-smartdashboard.html) in `SmartDashboard/FieldSimulation/` called `OpponentRobot1/2/3 Behavior` in the dashboard.  Select `Auto Cycle` to let AI control these robots to do cycles, or select `Joystick Control Left/Right-Handed` to control them manually with another gamepad (port 1/2/3 for opponent robot 1/2/3)
@@ -139,7 +139,7 @@ add a new [3D Field Widget](https://github.com/Mechanical-Advantage/AdvantageSco
 ## Setting Up Vision
 > 💡 The `subsystems/vision/apriltags` package is our team's implementation of an apriltag vision odometry, which is built on top of [Photon Vision](https://photonvision.org/).
 > We've implemented [custom filtering mechanisms]() that enhance accuracy.  We've also provide improved support for [6328's Log-Replay Technique](https://github.com/Mechanical-Advantage/AdvantageKit/blob/main/docs/WHAT-IS-ADVANTAGEKIT.md).
-> 
+>
 > ⚠️ For teams that already have a reliable vision odometry solution in place, we recommend deleting this package and continuing to use the approach that best suits your needs.
 ### 1. Configure PhotonVision Coprocessors
 On the vision coprocessors, please [enable MultiTag](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html#enabling-multitag) and [update the correct field layout](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/multitag.html#updating-the-field-layout) according to the [PhotonVision documentation](https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/index.html).
@@ -150,7 +150,7 @@ Optionally, if you want to view the individual `camera-to-target` transform calc
 
 ### 2. Configuring Camera Constants in The Code
 In `constants/VisionConstants.java`, put the infos about your camera here:
-```java 
+```java
 public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
         // declare all the photon cameras here
 );

@@ -13,7 +13,7 @@ public class SkiddingEstimator {
      * the skidding ratio is defined as the ratio between the maximum and minimum magnitude of the
      * "translational" part of the speed of the modules
      *
-     * @param swerveStatesMeasured  the swerve states measured from the modules
+     * @param swerveStatesMeasured the swerve states measured from the modules
      * @param swerveDriveKinematics the kinematics
      * @return the skidding ratio, maximum/minimum, ranges from [1,INFINITY)
      */
@@ -82,7 +82,7 @@ public class SkiddingEstimator {
             SwerveModuleState swerveModuleState1, SwerveModuleState swerveModuleState2) {
         final Translation2d
                 swerveState1VelocityVector =
-                new Translation2d(swerveModuleState1.speedMetersPerSecond, swerveModuleState1.angle),
+                        new Translation2d(swerveModuleState1.speedMetersPerSecond, swerveModuleState1.angle),
                 swerveState2VelocityVector =
                         new Translation2d(swerveModuleState2.speedMetersPerSecond, swerveModuleState2.angle);
 

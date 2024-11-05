@@ -1,12 +1,13 @@
 package frc.robot.subsystems.shooter;
 
+import static frc.robot.constants.PitchConstants.*;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
 import frc.robot.subsystems.MapleSubsystem;
@@ -15,17 +16,18 @@ import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.constants.PitchConstants.*;
 public class Pitch extends MapleSubsystem {
     private final PitchIO io;
     private final PitchInputsAutoLogged inputs;
 
     private double setPointRad = PITCH_LOWEST_ROTATION_RAD;
-    private final Alert notCalibratedAlert = new Alert("Pitch not calibrated!", Alert.AlertType.ERROR);
+    private final Alert notCalibratedAlert =
+            new Alert("Pitch not calibrated!", Alert.AlertType.ERROR);
 
     private final ArmFeedforward feedForward;
     private final PIDController feedBack;
     private final TrapezoidProfile profile;
+
     public Pitch(PitchIO io) {
         super("Pitch");
         this.io = io;
@@ -37,7 +39,8 @@ public class Pitch extends MapleSubsystem {
 
         notCalibratedAlert.setActivated(false);
 
-        setDefaultCommand(Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this));
+        setDefaultCommand(
+                Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this));
     }
 
     @Override
@@ -59,7 +62,8 @@ public class Pitch extends MapleSubsystem {
         notCalibratedAlert.setActivated(!inputs.calibrated);
         ShooterVisualizer.setPitchAngle(inputs.pitchAngleRad);
 
-        Logger.recordOutput("Shooter/Pitch Actual Position (Deg)", Math.toDegrees(inputs.pitchAngleRad));
+        Logger.recordOutput(
+                "Shooter/Pitch Actual Position (Deg)", Math.toDegrees(inputs.pitchAngleRad));
 
         SmartDashboard.putNumber("Pitch Actual Angle (Deg)", Math.toDegrees(inputs.pitchAngleRad));
         SmartDashboard.putBoolean("Pitch In Position", inPosition());
@@ -70,7 +74,9 @@ public class Pitch extends MapleSubsystem {
     }
 
     private double previousStateVelocity = 0;
-    private TrapezoidProfile.State currentState = new TrapezoidProfile.State(PITCH_LOWEST_ROTATION_RAD, 0);
+    private TrapezoidProfile.State currentState =
+            new TrapezoidProfile.State(PITCH_LOWEST_ROTATION_RAD, 0);
+
     public void runSetPointProfiled(double setPointRad) {
         if (checkSetPointOutOfRange(setPointRad) || !inputs.calibrated) {
             io.runPitchVoltage(0);
@@ -78,12 +84,11 @@ public class Pitch extends MapleSubsystem {
         }
 
         this.setPointRad = setPointRad;
-        this.currentState = profile.calculate(
-                Robot.defaultPeriodSecs,
-                currentState,
-                new TrapezoidProfile.State(setPointRad, 0)
-        );
-        final double stateAcceleration = (currentState.velocity - previousStateVelocity) / Robot.defaultPeriodSecs;
+        this.currentState =
+                profile.calculate(
+                        Robot.defaultPeriodSecs, currentState, new TrapezoidProfile.State(setPointRad, 0));
+        final double stateAcceleration =
+                (currentState.velocity - previousStateVelocity) / Robot.defaultPeriodSecs;
         runControlLoops(currentState.position, currentState.velocity, stateAcceleration);
         this.previousStateVelocity = currentState.velocity;
     }
@@ -105,28 +110,32 @@ public class Pitch extends MapleSubsystem {
 
     private boolean checkSetPointOutOfRange(double setPointRad) {
         if (setPointRad < PITCH_LOWEST_ROTATION_RAD || setPointRad > PITCH_HIGHER_LIMIT_RAD) {
-            DriverStation.reportError("attempt to run a pitch setpoint out of range: " + setPointRad, true);
+            DriverStation.reportError(
+                    "attempt to run a pitch setpoint out of range: " + setPointRad, true);
             return true;
         }
         return false;
     }
 
-    private void runControlLoops(double currentPositionSetPointRad, double currentVelocitySetPointRadPerSec, double currentAcceleration) {
+    private void runControlLoops(
+            double currentPositionSetPointRad,
+            double currentVelocitySetPointRadPerSec,
+            double currentAcceleration) {
         final double
-                feedForwardVoltage = feedForward.calculate(
-                        inputs.pitchAngleRad, currentVelocitySetPointRadPerSec, currentAcceleration
-                ),
-                feedBackVoltage = feedBack.calculate(
-                        inputs.pitchAngleRad, currentPositionSetPointRad
-                );
-        final double
-                safetyConstrainLow = inputs.pitchAngleRad <= PITCH_LOWEST_ROTATION_RAD ? 0 : -10,
+                feedForwardVoltage =
+                        feedForward.calculate(
+                                inputs.pitchAngleRad, currentVelocitySetPointRadPerSec, currentAcceleration),
+                feedBackVoltage = feedBack.calculate(inputs.pitchAngleRad, currentPositionSetPointRad);
+        final double safetyConstrainLow = inputs.pitchAngleRad <= PITCH_LOWEST_ROTATION_RAD ? 0 : -10,
                 safetyConstrainHigh = inputs.pitchAngleRad > PITCH_HIGHER_LIMIT_RAD ? 0 : 12,
-                pitchVoltage = MathUtil.clamp(
-                        feedForwardVoltage + feedBackVoltage, safetyConstrainLow, safetyConstrainHigh
-                );
-        Logger.recordOutput("Shooter/Pitch Control Loop SetPoint (Deg)", Math.toDegrees(currentPositionSetPointRad));
-        Logger.recordOutput("Shooter/Pitch Control Loop Velocity SetPoint (Deg per Sec)", Math.toDegrees(currentVelocitySetPointRadPerSec));
+                pitchVoltage =
+                        MathUtil.clamp(
+                                feedForwardVoltage + feedBackVoltage, safetyConstrainLow, safetyConstrainHigh);
+        Logger.recordOutput(
+                "Shooter/Pitch Control Loop SetPoint (Deg)", Math.toDegrees(currentPositionSetPointRad));
+        Logger.recordOutput(
+                "Shooter/Pitch Control Loop Velocity SetPoint (Deg per Sec)",
+                Math.toDegrees(currentVelocitySetPointRadPerSec));
         Logger.recordOutput("Shooter/Pitch Control Voltage", pitchVoltage);
         io.runPitchVoltage(pitchVoltage);
     }

@@ -7,43 +7,41 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.constants.LogPaths;
 import frc.robot.utils.MapleTimeUtils;
-import org.littletonrobotics.junction.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.littletonrobotics.junction.Logger;
 
 /**
- * Iron Maple's subsystem management.
- * Based on {@link SubsystemBase} from WPILib, we added on-disable/on-enable function calls
- * as well as precise dt calculations
- * */
+ * Iron Maple's subsystem management. Based on {@link SubsystemBase} from WPILib, we added
+ * on-disable/on-enable function calls as well as precise dt calculations
+ */
 public abstract class MapleSubsystem extends SubsystemBase {
     public static final List<MapleSubsystem> instances = new ArrayList<>();
     private double previousUpdateTimeStamp = 0;
+
     public static void register(MapleSubsystem instance) {
         instances.add(instance);
     }
+
     public static void cancelRegister(MapleSubsystem instance) {
         instances.remove(instance);
     }
 
     private static boolean wasEnabled = false;
+
     public static void checkForOnDisableAndEnable() {
         // periodic() is called from CommandScheduler, we only need to check for enable/disable
-        if (DriverStation.isEnabled() && (!wasEnabled))
-            enableAlllSubsystems();
-        else if (DriverStation.isDisabled() && (wasEnabled))
-            disableAllSubsystems();
+        if (DriverStation.isEnabled() && (!wasEnabled)) enableAlllSubsystems();
+        else if (DriverStation.isDisabled() && (wasEnabled)) disableAllSubsystems();
         wasEnabled = DriverStation.isEnabled();
     }
+
     public static void enableAlllSubsystems() {
-        for (MapleSubsystem instance:instances)
-            instance.onEnable();
+        for (MapleSubsystem instance : instances) instance.onEnable();
     }
 
     public static void disableAllSubsystems() {
-        for (MapleSubsystem instance:instances)
-            instance.onDisable();
+        for (MapleSubsystem instance : instances) instance.onDisable();
     }
 
     public MapleSubsystem(String name) {
@@ -52,7 +50,9 @@ public abstract class MapleSubsystem extends SubsystemBase {
     }
 
     public void onEnable() {}
+
     public void onDisable() {}
+
     public abstract void periodic(double dt, boolean enabled);
 
     @Override

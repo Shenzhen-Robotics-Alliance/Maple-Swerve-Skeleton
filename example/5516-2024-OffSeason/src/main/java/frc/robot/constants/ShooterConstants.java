@@ -9,16 +9,10 @@ public class ShooterConstants {
     public static final double kv_sim = 0.17;
     public static final double[] ka = new double[] {0.026625, 0.028551};
 
-    public static final TrapezoidProfile.Constraints SPEED_RPM_CONSTRAINS = new TrapezoidProfile.Constraints(
-            6000/0.5, 6000/0.3
-    );
+    public static final TrapezoidProfile.Constraints SPEED_RPM_CONSTRAINS =
+            new TrapezoidProfile.Constraints(6000 / 0.5, 6000 / 0.3);
 
     public static final double TOLERANCE_RPM = 40;
-    public static final MaplePIDController.MaplePIDConfig FLYWHEEL_PID_CONFIG_REV_PER_SEC = new MaplePIDController.MaplePIDConfig(
-            7,
-            30,
-            0,
-            0,
-            0, false, 0
-    );
+    public static final MaplePIDController.MaplePIDConfig FLYWHEEL_PID_CONFIG_REV_PER_SEC =
+            new MaplePIDController.MaplePIDConfig(7, 30, 0, 0, 0, false, 0);
 }

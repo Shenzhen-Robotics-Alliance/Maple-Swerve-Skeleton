@@ -12,54 +12,62 @@ import frc.robot.subsystems.shooter.FlyWheels;
 import frc.robot.subsystems.shooter.Pitch;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.MapleShooterOptimization;
-
 import java.util.function.Supplier;
 
 public class PathFindToPoseAndShootSequence extends AutoAlignment {
     public PathFindToPoseAndShootSequence(
-            Intake intake, Pitch pitch, FlyWheels flyWheels,
+            Intake intake,
+            Pitch pitch,
+            FlyWheels flyWheels,
             MapleShooterOptimization shooterOptimization,
             HolonomicDriveSubsystem driveSubsystem,
             Supplier<Translation2d> robotPrepareToShootPositionSupplier,
             Supplier<Translation2d> robotShootingPositionSupplier,
             Supplier<Translation2d> speaerPositionSupplier,
             LEDStatusLight statusLight,
-            CompetitionFieldVisualizer visualizer
-    ) {
+            CompetitionFieldVisualizer visualizer) {
         super(
                 driveSubsystem,
                 () -> {
-                    final Translation2d displacementToTarget = speaerPositionSupplier.get().minus(robotShootingPositionSupplier.get());
+                    final Translation2d displacementToTarget =
+                            speaerPositionSupplier.get().minus(robotShootingPositionSupplier.get());
                     return new Pose2d(
-                            robotPrepareToShootPositionSupplier.get(),
-                            displacementToTarget.getAngle()
-                    );
+                            robotPrepareToShootPositionSupplier.get(), displacementToTarget.getAngle());
                 },
-                () -> new Pose2d(
-                        robotShootingPositionSupplier.get(),
-                        shooterOptimization.getShooterFacing(
-                                speaerPositionSupplier.get(),
-                                driveSubsystem.getPose().getTranslation(),
-                                driveSubsystem.getMeasuredChassisSpeedsFieldRelative())
-                ),
+                () ->
+                        new Pose2d(
+                                robotShootingPositionSupplier.get(),
+                                shooterOptimization.getShooterFacing(
+                                        speaerPositionSupplier.get(),
+                                        driveSubsystem.getPose().getTranslation(),
+                                        driveSubsystem.getMeasuredChassisSpeedsFieldRelative())),
                 new Pose2d(0.3, 0.3, Rotation2d.fromDegrees(3)),
                 0.75,
-                new PrepareToAim(flyWheels, pitch, shooterOptimization, statusLight, robotShootingPositionSupplier, speaerPositionSupplier),
-                new AimAndShootSequence(
-                        pitch, flyWheels, intake, shooterOptimization, driveSubsystem,
-                        robotShootingPositionSupplier,
-                        speaerPositionSupplier,
-                        () -> isChassisSlowEnough(driveSubsystem),
+                new PrepareToAim(
+                        flyWheels,
+                        pitch,
+                        shooterOptimization,
                         statusLight,
-                        visualizer
-                ).ifNotePresent()
-        );
+                        robotShootingPositionSupplier,
+                        speaerPositionSupplier),
+                new AimAndShootSequence(
+                                pitch,
+                                flyWheels,
+                                intake,
+                                shooterOptimization,
+                                driveSubsystem,
+                                robotShootingPositionSupplier,
+                                speaerPositionSupplier,
+                                () -> isChassisSlowEnough(driveSubsystem),
+                                statusLight,
+                                visualizer)
+                        .ifNotePresent());
 
         super.addRequirements(driveSubsystem, pitch, flyWheels, intake);
     }
 
     private static boolean isChassisSlowEnough(HolonomicDriveSubsystem driveSubsystem) {
-        final ChassisSpeeds vel =  driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
+        final ChassisSpeeds vel = driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
         return Math.hypot(vel.vxMetersPerSecond, vel.vyMetersPerSecond) < 0.7
                 && Math.abs(vel.omegaRadiansPerSecond) < Math.toRadians(50);
     }

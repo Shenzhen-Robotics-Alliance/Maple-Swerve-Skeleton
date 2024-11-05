@@ -11,7 +11,9 @@ public class IntakeIOReal implements IntakeIO {
     private final TalonFX intakeFalcon;
     private final DigitalInput lowerBeamBreaker, upperBeamBreaker;
     private final StatusSignal<Double> intakeCurrent;
-    public IntakeIOReal(int intakeTalonFXID, int lowerBeamBreakerChannel, int upperBeamBreakerChannel) {
+
+    public IntakeIOReal(
+            int intakeTalonFXID, int lowerBeamBreakerChannel, int upperBeamBreakerChannel) {
         this.intakeFalcon = new TalonFX(intakeTalonFXID);
 
         final CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs();
