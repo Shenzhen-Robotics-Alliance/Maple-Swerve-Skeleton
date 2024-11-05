@@ -3,55 +3,69 @@ package frc.robot.subsystems.vision.apriltags;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.utils.CustomConfigs.MapleConfigFile;
-import org.photonvision.simulation.SimCameraProperties;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.photonvision.simulation.SimCameraProperties;
 
 public class PhotonCameraProperties {
     public final String name;
-    public final double frameRate, averageLatencyMS, latencyStandardDeviationMS,
-            calibrationAverageErrorPixel, calibrationErrorStandardDeviation;
+    public final double frameRate,
+            averageLatencyMS,
+            latencyStandardDeviationMS,
+            calibrationAverageErrorPixel,
+            calibrationErrorStandardDeviation;
     public final Rotation2d cameraFOVDiag;
     public final int captureWidthPixels, captureHeightPixels;
     public final Transform3d robotToCamera;
 
     public PhotonCameraProperties(
             String name,
-            double frameRate, double averageLatencyMS, double latencyStandardDeviationMS,
+            double frameRate,
+            double averageLatencyMS,
+            double latencyStandardDeviationMS,
             double cameraFOVDegreesDiag,
-            double calibrationAverageErrorPixel, double calibrationErrorStandardDeviation,
-            int captureWidthPixels, int captureHeightPixels,
+            double calibrationAverageErrorPixel,
+            double calibrationErrorStandardDeviation,
+            int captureWidthPixels,
+            int captureHeightPixels,
             Translation2d mountPositionOnRobotMeters,
             double mountHeightMeters,
             Rotation2d cameraFacing,
             double cameraPitchDegrees,
-            double rotateImageDegrees
-    ) {
+            double rotateImageDegrees) {
         this(
-                name, frameRate, averageLatencyMS, latencyStandardDeviationMS, Rotation2d.fromDegrees(cameraFOVDegreesDiag), calibrationAverageErrorPixel, calibrationErrorStandardDeviation, captureWidthPixels, captureHeightPixels,
-                new Transform3d(mountPositionOnRobotMeters.getX(), mountPositionOnRobotMeters.getY(), mountHeightMeters,
-                        new Rotation3d(
-                                0,
-                                -Math.toRadians(cameraPitchDegrees),
-                                cameraFacing.getRadians()
-                        ))
-                        .plus(new Transform3d(new Translation3d(), new Rotation3d(
-                                Math.toRadians(rotateImageDegrees), 0, 0)))
-        );
+                name,
+                frameRate,
+                averageLatencyMS,
+                latencyStandardDeviationMS,
+                Rotation2d.fromDegrees(cameraFOVDegreesDiag),
+                calibrationAverageErrorPixel,
+                calibrationErrorStandardDeviation,
+                captureWidthPixels,
+                captureHeightPixels,
+                new Transform3d(
+                                mountPositionOnRobotMeters.getX(),
+                                mountPositionOnRobotMeters.getY(),
+                                mountHeightMeters,
+                                new Rotation3d(0, -Math.toRadians(cameraPitchDegrees), cameraFacing.getRadians()))
+                        .plus(new Transform3d(
+                                new Translation3d(), new Rotation3d(Math.toRadians(rotateImageDegrees), 0, 0))));
     }
 
     public PhotonCameraProperties(
             String name,
-            double frameRate, double averageLatencyMS, double latencyStandardDeviationMS,
+            double frameRate,
+            double averageLatencyMS,
+            double latencyStandardDeviationMS,
             Rotation2d cameraFOVDiag,
-            double calibrationAverageErrorPixel, double calibrationErrorStandardDeviation,
-            int captureWidthPixels, int captureHeightPixels,
-            Transform3d robotToCamera
-    ) {
+            double calibrationAverageErrorPixel,
+            double calibrationErrorStandardDeviation,
+            int captureWidthPixels,
+            int captureHeightPixels,
+            Transform3d robotToCamera) {
         this.name = name;
         this.frameRate = frameRate;
         this.averageLatencyMS = averageLatencyMS;
@@ -64,7 +78,8 @@ public class PhotonCameraProperties {
         this.robotToCamera = robotToCamera;
 
         System.out.println("Created photon camera: " + name + " on robot");
-        System.out.println("Advantage Scope Asset String:\n" + toAdvantageScopeAssetFixedCameraConfigurationJsonString());
+        System.out.println(
+                "Advantage Scope Asset String:\n" + toAdvantageScopeAssetFixedCameraConfigurationJsonString());
     }
 
     public SimCameraProperties getSimulationProperties() {
@@ -83,10 +98,7 @@ public class PhotonCameraProperties {
             configFile = MapleConfigFile.fromDeployedConfig("PhotonCamerasProperties", configName);
         } catch (IOException e) {
             DriverStation.reportError(
-                    "cannot find camera properties config file: "
-                            + configName
-                            + " from deploy directory",
-                    true);
+                    "cannot find camera properties config file: " + configName + " from deploy directory", true);
             return new ArrayList<>();
         }
         return loadCamerasPropertiesFromConfig(configFile);
@@ -101,40 +113,38 @@ public class PhotonCameraProperties {
 
         final List<PhotonCameraProperties> cameraProperties = new ArrayList<>(cameraAmount);
 
-        for (int i = 0; i < cameraAmount ; i++) {
-            final MapleConfigFile.ConfigBlock cameraBlock = configFile.getBlock("Camera"+i);
+        for (int i = 0; i < cameraAmount; i++) {
+            final MapleConfigFile.ConfigBlock cameraBlock = configFile.getBlock("Camera" + i);
             cameraProperties.add(loadSingleCameraPropertyFromBlock(
-                    cameraBlock, cameraFPS, averageLatencyMS, latencyStandardDeviationMS
-            ));
+                    cameraBlock, cameraFPS, averageLatencyMS, latencyStandardDeviationMS));
         }
 
         return cameraProperties;
     }
 
-    private static PhotonCameraProperties loadSingleCameraPropertyFromBlock(MapleConfigFile.ConfigBlock cameraBlock, double cameraFPS, double averageLatencyMS, double latencyStandardDeviationMS) {
+    private static PhotonCameraProperties loadSingleCameraPropertyFromBlock(
+            MapleConfigFile.ConfigBlock cameraBlock,
+            double cameraFPS,
+            double averageLatencyMS,
+            double latencyStandardDeviationMS) {
         final Transform3d robotToCameraInstallation = new Transform3d(
                 new Translation3d(
                         cameraBlock.getDoubleConfig("mountPositionToRobotCenterForwardsMeters"),
                         cameraBlock.getDoubleConfig("mountPositionToRobotCenterLeftwardsMeters"),
-                        cameraBlock.getDoubleConfig("mountHeightMeters")
-                ),
+                        cameraBlock.getDoubleConfig("mountHeightMeters")),
                 new Rotation3d(
                         0,
                         -Math.toRadians(cameraBlock.getDoubleConfig("cameraPitchDegrees")),
-                        Math.toRadians(cameraBlock.getDoubleConfig("cameraYawDegrees"))
-                ));
-        final double cameraRollDeg = switch (cameraBlock.getIntConfig("captureOrientation")) {
-            case 1 -> 180;
-            case 2 -> -90;
-            case 3 -> 90;
-            default -> 0;
-        };
-        final Transform3d cameraInstallationToCapturedImage = new Transform3d(
-                        new Translation3d(),
-                        new Rotation3d(
-                                Math.toRadians(cameraRollDeg),
-                                0, 0
-                        ));
+                        Math.toRadians(cameraBlock.getDoubleConfig("cameraYawDegrees"))));
+        final double cameraRollDeg =
+                switch (cameraBlock.getIntConfig("captureOrientation")) {
+                    case 1 -> 180;
+                    case 2 -> -90;
+                    case 3 -> 90;
+                    default -> 0;
+                };
+        final Transform3d cameraInstallationToCapturedImage =
+                new Transform3d(new Translation3d(), new Rotation3d(Math.toRadians(cameraRollDeg), 0, 0));
         return new PhotonCameraProperties(
                 cameraBlock.getStringConfig("name"),
                 cameraFPS,
@@ -145,11 +155,18 @@ public class PhotonCameraProperties {
                 cameraBlock.getDoubleConfig("calibrationErrorStandardDeviationPixel"),
                 cameraBlock.getIntConfig("captureWidthPixels"),
                 cameraBlock.getIntConfig("captureHeightPixels"),
-                robotToCameraInstallation.plus(cameraInstallationToCapturedImage)
-        );
+                robotToCameraInstallation.plus(cameraInstallationToCapturedImage));
     }
 
-    public static MapleConfigFile createConfigFileForCameras(String name, int camerasAmount, double cameraFPS, double averageLatencyMS, double latencyStandardDeviationMS, int cameraWidthPixels, int cameraHeightPixels, double defaultCameraFOVDegrees) {
+    public static MapleConfigFile createConfigFileForCameras(
+            String name,
+            int camerasAmount,
+            double cameraFPS,
+            double averageLatencyMS,
+            double latencyStandardDeviationMS,
+            int cameraWidthPixels,
+            int cameraHeightPixels,
+            double defaultCameraFOVDegrees) {
         final MapleConfigFile configFile = new MapleConfigFile("PhotonCamerasProperties", name);
         final MapleConfigFile.ConfigBlock generalBlock = configFile.getBlock("GeneralInfo");
 
@@ -160,15 +177,17 @@ public class PhotonCameraProperties {
 
         for (int i = 0; i < camerasAmount; i++) {
             createConfigBlockForCamera(
-                    configFile.getBlock("Camera"+i),
-                    cameraWidthPixels,cameraHeightPixels,defaultCameraFOVDegrees
-            );
+                    configFile.getBlock("Camera" + i), cameraWidthPixels, cameraHeightPixels, defaultCameraFOVDegrees);
         }
 
         return configFile;
     }
 
-    private static void createConfigBlockForCamera(MapleConfigFile.ConfigBlock cameraBlock, int cameraWidthPixels, int cameraHeightPixels, double cameraFOVDegrees) {
+    private static void createConfigBlockForCamera(
+            MapleConfigFile.ConfigBlock cameraBlock,
+            int cameraWidthPixels,
+            int cameraHeightPixels,
+            double cameraFOVDegrees) {
         cameraBlock.putStringConfig("name", "YOUR_CAMERA_NAME");
         cameraBlock.putIntConfig("captureWidthPixels", cameraWidthPixels);
         cameraBlock.putIntConfig("captureHeightPixels", cameraHeightPixels);
@@ -184,7 +203,8 @@ public class PhotonCameraProperties {
 
     @Override
     public String toString() {
-        return String.format("""
+        return String.format(
+                """
                         PhotonCameraProperties of camera %s {,
                           frameRate: %.2f,
                           averageLatencyMS: %.2f,
@@ -196,9 +216,16 @@ public class PhotonCameraProperties {
                           captureHeightPixels: %d,
                           cameraToRobot: %s
                         }""",
-                name, frameRate, averageLatencyMS, latencyStandardDeviationMS,
-                calibrationAverageErrorPixel, calibrationErrorStandardDeviation,
-                cameraFOVDiag.toString(), captureWidthPixels, captureHeightPixels, robotToCamera.toString());
+                name,
+                frameRate,
+                averageLatencyMS,
+                latencyStandardDeviationMS,
+                calibrationAverageErrorPixel,
+                calibrationErrorStandardDeviation,
+                cameraFOVDiag.toString(),
+                captureWidthPixels,
+                captureHeightPixels,
+                robotToCamera.toString());
     }
 
     @SuppressWarnings("unchecked")

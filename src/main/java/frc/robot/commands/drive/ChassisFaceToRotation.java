@@ -17,28 +17,26 @@ public class ChassisFaceToRotation extends Command {
     private final Rotation2d tolerance;
 
     public ChassisFaceToRotation(
-            HolonomicDriveSubsystem driveSubsystem,
-            Supplier<Rotation2d> targetRotationSupplier,
-            Rotation2d tolerance) {
+            HolonomicDriveSubsystem driveSubsystem, Supplier<Rotation2d> targetRotationSupplier, Rotation2d tolerance) {
         this.driveSubsystem = driveSubsystem;
         this.targetRotationSupplier = targetRotationSupplier;
         this.tolerance = tolerance;
 
-        this.chassisRotationController =
-                new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
+        this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
     }
 
     @Override
     public void initialize() {
         chassisRotationController.calculate(
-                driveSubsystem.getFacing().getRadians(), targetRotationSupplier.get().getRadians());
+                driveSubsystem.getFacing().getRadians(),
+                targetRotationSupplier.get().getRadians());
     }
 
     @Override
     public void execute() {
-        final double rotationFeedBack =
-                chassisRotationController.calculate(
-                        driveSubsystem.getFacing().getRadians(), targetRotationSupplier.get().getRadians());
+        final double rotationFeedBack = chassisRotationController.calculate(
+                driveSubsystem.getFacing().getRadians(),
+                targetRotationSupplier.get().getRadians());
         driveSubsystem.runRobotCentricChassisSpeeds(new ChassisSpeeds(0, 0, rotationFeedBack), false);
     }
 
@@ -49,19 +47,17 @@ public class ChassisFaceToRotation extends Command {
 
     @Override
     public boolean isFinished() {
-        return driveSubsystem.getFacing().minus(targetRotationSupplier.get()).getRadians()
-                < tolerance.getRadians();
+        return driveSubsystem.getFacing().minus(targetRotationSupplier.get()).getRadians() < tolerance.getRadians();
     }
 
     public static ChassisFaceToRotation faceToTarget(
             HolonomicDriveSubsystem driveSubsystem, Supplier<Translation2d> targetPositionSupplier) {
         return new ChassisFaceToRotation(
                 driveSubsystem,
-                () ->
-                        targetPositionSupplier
-                                .get()
-                                .minus(driveSubsystem.getPose().getTranslation())
-                                .getAngle(),
+                () -> targetPositionSupplier
+                        .get()
+                        .minus(driveSubsystem.getPose().getTranslation())
+                        .getAngle(),
                 Rotation2d.fromDegrees(3));
     }
 }

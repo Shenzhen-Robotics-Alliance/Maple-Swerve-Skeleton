@@ -16,15 +16,13 @@ public class FeedShot {
     public static Command prepareToFeedForever(Pitch pitch, FlyWheels flyWheels) {
         final Command
                 preparePitch =
-                        Commands.run(
-                                () -> pitch.runSetPointProfiled(PitchConstants.PITCH_LOWEST_ROTATION_RAD), pitch),
+                        Commands.run(() -> pitch.runSetPointProfiled(PitchConstants.PITCH_LOWEST_ROTATION_RAD), pitch),
                 prepareFlyWheels = Commands.run(() -> flyWheels.runRPMProfiled(3500), flyWheels);
         return preparePitch.alongWith(prepareFlyWheels);
     }
 
     public static Command prepareToFeedUntilReady(Pitch pitch, FlyWheels flyWheels) {
-        return prepareToFeedForever(pitch, flyWheels)
-                .until(() -> pitch.inPosition() && flyWheels.flyWheelsReady());
+        return prepareToFeedForever(pitch, flyWheels).until(() -> pitch.inPosition() && flyWheels.flyWheelsReady());
     }
 
     public static Command shootFeed(
@@ -50,15 +48,12 @@ public class FeedShot {
         if (simulation == null) simulationCommand = Commands.none();
         else
             simulationCommand =
-                    Commands.runOnce(
-                            () ->
-                                    simulation.addGamePiece(
-                                            new Crescendo2024FieldObjects.FeedShotLowNote(
-                                                    driveSubsystem
-                                                            .getPose()
-                                                            .getTranslation()
-                                                            .plus(new Translation2d(0.5, 0).rotateBy(driveSubsystem.getFacing())),
-                                                    driveSubsystem.getFacing())));
+                    Commands.runOnce(() -> simulation.addGamePiece(new Crescendo2024FieldObjects.FeedShotLowNote(
+                            driveSubsystem
+                                    .getPose()
+                                    .getTranslation()
+                                    .plus(new Translation2d(0.5, 0).rotateBy(driveSubsystem.getFacing())),
+                            driveSubsystem.getFacing())));
         shootFeed.addCommands(simulationCommand.onlyIf(() -> noteInShooter[0]));
 
         return shootFeed;

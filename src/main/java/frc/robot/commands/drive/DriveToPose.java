@@ -66,9 +66,7 @@ public class DriveToPose extends Command {
         driveSubsystem.stop();
     }
 
-    /**
-     * @return the feed-back speed, robot-relative
-     */
+    /** @return the feed-back speed, robot-relative */
     private ChassisSpeeds getFeedBackSpeeds() {
         Logger.recordOutput(
                 "Odometry/TrajectorySetpoint",
@@ -89,18 +87,17 @@ public class DriveToPose extends Command {
         final ChassisSpeeds speeds = driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
         return Math.abs(desiredPose.getX() - currentPose.getX()) < tolerance.getX()
                 && Math.abs(desiredPose.getY() - currentPose.getY()) < tolerance.getY()
-                && Math.abs(desiredPose.getRotation().getDegrees() - currentPose.getRotation().getDegrees())
+                && Math.abs(desiredPose.getRotation().getDegrees()
+                                - currentPose.getRotation().getDegrees())
                         < tolerance.getRotation().getDegrees()
                 && Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) < 0.8
                 && Math.abs(speeds.omegaRadiansPerSecond) < Math.toRadians(30);
     }
 
-    public static HolonomicDriveController createPositionController(
-            HolonomicDriveSubsystem driveSubsystem) {
-        final TrapezoidProfile.Constraints chassisRotationalConstraints =
-                new TrapezoidProfile.Constraints(
-                        driveSubsystem.getChassisMaxAngularVelocity(),
-                        driveSubsystem.getChassisMaxAngularAccelerationRadPerSecSq());
+    public static HolonomicDriveController createPositionController(HolonomicDriveSubsystem driveSubsystem) {
+        final TrapezoidProfile.Constraints chassisRotationalConstraints = new TrapezoidProfile.Constraints(
+                driveSubsystem.getChassisMaxAngularVelocity(),
+                driveSubsystem.getChassisMaxAngularAccelerationRadPerSecSq());
         return new HolonomicDriveController(
                 new MaplePIDController(CHASSIS_TRANSLATION_CLOSE_LOOP),
                 new MaplePIDController(CHASSIS_TRANSLATION_CLOSE_LOOP),

@@ -1,5 +1,6 @@
 // Original Source:
-// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main,
+// Copyright 2021-2024 FRC 6328
 
 package frc.robot.subsystems.drive.IO;
 
@@ -20,10 +21,7 @@ public class GyroIOPigeon2 implements GyroIO {
     private final StatusSignal<Double> yawVelocity;
 
     public GyroIOPigeon2(SwerveDrivetrainConstants drivetrainConstants) {
-        this(
-                drivetrainConstants.Pigeon2Id,
-                drivetrainConstants.CANbusName,
-                drivetrainConstants.Pigeon2Configs);
+        this(drivetrainConstants.Pigeon2Id, drivetrainConstants.CANbusName, drivetrainConstants.Pigeon2Configs);
     }
 
     public GyroIOPigeon2(int Pigeon2Id, String CANbusName, Pigeon2Configuration Pigeon2Configs) {

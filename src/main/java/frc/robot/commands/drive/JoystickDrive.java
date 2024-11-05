@@ -61,29 +61,24 @@ public class JoystickDrive extends Command {
     public void execute() {
         if (input == null) return;
 
-        final ChassisSpeeds newestPilotInputSpeed =
-                input.getJoystickChassisSpeeds(
-                        driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
-                        driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
-        currentPilotInputSpeeds =
-                driveSubsystem.constrainAcceleration(
-                        currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
+        final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
+                driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
+                driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
+        currentPilotInputSpeeds = driveSubsystem.constrainAcceleration(
+                currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
 
-        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05)
-            previousRotationalInputTimer.reset();
+        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
 
         if (povButtonSupplier.get() != -1)
             this.currentRotationMaintenanceSetpoint =
-                    FieldConstants.getDriverStationFacing()
-                            .minus(Rotation2d.fromDegrees(povButtonSupplier.get()));
+                    FieldConstants.getDriverStationFacing().minus(Rotation2d.fromDegrees(povButtonSupplier.get()));
 
         if (previousRotationalInputTimer.hasElapsed(
                 TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS))
             SwerveDrive.swerveHeadingController.setHeadingRequest(
                     new ChassisHeadingController.FaceToRotationRequest(currentRotationMaintenanceSetpoint));
         else {
-            SwerveDrive.swerveHeadingController.setHeadingRequest(
-                    new ChassisHeadingController.NullRequest());
+            SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
             currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
         }
 
@@ -98,8 +93,7 @@ public class JoystickDrive extends Command {
             driveSubsystem.runDriverStationCentricChassisSpeeds(currentPilotInputSpeeds, true);
         else driveSubsystem.runRobotCentricChassisSpeeds(currentPilotInputSpeeds, true);
 
-        Logger.recordOutput(
-                "JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
+        Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
         Logger.recordOutput(
                 "JoystickDrive/rotationMaintainSetPoint",
                 new Pose2d(driveSubsystem.getPose().getTranslation(), currentRotationMaintenanceSetpoint));

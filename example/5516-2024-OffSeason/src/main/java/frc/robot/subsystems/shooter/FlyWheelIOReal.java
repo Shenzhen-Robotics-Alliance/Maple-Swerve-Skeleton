@@ -22,8 +22,7 @@ public class FlyWheelIOReal implements FlyWheelIO {
         currentLimitConfiguration.SupplyCurrentLimitEnable = true;
         currentLimitConfiguration.SupplyCurrentLimit = 60;
         flyWheelFalcon.getConfigurator().apply(currentLimitConfiguration);
-        BaseStatusSignal.setUpdateFrequencyForAll(
-                100, positionRevolutions, velocityRevolutions, supplyCurrentAmps);
+        BaseStatusSignal.setUpdateFrequencyForAll(100, positionRevolutions, velocityRevolutions, supplyCurrentAmps);
         flyWheelFalcon.optimizeBusUtilization();
     }
 

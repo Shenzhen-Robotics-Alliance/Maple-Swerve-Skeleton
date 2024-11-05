@@ -18,13 +18,10 @@ public class MapleJoystickDriveInput {
     /**
      * @param joystickXSupplier the supplier of the x-axis of the joystick, positive is RIGHTWARDS
      * @param joystickYSupplier the supplier of the x-axis of the joystick, positive is DOWNWARDS
-     * @param joystickOmegaSupplier the supplier of the omega-axis of the joystick, positive is
-     *     RIGHTWARDS
+     * @param joystickOmegaSupplier the supplier of the omega-axis of the joystick, positive is RIGHTWARDS
      */
     public MapleJoystickDriveInput(
-            DoubleSupplier joystickXSupplier,
-            DoubleSupplier joystickYSupplier,
-            DoubleSupplier joystickOmegaSupplier) {
+            DoubleSupplier joystickXSupplier, DoubleSupplier joystickYSupplier, DoubleSupplier joystickOmegaSupplier) {
         this.joystickXSupplier = joystickXSupplier;
         this.joystickYSupplier = joystickYSupplier;
         this.joystickOmegaSupplier = joystickOmegaSupplier;
@@ -39,16 +36,13 @@ public class MapleJoystickDriveInput {
             double chassisMaxVelocityMetersPerSec, double maxAngularVelocityRadPerSec) {
         final Translation2d linearSpeedMetersPerSec =
                 getTranslationalSpeedsFromJoystick(chassisMaxVelocityMetersPerSec);
-        final double rotationSpeedRadPerSec =
-                getRotationalSpeedFromJoystick(maxAngularVelocityRadPerSec);
+        final double rotationSpeedRadPerSec = getRotationalSpeedFromJoystick(maxAngularVelocityRadPerSec);
 
         return new ChassisSpeeds(
                 linearSpeedMetersPerSec.getX(), linearSpeedMetersPerSec.getY(), rotationSpeedRadPerSec);
     }
 
-    /**
-     * @return the translational speeds, in meters/second
-     */
+    /** @return the translational speeds, in meters/second */
     public Translation2d getTranslationalSpeedsFromJoystick(double chassisMaxVelocityMetersPerSec) {
         final double linearSpeedXComponentRaw = -joystickYSupplier.getAsDouble(),
                 linearSpeedYComponentRaw = -joystickXSupplier.getAsDouble(),
@@ -78,21 +72,16 @@ public class MapleJoystickDriveInput {
     }
 
     /**
-     * apply a smart dead-band to the given axis value unlike normal dead-banding, the threshold of a
-     * smart deadband increases as the value of the other axis increases this will make it easier for
-     * the pilot to set request a straight-line driving
+     * apply a smart dead-band to the given axis value unlike normal dead-banding, the threshold of a smart deadband
+     * increases as the value of the other axis increases this will make it easier for the pilot to set request a
+     * straight-line driving
      *
      * @param axisValue the value of the axis of interest
      * @param otherAxisValue the value of the other axis on the stick
      */
     private static double applySmartDeadBand(double axisValue, double otherAxisValue) {
-        final double deadBand =
-                MapleCommonMath.linearInterpretationWithBounding(
-                        0,
-                        DEAD_BAND_WHEN_OTHER_AXIS_EMPTY,
-                        1,
-                        DEAD_BAND_WHEN_OTHER_AXIS_FULL,
-                        Math.abs(otherAxisValue));
+        final double deadBand = MapleCommonMath.linearInterpretationWithBounding(
+                0, DEAD_BAND_WHEN_OTHER_AXIS_EMPTY, 1, DEAD_BAND_WHEN_OTHER_AXIS_FULL, Math.abs(otherAxisValue));
         return MathUtil.applyDeadband(axisValue, deadBand, 1);
     }
 
@@ -106,8 +95,7 @@ public class MapleJoystickDriveInput {
                 driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
     }
 
-    public static MapleJoystickDriveInput rightHandedJoystick(
-            CommandXboxController driverController) {
+    public static MapleJoystickDriveInput rightHandedJoystick(CommandXboxController driverController) {
         return new MapleJoystickDriveInput(
                 driverController::getRightX, driverController::getRightY, driverController::getLeftX);
     }

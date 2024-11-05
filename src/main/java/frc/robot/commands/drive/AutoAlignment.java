@@ -16,8 +16,8 @@ public class AutoAlignment extends SequentialCommandGroup {
     }
 
     /**
-     * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has
-     * two steps: 1. path-find to the target pose, roughly 2. accurate auto alignment
+     * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
+     * path-find to the target pose, roughly 2. accurate auto alignment
      */
     public AutoAlignment(
             HolonomicDriveSubsystem driveSubsystem,
@@ -38,8 +38,8 @@ public class AutoAlignment extends SequentialCommandGroup {
     }
 
     /**
-     * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has
-     * two steps: 1. path-find to the target pose, roughly 2. accurate auto alignment
+     * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
+     * path-find to the target pose, roughly 2. accurate auto alignment
      */
     public AutoAlignment(
             HolonomicDriveSubsystem driveSubsystem,
@@ -52,8 +52,7 @@ public class AutoAlignment extends SequentialCommandGroup {
             Command toRunDuringPrecise) {
         final Command
                 pathFindToTargetRough =
-                        new PathFindToPose(
-                                driveSubsystem, roughTarget, speedMultiplier, goalEndVelocityRoughApproach),
+                        new PathFindToPose(driveSubsystem, roughTarget, speedMultiplier, goalEndVelocityRoughApproach),
                 preciseAlignment = new DriveToPose(driveSubsystem, target, tolerance, 2);
 
         super.addRequirements(driveSubsystem);

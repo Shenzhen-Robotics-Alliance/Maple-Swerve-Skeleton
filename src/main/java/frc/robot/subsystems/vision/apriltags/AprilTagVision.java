@@ -31,16 +31,14 @@ public class AprilTagVision extends MapleSubsystem {
         this.inputs = new AprilTagVisionIO.VisionInputs(camerasProperties.size());
         this.camerasDisconnectedAlerts = new Alert[camerasProperties.size()];
         for (int i = 0; i < camerasProperties.size(); i++) {
-            this.camerasDisconnectedAlerts[i] =
-                    new Alert(
-                            "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' disconnected",
-                            Alert.AlertType.WARNING);
+            this.camerasDisconnectedAlerts[i] = new Alert(
+                    "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' disconnected",
+                    Alert.AlertType.WARNING);
             this.camerasDisconnectedAlerts[i].setActivated(false);
         }
 
-        this.multiTagPoseEstimator =
-                new MapleMultiTagPoseEstimator(
-                        fieldLayout, new CameraHeightAndPitchRollAngleFilter(), camerasProperties);
+        this.multiTagPoseEstimator = new MapleMultiTagPoseEstimator(
+                fieldLayout, new CameraHeightAndPitchRollAngleFilter(), camerasProperties);
         this.driveSubsystem = driveSubsystem;
     }
 
@@ -54,15 +52,12 @@ public class AprilTagVision extends MapleSubsystem {
         for (int i = 0; i < inputs.camerasInputs.length; i++)
             this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
 
-        result =
-                multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
-        result.ifPresent(
-                robotPoseEstimationResult ->
-                        driveSubsystem.addVisionMeasurement(robotPoseEstimationResult, getResultsTimeStamp()));
+        result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
+        result.ifPresent(robotPoseEstimationResult ->
+                driveSubsystem.addVisionMeasurement(robotPoseEstimationResult, getResultsTimeStamp()));
 
         Logger.recordOutput(
-                APRIL_TAGS_VISION_PATH + "Results/Estimated Pose",
-                displayVisionPointEstimateResult(result));
+                APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
         SmartDashboard.putBoolean("Vision Result Trustable", result.isPresent());
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Presented", result.isPresent());
     }
@@ -76,12 +71,10 @@ public class AprilTagVision extends MapleSubsystem {
     }
 
     private double getResultsTimeStamp() {
-        return inputs.inputsFetchedRealTimeStampSeconds
-                - getResultsAverageLatencySeconds(inputs.camerasInputs);
+        return inputs.inputsFetchedRealTimeStampSeconds - getResultsAverageLatencySeconds(inputs.camerasInputs);
     }
 
-    private static double getResultsAverageLatencySeconds(
-            AprilTagVisionIO.CameraInputs[] camerasInputs) {
+    private static double getResultsAverageLatencySeconds(AprilTagVisionIO.CameraInputs[] camerasInputs) {
         if (camerasInputs.length == 0) return 0;
         double totalLatencySeconds = 0;
         for (AprilTagVisionIO.CameraInputs cameraInputs : camerasInputs)

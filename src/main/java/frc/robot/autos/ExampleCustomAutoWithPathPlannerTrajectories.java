@@ -16,11 +16,9 @@ public class ExampleCustomAutoWithPathPlannerTrajectories implements Auto {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
 
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush first pp")));
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush second pp")));
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush second pp")));
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush third pp")));
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush fourth and shoot pp")));
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush fourth and shoot pp")));
 
         return commandGroup;
     }

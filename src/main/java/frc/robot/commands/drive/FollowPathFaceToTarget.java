@@ -17,15 +17,10 @@ public class FollowPathFaceToTarget {
             double offSetSeconds,
             Supplier<Translation2d> targetPositionSupplier,
             MapleShooterOptimization shooterOptimization) {
-        final Runnable requestFaceToTarget =
-                () ->
-                        SwerveDrive.swerveHeadingController.setHeadingRequest(
-                                new ChassisHeadingController.FaceToTargetRequest(
-                                        targetPositionSupplier, shooterOptimization));
+        final Runnable requestFaceToTarget = () -> SwerveDrive.swerveHeadingController.setHeadingRequest(
+                new ChassisHeadingController.FaceToTargetRequest(targetPositionSupplier, shooterOptimization));
         final Runnable requestNull =
-                () ->
-                        SwerveDrive.swerveHeadingController.setHeadingRequest(
-                                new ChassisHeadingController.NullRequest());
+                () -> SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
         return AutoBuilder.followPath(path)
                 .deadlineFor(Commands.waitSeconds(offSetSeconds).andThen(requestFaceToTarget))
                 .finallyDo(requestNull);
@@ -33,14 +28,10 @@ public class FollowPathFaceToTarget {
 
     public static Command followPathFacetToTarget(
             PathPlannerPath path, double offSetSeconds, Supplier<Rotation2d> rotationTargetOverride) {
-        final Runnable requestFaceToRotation =
-                () ->
-                        SwerveDrive.swerveHeadingController.setHeadingRequest(
-                                new ChassisHeadingController.FaceToRotationRequest(rotationTargetOverride.get()));
+        final Runnable requestFaceToRotation = () -> SwerveDrive.swerveHeadingController.setHeadingRequest(
+                new ChassisHeadingController.FaceToRotationRequest(rotationTargetOverride.get()));
         final Runnable requestNull =
-                () ->
-                        SwerveDrive.swerveHeadingController.setHeadingRequest(
-                                new ChassisHeadingController.NullRequest());
+                () -> SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
         return AutoBuilder.followPath(path)
                 .deadlineFor(Commands.waitSeconds(offSetSeconds).andThen(requestFaceToRotation))
                 .finallyDo(requestNull);

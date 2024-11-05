@@ -18,8 +18,7 @@ public class FlyWheelIOSim implements FlyWheelIO {
     public void updateInputs(FlyWheelsInputs inputs) {
         dcMotorSim.update(Robot.defaultPeriodSecs);
         inputs.supplyCurrentAmps = dcMotorSim.getCurrentDrawAmps();
-        inputs.flyWheelVelocityRevsPerSec =
-                Units.radiansToRotations(dcMotorSim.getAngularVelocityRadPerSec());
+        inputs.flyWheelVelocityRevsPerSec = Units.radiansToRotations(dcMotorSim.getAngularVelocityRadPerSec());
         inputs.flyWheelPositionRevs = Units.radiansToRotations(dcMotorSim.getAngularPositionRad());
 
         intakeIOSim.setShooterRunning(inputs.flyWheelVelocityRevsPerSec * 60 > 200);

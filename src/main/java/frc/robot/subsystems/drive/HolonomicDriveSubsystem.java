@@ -49,17 +49,13 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param timestamp The timestamp of the vision measurement in seconds.
      */
     default void addVisionMeasurement(
-            MapleMultiTagPoseEstimator.RobotPoseEstimationResult poseEstimationResult,
-            double timestamp) {}
+            MapleMultiTagPoseEstimator.RobotPoseEstimationResult poseEstimationResult, double timestamp) {}
 
-    /**
-     * @return the measured(actual) velocities of the chassis, robot-relative
-     */
+    /** @return the measured(actual) velocities of the chassis, robot-relative */
     ChassisSpeeds getMeasuredChassisSpeedsRobotRelative();
 
     default ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(
-                getMeasuredChassisSpeedsRobotRelative(), getFacing());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getMeasuredChassisSpeedsRobotRelative(), getFacing());
     }
 
     double getChassisMaxLinearVelocityMetersPerSec();
@@ -81,11 +77,9 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     /**
      * runs a driverstation-centric ChassisSpeeds
      *
-     * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally
-     *     from a gamepad
+     * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      */
-    default void runDriverStationCentricChassisSpeeds(
-            ChassisSpeeds driverStationCentricSpeeds, boolean discretize) {
+    default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds, boolean discretize) {
         final Rotation2d driverStationFacing = FieldConstants.getDriverStationFacing();
         runRobotCentricChassisSpeeds(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -96,12 +90,12 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     /**
      * runs a field-centric ChassisSpeeds
      *
-     * @param fieldCentricSpeeds a continuous chassis speeds, field-centric, normally from a pid
-     *     position controller
+     * @param fieldCentricSpeeds a continuous chassis speeds, field-centric, normally from a pid position controller
      */
     default void runFieldCentricChassisSpeeds(ChassisSpeeds fieldCentricSpeeds, boolean discretize) {
         runRobotCentricChassisSpeeds(
-                ChassisSpeeds.fromFieldRelativeSpeeds(fieldCentricSpeeds, getPose().getRotation()),
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                        fieldCentricSpeeds, getPose().getRotation()),
                 discretize);
     }
 
@@ -143,11 +137,10 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 FieldMirroringUtils::isSidePresentedAsRed,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> {
-                    final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
-                    Logger.recordOutput("Odometry/Trajectory", trajectory);
-                });
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+            final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
+            Logger.recordOutput("Odometry/Trajectory", trajectory);
+        });
         PathPlannerLogging.setLogTargetPoseCallback(
                 (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
     }
@@ -171,36 +164,29 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                         new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
                 desiredLinearVelocityMetersPerSec =
                         new Translation2d(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond),
-                linearVelocityDifference =
-                        desiredLinearVelocityMetersPerSec.minus(currentLinearVelocityMetersPerSec);
+                linearVelocityDifference = desiredLinearVelocityMetersPerSec.minus(currentLinearVelocityMetersPerSec);
 
-        final double maxLinearVelocityChangeIn1Period =
-                MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
+        final double maxLinearVelocityChangeIn1Period = MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
         final boolean desiredLinearVelocityReachableWithin1Period =
                 linearVelocityDifference.getNorm() <= maxLinearVelocityChangeIn1Period;
         final Translation2d
                 linearVelocityChangeVector =
                         new Translation2d(
-                                maxLinearVelocityChangeIn1Period,
-                                MapleCommonMath.getAngle(linearVelocityDifference)),
+                                maxLinearVelocityChangeIn1Period, MapleCommonMath.getAngle(linearVelocityDifference)),
                 newLinearVelocity =
                         desiredLinearVelocityReachableWithin1Period
                                 ? desiredLinearVelocityMetersPerSec
                                 : currentLinearVelocityMetersPerSec.plus(linearVelocityChangeVector);
 
         final double
-                angularVelocityDifference =
-                        desiredSpeeds.omegaRadiansPerSecond - currentSpeeds.omegaRadiansPerSecond,
+                angularVelocityDifference = desiredSpeeds.omegaRadiansPerSecond - currentSpeeds.omegaRadiansPerSecond,
                 maxAngularVelocityChangeIn1Period = MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ * dtSecs,
-                angularVelocityChange =
-                        Math.copySign(maxAngularVelocityChangeIn1Period, angularVelocityDifference);
+                angularVelocityChange = Math.copySign(maxAngularVelocityChangeIn1Period, angularVelocityDifference);
         final boolean desiredAngularVelocityReachableWithin1Period =
                 Math.abs(angularVelocityDifference) <= maxAngularVelocityChangeIn1Period;
-        final double newAngularVelocity =
-                desiredAngularVelocityReachableWithin1Period
-                        ? desiredSpeeds.omegaRadiansPerSecond
-                        : currentSpeeds.omegaRadiansPerSecond + angularVelocityChange;
-        return new ChassisSpeeds(
-                newLinearVelocity.getX(), newLinearVelocity.getY(), newAngularVelocity);
+        final double newAngularVelocity = desiredAngularVelocityReachableWithin1Period
+                ? desiredSpeeds.omegaRadiansPerSecond
+                : currentSpeeds.omegaRadiansPerSecond + angularVelocityChange;
+        return new ChassisSpeeds(newLinearVelocity.getX(), newLinearVelocity.getY(), newAngularVelocity);
     }
 }

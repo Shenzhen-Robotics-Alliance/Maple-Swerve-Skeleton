@@ -29,19 +29,15 @@ public class IntakeIOSim extends IntakeSimulation implements IntakeIO {
     @Override
     public void updateInputs(IntakeInputs inputs) {
         if (shooterRunning
-                && voltageIntegralSinceNoteInIntake
-                        > VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_LEAVE) {
+                && voltageIntegralSinceNoteInIntake > VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_LEAVE) {
             super.gamePieceCount--;
             voltageIntegralSinceNoteInIntake = 0;
         }
         final boolean noteTouchingIntake = super.gamePieceCount > 0;
         inputs.lowerBeamBreakBlocked = noteTouchingIntake;
-        if (noteTouchingIntake)
-            voltageIntegralSinceNoteInIntake += intakeVoltage * Robot.defaultPeriodSecs;
-        inputs.upperBeamBreakerBlocked =
-                inputs.lowerBeamBreakBlocked
-                        && voltageIntegralSinceNoteInIntake
-                                >= VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION;
+        if (noteTouchingIntake) voltageIntegralSinceNoteInIntake += intakeVoltage * Robot.defaultPeriodSecs;
+        inputs.upperBeamBreakerBlocked = inputs.lowerBeamBreakBlocked
+                && voltageIntegralSinceNoteInIntake >= VOLTAGE_INTEGRAL_SINCE_NOTE_IN_INTAKE_WHEN_NOTE_IN_POSITION;
     }
 
     @Override

@@ -3,9 +3,7 @@ package frc.robot.utils;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import org.ironmaple.utils.mathutils.MapleCommonMath;
 
-/**
- * interface for an LED animation that can be displayed on the dashboard or by an addressable led
- */
+/** interface for an LED animation that can be displayed on the dashboard or by an addressable led */
 public interface LEDAnimation {
     void play(AddressableLEDBuffer buffer, double t);
 
@@ -25,11 +23,7 @@ public interface LEDAnimation {
             t *= hz;
             final double brightness = 0.5 + 0.5 * Math.sin(t * Math.PI);
             for (int i = 0; i < buffer.getLength(); i++)
-                buffer.setRGB(
-                        i,
-                        (int) (colorR * brightness),
-                        (int) (colorG * brightness),
-                        (int) (colorB * brightness));
+                buffer.setRGB(i, (int) (colorR * brightness), (int) (colorG * brightness), (int) (colorB * brightness));
         }
     }
 
@@ -84,8 +78,7 @@ public interface LEDAnimation {
             final int stripLength = buffer.getLength() / 2;
             for (int i = 0; i < stripLength; i++) {
                 int r = colorR, g = colorG, b = colorB;
-                if (i >= (int) (upperEdge * stripLength) || i <= (int) (lowerEdge * stripLength))
-                    r = g = b = 0;
+                if (i >= (int) (upperEdge * stripLength) || i <= (int) (lowerEdge * stripLength)) r = g = b = 0;
                 buffer.setRGB(stripLength + i, r, g, b);
                 buffer.setRGB(stripLength - i - 1, r, g, b);
             }

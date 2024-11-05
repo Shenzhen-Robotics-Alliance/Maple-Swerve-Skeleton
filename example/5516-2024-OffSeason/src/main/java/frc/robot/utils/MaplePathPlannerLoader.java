@@ -26,18 +26,14 @@ public class MaplePathPlannerLoader {
      *
      * <p>Original Source: {@link com.pathplanner.lib.path.PathPlannerPath}
      *
-     * <p>Changes We Made: 1. Supports reversed paths 2. Overrides the global constraints as it
-     * different for each robot
+     * <p>Changes We Made: 1. Supports reversed paths 2. Overrides the global constraints as it different for each robot
      *
      * @param pathName The name of the path to load
      * @return PathPlannerPath created from the given file name
      */
     public static PathPlannerPath fromPathFile(String pathName, PathConstraints globalConstraints) {
-        try (BufferedReader br =
-                new BufferedReader(
-                        new FileReader(
-                                new File(
-                                        Filesystem.getDeployDirectory(), "pathplanner/paths/" + pathName + ".path")))) {
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(new File(Filesystem.getDeployDirectory(), "pathplanner/paths/" + pathName + ".path")))) {
             StringBuilder fileContentBuilder = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
@@ -60,19 +56,15 @@ public class MaplePathPlannerLoader {
      *
      * <p>Original Source: {@link com.pathplanner.lib.path.PathPlannerPath}
      *
-     * <p>Changes We Made: 1. Supports reversed paths 2. Overrides the global constraints as it
-     * different for each robot
+     * <p>Changes We Made: 1. Supports reversed paths 2. Overrides the global constraints as it different for each robot
      *
      * @param pathName The name of the path to load
      * @return PathPlannerPath created from the given file name
      */
     public static PathPlannerPath fromPathFileReversed(
             String pathName, PathConstraints globalConstraints, GoalEndState goalEndState) {
-        try (BufferedReader br =
-                new BufferedReader(
-                        new FileReader(
-                                new File(
-                                        Filesystem.getDeployDirectory(), "pathplanner/paths/" + pathName + ".path")))) {
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(new File(Filesystem.getDeployDirectory(), "pathplanner/paths/" + pathName + ".path")))) {
             StringBuilder fileContentBuilder = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
@@ -90,8 +82,7 @@ public class MaplePathPlannerLoader {
         }
     }
 
-    private static PathPlannerPath pathFromJson(
-            JSONObject pathJson, PathConstraints globalConstraints) {
+    private static PathPlannerPath pathFromJson(JSONObject pathJson, PathConstraints globalConstraints) {
         GoalEndState goalEndState = goalEndStateFromJson((JSONObject) pathJson.get("goalEndState"));
         return pathFromJson(pathJson, globalConstraints, false, goalEndState);
     }
@@ -102,18 +93,15 @@ public class MaplePathPlannerLoader {
     }
 
     /**
-     * Original Source: {@link com.pathplanner.lib.path.PathPlannerPath} Changes We Made: 1. Supports
-     * reversed paths 2. Overrides the global constraints as it different for each robot
+     * Original Source: {@link com.pathplanner.lib.path.PathPlannerPath} Changes We Made: 1. Supports reversed paths 2.
+     * Overrides the global constraints as it different for each robot
      *
      * @param pathJson
      * @param globalConstraints
      * @param reversed
      */
     private static PathPlannerPath pathFromJson(
-            JSONObject pathJson,
-            PathConstraints globalConstraints,
-            boolean reversed,
-            GoalEndState goalEndState) {
+            JSONObject pathJson, PathConstraints globalConstraints, boolean reversed, GoalEndState goalEndState) {
         final JSONArray wayPointsJsonArray = (JSONArray) pathJson.get("waypoints");
         final int wayPointsCount = wayPointsJsonArray.size();
         List<Translation2d> bezierPoints = bezierPointsFromWaypointsJson(wayPointsJsonArray, reversed);
@@ -123,39 +111,32 @@ public class MaplePathPlannerLoader {
 
         for (var rotJson : (JSONArray) pathJson.get("rotationTargets")) {
             final RotationTarget originalRotationTarget = rotationTargetFromJson((JSONObject) rotJson);
-            final double wayPointRelativePosition =
-                    reversed
-                            ? wayPointsCount - originalRotationTarget.getPosition()
-                            : originalRotationTarget.getPosition();
-            rotationTargets.add(
-                    new RotationTarget(
-                            wayPointRelativePosition,
-                            originalRotationTarget.getTarget(),
-                            originalRotationTarget.shouldRotateFast()));
+            final double wayPointRelativePosition = reversed
+                    ? wayPointsCount - originalRotationTarget.getPosition()
+                    : originalRotationTarget.getPosition();
+            rotationTargets.add(new RotationTarget(
+                    wayPointRelativePosition,
+                    originalRotationTarget.getTarget(),
+                    originalRotationTarget.shouldRotateFast()));
         }
 
         for (var zoneJson : (JSONArray) pathJson.get("constraintZones")) {
-            final ConstraintsZone originalConstraintsZone =
-                    constraintsZoneFromJson((JSONObject) zoneJson);
-            final double minWayPointPos =
-                    reversed
-                            ? wayPointsCount - originalConstraintsZone.getMaxWaypointPos()
-                            : originalConstraintsZone.getMinWaypointPos();
-            final double maxWayPointPos =
-                    reversed
-                            ? wayPointsCount - originalConstraintsZone.getMinWaypointPos()
-                            : originalConstraintsZone.getMaxWaypointPos();
+            final ConstraintsZone originalConstraintsZone = constraintsZoneFromJson((JSONObject) zoneJson);
+            final double minWayPointPos = reversed
+                    ? wayPointsCount - originalConstraintsZone.getMaxWaypointPos()
+                    : originalConstraintsZone.getMinWaypointPos();
+            final double maxWayPointPos = reversed
+                    ? wayPointsCount - originalConstraintsZone.getMinWaypointPos()
+                    : originalConstraintsZone.getMaxWaypointPos();
             constraintZones.add(
-                    new ConstraintsZone(
-                            minWayPointPos, maxWayPointPos, originalConstraintsZone.getConstraints()));
+                    new ConstraintsZone(minWayPointPos, maxWayPointPos, originalConstraintsZone.getConstraints()));
         }
 
         for (var markerJson : (JSONArray) pathJson.get("eventMarkers")) {
             final EventMarker originalEventMarker = eventMarkerFromJson((JSONObject) markerJson);
-            final double wayPointRelativePosition =
-                    reversed
-                            ? wayPointsCount - originalEventMarker.getWaypointRelativePos()
-                            : originalEventMarker.getWaypointRelativePos();
+            final double wayPointRelativePosition = reversed
+                    ? wayPointsCount - originalEventMarker.getWaypointRelativePos()
+                    : originalEventMarker.getWaypointRelativePos();
             eventMarkers.add(new EventMarker(wayPointRelativePosition, originalEventMarker.getCommand()));
         }
 
@@ -164,8 +145,7 @@ public class MaplePathPlannerLoader {
             JSONObject previewStartingStateJson = (JSONObject) pathJson.get("previewStartingState");
             if (previewStartingStateJson != null) {
                 previewStartingRotation =
-                        Rotation2d.fromDegrees(
-                                ((Number) previewStartingStateJson.get("rotation")).doubleValue());
+                        Rotation2d.fromDegrees(((Number) previewStartingStateJson.get("rotation")).doubleValue());
             }
         }
 
@@ -185,8 +165,7 @@ public class MaplePathPlannerLoader {
      *
      * <p>added path reversing function
      */
-    private static List<Translation2d> bezierPointsFromWaypointsJson(
-            JSONArray waypointsJson, boolean reversed) {
+    private static List<Translation2d> bezierPointsFromWaypointsJson(JSONArray waypointsJson, boolean reversed) {
         List<Translation2d> bezierPoints = new ArrayList<>();
 
         // First point
@@ -257,8 +236,7 @@ public class MaplePathPlannerLoader {
     }
 
     /**
-     * Original Source {@link com.pathplanner.lib.path.ConstraintsZone} Create a constraints zone from
-     * json
+     * Original Source {@link com.pathplanner.lib.path.ConstraintsZone} Create a constraints zone from json
      *
      * @param zoneJson A {@link org.json.simple.JSONObject} representing a constraints zone
      * @return The constraints zone defined by the given json object
@@ -271,26 +249,19 @@ public class MaplePathPlannerLoader {
     }
 
     /**
-     * Original Source {@link com.pathplanner.lib.path.PathConstraints} Create a path constraints
-     * object from json
+     * Original Source {@link com.pathplanner.lib.path.PathConstraints} Create a path constraints object from json
      *
-     * @param constraintsJson {@link org.json.simple.JSONObject} representing a path constraints
-     *     object
+     * @param constraintsJson {@link org.json.simple.JSONObject} representing a path constraints object
      * @return The path constraints defined by the given json
      */
     private static PathConstraints pathConstraintsFromJson(JSONObject constraintsJson) {
         double maxVel = ((Number) constraintsJson.get("maxVelocity")).doubleValue();
         double maxAccel = ((Number) constraintsJson.get("maxAcceleration")).doubleValue();
-        double maxAngularVel =
-                ((Number) constraintsJson.get("maxAngularVelocity")).doubleValue(); // Degrees
-        double maxAngularAccel =
-                ((Number) constraintsJson.get("maxAngularAcceleration")).doubleValue(); // Degrees
+        double maxAngularVel = ((Number) constraintsJson.get("maxAngularVelocity")).doubleValue(); // Degrees
+        double maxAngularAccel = ((Number) constraintsJson.get("maxAngularAcceleration")).doubleValue(); // Degrees
 
         return new PathConstraints(
-                maxVel,
-                maxAccel,
-                Units.degreesToRadians(maxAngularVel),
-                Units.degreesToRadians(maxAngularAccel));
+                maxVel, maxAccel, Units.degreesToRadians(maxAngularVel), Units.degreesToRadians(maxAngularAccel));
     }
 
     /**
@@ -305,14 +276,11 @@ public class MaplePathPlannerLoader {
         return new EventMarker(pos, cmd);
     }
 
-    public static Supplier<Pose2d> getEndingRobotPoseInCurrentAllianceSupplier(
-            PathPlannerPath pathAtBlueAlliance) {
+    public static Supplier<Pose2d> getEndingRobotPoseInCurrentAllianceSupplier(PathPlannerPath pathAtBlueAlliance) {
         final List<Pose2d> pathPoses = pathAtBlueAlliance.getPathPoses();
         final Rotation2d endingRotation = pathAtBlueAlliance.getGoalEndState().getRotation();
         final Pose2d lastPathPose = pathPoses.get(pathPoses.size() - 1);
 
-        return () ->
-                FieldConstants.toCurrentAlliancePose(
-                        new Pose2d(lastPathPose.getTranslation(), endingRotation));
+        return () -> FieldConstants.toCurrentAlliancePose(new Pose2d(lastPathPose.getTranslation(), endingRotation));
     }
 }

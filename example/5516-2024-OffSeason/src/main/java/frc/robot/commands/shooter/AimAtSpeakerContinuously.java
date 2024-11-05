@@ -12,12 +12,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
- * aims at the speaker continuously adjust the pitch and flywheels to match the current distance it
- * does not adjust the chassis rotation, so it should be running in parallel with {@link
- * frc.robot.commands.drive.JoystickDriveAndAimAtTarget} or {@link
- * frc.robot.commands.drive.AutoAlignment} it takes the chassis velocity into consideration, but
- * will still be inaccurate if moving too fast the command never ends by itself, readyToShoot()
- * tells you whether the pitch and fly-wheels are ready
+ * aims at the speaker continuously adjust the pitch and flywheels to match the current distance it does not adjust the
+ * chassis rotation, so it should be running in parallel with
+ * {@link frc.robot.commands.drive.JoystickDriveAndAimAtTarget} or {@link frc.robot.commands.drive.AutoAlignment} it
+ * takes the chassis velocity into consideration, but will still be inaccurate if moving too fast the command never ends
+ * by itself, readyToShoot() tells you whether the pitch and fly-wheels are ready
  */
 public class AimAtSpeakerContinuously extends Command {
     private final FlyWheels flyWheels;
@@ -60,11 +59,10 @@ public class AimAtSpeakerContinuously extends Command {
     @Override
     public void execute() {
         shooterOptimizationRunning = true;
-        final MapleShooterOptimization.ShooterState state =
-                shooterOptimization.getOptimizedShootingState(
-                        targetPositionSupplier.get(),
-                        drive.getPose().getTranslation(),
-                        drive.getMeasuredChassisSpeedsFieldRelative());
+        final MapleShooterOptimization.ShooterState state = shooterOptimization.getOptimizedShootingState(
+                targetPositionSupplier.get(),
+                drive.getPose().getTranslation(),
+                drive.getMeasuredChassisSpeedsFieldRelative());
         state.log("Shooter/");
 
         pitch.runStaticSetPoint(
@@ -72,8 +70,7 @@ public class AimAtSpeakerContinuously extends Command {
                 Math.toRadians(state.shooterAngleChangeRateDegreesPerSecond));
         flyWheels.runStaticRPMSetPoint(state.shooterRPM, state.shooterRPMChangeRateRPMPerSeconds);
 
-        if (statusLight != null)
-            statusLight.setAnimation(readyToShoot() ? AIMING_SPEAKER_READY : AIMING_SPEAKER);
+        if (statusLight != null) statusLight.setAnimation(readyToShoot() ? AIMING_SPEAKER_READY : AIMING_SPEAKER);
     }
 
     public boolean readyToShoot() {

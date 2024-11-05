@@ -12,11 +12,7 @@ public class PathFindToPose extends CommandOnFly {
             Supplier<Pose2d> targetPose,
             double speedMultiplier,
             double goalEndVelocity) {
-        super(
-                () ->
-                        AutoBuilder.pathfindToPose(
-                                targetPose.get(),
-                                driveSubsystem.getChassisConstrains(speedMultiplier),
-                                goalEndVelocity));
+        super(() -> AutoBuilder.pathfindToPose(
+                targetPose.get(), driveSubsystem.getChassisConstrains(speedMultiplier), goalEndVelocity));
     }
 }

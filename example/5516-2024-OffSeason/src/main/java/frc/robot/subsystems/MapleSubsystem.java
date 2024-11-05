@@ -12,8 +12,8 @@ import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * Iron Maple's subsystem management. Based on {@link SubsystemBase} from WPILib, we added
- * on-disable/on-enable function calls as well as precise dt calculations
+ * Iron Maple's subsystem management. Based on {@link SubsystemBase} from WPILib, we added on-disable/on-enable function
+ * calls as well as precise dt calculations
  */
 public abstract class MapleSubsystem extends SubsystemBase {
     public static final List<MapleSubsystem> instances = new ArrayList<>();

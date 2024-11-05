@@ -24,21 +24,20 @@ public abstract class IntakeSimulation extends BodyFixture {
     private final Queue<GamePieceInSimulation> gamePiecesToRemove;
 
     /**
-     * Creates an intake simulation the intake is considered a line segment on the robot any game
-     * piece that touches the line will be grabbed
+     * Creates an intake simulation the intake is considered a line segment on the robot any game piece that touches the
+     * line will be grabbed
      *
      * @param startPointOnRobot the start point of the segment, in relative to the robot
      * @param endPointOnRobot the end point of the segment, in relative to the robot
      * @param capacity the amount of game-pieces that can be hold in the intake
      */
-    public IntakeSimulation(
-            Translation2d startPointOnRobot, Translation2d endPointOnRobot, int capacity) {
+    public IntakeSimulation(Translation2d startPointOnRobot, Translation2d endPointOnRobot, int capacity) {
         this(new Segment(toDyn4jVector2(startPointOnRobot), toDyn4jVector2(endPointOnRobot)), capacity);
     }
 
     /**
-     * Creates an intake simulation the intake is fixed shape on the robot any game piece that touches
-     * the line will be grabbed
+     * Creates an intake simulation the intake is fixed shape on the robot any game piece that touches the line will be
+     * grabbed
      *
      * @param shape the shape of the intake
      * @param capacity the amount of game-pieces that can be hold in the intake\
@@ -59,8 +58,7 @@ public abstract class IntakeSimulation extends BodyFixture {
             if (!isIntakeRunning()) return;
             if (gamePieceCount == capacity) return;
 
-            final CollisionBody<?> collisionBody1 = collision.getBody1(),
-                    collisionBody2 = collision.getBody2();
+            final CollisionBody<?> collisionBody1 = collision.getBody1(), collisionBody2 = collision.getBody2();
             final Fixture fixture1 = collision.getFixture1(), fixture2 = collision.getFixture2();
 
             if (collisionBody1 instanceof GamePieceInSimulation && fixture2 == IntakeSimulation.this)

@@ -1,5 +1,6 @@
 // Original Source:
-// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main,
+// Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot.subsystems.drive;
@@ -36,8 +37,7 @@ public class SwerveModule extends MapleSubsystem {
         super("Module-" + name);
         this.io = io;
         this.name = name;
-        this.hardwareFaultAlert =
-                new Alert("Module-" + name + " Hardware Fault", Alert.AlertType.ERROR);
+        this.hardwareFaultAlert = new Alert("Module-" + name + " Hardware Fault", Alert.AlertType.ERROR);
         this.hardwareFaultAlert.setActivated(false);
 
         turnCloseLoop = new MaplePIDController(STEER_CLOSE_LOOP);
@@ -65,8 +65,7 @@ public class SwerveModule extends MapleSubsystem {
     private void updateOdometryPositions() {
         odometryPositions = new SwerveModulePosition[inputs.odometryDriveWheelRevolutions.length];
         for (int i = 0; i < odometryPositions.length; i++) {
-            double positionMeters =
-                    driveWheelRevolutionsToMeters(inputs.odometryDriveWheelRevolutions[i]);
+            double positionMeters = driveWheelRevolutionsToMeters(inputs.odometryDriveWheelRevolutions[i]);
             Rotation2d angle = inputs.odometrySteerPositions[i];
             odometryPositions[i] = new SwerveModulePosition(positionMeters, angle);
         }
@@ -78,12 +77,9 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private void runDriveControlLoop() {
-        final double adjustSpeedSetpointMetersPerSec =
-                SwerveStateProjection.project(setPoint, getSteerFacing());
-        io.setDriveVoltage(
-                DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec)
-                        + driveCloseLoop.calculate(
-                                getDriveVelocityMetersPerSec(), adjustSpeedSetpointMetersPerSec));
+        final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
+        io.setDriveVoltage(DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec)
+                + driveCloseLoop.calculate(getDriveVelocityMetersPerSec(), adjustSpeedSetpointMetersPerSec));
     }
 
     /** Runs the module with the specified setpoint state. Returns the optimized state. */
@@ -122,8 +118,7 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private double driveWheelRevolutionsToMeters(double driveWheelRevolutions) {
-        return Units.rotationsToRadians(driveWheelRevolutions)
-                * DriveTrainConstants.WHEEL_RADIUS_METERS;
+        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS_METERS;
     }
 
     /** Returns the current drive velocity of the module in meters per second. */

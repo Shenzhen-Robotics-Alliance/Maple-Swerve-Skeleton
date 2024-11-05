@@ -45,8 +45,7 @@ public class JoystickDrive extends Command {
         this.previousChassisUsageTimer.start();
         this.previousRotationalInputTimer = new Timer();
         this.previousRotationalInputTimer.start();
-        this.chassisRotationController =
-                new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
+        this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
 
         super.addRequirements(driveSubsystem);
         resetSensitivity();
@@ -59,43 +58,34 @@ public class JoystickDrive extends Command {
         this.currentPilotInputSpeeds = new ChassisSpeeds();
         this.currentRotationMaintenanceSetpoint = driveSubsystem.getRawGyroYaw();
 
-        this.chassisRotationController.calculate(
-                driveSubsystem.getRawGyroYaw().getRadians()); // activate controller
+        this.chassisRotationController.calculate(driveSubsystem.getRawGyroYaw().getRadians()); // activate controller
     }
 
     @Override
     public void execute() {
         if (input == null) return;
 
-        final ChassisSpeeds newestPilotInputSpeed =
-                input.getJoystickChassisSpeeds(
-                        driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
-                        driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
-        currentPilotInputSpeeds =
-                driveSubsystem.constrainAcceleration(
-                        currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
+        final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
+                driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
+                driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
+        currentPilotInputSpeeds = driveSubsystem.constrainAcceleration(
+                currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
 
-        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05)
-            previousRotationalInputTimer.reset();
+        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
 
         if (povButtonSupplier.get() != -1)
             setCurrentRotationalMaintenance(
-                    FieldConstants.getDriverStationFacing()
-                            .minus(Rotation2d.fromDegrees(povButtonSupplier.get())));
+                    FieldConstants.getDriverStationFacing().minus(Rotation2d.fromDegrees(povButtonSupplier.get())));
 
         final ChassisSpeeds chassisSpeedsWithRotationMaintenance;
-        final double rotationCorrectionAngularVelocity =
-                chassisRotationController.calculate(
-                        driveSubsystem.getRawGyroYaw().getRadians(),
-                        currentRotationMaintenanceSetpoint.getRadians());
+        final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(
+                driveSubsystem.getRawGyroYaw().getRadians(), currentRotationMaintenanceSetpoint.getRadians());
         Logger.recordOutput("previousRotationalInputTimer.get()", previousRotationalInputTimer.get());
-        if (previousRotationalInputTimer.get()
-                > TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS)
-            chassisSpeedsWithRotationMaintenance =
-                    new ChassisSpeeds(
-                            currentPilotInputSpeeds.vxMetersPerSecond,
-                            currentPilotInputSpeeds.vyMetersPerSecond,
-                            rotationCorrectionAngularVelocity);
+        if (previousRotationalInputTimer.get() > TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS)
+            chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
+                    currentPilotInputSpeeds.vxMetersPerSecond,
+                    currentPilotInputSpeeds.vyMetersPerSecond,
+                    rotationCorrectionAngularVelocity);
         else {
             chassisSpeedsWithRotationMaintenance = currentPilotInputSpeeds;
             Logger.recordOutput("pilot input speeds", currentPilotInputSpeeds);
@@ -103,17 +93,14 @@ public class JoystickDrive extends Command {
         }
 
         Logger.recordOutput(
-                "JoystickDrive/rotation maintenance set-point (deg)",
-                currentRotationMaintenanceSetpoint.getDegrees());
-        Logger.recordOutput(
-                "JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
+                "JoystickDrive/rotation maintenance set-point (deg)", currentRotationMaintenanceSetpoint.getDegrees());
+        Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
         Logger.recordOutput(
                 "JoystickDrive/rotation closed loop velocity (deg per sec)",
                 Math.toDegrees(rotationCorrectionAngularVelocity));
 
         if (!isZero(chassisSpeedsWithRotationMaintenance)) previousChassisUsageTimer.reset();
-        Logger.recordOutput(
-                "JoystickDrive/current pilot input speeds", currentPilotInputSpeeds.toString());
+        Logger.recordOutput("JoystickDrive/current pilot input speeds", currentPilotInputSpeeds.toString());
 
         if (previousChassisUsageTimer.hasElapsed(NON_USAGE_TIME_RESET_WHEELS)) {
             driveSubsystem.stop();
@@ -128,8 +115,7 @@ public class JoystickDrive extends Command {
     public void setCurrentRotationalMaintenance(Rotation2d setPointAbsoluteFacing) {
         final Rotation2d gyroReadingBiasFromActualFacing =
                 driveSubsystem.getRawGyroYaw().minus(driveSubsystem.getFacing());
-        this.currentRotationMaintenanceSetpoint =
-                setPointAbsoluteFacing.rotateBy(gyroReadingBiasFromActualFacing);
+        this.currentRotationMaintenanceSetpoint = setPointAbsoluteFacing.rotateBy(gyroReadingBiasFromActualFacing);
     }
 
     public void setSensitivity(double translationalSensitivity, double rotationalSensitivity) {

@@ -53,17 +53,13 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param timestamp The timestamp of the vision measurement in seconds.
      * @param measurementStdDevs the standard deviation of the measurement
      */
-    default void addVisionMeasurement(
-            Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {}
+    default void addVisionMeasurement(Pose2d visionPose, double timestamp, Matrix<N3, N1> measurementStdDevs) {}
 
-    /**
-     * @return the measured(actual) velocities of the chassis, robot-relative
-     */
+    /** @return the measured(actual) velocities of the chassis, robot-relative */
     ChassisSpeeds getMeasuredChassisSpeedsRobotRelative();
 
     default ChassisSpeeds getMeasuredChassisSpeedsFieldRelative() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(
-                getMeasuredChassisSpeedsRobotRelative(), getFacing());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getMeasuredChassisSpeedsRobotRelative(), getFacing());
     }
 
     double getChassisMaxLinearVelocityMetersPerSec();
@@ -85,25 +81,22 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     /**
      * runs a driverstation-centric ChassisSpeeds
      *
-     * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally
-     *     from a gamepad
+     * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      */
     default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds) {
         final Rotation2d driverStationFacing = FieldConstants.getDriverStationFacing();
-        runRobotCentricChassisSpeeds(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        driverStationCentricSpeeds, getPose().getRotation().minus(driverStationFacing)));
+        runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                driverStationCentricSpeeds, getPose().getRotation().minus(driverStationFacing)));
     }
 
     /**
      * runs a field-centric ChassisSpeeds
      *
-     * @param fieldCentricSpeeds a continuous chassis speeds, field-centric, normally from a pid
-     *     position controller
+     * @param fieldCentricSpeeds a continuous chassis speeds, field-centric, normally from a pid position controller
      */
     default void runFieldCentricChassisSpeeds(ChassisSpeeds fieldCentricSpeeds) {
-        runRobotCentricChassisSpeeds(
-                ChassisSpeeds.fromFieldRelativeSpeeds(fieldCentricSpeeds, getPose().getRotation()));
+        runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                fieldCentricSpeeds, getPose().getRotation()));
     }
 
     default void stop() {
@@ -119,8 +112,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         final double PERCENT_DEADBAND = 0.03;
         if (Math.abs(speeds.omegaRadiansPerSecond) < PERCENT_DEADBAND * getChassisMaxAngularVelocity()
                 && Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)
-                        < PERCENT_DEADBAND * getChassisMaxLinearVelocityMetersPerSec())
-            speeds = new ChassisSpeeds();
+                        < PERCENT_DEADBAND * getChassisMaxLinearVelocityMetersPerSec()) speeds = new ChassisSpeeds();
 
         runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02));
     }
@@ -140,12 +132,11 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 FieldConstants::isSidePresentedAsRed,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
-        PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> {
-                    final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
-                    Logger.recordOutput("Odometry/Trajectory", trajectory);
-                    fieldVisualizer.displayTrajectory(trajectory);
-                });
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> {
+            final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
+            Logger.recordOutput("Odometry/Trajectory", trajectory);
+            fieldVisualizer.displayTrajectory(trajectory);
+        });
         PathPlannerLogging.setLogTargetPoseCallback(
                 (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
     }
@@ -169,35 +160,28 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                         new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
                 desiredLinearVelocityMetersPerSec =
                         new Translation2d(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond),
-                linearVelocityDifference =
-                        desiredLinearVelocityMetersPerSec.minus(currentLinearVelocityMetersPerSec);
+                linearVelocityDifference = desiredLinearVelocityMetersPerSec.minus(currentLinearVelocityMetersPerSec);
 
-        final double maxLinearVelocityChangeIn1Period =
-                MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
+        final double maxLinearVelocityChangeIn1Period = MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
         final boolean desiredLinearVelocityReachableWithin1Period =
                 linearVelocityDifference.getNorm() <= maxLinearVelocityChangeIn1Period;
         final Translation2d
                 linearVelocityChangeVector =
-                        new Translation2d(
-                                maxLinearVelocityChangeIn1Period, linearVelocityDifference.getAngle()),
+                        new Translation2d(maxLinearVelocityChangeIn1Period, linearVelocityDifference.getAngle()),
                 newLinearVelocity =
                         desiredLinearVelocityReachableWithin1Period
                                 ? desiredLinearVelocityMetersPerSec
                                 : currentLinearVelocityMetersPerSec.plus(linearVelocityChangeVector);
 
         final double
-                angularVelocityDifference =
-                        desiredSpeeds.omegaRadiansPerSecond - currentSpeeds.omegaRadiansPerSecond,
+                angularVelocityDifference = desiredSpeeds.omegaRadiansPerSecond - currentSpeeds.omegaRadiansPerSecond,
                 maxAngularVelocityChangeIn1Period = MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ * dtSecs,
-                angularVelocityChange =
-                        Math.copySign(maxAngularVelocityChangeIn1Period, angularVelocityDifference);
+                angularVelocityChange = Math.copySign(maxAngularVelocityChangeIn1Period, angularVelocityDifference);
         final boolean desiredAngularVelocityReachableWithin1Period =
                 Math.abs(angularVelocityDifference) <= maxAngularVelocityChangeIn1Period;
-        final double newAngularVelocity =
-                desiredAngularVelocityReachableWithin1Period
-                        ? desiredSpeeds.omegaRadiansPerSecond
-                        : currentSpeeds.omegaRadiansPerSecond + angularVelocityChange;
-        return new ChassisSpeeds(
-                newLinearVelocity.getX(), newLinearVelocity.getY(), newAngularVelocity);
+        final double newAngularVelocity = desiredAngularVelocityReachableWithin1Period
+                ? desiredSpeeds.omegaRadiansPerSecond
+                : currentSpeeds.omegaRadiansPerSecond + angularVelocityChange;
+        return new ChassisSpeeds(newLinearVelocity.getX(), newLinearVelocity.getY(), newAngularVelocity);
     }
 }

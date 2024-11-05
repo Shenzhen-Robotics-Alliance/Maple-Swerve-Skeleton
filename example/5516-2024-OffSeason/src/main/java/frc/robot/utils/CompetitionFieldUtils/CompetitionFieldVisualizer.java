@@ -10,10 +10,9 @@ import java.util.*;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * visualizes a competition field on dashboard & Advantage Scope displays robots, opponent robots
- * and game pieces on field the source of these information should either be captured from a vision
- * system during a real competition or by the Maple Physics Simulation during a simulated
- * competition
+ * visualizes a competition field on dashboard & Advantage Scope displays robots, opponent robots and game pieces on
+ * field the source of these information should either be captured from a vision system during a real competition or by
+ * the Maple Physics Simulation during a simulated competition
  */
 public class CompetitionFieldVisualizer {
     public interface ObjectOnFieldDisplay {
@@ -40,18 +39,17 @@ public class CompetitionFieldVisualizer {
     private final Field2d dashboardField2d;
 
     public CompetitionFieldVisualizer(HolonomicDriveSubsystem driveSubsystem) {
-        this(
-                new CompetitionFieldVisualizer.Object2dOnFieldDisplay() {
-                    @Override
-                    public Pose2d getObjectOnFieldPose2d() {
-                        return driveSubsystem.getPose();
-                    }
+        this(new CompetitionFieldVisualizer.Object2dOnFieldDisplay() {
+            @Override
+            public Pose2d getObjectOnFieldPose2d() {
+                return driveSubsystem.getPose();
+            }
 
-                    @Override
-                    public String getTypeName() {
-                        return "Robot";
-                    }
-                });
+            @Override
+            public String getTypeName() {
+                return "Robot";
+            }
+        });
     }
 
     public CompetitionFieldVisualizer(Object2dOnFieldDisplay mainRobot) {
@@ -109,17 +107,17 @@ public class CompetitionFieldVisualizer {
 
     private void removeGamePiecesOnFlyIfReachedTarget() {
         for (Set<GamePieceOnFlyDisplay> gamePieceSet : gamePiecesOnFlyDisplayWithGivenType.values())
-            gamePieceSet.removeIf(
-                    gamePieceOnFlyDisplay -> {
-                        if (gamePieceOnFlyDisplay.isReached()) deleteObject(gamePieceOnFlyDisplay);
-                        return gamePieceOnFlyDisplay.isReached();
-                    });
+            gamePieceSet.removeIf(gamePieceOnFlyDisplay -> {
+                if (gamePieceOnFlyDisplay.isReached()) deleteObject(gamePieceOnFlyDisplay);
+                return gamePieceOnFlyDisplay.isReached();
+            });
     }
 
     private static List<Pose2d> getPose2ds(Set<ObjectOnFieldDisplay> objects) {
         final List<Pose2d> pose2dList = new ArrayList<>();
 
-        for (ObjectOnFieldDisplay object : objects) pose2dList.add(object.getPose3d().toPose2d());
+        for (ObjectOnFieldDisplay object : objects)
+            pose2dList.add(object.getPose3d().toPose2d());
         return pose2dList;
     }
 

@@ -70,11 +70,10 @@ public class MapleMultiTagPoseEstimator {
         observedVisionTargetPoseInFieldLayout.clear();
 
         if (cameraInputs.length != camerasProperties.size())
-            throw new IllegalArgumentException(
-                    "camera inputs length "
-                            + cameraInputs.length
-                            + " does not match camera properties size "
-                            + camerasProperties.size());
+            throw new IllegalArgumentException("camera inputs length "
+                    + cameraInputs.length
+                    + " does not match camera properties size "
+                    + camerasProperties.size());
 
         for (int i = 0; i < cameraInputs.length; i++)
             fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i), currentOdometryPose);
@@ -87,9 +86,8 @@ public class MapleMultiTagPoseEstimator {
         calculateVisibleTagsPosesForLog(cameraInput, cameraProperty, currentOdometryPose);
 
         /* if there is multi-solvepnp result, we only trust that */
-        Optional<Pose3d> multiSolvePNPPoseEstimation =
-                calculateRobotPose3dFromMultiSolvePNPResult(
-                        cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
+        Optional<Pose3d> multiSolvePNPPoseEstimation = calculateRobotPose3dFromMultiSolvePNPResult(
+                cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
         if (multiSolvePNPPoseEstimation.isPresent()) {
             robotPose3dObservationsMultiTag.add(multiSolvePNPPoseEstimation.get());
             return;
@@ -105,25 +103,19 @@ public class MapleMultiTagPoseEstimator {
 
     private Pose3d calculateObservedAprilTagTargetPose(
             Transform3d bestCameraToTarget, Transform3d robotToCamera, Pose2d currentOdometryPose) {
-        return new Pose3d(currentOdometryPose)
-                .transformBy(robotToCamera)
-                .transformBy(bestCameraToTarget);
+        return new Pose3d(currentOdometryPose).transformBy(robotToCamera).transformBy(bestCameraToTarget);
     }
 
     private Optional<Pose3d> calculateRobotPose3dFromSingleObservation(
             Transform3d robotToCamera, Transform3d cameraToTarget, int tagID) {
-        return fieldLayout
-                .getTagPose(tagID)
-                .map(
-                        tagPose ->
-                                tagPose.transformBy(cameraToTarget.inverse()).transformBy(robotToCamera.inverse()));
+        return fieldLayout.getTagPose(tagID).map(tagPose -> tagPose.transformBy(cameraToTarget.inverse())
+                .transformBy(robotToCamera.inverse()));
     }
 
     private Optional<Pose3d> calculateRobotPose3dFromMultiSolvePNPResult(
             Transform3d robotToCamera, Optional<Transform3d> bestFieldToCamera) {
         return bestFieldToCamera.map(
-                fieldToCamera ->
-                        new Pose3d().transformBy(fieldToCamera).transformBy(robotToCamera.inverse()));
+                fieldToCamera -> new Pose3d().transformBy(fieldToCamera).transformBy(robotToCamera.inverse()));
     }
 
     private void calculateVisibleTagsPosesForLog(
@@ -137,11 +129,8 @@ public class MapleMultiTagPoseEstimator {
             fieldLayout
                     .getTagPose(cameraInput.fiducialMarksID[i])
                     .ifPresent(observedVisionTargetPoseInFieldLayout::add);
-            observedAprilTagsPoses.add(
-                    calculateObservedAprilTagTargetPose(
-                            cameraInput.bestCameraToTargets[i],
-                            cameraProperty.robotToCamera,
-                            currentOdometryPose));
+            observedAprilTagsPoses.add(calculateObservedAprilTagTargetPose(
+                    cameraInput.bestCameraToTargets[i], cameraProperty.robotToCamera, currentOdometryPose));
         }
     }
 
@@ -166,17 +155,15 @@ public class MapleMultiTagPoseEstimator {
      * using the filtering mechanism, find out the best guess of the robot pose and the standard error
      *
      * @param cameraInputs the inputs of the cameras
-     * @return (optionally) the best guess of the robot pose and the standard error, if there are
-     *     valid targets
+     * @return (optionally) the best guess of the robot pose and the standard error, if there are valid targets
      */
     public Optional<RobotPoseEstimationResult> estimateRobotPose(
             AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose) {
         if (cameraInputs.length != camerasProperties.size())
-            throw new IllegalStateException(
-                    "camera inputs length"
-                            + cameraInputs.length
-                            + " does not match cameras properties length: "
-                            + camerasProperties.size());
+            throw new IllegalStateException("camera inputs length"
+                    + cameraInputs.length
+                    + " does not match cameras properties length: "
+                    + camerasProperties.size());
 
         fetchRobotPose3dEstimationsFromCameraInputs(cameraInputs, currentOdometryPose);
 
@@ -189,8 +176,7 @@ public class MapleMultiTagPoseEstimator {
 
     private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
         final boolean resultsCountSufficient =
-                validRobotPoseEstimationsSingleTag.size() >= 2
-                        || (!validRobotPoseEstimationsMultiTag.isEmpty());
+                validRobotPoseEstimationsSingleTag.size() >= 2 || (!validRobotPoseEstimationsMultiTag.isEmpty());
 
         if (!resultsCountSufficient) return Optional.empty();
 
@@ -199,46 +185,32 @@ public class MapleMultiTagPoseEstimator {
                 robotPoseEstimationsThetaRadians = new ArrayList<>();
 
         for (Pose3d robotPoseEstimationSingleTag : validRobotPoseEstimationsSingleTag) {
-            robotPoseEstimationsXMeters.add(
-                    new Statistics.Estimation(
-                            robotPoseEstimationSingleTag.getX(),
-                            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
-            robotPoseEstimationsYMeters.add(
-                    new Statistics.Estimation(
-                            robotPoseEstimationSingleTag.getY(),
-                            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
-            robotPoseEstimationsThetaRadians.add(
-                    new Statistics.Estimation(
-                            robotPoseEstimationSingleTag.getRotation().getZ(),
-                            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION));
+            robotPoseEstimationsXMeters.add(new Statistics.Estimation(
+                    robotPoseEstimationSingleTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
+            robotPoseEstimationsYMeters.add(new Statistics.Estimation(
+                    robotPoseEstimationSingleTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
+            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
+                    robotPoseEstimationSingleTag.getRotation().getZ(),
+                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION));
         }
 
         for (Pose3d robotPoseEstimationMultiTag : validRobotPoseEstimationsMultiTag) {
-            robotPoseEstimationsXMeters.add(
-                    new Statistics.Estimation(
-                            robotPoseEstimationMultiTag.getX(),
-                            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
-            robotPoseEstimationsYMeters.add(
-                    new Statistics.Estimation(
-                            robotPoseEstimationMultiTag.getY(),
-                            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
-            robotPoseEstimationsThetaRadians.add(
-                    new Statistics.Estimation(
-                            robotPoseEstimationMultiTag.getRotation().getZ(),
-                            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
+            robotPoseEstimationsXMeters.add(new Statistics.Estimation(
+                    robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
+            robotPoseEstimationsYMeters.add(new Statistics.Estimation(
+                    robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
+            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
+                    robotPoseEstimationMultiTag.getRotation().getZ(), ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
         }
 
         final Statistics.Estimation
                 robotPoseFinalEstimationXMeters = Statistics.linearFilter(robotPoseEstimationsXMeters),
                 robotPoseFinalEstimationYMeters = Statistics.linearFilter(robotPoseEstimationsYMeters),
-                robotPoseFinalEstimationThetaRadians =
-                        Statistics.linearFilter(robotPoseEstimationsThetaRadians);
+                robotPoseFinalEstimationThetaRadians = Statistics.linearFilter(robotPoseEstimationsThetaRadians);
 
         final Translation2d translationPointEstimate =
-                new Translation2d(
-                        robotPoseFinalEstimationXMeters.center(), robotPoseFinalEstimationYMeters.center());
-        final Rotation2d rotationPointEstimate =
-                Rotation2d.fromRadians(robotPoseFinalEstimationThetaRadians.center());
+                new Translation2d(robotPoseFinalEstimationXMeters.center(), robotPoseFinalEstimationYMeters.center());
+        final Rotation2d rotationPointEstimate = Rotation2d.fromRadians(robotPoseFinalEstimationThetaRadians.center());
 
         final double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
                 estimationStandardErrorY = robotPoseFinalEstimationYMeters.standardDeviation(),
@@ -248,34 +220,28 @@ public class MapleMultiTagPoseEstimator {
                 "Vision/MeasurementErrors/translationalStandardError",
                 Math.hypot(estimationStandardErrorX, estimationStandardErrorY));
         Logger.recordOutput(
-                "Vision/MeasurementErrors/rotationalStandardError",
-                Math.toDegrees(estimationStandardErrorTheta));
+                "Vision/MeasurementErrors/rotationalStandardError", Math.toDegrees(estimationStandardErrorTheta));
 
-        final double translationStdDev =
-                Math.hypot(
-                        Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
-                        Statistics.getStandardDeviation(robotPoseEstimationsYMeters));
+        final double translationStdDev = Math.hypot(
+                Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
+                Statistics.getStandardDeviation(robotPoseEstimationsYMeters));
         final double rotationStdDev = Statistics.getStandardDeviation(robotPoseEstimationsThetaRadians);
         Logger.recordOutput("Vision/MeasurementErrors/translationalStdDev", translationStdDev);
-        Logger.recordOutput(
-                "Vision/MeasurementErrors/rotationalStdDev", Math.toDegrees(rotationStdDev));
+        Logger.recordOutput("Vision/MeasurementErrors/rotationalStdDev", Math.toDegrees(rotationStdDev));
         if (translationStdDev > TRANSLATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT
-                || rotationStdDev > ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT)
-            return Optional.empty();
+                || rotationStdDev > ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT) return Optional.empty();
 
-        return Optional.of(
-                new RobotPoseEstimationResult(
-                        new Pose2d(translationPointEstimate, rotationPointEstimate),
-                        estimationStandardErrorX,
-                        estimationStandardErrorY,
-                        estimationStandardErrorTheta));
+        return Optional.of(new RobotPoseEstimationResult(
+                new Pose2d(translationPointEstimate, rotationPointEstimate),
+                estimationStandardErrorX,
+                estimationStandardErrorY,
+                estimationStandardErrorTheta));
     }
 
     /** Log the filtering data */
     private void logFilteringData() {
         Logger.recordOutput(
-                APRIL_TAGS_VISION_PATH + "Filtering/CurrentFilterImplementation",
-                filter.getFilterImplementationName());
+                APRIL_TAGS_VISION_PATH + "Filtering/CurrentFilterImplementation", filter.getFilterImplementationName());
         if (!LOG_DETAILED_FILTERING_DATA) return;
 
         /* these are the detailed filtering data, logging them on RobotRIO1.0 is a bad idea, if you want them, replay the log */

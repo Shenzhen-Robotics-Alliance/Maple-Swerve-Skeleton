@@ -16,13 +16,11 @@ import org.dyn4j.geometry.Geometry;
 /** a set of game pieces of the 2024 game "Crescendo" */
 public final class Crescendo2024FieldObjects {
     /* https://www.andymark.com/products/frc-2024-am-4999 */
-    private static final double NOTE_HEIGHT = Units.inchesToMeters(2),
-            NOTE_DIAMETER = Units.inchesToMeters(14);
+    private static final double NOTE_HEIGHT = Units.inchesToMeters(2), NOTE_DIAMETER = Units.inchesToMeters(14);
 
     /**
-     * a static note on field it is displayed on the dashboard and telemetry, but it does not appear
-     * in the simulation. meaning that, it does not have collision space and isn't involved in intake
-     * simulation
+     * a static note on field it is displayed on the dashboard and telemetry, but it does not appear in the simulation.
+     * meaning that, it does not have collision space and isn't involved in intake simulation
      */
     public static class NoteOnFieldStatic implements GamePieceOnFieldDisplay {
         private final Translation2d initialPosition;
@@ -64,17 +62,13 @@ public final class Crescendo2024FieldObjects {
         }
     }
 
-    /**
-     * a note that is flying from a shooter to the speaker the flight is simulated by a simple linear
-     * animation
-     */
+    /** a note that is flying from a shooter to the speaker the flight is simulated by a simple linear animation */
     public static class NoteFlyingToSpeaker extends GamePieceOnFlyDisplay {
         public NoteFlyingToSpeaker(Translation3d shooterPosition, double flightTimeSeconds) {
             this(shooterPosition, flightTimeSeconds, false);
         }
 
-        public NoteFlyingToSpeaker(
-                Translation3d shooterPosition, double flightTimeSeconds, boolean reverseSide) {
+        public NoteFlyingToSpeaker(Translation3d shooterPosition, double flightTimeSeconds, boolean reverseSide) {
             super(
                     shooterPosition,
                     FieldConstants.toCurrentAllianceTranslation(
@@ -115,28 +109,21 @@ public final class Crescendo2024FieldObjects {
                     FEED_SHOT_FLIGHT_TIME_SECONDS);
             this.robotFacingWhenLaunching =
                     targetedPositionOnField.minus(shooterPositionOnField).getAngle();
-            final Command addNoteOnGroundToSimulator =
-                    Commands.runOnce(
-                            () -> {
-                                final Crescendo2024FieldObjects.NoteOnFieldSimulated note =
-                                        new Crescendo2024FieldObjects.NoteOnFieldSimulated(targetedPositionOnField);
-                                note.setLinearVelocity(
-                                        GeometryConvertor.toDyn4jVector2(
-                                                new Translation2d(
-                                                        shooterPositionOnField.getDistance(targetedPositionOnField)
-                                                                / FEED_SHOT_FLIGHT_TIME_SECONDS,
-                                                        robotFacingWhenLaunching)));
-                                simulation.addGamePiece(note);
-                            });
+            final Command addNoteOnGroundToSimulator = Commands.runOnce(() -> {
+                final Crescendo2024FieldObjects.NoteOnFieldSimulated note =
+                        new Crescendo2024FieldObjects.NoteOnFieldSimulated(targetedPositionOnField);
+                note.setLinearVelocity(GeometryConvertor.toDyn4jVector2(new Translation2d(
+                        shooterPositionOnField.getDistance(targetedPositionOnField) / FEED_SHOT_FLIGHT_TIME_SECONDS,
+                        robotFacingWhenLaunching)));
+                simulation.addGamePiece(note);
+            });
             if (simulation != null)
                 CommandScheduler.getInstance()
-                        .schedule(
-                                Commands.waitSeconds(FEED_SHOT_FLIGHT_TIME_SECONDS)
-                                        .andThen(addNoteOnGroundToSimulator));
+                        .schedule(Commands.waitSeconds(FEED_SHOT_FLIGHT_TIME_SECONDS)
+                                .andThen(addNoteOnGroundToSimulator));
         }
 
-        private static Translation3d getNoteTouchGroundTranslation3d(
-                Translation2d noteEndingTranslation2d) {
+        private static Translation3d getNoteTouchGroundTranslation3d(Translation2d noteEndingTranslation2d) {
             return new Translation3d(noteEndingTranslation2d.getX(), noteEndingTranslation2d.getY(), 0.2);
         }
 
@@ -149,11 +136,10 @@ public final class Crescendo2024FieldObjects {
         public Pose3d getPose3d() {
             final double t = getTimeSinceLaunchSeconds(),
                     height =
-                            FEED_SHOT_INITIAL_HEIGHT_METERS
-                                    + FEED_SHOT_VERTICAL_SPEED_MPS * t
-                                    - 1.0 / 2.0 * t * t * 10;
+                            FEED_SHOT_INITIAL_HEIGHT_METERS + FEED_SHOT_VERTICAL_SPEED_MPS * t - 1.0 / 2.0 * t * t * 10;
             return new Pose3d(
-                    new Translation3d(super.getPose3d().getX(), super.getPose3d().getY(), height),
+                    new Translation3d(
+                            super.getPose3d().getX(), super.getPose3d().getY(), height),
                     new Rotation3d(0, Math.toRadians(-35), robotFacingWhenLaunching.getRadians()));
         }
     }
@@ -169,14 +155,12 @@ public final class Crescendo2024FieldObjects {
         public FeedShotLowNote(Translation2d initialPosition, Rotation2d robotFacingWhenLaunching) {
             super(initialPosition, Geometry.createCircle(NOTE_DIAMETER / 2));
             setLinearDamping(0);
-            setLinearVelocity(
-                    GeometryConvertor.toDyn4jVector2(
-                            new Translation2d(LOW_SHOT_NOTE_SPEED_MPS, 0).rotateBy(robotFacingWhenLaunching)));
+            setLinearVelocity(GeometryConvertor.toDyn4jVector2(
+                    new Translation2d(LOW_SHOT_NOTE_SPEED_MPS, 0).rotateBy(robotFacingWhenLaunching)));
             this.launchTimeSeconds = MapleTimeUtils.getLogTimeSeconds();
             CommandScheduler.getInstance()
-                    .schedule(
-                            Commands.waitUntil(() -> getGamePieceHeight() == NOTE_HEIGHT)
-                                    .andThen(() -> setLinearDamping(GamePieceInSimulation.LINEAR_DAMPING)));
+                    .schedule(Commands.waitUntil(() -> getGamePieceHeight() == NOTE_HEIGHT)
+                            .andThen(() -> setLinearDamping(GamePieceInSimulation.LINEAR_DAMPING)));
         }
 
         @Override
@@ -187,8 +171,7 @@ public final class Crescendo2024FieldObjects {
         @Override
         public double getGamePieceHeight() {
             final double t = MapleTimeUtils.getLogTimeSeconds() - launchTimeSeconds,
-                    height =
-                            LOW_SHOT_INITIAL_HEIGHT + LOW_SHOT_VERTICAL_SPEED_MPS * t - 1.0 / 2.0 * t * t * 10;
+                    height = LOW_SHOT_INITIAL_HEIGHT + LOW_SHOT_VERTICAL_SPEED_MPS * t - 1.0 / 2.0 * t * t * 10;
             return Math.max(NOTE_HEIGHT, height);
         }
     }

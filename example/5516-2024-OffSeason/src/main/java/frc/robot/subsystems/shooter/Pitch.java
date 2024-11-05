@@ -21,8 +21,7 @@ public class Pitch extends MapleSubsystem {
     private final PitchInputsAutoLogged inputs;
 
     private double setPointRad = PITCH_LOWEST_ROTATION_RAD;
-    private final Alert notCalibratedAlert =
-            new Alert("Pitch not calibrated!", Alert.AlertType.ERROR);
+    private final Alert notCalibratedAlert = new Alert("Pitch not calibrated!", Alert.AlertType.ERROR);
 
     private final ArmFeedforward feedForward;
     private final PIDController feedBack;
@@ -39,8 +38,7 @@ public class Pitch extends MapleSubsystem {
 
         notCalibratedAlert.setActivated(false);
 
-        setDefaultCommand(
-                Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this));
+        setDefaultCommand(Commands.run(() -> this.runSetPointProfiled(PITCH_LOWEST_ROTATION_RAD), this));
     }
 
     @Override
@@ -62,8 +60,7 @@ public class Pitch extends MapleSubsystem {
         notCalibratedAlert.setActivated(!inputs.calibrated);
         ShooterVisualizer.setPitchAngle(inputs.pitchAngleRad);
 
-        Logger.recordOutput(
-                "Shooter/Pitch Actual Position (Deg)", Math.toDegrees(inputs.pitchAngleRad));
+        Logger.recordOutput("Shooter/Pitch Actual Position (Deg)", Math.toDegrees(inputs.pitchAngleRad));
 
         SmartDashboard.putNumber("Pitch Actual Angle (Deg)", Math.toDegrees(inputs.pitchAngleRad));
         SmartDashboard.putBoolean("Pitch In Position", inPosition());
@@ -74,8 +71,7 @@ public class Pitch extends MapleSubsystem {
     }
 
     private double previousStateVelocity = 0;
-    private TrapezoidProfile.State currentState =
-            new TrapezoidProfile.State(PITCH_LOWEST_ROTATION_RAD, 0);
+    private TrapezoidProfile.State currentState = new TrapezoidProfile.State(PITCH_LOWEST_ROTATION_RAD, 0);
 
     public void runSetPointProfiled(double setPointRad) {
         if (checkSetPointOutOfRange(setPointRad) || !inputs.calibrated) {
@@ -85,10 +81,8 @@ public class Pitch extends MapleSubsystem {
 
         this.setPointRad = setPointRad;
         this.currentState =
-                profile.calculate(
-                        Robot.defaultPeriodSecs, currentState, new TrapezoidProfile.State(setPointRad, 0));
-        final double stateAcceleration =
-                (currentState.velocity - previousStateVelocity) / Robot.defaultPeriodSecs;
+                profile.calculate(Robot.defaultPeriodSecs, currentState, new TrapezoidProfile.State(setPointRad, 0));
+        final double stateAcceleration = (currentState.velocity - previousStateVelocity) / Robot.defaultPeriodSecs;
         runControlLoops(currentState.position, currentState.velocity, stateAcceleration);
         this.previousStateVelocity = currentState.velocity;
     }
@@ -99,8 +93,7 @@ public class Pitch extends MapleSubsystem {
             return;
         }
 
-        if (Math.abs(setPointRad - inputs.pitchAngleRad) < Math.toRadians(7))
-            runSetPointProfiled(setPointRad);
+        if (Math.abs(setPointRad - inputs.pitchAngleRad) < Math.toRadians(7)) runSetPointProfiled(setPointRad);
 
         this.setPointRad = setPointRad;
         this.currentState = new TrapezoidProfile.State(setPointRad, velocitySetPointRadPerSec);
@@ -110,17 +103,14 @@ public class Pitch extends MapleSubsystem {
 
     private boolean checkSetPointOutOfRange(double setPointRad) {
         if (setPointRad < PITCH_LOWEST_ROTATION_RAD || setPointRad > PITCH_HIGHER_LIMIT_RAD) {
-            DriverStation.reportError(
-                    "attempt to run a pitch setpoint out of range: " + setPointRad, true);
+            DriverStation.reportError("attempt to run a pitch setpoint out of range: " + setPointRad, true);
             return true;
         }
         return false;
     }
 
     private void runControlLoops(
-            double currentPositionSetPointRad,
-            double currentVelocitySetPointRadPerSec,
-            double currentAcceleration) {
+            double currentPositionSetPointRad, double currentVelocitySetPointRadPerSec, double currentAcceleration) {
         final double
                 feedForwardVoltage =
                         feedForward.calculate(
@@ -129,10 +119,8 @@ public class Pitch extends MapleSubsystem {
         final double safetyConstrainLow = inputs.pitchAngleRad <= PITCH_LOWEST_ROTATION_RAD ? 0 : -10,
                 safetyConstrainHigh = inputs.pitchAngleRad > PITCH_HIGHER_LIMIT_RAD ? 0 : 12,
                 pitchVoltage =
-                        MathUtil.clamp(
-                                feedForwardVoltage + feedBackVoltage, safetyConstrainLow, safetyConstrainHigh);
-        Logger.recordOutput(
-                "Shooter/Pitch Control Loop SetPoint (Deg)", Math.toDegrees(currentPositionSetPointRad));
+                        MathUtil.clamp(feedForwardVoltage + feedBackVoltage, safetyConstrainLow, safetyConstrainHigh);
+        Logger.recordOutput("Shooter/Pitch Control Loop SetPoint (Deg)", Math.toDegrees(currentPositionSetPointRad));
         Logger.recordOutput(
                 "Shooter/Pitch Control Loop Velocity SetPoint (Deg per Sec)",
                 Math.toDegrees(currentVelocitySetPointRadPerSec));

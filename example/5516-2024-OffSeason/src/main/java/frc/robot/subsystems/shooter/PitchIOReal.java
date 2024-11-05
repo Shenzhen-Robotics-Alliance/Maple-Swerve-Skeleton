@@ -22,8 +22,7 @@ public class PitchIOReal implements PitchIO {
 
     private double encoderPositionAtLowestPoint;
 
-    public PitchIOReal(
-            int pitch1TalonFXID, boolean pitch1Inverted, int pitch2TalonFXID, boolean pitch2Inverted) {
+    public PitchIOReal(int pitch1TalonFXID, boolean pitch1Inverted, int pitch2TalonFXID, boolean pitch2Inverted) {
         this.pitchFalcon1 = new TalonFX(pitch1TalonFXID);
         this.pitchFalcon2 = new TalonFX(pitch2TalonFXID);
         pitchFalcon1.setInverted(pitch1Inverted);
@@ -60,18 +59,14 @@ public class PitchIOReal implements PitchIO {
 
         pitchInputs.calibrated |= isLimitSwitchPressed();
         Logger.recordOutput("Shooter/Pitch Limit", isLimitSwitchPressed());
-        if (isLimitSwitchPressed())
-            encoderPositionAtLowestPoint = pitchRelativeEncoderPositionRev.getValue();
+        if (isLimitSwitchPressed()) encoderPositionAtLowestPoint = pitchRelativeEncoderPositionRev.getValue();
 
-        pitchInputs.pitchSuppliedCurrentAmps =
-                pitchMotor1SuppliedAmps.getValue() + pitchMotor2SuppliedAmps.getValue();
+        pitchInputs.pitchSuppliedCurrentAmps = pitchMotor1SuppliedAmps.getValue() + pitchMotor2SuppliedAmps.getValue();
         pitchInputs.pitchAngularVelocityRadPerSec =
                 Units.rotationsToRadians(pitchEncoderVelocityRevPerSec.getValue() / GEAR_RATIO);
-        pitchInputs.pitchAngleRad =
-                Units.rotationsToRadians(
-                                (pitchRelativeEncoderPositionRev.getValue() - encoderPositionAtLowestPoint)
-                                        / GEAR_RATIO)
-                        + PITCH_LOWEST_ROTATION_RAD;
+        pitchInputs.pitchAngleRad = Units.rotationsToRadians(
+                        (pitchRelativeEncoderPositionRev.getValue() - encoderPositionAtLowestPoint) / GEAR_RATIO)
+                + PITCH_LOWEST_ROTATION_RAD;
     }
 
     @Override
@@ -83,8 +78,7 @@ public class PitchIOReal implements PitchIO {
 
     @Override
     public void setPitchLock(boolean enabled) {
-        final NeutralModeValue neutralModeValue =
-                enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+        final NeutralModeValue neutralModeValue = enabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
         pitchFalcon1.setNeutralMode(neutralModeValue);
         pitchFalcon2.setNeutralMode(neutralModeValue);
     }

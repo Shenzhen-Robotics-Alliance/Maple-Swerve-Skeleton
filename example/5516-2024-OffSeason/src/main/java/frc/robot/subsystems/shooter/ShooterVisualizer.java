@@ -41,20 +41,16 @@ public class ShooterVisualizer {
                 new Pose3d(SHOOTER_TRANSLATION_ON_ROBOT, new Rotation3d(0, -pitchAngleRad, 0));
         Logger.recordOutput(LogPaths.SHOOTER_PATH + "MechanismPose", new Pose3d[] {shooterPoseToRobot});
         final Transform3d robotToNote =
-                new Transform3d(
-                        NOTE_AT_SHOOTER_AXLE_TRANSLATION_ON_ROBOT, new Rotation3d(0, -pitchAngleRad, 0));
-        final Transform3d noteTranslationInPitchDirection =
-                new Transform3d(
-                        switch (notePositionInShooter) {
-                            case GONE, AT_BOTTOM -> new Translation3d();
-                            case AT_TOP -> NOTE_TRANSLATION_AT_PITCH_DIRECTION_TO_AXLE;
-                        },
-                        new Rotation3d());
+                new Transform3d(NOTE_AT_SHOOTER_AXLE_TRANSLATION_ON_ROBOT, new Rotation3d(0, -pitchAngleRad, 0));
+        final Transform3d noteTranslationInPitchDirection = new Transform3d(
+                switch (notePositionInShooter) {
+                    case GONE, AT_BOTTOM -> new Translation3d();
+                    case AT_TOP -> NOTE_TRANSLATION_AT_PITCH_DIRECTION_TO_AXLE;
+                },
+                new Rotation3d());
         final Pose3d notePose =
                 switch (notePositionInShooter) {
-                    case AT_TOP, AT_BOTTOM -> robotPose
-                            .plus(robotToNote)
-                            .plus(noteTranslationInPitchDirection);
+                    case AT_TOP, AT_BOTTOM -> robotPose.plus(robotToNote).plus(noteTranslationInPitchDirection);
                     case GONE -> new Pose3d(0, 0, -1, new Rotation3d());
                 };
         Logger.recordOutput(LogPaths.SHOOTER_PATH + "NoteInShooter", notePose);

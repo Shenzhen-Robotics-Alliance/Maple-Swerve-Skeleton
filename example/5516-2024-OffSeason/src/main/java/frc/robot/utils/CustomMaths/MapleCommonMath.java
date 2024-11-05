@@ -6,13 +6,12 @@ import java.util.Random;
 
 public class MapleCommonMath {
     /**
-     * random object that generates random variables the seed is the hash of GIT_SHA this way when you
-     * do log-replay even the generated random numbers are the same
+     * random object that generates random variables the seed is the hash of GIT_SHA this way when you do log-replay
+     * even the generated random numbers are the same
      */
     private static final Random random = new Random(BuildConstants.GIT_SHA.hashCode());
 
-    public static double linearInterpretationWithBounding(
-            double x1, double y1, double x2, double y2, double x) {
+    public static double linearInterpretationWithBounding(double x1, double y1, double x2, double y2, double x) {
         final double minX = Math.min(x1, x2), maxX = Math.max(x1, x2);
         return linearInterpretation(x1, y1, x2, y2, Math.min(maxX, Math.max(minX, x)));
     }

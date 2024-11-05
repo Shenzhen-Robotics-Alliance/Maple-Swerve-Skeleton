@@ -40,13 +40,10 @@ public class GeometryConvertor {
     }
 
     public static Vector2 toDyn4jLinearVelocity(ChassisSpeeds wpilibChassisSpeeds) {
-        return new Vector2(
-                wpilibChassisSpeeds.vxMetersPerSecond, wpilibChassisSpeeds.vyMetersPerSecond);
+        return new Vector2(wpilibChassisSpeeds.vxMetersPerSecond, wpilibChassisSpeeds.vyMetersPerSecond);
     }
 
-    public static ChassisSpeeds toWpilibChassisSpeeds(
-            Vector2 dyn4jLinearVelocity, double angularVelocityRadPerSec) {
-        return new ChassisSpeeds(
-                dyn4jLinearVelocity.x, dyn4jLinearVelocity.y, angularVelocityRadPerSec);
+    public static ChassisSpeeds toWpilibChassisSpeeds(Vector2 dyn4jLinearVelocity, double angularVelocityRadPerSec) {
+        return new ChassisSpeeds(dyn4jLinearVelocity.x, dyn4jLinearVelocity.y, angularVelocityRadPerSec);
     }
 }

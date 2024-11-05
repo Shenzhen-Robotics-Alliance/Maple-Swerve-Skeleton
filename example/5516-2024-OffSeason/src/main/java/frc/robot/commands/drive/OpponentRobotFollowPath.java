@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 /**
- * this replaces AutoBuilder because in our code, opponent robots are simulated using path-planner
- * drive commands only the main robot should use AutoBuilder, opponent robots should use this
+ * this replaces AutoBuilder because in our code, opponent robots are simulated using path-planner drive commands only
+ * the main robot should use AutoBuilder, opponent robots should use this
  */
 public class OpponentRobotFollowPath extends FollowPathHolonomic {
     public OpponentRobotFollowPath(
@@ -36,9 +36,7 @@ public class OpponentRobotFollowPath extends FollowPathHolonomic {
     }
 
     public OpponentRobotFollowPath(
-            PathPlannerPath path,
-            BooleanSupplier shouldFlipPath,
-            HolonomicDriveSubsystem driveSubsystem) {
+            PathPlannerPath path, BooleanSupplier shouldFlipPath, HolonomicDriveSubsystem driveSubsystem) {
         super(
                 path,
                 driveSubsystem::getPose,
@@ -56,13 +54,11 @@ public class OpponentRobotFollowPath extends FollowPathHolonomic {
     }
 
     public static PathPlannerPath reversePath(PathPlannerPath originalPath, GoalEndState endState) {
-        final List<PathPoint> newPoints = new ArrayList<>(),
-                originalPoints = originalPath.getAllPathPoints();
+        final List<PathPoint> newPoints = new ArrayList<>(), originalPoints = originalPath.getAllPathPoints();
         for (int i = originalPoints.size() - 1; i >= 0; i--) {
             final PathPoint originalPoint = originalPoints.get(i);
             newPoints.add(
-                    new PathPoint(
-                            originalPoint.position, originalPoint.rotationTarget, originalPoint.constraints));
+                    new PathPoint(originalPoint.position, originalPoint.rotationTarget, originalPoint.constraints));
         }
 
         return PathPlannerPath.fromPathPoints(newPoints, originalPath.getGlobalConstraints(), endState);

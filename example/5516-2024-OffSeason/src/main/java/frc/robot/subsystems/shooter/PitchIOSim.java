@@ -11,16 +11,15 @@ public class PitchIOSim implements PitchIO {
     private final SingleJointedArmSim armSim;
 
     public PitchIOSim() {
-        this.armSim =
-                new SingleJointedArmSim(
-                        DCMotor.getFalcon500(2),
-                        GEAR_RATIO,
-                        SingleJointedArmSim.estimateMOI(0.5, 15),
-                        0.5,
-                        PITCH_LOWEST_ROTATION_RAD,
-                        PITCH_HIGHER_LIMIT_RAD,
-                        true,
-                        PITCH_LOWEST_ROTATION_RAD);
+        this.armSim = new SingleJointedArmSim(
+                DCMotor.getFalcon500(2),
+                GEAR_RATIO,
+                SingleJointedArmSim.estimateMOI(0.5, 15),
+                0.5,
+                PITCH_LOWEST_ROTATION_RAD,
+                PITCH_HIGHER_LIMIT_RAD,
+                true,
+                PITCH_LOWEST_ROTATION_RAD);
     }
 
     @Override

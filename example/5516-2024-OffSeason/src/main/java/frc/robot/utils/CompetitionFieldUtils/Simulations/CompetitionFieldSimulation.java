@@ -23,8 +23,8 @@ import org.dyn4j.world.World;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * this class simulates the physical behavior of all the objects on field should only be created
- * during a robot simulation (not in real or replay mode)
+ * this class simulates the physical behavior of all the objects on field should only be created during a robot
+ * simulation (not in real or replay mode)
  */
 public abstract class CompetitionFieldSimulation {
     protected final World<Body> physicsWorld;
@@ -35,8 +35,7 @@ public abstract class CompetitionFieldSimulation {
 
     private final List<IntakeSimulation> intakeSimulations = new ArrayList<>();
 
-    public CompetitionFieldSimulation(
-            HolonomicChassisSimulation mainRobot, FieldObstaclesMap obstaclesMap) {
+    public CompetitionFieldSimulation(HolonomicChassisSimulation mainRobot, FieldObstaclesMap obstaclesMap) {
         this.competitionField = new CompetitionFieldVisualizer(mainRobot);
         this.mainRobot = mainRobot;
         this.physicsWorld = new World<>();
@@ -64,8 +63,7 @@ public abstract class CompetitionFieldSimulation {
                 this.removeGamePiece(intakeSimulation.getGamePiecesToRemove().poll());
 
         Logger.recordOutput(
-                LogPaths.PHYSICS_SIMULATION_PATH + "dyn4j simulator time millis",
-                (System.nanoTime() - t0) / 1000000.0);
+                LogPaths.PHYSICS_SIMULATION_PATH + "dyn4j simulator time millis", (System.nanoTime() - t0) / 1000000.0);
     }
 
     public void addRobot(HolonomicChassisSimulation chassisSimulation) {
@@ -116,10 +114,7 @@ public abstract class CompetitionFieldSimulation {
     /** do field reset by placing all the game-pieces on field(for autonomous) */
     public abstract void placeGamePiecesOnField();
 
-    /**
-     * update the score counts & human players periodically implement this method in current year's
-     * simulation
-     */
+    /** update the score counts & human players periodically implement this method in current year's simulation */
     public abstract void competitionPeriodic();
 
     /** stores the obstacles on a competition field, which includes the border and the game pieces */
@@ -127,11 +122,8 @@ public abstract class CompetitionFieldSimulation {
         private final List<Body> obstacles = new ArrayList<>();
 
         protected void addBorderLine(Translation2d startingPoint, Translation2d endingPoint) {
-            final Body obstacle =
-                    getObstacle(
-                            Geometry.createSegment(
-                                    GeometryConvertor.toDyn4jVector2(startingPoint),
-                                    GeometryConvertor.toDyn4jVector2(endingPoint)));
+            final Body obstacle = getObstacle(Geometry.createSegment(
+                    GeometryConvertor.toDyn4jVector2(startingPoint), GeometryConvertor.toDyn4jVector2(endingPoint)));
             obstacles.add(obstacle);
         }
 

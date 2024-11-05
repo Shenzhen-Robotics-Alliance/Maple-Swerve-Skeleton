@@ -1,5 +1,6 @@
 // Original Source:
-// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main,
+// Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot;
@@ -50,10 +51,9 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
+ * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
+ * little robot logic should actually be handled in the {@link Robot} periodic methods (other than the scheduler calls).
+ * Instead, the structure of the robot (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
     // pdp for akit logging
@@ -106,34 +106,25 @@ public class RobotContainer {
                 powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
 
                 /* CTRE Chassis: */
-                drive =
-                        new SwerveDrive(
-                                SwerveDrive.DriveType.CTRE_ON_CANIVORE,
-                                new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
-                                new ModuleIOTalon(
-                                        TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft, "FrontLeft"),
-                                new ModuleIOTalon(
-                                        TunerConstants.DrivetrainConstants, TunerConstants.FrontRight, "FrontRight"),
-                                new ModuleIOTalon(
-                                        TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
-                                new ModuleIOTalon(
-                                        TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight"));
+                drive = new SwerveDrive(
+                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
+                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft, "FrontLeft"),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontRight, "FrontRight"),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
+                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight"));
 
                 aprilTagVision =
-                        new AprilTagVision(
-                                new AprilTagVisionIOReal(camerasProperties), camerasProperties, drive);
+                        new AprilTagVision(new AprilTagVisionIOReal(camerasProperties), camerasProperties, drive);
 
                 this.competitionFieldVisualizer = new CompetitionFieldVisualizer(drive);
 
                 this.intake = new Intake(new IntakeIOReal(16, 2, 1), noteInShooterConsumer);
-                this.pitch =
-                        new Pitch(
-                                new PitchIOReal(
-                                        17, true,
-                                        18, false));
+                this.pitch = new Pitch(new PitchIOReal(
+                        17, true,
+                        18, false));
                 this.flyWheels =
-                        new FlyWheels(
-                                new FlyWheelIO[] {new FlyWheelIOReal(21, true), new FlyWheelIOReal(22, true)});
+                        new FlyWheels(new FlyWheelIO[] {new FlyWheelIOReal(21, true), new FlyWheelIOReal(22, true)});
             }
 
             case SIM -> {
@@ -144,34 +135,26 @@ public class RobotContainer {
                         backLeft = new ModuleIOSim(),
                         backRight = new ModuleIOSim();
                 final GyroIOSim gyroIOSim = new GyroIOSim();
-                drive =
-                        new SwerveDrive(
-                                SwerveDrive.DriveType.GENERIC,
-                                gyroIOSim,
-                                frontLeft,
-                                frontRight,
-                                backLeft,
-                                backRight);
-                final SwerveDriveSimulation driveSimulation =
-                        new SwerveDriveSimulation(
-                                gyroIOSim,
-                                frontLeft,
-                                frontRight,
-                                backLeft,
-                                backRight,
-                                new Pose2d(3, 3, new Rotation2d()),
-                                drive::setPose);
+                drive = new SwerveDrive(
+                        SwerveDrive.DriveType.GENERIC, gyroIOSim, frontLeft, frontRight, backLeft, backRight);
+                final SwerveDriveSimulation driveSimulation = new SwerveDriveSimulation(
+                        gyroIOSim,
+                        frontLeft,
+                        frontRight,
+                        backLeft,
+                        backRight,
+                        new Pose2d(3, 3, new Rotation2d()),
+                        drive::setPose);
                 fieldSimulation = new Crescendo2024FieldSimulation(driveSimulation);
                 this.competitionFieldVisualizer = fieldSimulation.getVisualizer();
 
-                aprilTagVision =
-                        new AprilTagVision(
-                                new ApriltagVisionIOSim(
-                                        camerasProperties,
-                                        VisionConstants.fieldLayout,
-                                        driveSimulation::getObjectOnFieldPose2d),
+                aprilTagVision = new AprilTagVision(
+                        new ApriltagVisionIOSim(
                                 camerasProperties,
-                                drive);
+                                VisionConstants.fieldLayout,
+                                driveSimulation::getObjectOnFieldPose2d),
+                        camerasProperties,
+                        drive);
 
                 fieldSimulation.placeGamePiecesOnField();
 
@@ -190,22 +173,20 @@ public class RobotContainer {
                 fieldSimulation.registerIntake(intakeIOSim);
                 this.intake = new Intake(intakeIOSim, noteInShooterConsumer);
                 this.pitch = new Pitch(new PitchIOSim());
-                this.flyWheels =
-                        new FlyWheels(
-                                new FlyWheelIO[] {new FlyWheelIOSim(intakeIOSim), new FlyWheelIOSim(intakeIOSim)});
+                this.flyWheels = new FlyWheels(
+                        new FlyWheelIO[] {new FlyWheelIOSim(intakeIOSim), new FlyWheelIOSim(intakeIOSim)});
             }
 
             default -> {
                 powerDistribution = new PowerDistribution();
                 // Replayed robot, disable IO implementations
-                drive =
-                        new SwerveDrive(
-                                SwerveDrive.DriveType.GENERIC,
-                                (inputs) -> {},
-                                (inputs) -> {},
-                                (inputs) -> {},
-                                (inputs) -> {},
-                                (inputs) -> {});
+                drive = new SwerveDrive(
+                        SwerveDrive.DriveType.GENERIC,
+                        (inputs) -> {},
+                        (inputs) -> {},
+                        (inputs) -> {},
+                        (inputs) -> {},
+                        (inputs) -> {});
 
                 aprilTagVision = new AprilTagVision((inputs) -> {}, camerasProperties, drive);
 
@@ -218,8 +199,7 @@ public class RobotContainer {
         }
 
         this.drive.configHolonomicPathPlannerAutoBuilder(competitionFieldVisualizer);
-        visualizerForShooter =
-                Robot.CURRENT_ROBOT_MODE == RobotMode.REAL ? null : competitionFieldVisualizer;
+        visualizerForShooter = Robot.CURRENT_ROBOT_MODE == RobotMode.REAL ? null : competitionFieldVisualizer;
 
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
         autoChooser = buildAutoChooser();
@@ -229,22 +209,21 @@ public class RobotContainer {
         driverModeChooser.addOption(JoystickMode.RIGHT_HANDED.name(), JoystickMode.RIGHT_HANDED);
 
         /* you can tune these shooter params on the dashboard, changes will apply real-time */
-        this.shooterOptimization =
-                new MapleShooterOptimization(
-                        "MainShooter",
-                        /* shooting distances */
-                        new double[] {1.4, 2, 3, 3.5, 4, 4.5, 5},
-                        /* corresponding shooter angles (degrees) */
-                        new double[] {54, 47, 35, 33, 30.5, 27, 26},
-                        /* corresponding flywheels RPM */
-                        new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500},
-                        /*
-                         * flight-time in seconds
-                         * this affects how much system will "think ahead"
-                         * it also affects the animation of the flying note
-                         * to measure this number precisely, record a 120fps video with your phone of your robot shooting
-                         * */
-                        new double[] {0.22, 0.25, 0.28, 0.3, 0.34, 0.36, 0.4});
+        this.shooterOptimization = new MapleShooterOptimization(
+                "MainShooter",
+                /* shooting distances */
+                new double[] {1.4, 2, 3, 3.5, 4, 4.5, 5},
+                /* corresponding shooter angles (degrees) */
+                new double[] {54, 47, 35, 33, 30.5, 27, 26},
+                /* corresponding flywheels RPM */
+                new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500},
+                /*
+                 * flight-time in seconds
+                 * this affects how much system will "think ahead"
+                 * it also affects the animation of the flying note
+                 * to measure this number precisely, record a 120fps video with your phone of your robot shooting
+                 * */
+                new double[] {0.22, 0.25, 0.28, 0.3, 0.34, 0.36, 0.4});
 
         this.shootingDistanceChooser = new LoggedDashboardChooser<>("Select Shooting Distance");
         this.shootingDistanceChooser.addDefaultOption("4", 4.0);
@@ -270,8 +249,7 @@ public class RobotContainer {
     }
 
     private static LoggedDashboardChooser<Auto> buildAutoChooser() {
-        final LoggedDashboardChooser<Auto> autoSendableChooser =
-                new LoggedDashboardChooser<>("Select Auto");
+        final LoggedDashboardChooser<Auto> autoSendableChooser = new LoggedDashboardChooser<>("Select Auto");
         autoSendableChooser.addDefaultOption("None", Auto.none());
         autoSendableChooser.addOption("Amp Side Six Notes Fast", new AmpSideSixNotesFast());
         autoSendableChooser.addOption(
@@ -306,20 +284,16 @@ public class RobotContainer {
     private boolean isLeftHanded = true;
     private Command autonomousCommand = Commands.none();
     private Auto previouslySelectedAuto = null;
-    /**
-     * reconfigures button bindings if alliance station has changed re-create autos if not yet created
-     */
+    /** reconfigures button bindings if alliance station has changed re-create autos if not yet created */
     public void checkForCommandChanges() {
         final boolean isLeftHandedSelected = !JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get());
-        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed
-                || isLeftHanded != isLeftHandedSelected) configureButtonBindings();
+        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
+            configureButtonBindings();
         isLeftHanded = isLeftHandedSelected;
 
         final Auto selectedAuto = autoChooser.get();
-        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed
-                || selectedAuto != previouslySelectedAuto) {
-            this.autonomousCommand =
-                    selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
+        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || selectedAuto != previouslySelectedAuto) {
+            this.autonomousCommand = selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
             resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
         }
 
@@ -328,8 +302,7 @@ public class RobotContainer {
     }
 
     private void resetFieldAndOdometryForAuto(Pose2d robotStartingPoseAtBlueAlliance) {
-        final Pose2d startingPose =
-                FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
+        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
 
         if (fieldSimulation != null) {
             fieldSimulation.getMainRobot().setSimulationWorldPose(startingPose);
@@ -342,16 +315,15 @@ public class RobotContainer {
     }
 
     /**
-     * Use this method to define your button->command mappings. Buttons can be created by
-     * instantiating a {@link GenericHID} or one of its subclasses ({@link Joystick} or {@link
-     * XboxController}), and then passing it to a {@link JoystickButton}.
+     * Use this method to define your button->command mappings. Buttons can be created by instantiating a
+     * {@link GenericHID} or one of its subclasses ({@link Joystick} or {@link XboxController}), and then passing it to
+     * a {@link JoystickButton}.
      */
     public void configureButtonBindings() {
         /* joystick drive command */
-        final MapleJoystickDriveInput driveInput =
-                JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get())
-                        ? MapleJoystickDriveInput.rightHandedJoystick(driverXBox)
-                        : MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
+        final MapleJoystickDriveInput driveInput = JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get())
+                ? MapleJoystickDriveInput.rightHandedJoystick(driverXBox)
+                : MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
         final JoystickDrive joystickDrive =
                 new JoystickDrive(driveInput, () -> true, driverXBox.getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
@@ -362,13 +334,10 @@ public class RobotContainer {
         /* reset gyro heading manually (in case the vision does not work) */
         driverXBox
                 .start()
-                .onTrue(
-                        Commands.runOnce(
-                                        () ->
-                                                drive.setPose(
-                                                        new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                                        drive)
-                                .ignoringDisable(true));
+                .onTrue(Commands.runOnce(
+                                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                drive)
+                        .ignoringDisable(true));
 
         /* drive slowly and intake note, rumble game-pad when note detected */
         driverXBox
@@ -377,83 +346,67 @@ public class RobotContainer {
                 .onTrue(Commands.runOnce(() -> joystickDrive.setSensitivity(0.6, 0.4)))
                 .onFalse(Commands.runOnce(joystickDrive::resetSensitivity));
         /* split note from bottom */
-        driverXBox
-                .a()
-                .whileTrue(
-                        Commands.run(
-                                () -> {
-                                    intake.runInvertVoltage();
-                                    flyWheels.forceMaxRevert();
-                                }));
+        driverXBox.a().whileTrue(Commands.run(() -> {
+            intake.runInvertVoltage();
+            flyWheels.forceMaxRevert();
+        }));
 
         /* amp command */
         driverXBox
                 .y()
                 .onTrue(new PrepareToAmp(pitch, flyWheels, ledStatusLight))
-                .whileTrue(
-                        Commands.run(
-                                        () -> {
-                                            joystickDrive.setCurrentRotationalMaintenance(
-                                                    FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(-90)));
-                                            joystickDrive.setSensitivity(0.7, 1);
-                                        })
-                                .finallyDo(joystickDrive::resetSensitivity))
-                .onFalse(
-                        new ScoreAmp(intake, pitch, flyWheels, ledStatusLight)
-                                .withVisualization(visualizerForShooter, fieldSimulation, drive));
+                .whileTrue(Commands.run(() -> {
+                            joystickDrive.setCurrentRotationalMaintenance(
+                                    FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(-90)));
+                            joystickDrive.setSensitivity(0.7, 1);
+                        })
+                        .finallyDo(joystickDrive::resetSensitivity))
+                .onFalse(new ScoreAmp(intake, pitch, flyWheels, ledStatusLight)
+                        .withVisualization(visualizerForShooter, fieldSimulation, drive));
 
         /* feed shot */
         driverXBox
                 .b()
                 .onTrue(FeedShot.prepareToFeedForever(pitch, flyWheels))
-                .whileTrue(
-                        Commands.run(
-                                () ->
-                                        joystickDrive.setCurrentRotationalMaintenance(
-                                                FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(180)))))
+                .whileTrue(Commands.run(() -> joystickDrive.setCurrentRotationalMaintenance(
+                        FieldConstants.toCurrentAllianceRotation(Rotation2d.fromDegrees(180)))))
                 .onFalse(FeedShot.shootFeed(pitch, flyWheels, intake, fieldSimulation, drive));
 
         /* aim and shoot command */
-        final JoystickDriveAndAimAtTarget faceTargetWhileDrivingLowSpeed =
-                new JoystickDriveAndAimAtTarget(
-                        driveInput, drive, FieldConstants.SPEAKER_POSITION_SUPPLIER, shooterOptimization, 0.3);
-        final Command semiAutoAimAndShoot =
-                new AimAndShootSequence(
-                                pitch,
-                                flyWheels,
-                                intake,
-                                shooterOptimization,
-                                drive,
-                                FieldConstants.SPEAKER_POSITION_SUPPLIER,
-                                faceTargetWhileDrivingLowSpeed::chassisRotationInPosition,
-                                ledStatusLight,
-                                visualizerForShooter)
-                        .ifNotePresent();
+        final JoystickDriveAndAimAtTarget faceTargetWhileDrivingLowSpeed = new JoystickDriveAndAimAtTarget(
+                driveInput, drive, FieldConstants.SPEAKER_POSITION_SUPPLIER, shooterOptimization, 0.3);
+        final Command semiAutoAimAndShoot = new AimAndShootSequence(
+                        pitch,
+                        flyWheels,
+                        intake,
+                        shooterOptimization,
+                        drive,
+                        FieldConstants.SPEAKER_POSITION_SUPPLIER,
+                        faceTargetWhileDrivingLowSpeed::chassisRotationInPosition,
+                        ledStatusLight,
+                        visualizerForShooter)
+                .ifNotePresent();
         driverXBox
                 .rightTrigger(0.5)
-                .whileTrue(
-                        semiAutoAimAndShoot
-                                .deadlineWith(faceTargetWhileDrivingLowSpeed)
-                                .finallyDo(() -> joystickDrive.setCurrentRotationalMaintenance(drive.getFacing())));
+                .whileTrue(semiAutoAimAndShoot
+                        .deadlineWith(faceTargetWhileDrivingLowSpeed)
+                        .finallyDo(() -> joystickDrive.setCurrentRotationalMaintenance(drive.getFacing())));
 
         driverXBox
                 .rightBumper()
-                .whileTrue(
-                        new PathFindToPoseAndShootSequence(
-                                intake,
-                                pitch,
-                                flyWheels,
-                                shooterOptimization,
-                                drive,
-                                () ->
-                                        FieldConstants.toCurrentAllianceTranslation(
-                                                new Translation2d(shootingDistanceChooser.get() + 0.1, 5.55)),
-                                () ->
-                                        FieldConstants.toCurrentAllianceTranslation(
-                                                new Translation2d(shootingDistanceChooser.get(), 5.55)),
-                                FieldConstants.SPEAKER_POSITION_SUPPLIER,
-                                ledStatusLight,
-                                visualizerForShooter));
+                .whileTrue(new PathFindToPoseAndShootSequence(
+                        intake,
+                        pitch,
+                        flyWheels,
+                        shooterOptimization,
+                        drive,
+                        () -> FieldConstants.toCurrentAllianceTranslation(
+                                new Translation2d(shootingDistanceChooser.get() + 0.1, 5.55)),
+                        () -> FieldConstants.toCurrentAllianceTranslation(
+                                new Translation2d(shootingDistanceChooser.get(), 5.55)),
+                        FieldConstants.SPEAKER_POSITION_SUPPLIER,
+                        ledStatusLight,
+                        visualizerForShooter));
     }
 
     /**

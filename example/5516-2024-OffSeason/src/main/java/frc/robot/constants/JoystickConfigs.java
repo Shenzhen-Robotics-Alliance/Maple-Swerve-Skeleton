@@ -6,8 +6,8 @@ public class JoystickConfigs {
     public static final double DEFAULT_ROTATIONAL_SENSITIVITY = 0.85;
 
     /**
-     * the amount of time that the chassis waits after the pilot's last input, before it places all
-     * the swerve wheels to standby-state (facing forward)
+     * the amount of time that the chassis waits after the pilot's last input, before it places all the swerve wheels to
+     * standby-state (facing forward)
      */
     public static final double NON_USAGE_TIME_RESET_WHEELS = 1;
 
@@ -19,17 +19,16 @@ public class JoystickConfigs {
     public static final double ROTATION_SPEED_INPUT_EXPONENT = 2;
 
     /**
-     * the amount of time that the chassis needs to shift to the desired pilot motion it's sort of a
-     * "smooth out" of the pilot's input this dramatically reduces over-current and brownouts
+     * the amount of time that the chassis needs to shift to the desired pilot motion it's sort of a "smooth out" of the
+     * pilot's input this dramatically reduces over-current and brownouts
      */
     public static final double LINEAR_ACCELERATION_SMOOTH_OUT_SECONDS = 0.1;
     /** same thing for rotation */
     public static final double ANGULAR_ACCELERATION_SMOOTH_OUT_SECONDS = 0.1;
 
     /**
-     * the amount of time that the chassis waits after the pilot's last rotational input, before it
-     * starts to "lock" its rotation with PID
+     * the amount of time that the chassis waits after the pilot's last rotational input, before it starts to "lock" its
+     * rotation with PID
      */
-    public static final double TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS =
-            0.6;
+    public static final double TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS = 0.6;
 }

@@ -14,16 +14,15 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
     @Override
     public Command getAutoCommand(RobotContainer robot) throws IOException, ParseException {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush first")).asProxy());
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush second")).asProxy());
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush third")).asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush first"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush second"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush third"))
+                .asProxy());
 
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush fourth and shoot"))
-                        .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("rush fourth and shoot"))
+                .asProxy());
         return commandGroup;
     }
 

@@ -1,5 +1,6 @@
 // Original Source:
-// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main,
+// Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot.subsystems.drive.IO;
@@ -40,9 +41,7 @@ public class ModuleIOTalon implements ModuleIO {
     private final double DRIVE_GEAR_RATIO;
 
     public ModuleIOTalon(
-            SwerveDrivetrainConstants drivetrainConstants,
-            SwerveModuleConstants moduleConstants,
-            String name) {
+            SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants moduleConstants, String name) {
         this.name = name;
         driveTalon = new TalonFX(moduleConstants.DriveMotorId, drivetrainConstants.CANbusName);
         steerTalon = new TalonFX(moduleConstants.SteerMotorId, drivetrainConstants.CANbusName);
@@ -71,21 +70,19 @@ public class ModuleIOTalon implements ModuleIO {
         driveMotorAppliedVoltage = driveTalon.getMotorVoltage();
         driveMotorCurrent = driveTalon.getSupplyCurrent();
 
-        steerEncoderAbsolutePositionRevolutions =
-                OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
+        steerEncoderAbsolutePositionRevolutions = OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
         steerEncoderVelocityRevolutionsPerSecond = cancoder.getVelocity();
         steerMotorAppliedVolts = steerTalon.getMotorVoltage();
         steerMotorCurrent = steerTalon.getSupplyCurrent();
 
-        periodicallyRefreshedSignals =
-                new BaseStatusSignal[] {
-                    driveEncoderUngearedRevolutionsPerSecond,
-                    driveMotorAppliedVoltage,
-                    driveMotorCurrent,
-                    steerEncoderVelocityRevolutionsPerSecond,
-                    steerMotorAppliedVolts,
-                    steerMotorCurrent
-                };
+        periodicallyRefreshedSignals = new BaseStatusSignal[] {
+            driveEncoderUngearedRevolutionsPerSecond,
+            driveMotorAppliedVoltage,
+            driveMotorCurrent,
+            steerEncoderVelocityRevolutionsPerSecond,
+            steerMotorAppliedVolts,
+            steerMotorCurrent
+        };
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, periodicallyRefreshedSignals);
         driveTalon.optimizeBusUtilization();
@@ -96,21 +93,20 @@ public class ModuleIOTalon implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        inputs.hardwareConnected = BaseStatusSignal.refreshAll(periodicallyRefreshedSignals).isOK();
+        inputs.hardwareConnected =
+                BaseStatusSignal.refreshAll(periodicallyRefreshedSignals).isOK();
 
-        inputs.odometryDriveWheelRevolutions =
-                driveEncoderUngearedRevolutions.stream()
-                        .mapToDouble(value -> value / DRIVE_GEAR_RATIO)
-                        .toArray();
+        inputs.odometryDriveWheelRevolutions = driveEncoderUngearedRevolutions.stream()
+                .mapToDouble(value -> value / DRIVE_GEAR_RATIO)
+                .toArray();
         driveEncoderUngearedRevolutions.clear();
         if (inputs.odometryDriveWheelRevolutions.length > 0)
             inputs.driveWheelFinalRevolutions =
                     inputs.odometryDriveWheelRevolutions[inputs.odometryDriveWheelRevolutions.length - 1];
 
-        inputs.odometrySteerPositions =
-                steerEncoderAbsolutePositionRevolutions.stream()
-                        .map(this::getSteerFacingFromCANCoderReading)
-                        .toArray(Rotation2d[]::new);
+        inputs.odometrySteerPositions = steerEncoderAbsolutePositionRevolutions.stream()
+                .map(this::getSteerFacingFromCANCoderReading)
+                .toArray(Rotation2d[]::new);
         steerEncoderAbsolutePositionRevolutions.clear();
         if (inputs.odometrySteerPositions.length > 0)
             inputs.steerFacing = inputs.odometrySteerPositions[inputs.odometrySteerPositions.length - 1];

@@ -47,8 +47,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
 
         lock.lock();
         timeStampsQueue.offer(estimateAverageTimeStamps());
-        for (OdometryDoubleInput odometryDoubleInput : odometryDoubleInputs)
-            odometryDoubleInput.cacheInputToQueue();
+        for (OdometryDoubleInput odometryDoubleInput : odometryDoubleInputs) odometryDoubleInput.cacheInputToQueue();
         lock.unlock();
     }
 
@@ -59,8 +58,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
                 MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
                 BaseStatusSignal.refreshAll();
             }
-            case CTRE_ON_CANIVORE -> BaseStatusSignal.waitForAll(
-                    ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
+            case CTRE_ON_CANIVORE -> BaseStatusSignal.waitForAll(ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
         }
     }
 

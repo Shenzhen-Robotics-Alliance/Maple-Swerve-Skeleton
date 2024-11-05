@@ -4,8 +4,7 @@ import edu.wpi.first.math.geometry.*;
 import frc.robot.utils.CompetitionFieldUtils.CompetitionFieldVisualizer;
 import frc.robot.utils.MapleTimeUtils;
 
-public abstract class GamePieceOnFlyDisplay
-        implements CompetitionFieldVisualizer.ObjectOnFieldDisplay {
+public abstract class GamePieceOnFlyDisplay implements CompetitionFieldVisualizer.ObjectOnFieldDisplay {
     protected final Translation3d shooterPosition, targetedPosition;
     protected final double flightTimeSeconds, startTimeSeconds;
     protected final Rotation3d gamePieceRotation;
@@ -21,7 +20,8 @@ public abstract class GamePieceOnFlyDisplay
         final double yaw = displacementToTarget.toTranslation2d().getAngle().getRadians(),
                 pitch =
                         -Math.atan2(
-                                displacementToTarget.getZ(), displacementToTarget.toTranslation2d().getNorm());
+                                displacementToTarget.getZ(),
+                                displacementToTarget.toTranslation2d().getNorm());
         this.gamePieceRotation = new Rotation3d(0, pitch, yaw);
     }
 

@@ -29,16 +29,14 @@ public class MapleInterpolationTable {
 
         public void initializeTuningPanelOnDashboard() {
             if (Objects.equals(tableName, "Unknown")) return;
-            SmartDashboard.putNumberArray(
-                    "InterpolationTables/" + tableName + "/" + variableName, values);
+            SmartDashboard.putNumberArray("InterpolationTables/" + tableName + "/" + variableName, values);
         }
 
         public void updateValuesFromDashboard() {
             if (Objects.equals(tableName, "Unknown")) return;
 
-            final double[] updatedValues =
-                    SmartDashboard.getNumberArray(
-                            "InterpolationTables/" + tableName + "/" + variableName, new double[] {});
+            final double[] updatedValues = SmartDashboard.getNumberArray(
+                    "InterpolationTables/" + tableName + "/" + variableName, new double[] {});
             if (updatedValues.length != values.length) return;
             System.arraycopy(updatedValues, 0, values, 0, values.length);
         }
@@ -57,20 +55,18 @@ public class MapleInterpolationTable {
         }
     }
 
-    public MapleInterpolationTable(
-            String name, Variable independentVariable, Variable... interpolatedVariables) {
+    public MapleInterpolationTable(String name, Variable independentVariable, Variable... interpolatedVariables) {
         this.tableName = name;
         this.independentVariable = independentVariable;
         this.interpolatedVariables = new HashMap<>();
         for (Variable variable : interpolatedVariables) {
             this.interpolatedVariables.put(variable.variableName, variable);
             if (variable.values.length != independentVariable.values.length)
-                throw new RuntimeException(
-                        "interpolated variable "
-                                + variable.variableName
-                                + " has length "
-                                + variable.values.length
-                                + " which does not match the independent variable");
+                throw new RuntimeException("interpolated variable "
+                        + variable.variableName
+                        + " has length "
+                        + variable.values.length
+                        + " which does not match the independent variable");
         }
 
         this.minX = Arrays.stream(independentVariable.values).min().orElse(0);
@@ -95,26 +91,20 @@ public class MapleInterpolationTable {
     }
 
     private static InterpolatingDoubleTreeMap getInterpolatingDoubleTreeMap(
-            Variable independentVariable,
-            Variable interpolatedVariable,
-            InterpolatingDoubleTreeMap targetMap) {
+            Variable independentVariable, Variable interpolatedVariable, InterpolatingDoubleTreeMap targetMap) {
         targetMap.clear();
         for (int i = 0; i < independentVariable.values.length; i++)
             targetMap.put(independentVariable.values[i], interpolatedVariable.values[i]);
         return targetMap;
     }
 
-    public double interpolateVariableWithLimit(
-            String interpolatedVariableName, double independentVariableValue) {
-        return interpolateVariable(
-                interpolatedVariableName, MathUtil.clamp(independentVariableValue, minX, maxX));
+    public double interpolateVariableWithLimit(String interpolatedVariableName, double independentVariableValue) {
+        return interpolateVariable(interpolatedVariableName, MathUtil.clamp(independentVariableValue, minX, maxX));
     }
 
-    public double interpolateVariable(
-            String interpolatedVariableName, double independentVariableValue) {
+    public double interpolateVariable(String interpolatedVariableName, double independentVariableValue) {
         if (!interpolatedVariables.containsKey(interpolatedVariableName))
-            throw new NullPointerException(
-                    "interpolated variable does not exit: " + interpolatedVariableName);
+            throw new NullPointerException("interpolated variable does not exit: " + interpolatedVariableName);
         final Variable interpolatedVariable = interpolatedVariables.get(interpolatedVariableName);
 
         independentVariable.updateValuesFromDashboard();
@@ -126,11 +116,9 @@ public class MapleInterpolationTable {
         return interpolatingDoubleTreeMap.get(independentVariableValue);
     }
 
-    public double findDerivative(
-            String interpolatedVariableName, double independentVariableValue, double dx) {
-        final double dy =
-                interpolateVariable(interpolatedVariableName, independentVariableValue + dx / 2)
-                        - interpolateVariable(interpolatedVariableName, independentVariableValue - dx / 2);
+    public double findDerivative(String interpolatedVariableName, double independentVariableValue, double dx) {
+        final double dy = interpolateVariable(interpolatedVariableName, independentVariableValue + dx / 2)
+                - interpolateVariable(interpolatedVariableName, independentVariableValue - dx / 2);
 
         return dy / dx;
     }
@@ -154,12 +142,10 @@ public class MapleInterpolationTable {
         final int interpolatedVariablesCount = infoBlock.getIntConfig("interpolatedVariablesCount"),
                 length = infoBlock.getIntConfig("length");
 
-        final Variable independentVariable =
-                Variable.fromBlock(configFile.getBlock("variable0"), length);
+        final Variable independentVariable = Variable.fromBlock(configFile.getBlock("variable0"), length);
         final Variable[] interpolateVariables = new Variable[interpolatedVariablesCount];
         for (int i = 0; i < interpolatedVariablesCount; i++)
-            interpolateVariables[i] =
-                    Variable.fromBlock(configFile.getBlock("variable" + (i + 1)), length);
+            interpolateVariables[i] = Variable.fromBlock(configFile.getBlock("variable" + (i + 1)), length);
         return new MapleInterpolationTable(
                 configFile.configName, independentVariable, interpolateVariables); // TODO: write this part
     }

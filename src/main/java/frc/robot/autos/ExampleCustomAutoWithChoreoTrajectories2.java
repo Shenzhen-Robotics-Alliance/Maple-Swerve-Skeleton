@@ -17,24 +17,19 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
         commandGroup.addCommands(
                 AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("shoot preload and second"))
                         .asProxy());
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("shoot third and fourth"))
-                        .asProxy());
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab fifth and shoot"))
-                        .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("shoot third and fourth"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab fifth and shoot"))
+                .asProxy());
 
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab sixth and shoot"))
-                        .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab sixth and shoot"))
+                .asProxy());
 
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab seven and shoot"))
-                        .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab seven and shoot"))
+                .asProxy());
 
-        commandGroup.addCommands(
-                AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab eighth and shoot"))
-                        .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab eighth and shoot"))
+                .asProxy());
         return commandGroup;
     }
 

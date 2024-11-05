@@ -16,8 +16,7 @@ public class Intake extends MapleSubsystem {
     private final IntakeIO io;
     private final IntakeInputsAutoLogged inputs;
 
-    private static final LEDAnimation
-            RUNNING = new LEDAnimation.Charging(255, 255, 255, 2), // orange charging
+    private static final LEDAnimation RUNNING = new LEDAnimation.Charging(255, 255, 255, 2), // orange charging
             GRABBED_NOTE = new LEDAnimation.ShowColor(230, 255, 0); // yellow
     private boolean lowerBeamBrakeAlwaysTrue, upperBeamBrakeAlwaysTrue;
     private final Alert lowerBeamBrakeAlwaysBlockedAlert, upperBeamBrakeAlwaysBlockedAlert;
@@ -48,10 +47,8 @@ public class Intake extends MapleSubsystem {
     public void periodic(double dt, boolean enabled) {
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
-        this.lowerBeamBrakeAlwaysBlockedAlert.setActivated(
-                lowerBeamBrakeAlwaysTrue &= inputs.lowerBeamBreakBlocked);
-        this.upperBeamBrakeAlwaysBlockedAlert.setActivated(
-                upperBeamBrakeAlwaysTrue &= inputs.upperBeamBreakerBlocked);
+        this.lowerBeamBrakeAlwaysBlockedAlert.setActivated(lowerBeamBrakeAlwaysTrue &= inputs.lowerBeamBreakBlocked);
+        this.upperBeamBrakeAlwaysBlockedAlert.setActivated(upperBeamBrakeAlwaysTrue &= inputs.upperBeamBreakerBlocked);
         noteInShooterConsumer.accept(isNotePresent());
 
         visualizeNoteInShooter();
@@ -59,8 +56,7 @@ public class Intake extends MapleSubsystem {
 
     private void visualizeNoteInShooter() {
         final ShooterVisualizer.NotePositionInShooter notePositionInShooter;
-        if (inputs.upperBeamBreakerBlocked)
-            notePositionInShooter = ShooterVisualizer.NotePositionInShooter.AT_TOP;
+        if (inputs.upperBeamBreakerBlocked) notePositionInShooter = ShooterVisualizer.NotePositionInShooter.AT_TOP;
         else if (inputs.lowerBeamBreakBlocked)
             notePositionInShooter = ShooterVisualizer.NotePositionInShooter.AT_BOTTOM;
         else notePositionInShooter = ShooterVisualizer.NotePositionInShooter.GONE;
@@ -113,10 +109,9 @@ public class Intake extends MapleSubsystem {
     public Command executeIntakeNote(LEDStatusLight statusLight, XboxController xboxController) {
         return executeIntakeNote()
                 .raceWith(Commands.run(() -> statusLight.setAnimation(RUNNING), statusLight))
-                .andThen(
-                        statusLight
-                                .playAnimationAndStop(GRABBED_NOTE, 1.5)
-                                .deadlineWith(rumbleGamepad(xboxController)));
+                .andThen(statusLight
+                        .playAnimationAndStop(GRABBED_NOTE, 1.5)
+                        .deadlineWith(rumbleGamepad(xboxController)));
     }
 
     public static Command rumbleGamepad(XboxController xboxController) {

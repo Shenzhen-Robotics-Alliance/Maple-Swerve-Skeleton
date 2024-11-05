@@ -49,10 +49,9 @@ public class FlyWheels extends MapleSubsystem {
         this.sysIdRoutines = new SysIdRoutine[IOs.length];
         for (int i = 0; i < inputs.length; i++) {
             this.inputs[i] = new FlyWheelsInputsAutoLogged();
-            this.sysIdRoutines[i] =
-                    new SysIdRoutine(
-                            new SysIdRoutine.Config(null, null, null, this::logState),
-                            new SysIdRoutine.Mechanism(voltageMeasureRunner(i), null, this));
+            this.sysIdRoutines[i] = new SysIdRoutine(
+                    new SysIdRoutine.Config(null, null, null, this::logState),
+                    new SysIdRoutine.Mechanism(voltageMeasureRunner(i), null, this));
         }
         this.speedRPMProfile = new TrapezoidProfile(SPEED_RPM_CONSTRAINS);
         this.currentStateRPM = new TrapezoidProfile.State(0, 0);
@@ -75,8 +74,7 @@ public class FlyWheels extends MapleSubsystem {
         this.IOs[index].updateInputs(inputs[index]);
         Logger.processInputs("FlyWheels/" + index, inputs[index]);
         Logger.recordOutput(
-                "Shooter/FlyWheel" + index + " Measured RPM",
-                inputs[index].flyWheelVelocityRevsPerSec * 60);
+                "Shooter/FlyWheel" + index + " Measured RPM", inputs[index].flyWheelVelocityRevsPerSec * 60);
     }
 
     @Override
@@ -100,8 +98,7 @@ public class FlyWheels extends MapleSubsystem {
         for (FlyWheelIO io : IOs) io.runVoltage(0);
 
         double totalRPM = 0.0;
-        for (FlyWheelIO.FlyWheelsInputs input : inputs)
-            totalRPM += input.flyWheelVelocityRevsPerSec * 60;
+        for (FlyWheelIO.FlyWheelsInputs input : inputs) totalRPM += input.flyWheelVelocityRevsPerSec * 60;
         currentStateRPM = new TrapezoidProfile.State(totalRPM / inputs.length, 0);
         goalRPM = 0;
     }
@@ -118,8 +115,7 @@ public class FlyWheels extends MapleSubsystem {
 
     public void runRPMProfiled(double rpm) {
         this.currentStateRPM =
-                speedRPMProfile.calculate(
-                        Robot.defaultPeriodSecs, currentStateRPM, new TrapezoidProfile.State(rpm, 0));
+                speedRPMProfile.calculate(Robot.defaultPeriodSecs, currentStateRPM, new TrapezoidProfile.State(rpm, 0));
         this.goalRPM = rpm;
         runControlLoops();
     }
@@ -135,11 +131,9 @@ public class FlyWheels extends MapleSubsystem {
             final double flyWheelVelocityRevPerSec = currentStateRPM.position / 60,
                     flyWheelAccelerationRevPerSec = currentStateRPM.velocity / 60,
                     feedForwardVoltage =
-                            feedForwardRevPerSec[i].calculate(
-                                    flyWheelVelocityRevPerSec, flyWheelAccelerationRevPerSec);
+                            feedForwardRevPerSec[i].calculate(flyWheelVelocityRevPerSec, flyWheelAccelerationRevPerSec);
             final double feedBackVoltage =
-                    feedBackRevPerSec.calculate(
-                            inputs[i].flyWheelVelocityRevsPerSec, flyWheelVelocityRevPerSec);
+                    feedBackRevPerSec.calculate(inputs[i].flyWheelVelocityRevsPerSec, flyWheelVelocityRevPerSec);
             runVolts(i, feedBackVoltage + feedForwardVoltage);
         }
     }

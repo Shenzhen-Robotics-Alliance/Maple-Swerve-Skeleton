@@ -48,11 +48,9 @@ public class MapleShooterOptimization {
         public void log(String logPath) {
             Logger.recordOutput(logPath + "ShooterAngleDegrees", shooterAngleDegrees);
             Logger.recordOutput(
-                    logPath + "ShooterAngleChangeRateDegreesPerSecond",
-                    shooterAngleChangeRateDegreesPerSecond);
+                    logPath + "ShooterAngleChangeRateDegreesPerSecond", shooterAngleChangeRateDegreesPerSecond);
             Logger.recordOutput(logPath + "ShooterRPM", shooterRPM);
-            Logger.recordOutput(
-                    logPath + "ShooterRPMChangeRateRPMPerSeconds", shooterRPMChangeRateRPMPerSeconds);
+            Logger.recordOutput(logPath + "ShooterRPMChangeRateRPMPerSeconds", shooterRPMChangeRateRPMPerSeconds);
         }
     }
 
@@ -90,29 +88,21 @@ public class MapleShooterOptimization {
     }
 
     public Rotation2d getShooterFacing(
-            Translation2d targetPosition,
-            Translation2d robotPosition,
-            ChassisSpeeds robotVelocityFieldRelative) {
+            Translation2d targetPosition, Translation2d robotPosition, ChassisSpeeds robotVelocityFieldRelative) {
         final double flightTime = getFlightTimeSeconds(targetPosition, robotPosition);
-        final Translation2d robotPositionAfterFlightTime =
-                robotPosition.plus(
-                        new Translation2d(
-                                robotVelocityFieldRelative.vxMetersPerSecond * flightTime,
-                                robotVelocityFieldRelative.vyMetersPerSecond * flightTime));
+        final Translation2d robotPositionAfterFlightTime = robotPosition.plus(new Translation2d(
+                robotVelocityFieldRelative.vxMetersPerSecond * flightTime,
+                robotVelocityFieldRelative.vyMetersPerSecond * flightTime));
 
         return targetPosition.minus(robotPositionAfterFlightTime).getAngle();
     }
 
     public ShooterState getOptimizedShootingState(
-            Translation2d targetPosition,
-            Translation2d robotPosition,
-            ChassisSpeeds robotVelocityFieldRelative) {
+            Translation2d targetPosition, Translation2d robotPosition, ChassisSpeeds robotVelocityFieldRelative) {
         final double flightTimeSeconds = getFlightTimeSeconds(targetPosition, robotPosition);
-        final Translation2d robotNewPosition =
-                robotPosition.plus(
-                        new Translation2d(
-                                robotVelocityFieldRelative.vxMetersPerSecond * flightTimeSeconds,
-                                robotVelocityFieldRelative.vyMetersPerSecond * flightTimeSeconds));
+        final Translation2d robotNewPosition = robotPosition.plus(new Translation2d(
+                robotVelocityFieldRelative.vxMetersPerSecond * flightTimeSeconds,
+                robotVelocityFieldRelative.vyMetersPerSecond * flightTimeSeconds));
         final double newDistanceToTarget = targetPosition.getDistance(robotNewPosition);
         final Rotation2d
                 chassisSpeedsDirection =
@@ -126,25 +116,17 @@ public class MapleShooterOptimization {
                                 robotVelocityFieldRelative.vyMetersPerSecond,
                                 robotVelocityFieldRelative.vxMetersPerSecond);
 
-        Logger.recordOutput(
-                "ShooterStateOptimization/distance to target change rate", distanceToTargetChangingRate);
-        final double
-                shooterAngleDeg = table.interpolateVariable("Shooter-Angle-Degrees", newDistanceToTarget),
+        Logger.recordOutput("ShooterStateOptimization/distance to target change rate", distanceToTargetChangingRate);
+        final double shooterAngleDeg = table.interpolateVariable("Shooter-Angle-Degrees", newDistanceToTarget),
                 shooterAngleDegChangeRateToDistance =
                         table.findDerivative("Shooter-Angle-Degrees", newDistanceToTarget, 0.1),
-                shooterAngleDegChangeRateDegPerSec =
-                        shooterAngleDegChangeRateToDistance * distanceToTargetChangingRate,
+                shooterAngleDegChangeRateDegPerSec = shooterAngleDegChangeRateToDistance * distanceToTargetChangingRate,
                 shooterRPM = table.interpolateVariable("Shooter-RPM", newDistanceToTarget),
-                shooterRPMChangeRateToDistance =
-                        table.findDerivative("Shooter-RPM", newDistanceToTarget, 0.1),
-                shooterRPMChangeRateRPMPerSec =
-                        shooterRPMChangeRateToDistance * distanceToTargetChangingRate;
+                shooterRPMChangeRateToDistance = table.findDerivative("Shooter-RPM", newDistanceToTarget, 0.1),
+                shooterRPMChangeRateRPMPerSec = shooterRPMChangeRateToDistance * distanceToTargetChangingRate;
 
         return new ShooterState(
-                shooterAngleDeg,
-                shooterAngleDegChangeRateDegPerSec,
-                shooterRPM,
-                shooterRPMChangeRateRPMPerSec);
+                shooterAngleDeg, shooterAngleDegChangeRateDegPerSec, shooterRPM, shooterRPMChangeRateRPMPerSec);
     }
 
     public boolean isTargetInRange(Translation2d targetPosition, Translation2d robotPosition) {
@@ -179,11 +161,10 @@ public class MapleShooterOptimization {
 
         @Override
         public void execute() {
-            desiredChassisFacing =
-                    shooterOptimization.getShooterFacing(
-                            targetPositionSupplier.get(),
-                            driveSubsystem.getPose().getTranslation(),
-                            driveSubsystem.getMeasuredChassisSpeedsFieldRelative());
+            desiredChassisFacing = shooterOptimization.getShooterFacing(
+                    targetPositionSupplier.get(),
+                    driveSubsystem.getPose().getTranslation(),
+                    driveSubsystem.getMeasuredChassisSpeedsFieldRelative());
             rotationalTargetOverride.set(Optional.of(desiredChassisFacing));
             complete = driveSubsystem.getFacing().minus(desiredChassisFacing).getDegrees() < 3;
         }

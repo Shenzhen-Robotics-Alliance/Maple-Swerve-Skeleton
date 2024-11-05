@@ -49,68 +49,53 @@ public class MapleConfigFile {
         public double getDoubleConfig(String name) throws NullPointerException {
             if (!hasDoubleConfig(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: "
-                                + blockName
-                                + ", config: "
-                                + name
-                                + ", type: double");
+                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: double");
             return doubleConfigs.get(name);
         }
 
         public int getIntConfig(String name) throws NullPointerException {
             if (!hasIntConfig(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: "
-                                + blockName
-                                + ", config: "
-                                + name
-                                + ", type: int");
+                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: int");
             return intConfigs.get(name);
         }
 
         public String getStringConfig(String name) throws NullPointerException {
             if (!hasStringConfig(name))
                 throw new NullPointerException(
-                        "Configuration not found for block: "
-                                + blockName
-                                + ", config: "
-                                + name
-                                + ", type: string");
+                        "Configuration not found for block: " + blockName + ", config: " + name + ", type: string");
             return stringConfigs.get(name);
         }
 
         public void putDoubleConfig(String configName, double value) throws IllegalArgumentException {
             if (intConfigs.containsKey(configName) || stringConfigs.containsKey(configName))
-                throw new IllegalArgumentException(
-                        "Cannot put double config '"
-                                + configName
-                                + "' to block '"
-                                + blockName
-                                + "' since there is already an int or string config with the same name");
+                throw new IllegalArgumentException("Cannot put double config '"
+                        + configName
+                        + "' to block '"
+                        + blockName
+                        + "' since there is already an int or string config with the same name");
             configOrders.add(configName);
             doubleConfigs.put(configName, value);
         }
 
         public void putIntConfig(String configName, int value) throws IllegalArgumentException {
             if (doubleConfigs.containsKey(configName) || stringConfigs.containsKey(configName))
-                throw new IllegalArgumentException(
-                        "Cannot put int config '"
-                                + configName
-                                + "' to block '"
-                                + blockName
-                                + "' since there is already a double or string config with the same name");
+                throw new IllegalArgumentException("Cannot put int config '"
+                        + configName
+                        + "' to block '"
+                        + blockName
+                        + "' since there is already a double or string config with the same name");
             configOrders.add(configName);
             intConfigs.put(configName, value);
         }
 
         public void putStringConfig(String configName, String value) throws IllegalArgumentException {
             if (doubleConfigs.containsKey(configName) || intConfigs.containsKey(configName))
-                throw new IllegalArgumentException(
-                        "Cannot put string config '"
-                                + configName
-                                + "' to block '"
-                                + blockName
-                                + "' since there is already a double or int config with the same name");
+                throw new IllegalArgumentException("Cannot put string config '"
+                        + configName
+                        + "' to block '"
+                        + blockName
+                        + "' since there is already a double or int config with the same name");
             configOrders.add(configName);
             stringConfigs.put(configName, value);
         }
@@ -141,8 +126,7 @@ public class MapleConfigFile {
         MapleConfigFile configFile = new MapleConfigFile(configType, configName);
 
         final Path xmlFilePath =
-                Paths.get(
-                        Filesystem.getDeployDirectory().getPath(), "configs", configType, configName + ".xml");
+                Paths.get(Filesystem.getDeployDirectory().getPath(), "configs", configType, configName + ".xml");
         File xmlFile = xmlFilePath.toFile();
         if (!xmlFile.exists()) {
             throw new IOException("Config file does not exist: " + xmlFilePath);
@@ -233,8 +217,7 @@ public class MapleConfigFile {
         }
     }
 
-    private static void writeAllConfigBlocks(MapleConfigFile config, FileWriter writer)
-            throws IOException {
+    private static void writeAllConfigBlocks(MapleConfigFile config, FileWriter writer) throws IOException {
         for (String blockName : config.configBlocksOrder) {
             ConfigBlock block = config.configBlocks.get(blockName);
             writer.write("    <" + block.blockName + ">\n");
@@ -243,8 +226,7 @@ public class MapleConfigFile {
         }
     }
 
-    private static void writeSingleConfigBlock(ConfigBlock block, FileWriter writer)
-            throws IOException {
+    private static void writeSingleConfigBlock(ConfigBlock block, FileWriter writer) throws IOException {
         for (String configName : block.configOrders) {
             if (block.hasStringConfig(configName)) writeStringConfig(block, configName, writer);
             else if (block.hasIntConfig(configName)) writeIntConfig(block, configName, writer);
@@ -252,39 +234,33 @@ public class MapleConfigFile {
         }
     }
 
-    private static void writeDoubleConfig(ConfigBlock block, String configName, FileWriter writer)
-            throws IOException {
-        writer.write(
-                "        <"
-                        + configName
-                        + " type=\"double\">"
-                        + block.getDoubleConfig(configName)
-                        + "</"
-                        + configName
-                        + ">\n");
+    private static void writeDoubleConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
+        writer.write("        <"
+                + configName
+                + " type=\"double\">"
+                + block.getDoubleConfig(configName)
+                + "</"
+                + configName
+                + ">\n");
     }
 
-    private static void writeStringConfig(ConfigBlock block, String configName, FileWriter writer)
-            throws IOException {
-        writer.write(
-                "        <"
-                        + configName
-                        + " type=\"string\">"
-                        + block.getStringConfig(configName)
-                        + "</"
-                        + configName
-                        + ">\n");
+    private static void writeStringConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
+        writer.write("        <"
+                + configName
+                + " type=\"string\">"
+                + block.getStringConfig(configName)
+                + "</"
+                + configName
+                + ">\n");
     }
 
-    private static void writeIntConfig(ConfigBlock block, String configName, FileWriter writer)
-            throws IOException {
-        writer.write(
-                "        <"
-                        + configName
-                        + " type=\"int\">"
-                        + block.getIntConfig(configName)
-                        + "</"
-                        + configName
-                        + ">\n");
+    private static void writeIntConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
+        writer.write("        <"
+                + configName
+                + " type=\"int\">"
+                + block.getIntConfig(configName)
+                + "</"
+                + configName
+                + ">\n");
     }
 }

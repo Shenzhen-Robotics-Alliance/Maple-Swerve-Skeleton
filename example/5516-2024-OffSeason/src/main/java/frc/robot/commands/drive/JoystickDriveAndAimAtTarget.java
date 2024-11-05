@@ -20,9 +20,9 @@ import org.littletonrobotics.junction.Logger;
  *
  * <h1>Custom Drive Command</h1>
  *
- * <p>The chassis will automatically face to a target on field (eg. the speaker) while the pilot
- * controls its movements The chassis will also adjust its facing in-advance, with respect to the
- * flight time calculated from {@link MapleShooterOptimization} (this is for shooting-on-the-move)
+ * <p>The chassis will automatically face to a target on field (eg. the speaker) while the pilot controls its movements
+ * The chassis will also adjust its facing in-advance, with respect to the flight time calculated from
+ * {@link MapleShooterOptimization} (this is for shooting-on-the-move)
  */
 public class JoystickDriveAndAimAtTarget extends Command {
     private final MapleJoystickDriveInput input;
@@ -42,12 +42,10 @@ public class JoystickDriveAndAimAtTarget extends Command {
         this.targetPositionSupplier = targetPositionSupplier;
         this.shooterOptimization = shooterOptimization;
         this.pilotInputMultiplier = pilotInputMultiplier;
-        this.chassisRotationController =
-                new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
+        this.chassisRotationController = new MaplePIDController(DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP);
 
         this.driveSubsystem = driveSubsystem;
-        this.input =
-                new MapleJoystickDriveInput(input.joystickXSupplier, input.joystickYSupplier, () -> 0);
+        this.input = new MapleJoystickDriveInput(input.joystickXSupplier, input.joystickYSupplier, () -> 0);
     }
 
     @Override
@@ -60,14 +58,12 @@ public class JoystickDriveAndAimAtTarget extends Command {
     public void execute() {
         final ChassisSpeeds
                 pilotInputSpeeds =
-                        input
-                                .getJoystickChassisSpeeds(
+                        input.getJoystickChassisSpeeds(
                                         driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(),
                                         driveSubsystem.getChassisMaxAngularVelocity())
                                 .times(pilotInputMultiplier),
                 chassisSpeeds =
-                        pilotInputSpeeds.plus(
-                                new ChassisSpeeds(0, 0, getRotationalCorrectionVelocityRadPerSec()));
+                        pilotInputSpeeds.plus(new ChassisSpeeds(0, 0, getRotationalCorrectionVelocityRadPerSec()));
 
         driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeeds);
         super.execute();
@@ -77,13 +73,10 @@ public class JoystickDriveAndAimAtTarget extends Command {
 
     public double getRotationalCorrectionVelocityRadPerSec() {
         final Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
-        final ChassisSpeeds robotVelocityFieldRelative =
-                driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
-        final Translation2d robotPositionAfterDt =
-                robotPosition.plus(
-                        new Translation2d(
-                                robotVelocityFieldRelative.vxMetersPerSecond * Robot.defaultPeriodSecs,
-                                robotVelocityFieldRelative.vyMetersPerSecond * Robot.defaultPeriodSecs));
+        final ChassisSpeeds robotVelocityFieldRelative = driveSubsystem.getMeasuredChassisSpeedsFieldRelative();
+        final Translation2d robotPositionAfterDt = robotPosition.plus(new Translation2d(
+                robotVelocityFieldRelative.vxMetersPerSecond * Robot.defaultPeriodSecs,
+                robotVelocityFieldRelative.vyMetersPerSecond * Robot.defaultPeriodSecs));
 
         final Rotation2d
                 targetedFacing =

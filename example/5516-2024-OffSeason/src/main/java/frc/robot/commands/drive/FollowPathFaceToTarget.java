@@ -17,12 +17,10 @@ public class FollowPathFaceToTarget {
             MapleShooterOptimization shooterOptimization,
             HolonomicDriveSubsystem driveSubsystem,
             PathPlannerPath path) {
-        final Supplier<Rotation2d> rotationTargetOverride =
-                () ->
-                        shooterOptimization.getShooterFacing(
-                                targetPositionSupplier.get(),
-                                driveSubsystem.getPose().getTranslation(),
-                                driveSubsystem.getMeasuredChassisSpeedsFieldRelative());
+        final Supplier<Rotation2d> rotationTargetOverride = () -> shooterOptimization.getShooterFacing(
+                targetPositionSupplier.get(),
+                driveSubsystem.getPose().getTranslation(),
+                driveSubsystem.getMeasuredChassisSpeedsFieldRelative());
         return followPathFacetToTarget(driveSubsystem, path, rotationTargetOverride);
     }
 
@@ -30,26 +28,20 @@ public class FollowPathFaceToTarget {
             Supplier<Translation2d> targetPositionSupplier,
             HolonomicDriveSubsystem driveSubsystem,
             PathPlannerPath path) {
-        final Supplier<Rotation2d> rotationTargetOverride =
-                () ->
-                        targetPositionSupplier
-                                .get()
-                                .minus(driveSubsystem.getPose().getTranslation())
-                                .getAngle();
+        final Supplier<Rotation2d> rotationTargetOverride = () -> targetPositionSupplier
+                .get()
+                .minus(driveSubsystem.getPose().getTranslation())
+                .getAngle();
         return followPathFacetToTarget(driveSubsystem, path, rotationTargetOverride);
     }
 
     public static Command followPathFacetToTarget(
-            HolonomicDriveSubsystem driveSubsystem,
-            PathPlannerPath path,
-            Supplier<Rotation2d> rotationTargetOverride) {
+            HolonomicDriveSubsystem driveSubsystem, PathPlannerPath path, Supplier<Rotation2d> rotationTargetOverride) {
         final Command followPath = AutoBuilder.followPath(path);
         followPath.addRequirements(driveSubsystem);
         return followPath
-                .beforeStarting(
-                        () ->
-                                PPHolonomicDriveController.setRotationTargetOverride(
-                                        () -> Optional.of(rotationTargetOverride.get())))
+                .beforeStarting(() -> PPHolonomicDriveController.setRotationTargetOverride(
+                        () -> Optional.of(rotationTargetOverride.get())))
                 .finallyDo(() -> PPHolonomicDriveController.setRotationTargetOverride(Optional::empty));
     }
 }

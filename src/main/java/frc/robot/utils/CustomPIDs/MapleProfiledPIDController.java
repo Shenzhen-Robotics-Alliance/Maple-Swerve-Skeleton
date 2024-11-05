@@ -16,7 +16,6 @@ public class MapleProfiledPIDController extends ProfiledPIDController {
 
     @Override
     public double calculate(double measurement) {
-        return MathUtil.clamp(
-                super.calculate(measurement), -pidConfig.maximumPower, pidConfig.maximumPower);
+        return MathUtil.clamp(super.calculate(measurement), -pidConfig.maximumPower, pidConfig.maximumPower);
     }
 }

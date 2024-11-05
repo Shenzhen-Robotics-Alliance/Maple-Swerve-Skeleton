@@ -31,16 +31,14 @@ public class PathFindToPoseAndShootSequence extends AutoAlignment {
                 () -> {
                     final Translation2d displacementToTarget =
                             speaerPositionSupplier.get().minus(robotShootingPositionSupplier.get());
-                    return new Pose2d(
-                            robotPrepareToShootPositionSupplier.get(), displacementToTarget.getAngle());
+                    return new Pose2d(robotPrepareToShootPositionSupplier.get(), displacementToTarget.getAngle());
                 },
-                () ->
-                        new Pose2d(
-                                robotShootingPositionSupplier.get(),
-                                shooterOptimization.getShooterFacing(
-                                        speaerPositionSupplier.get(),
-                                        driveSubsystem.getPose().getTranslation(),
-                                        driveSubsystem.getMeasuredChassisSpeedsFieldRelative())),
+                () -> new Pose2d(
+                        robotShootingPositionSupplier.get(),
+                        shooterOptimization.getShooterFacing(
+                                speaerPositionSupplier.get(),
+                                driveSubsystem.getPose().getTranslation(),
+                                driveSubsystem.getMeasuredChassisSpeedsFieldRelative())),
                 new Pose2d(0.3, 0.3, Rotation2d.fromDegrees(3)),
                 0.75,
                 new PrepareToAim(

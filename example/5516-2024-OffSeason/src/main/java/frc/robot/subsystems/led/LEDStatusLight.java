@@ -22,8 +22,7 @@ public class LEDStatusLight extends MapleSubsystem {
     private LEDAnimation animation;
 
     private boolean notePresent = false;
-    private static final LEDAnimation
-            DISABLED = new LEDAnimation.SlideBackAndForth(0, 200, 255, 0.5, 0.8),
+    private static final LEDAnimation DISABLED = new LEDAnimation.SlideBackAndForth(0, 200, 255, 0.5, 0.8),
             ENABLED = new LEDAnimation.SlideBackAndForth(0, 200, 255, 2, 0.8),
             ENABLED_HOLDING_NOTE = new LEDAnimation.Rainbow(1);
 
@@ -38,15 +37,11 @@ public class LEDStatusLight extends MapleSubsystem {
         t.start();
         if (led != null) led.start();
 
-        super.setDefaultCommand(
-                Commands.run(
-                                () ->
-                                        setAnimation(
-                                                DriverStation.isEnabled()
-                                                        ? (notePresent ? ENABLED_HOLDING_NOTE : ENABLED)
-                                                        : DISABLED),
-                                this)
-                        .ignoringDisable(true));
+        super.setDefaultCommand(Commands.run(
+                        () -> setAnimation(
+                                DriverStation.isEnabled() ? (notePresent ? ENABLED_HOLDING_NOTE : ENABLED) : DISABLED),
+                        this)
+                .ignoringDisable(true));
     }
 
     final String[] colors = new String[DASHBOARD_DISPLAY_LENGTH / 2];
@@ -56,13 +51,12 @@ public class LEDStatusLight extends MapleSubsystem {
         animation.play(buffer, t.get());
         animation.play(bufferForDashboard, t.get());
         for (int i = 0; i < DASHBOARD_DISPLAY_LENGTH / 2; i++)
-            colors[i] = bufferForDashboard.getLED(DASHBOARD_DISPLAY_LENGTH / 2 + i).toHexString();
+            colors[i] =
+                    bufferForDashboard.getLED(DASHBOARD_DISPLAY_LENGTH / 2 + i).toHexString();
 
         if (led != null) led.setData(buffer);
-        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
-            SmartDashboard.putStringArray("Status Light", colors);
-        else if (Robot.CURRENT_ROBOT_MODE == RobotMode.REPLAY)
-            Logger.recordOutput("Status Light", colors);
+        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM) SmartDashboard.putStringArray("Status Light", colors);
+        else if (Robot.CURRENT_ROBOT_MODE == RobotMode.REPLAY) Logger.recordOutput("Status Light", colors);
     }
 
     public void setAnimation(LEDAnimation animation) {
@@ -72,8 +66,7 @@ public class LEDStatusLight extends MapleSubsystem {
     public Command playAnimationAndStop(LEDAnimation animation, double durationSeconds) {
         return Commands.runOnce(() -> setAnimation(animation), this)
                 .andThen(Commands.waitSeconds(durationSeconds))
-                .andThen(
-                        Commands.runOnce(() -> setAnimation(DriverStation.isEnabled() ? ENABLED : DISABLED)));
+                .andThen(Commands.runOnce(() -> setAnimation(DriverStation.isEnabled() ? ENABLED : DISABLED)));
     }
 
     public void setNotePresent(boolean present) {
