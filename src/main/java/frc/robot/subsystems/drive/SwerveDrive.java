@@ -5,6 +5,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 import static frc.robot.constants.VisionConstants.*;
 
@@ -52,7 +53,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
             visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.INFO);
     public static final ChassisHeadingController swerveHeadingController = new ChassisHeadingController(
             new TrapezoidProfile.Constraints(
-                    CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC, CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ),
+                    CHASSIS_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
+                    CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)),
             DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP,
             new Rotation2d());
 
@@ -262,22 +264,22 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public double getChassisMaxLinearVelocityMetersPerSec() {
-        return CHASSIS_MAX_VELOCITY;
+        return CHASSIS_MAX_VELOCITY.in(MetersPerSecond);
     }
 
     @Override
     public double getChassisMaxAccelerationMetersPerSecSq() {
-        return CHASSIS_MAX_ACCELERATION_MPS_SQ;
+        return CHASSIS_MAX_ACCELERATION.in(MetersPerSecondPerSecond);
     }
 
     @Override
     public double getChassisMaxAngularVelocity() {
-        return CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC;
+        return CHASSIS_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond);
     }
 
     @Override
     public double getChassisMaxAngularAccelerationRadPerSecSq() {
-        return CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ;
+        return CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond);
     }
 
     public static boolean acceptRotationalMeasurement = true;

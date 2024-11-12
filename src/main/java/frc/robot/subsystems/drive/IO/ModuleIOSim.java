@@ -5,9 +5,12 @@
 
 package frc.robot.subsystems.drive.IO;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.util.Units;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.motorsims.ControlRequest;
 
 /**
  * Physics sim implementation of module IO.
@@ -46,11 +49,12 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVoltage(double volts) {
-        moduleSimulation.requestDriveVoltageOut(volts);
+        moduleSimulation.requestDriveControl(new ControlRequest.VoltageOut(Volts.of(volts)));
     }
 
     @Override
     public void setSteerPowerPercent(double powerPercent) {
-        moduleSimulation.requestSteerVoltageOut(12 * powerPercent);
+        moduleSimulation.requestSteerControl(
+                new ControlRequest.VoltageOut(Volts.of(12).times(powerPercent)));
     }
 }

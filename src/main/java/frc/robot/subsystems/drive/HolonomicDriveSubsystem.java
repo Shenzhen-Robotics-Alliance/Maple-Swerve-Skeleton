@@ -123,17 +123,17 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                         CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
                         CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),
                 new RobotConfig(
-                        DriveTrainConstants.ROBOT_MASS_KG,
-                        6.0,
+                        DriveTrainConstants.ROBOT_MASS,
+                        DriveTrainConstants.ROBOT_MOI,
                         new ModuleConfig(
-                                DriveTrainConstants.WHEEL_RADIUS_METERS,
+                                DriveTrainConstants.WHEEL_RADIUS,
                                 DriveTrainConstants.CHASSIS_MAX_VELOCITY,
                                 DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
                                 DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
                                 DriveTrainConstants.DRIVE_CURRENT_LIMIT,
                                 1),
-                        DriveTrainConstants.TRACK_WIDTH_METERS,
-                        DriveTrainConstants.TRACK_LENGTH_METERS),
+                        DriveTrainConstants.TRACK_WIDTH,
+                        DriveTrainConstants.TRACK_LENGTH),
                 FieldMirroringUtils::isSidePresentedAsRed,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());

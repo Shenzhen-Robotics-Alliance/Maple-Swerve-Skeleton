@@ -1,5 +1,7 @@
 package frc.robot.utils;
 
+import static edu.wpi.first.units.Units.Kilograms;
+
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -49,7 +51,7 @@ public class AIRobotInSimulation implements Subsystem {
     public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[5];
 
     private static final DriveTrainSimulationConfig AI_ROBOT_CONFIG =
-            DriveTrainSimulationConfig.Default().withRobotMass(55);
+            DriveTrainSimulationConfig.Default().withRobotMass(Kilograms.of(45));
 
     private static final RobotConfig robotConfig = new RobotConfig(
             55,

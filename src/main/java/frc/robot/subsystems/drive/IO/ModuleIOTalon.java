@@ -5,6 +5,7 @@
 
 package frc.robot.subsystems.drive.IO;
 
+import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.constants.DriveTrainConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -48,14 +49,14 @@ public class ModuleIOTalon implements ModuleIO {
         cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANbusName);
 
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
-        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_CURRENT_LIMIT;
+        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_CURRENT_LIMIT.in(Amps);
         driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
         driveTalon.setInverted(moduleConstants.DriveMotorInverted);
         setDriveBrake(true);
 
         var steerConfig = moduleConstants.SteerMotorInitialConfigs;
-        steerConfig.CurrentLimits.SupplyCurrentLimit = STEER_CURRENT_LIMIT;
+        steerConfig.CurrentLimits.SupplyCurrentLimit = STEER_CURRENT_LIMIT.in(Amps);
         steerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
         steerTalon.setInverted(moduleConstants.SteerMotorInverted);

@@ -5,6 +5,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -111,23 +113,21 @@ public class RobotContainer {
             case SIM -> {
                 this.driveSimulation = new SwerveDriveSimulation(
                         DriveTrainSimulationConfig.Default()
-                                .withRobotMass(DriveTrainConstants.ROBOT_MASS_KG)
-                                .withBumperSize(
-                                        DriveTrainConstants.BUMPER_LENGTH_METERS,
-                                        DriveTrainConstants.BUMPER_WIDTH_METERS)
+                                .withRobotMass(DriveTrainConstants.ROBOT_MASS)
+                                .withBumperSize(DriveTrainConstants.BUMPER_LENGTH, DriveTrainConstants.BUMPER_WIDTH)
                                 .withTrackLengthTrackWidth(
-                                        DriveTrainConstants.TRACK_LENGTH_METERS, DriveTrainConstants.TRACK_WIDTH_METERS)
+                                        DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
                                 .withSwerveModule(() -> new SwerveModuleSimulation(
                                         DriveTrainConstants.DRIVE_MOTOR,
                                         DriveTrainConstants.STEER_MOTOR,
-                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT.in(Amps),
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
-                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
-                                        DriveTrainConstants.STEER_FRICTION_VOLTAGE,
+                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE.in(Volts),
+                                        DriveTrainConstants.STEER_FRICTION_VOLTAGE.in(Volts),
                                         DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
-                                        DriveTrainConstants.WHEEL_RADIUS_METERS,
-                                        DriveTrainConstants.STEER_INERTIA)),
+                                        DriveTrainConstants.WHEEL_RADIUS.in(Meters),
+                                        DriveTrainConstants.STEER_INERTIA.in(KilogramSquareMeters))),
                         new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 

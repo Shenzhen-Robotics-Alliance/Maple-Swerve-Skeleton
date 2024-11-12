@@ -5,6 +5,7 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.constants.DriveControlLoops.*;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -86,10 +87,10 @@ public class SwerveModule extends MapleSubsystem {
     public SwerveModuleState runSetPoint(SwerveModuleState state) {
         this.setPoint = SwerveModuleState.optimize(state, getSteerFacing());
 
-        if (Math.abs(state.speedMetersPerSecond) < 0.04) {
+        if (Math.abs(state.speedMetersPerSecond) < 0.01) {
             io.setDriveVoltage(0);
             io.setSteerPowerPercent(0);
-            return this.getMeasuredState();
+            return this.setPoint = new SwerveModuleState();
         }
         runDriveControlLoop();
         runSteerCloseLoop();
@@ -118,7 +119,7 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private double driveWheelRevolutionsToMeters(double driveWheelRevolutions) {
-        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS_METERS;
+        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
