@@ -302,7 +302,7 @@ public class RobotContainer {
 
         /* TODO: aim at target and drive example, delete it for your project */
         final JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
-                driveInput, drive, FieldConstants.SPEAKER_POSITION_SUPPLIER, exampleShooterOptimization, 0.5);
+                driveInput, drive, FieldConstants.SPEAKER_POSITION_SUPPLIER, exampleShooterOptimization, 0.75);
         driverXBox.rightTrigger(0.5).whileTrue(exampleFaceTargetWhileDriving);
 
         /* auto alignment example, delete it for your project */

@@ -44,7 +44,6 @@ public class JoystickDriveAndAimAtTarget extends Command {
 
     @Override
     public void initialize() {
-        SwerveDrive.acceptRotationalMeasurement = false;
         SwerveDrive.swerveHeadingController.setHeadingRequest(
                 new ChassisHeadingController.FaceToTargetRequest(targetPositionSupplier, shooterOptimization));
     }
@@ -63,7 +62,6 @@ public class JoystickDriveAndAimAtTarget extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        SwerveDrive.acceptRotationalMeasurement = true;
         SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 }

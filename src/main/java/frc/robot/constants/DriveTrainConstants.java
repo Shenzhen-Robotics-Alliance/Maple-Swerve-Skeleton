@@ -17,7 +17,7 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
  */
 public class DriveTrainConstants {
     /** numbers that needs to be changed to fit each robot TODO: change these numbers to match your robot */
-    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.25; // 1.15 for tire wheels
+    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.2;
 
     public static final Mass ROBOT_MASS = Kilograms.of(45); // robot weight with bumpers
 

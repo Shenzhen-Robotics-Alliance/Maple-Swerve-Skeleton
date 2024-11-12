@@ -282,13 +282,10 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         return CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond);
     }
 
-    public static boolean acceptRotationalMeasurement = true;
-
     @Override
     public void addVisionMeasurement(
             MapleMultiTagPoseEstimator.RobotPoseEstimationResult poseEstimationResult, double timestamp) {
         previousMeasurementTimeStamp = Math.max(timestamp, previousMeasurementTimeStamp);
-        if (!acceptRotationalMeasurement) poseEstimationResult.rotationalStandardDeviationRadians = 100;
         poseEstimator.addVisionMeasurement(
                 poseEstimationResult.pointEstimation, timestamp, poseEstimationResult.getEstimationStandardError());
     }
