@@ -48,7 +48,7 @@ Building on the [PhotonLib Camera Sim](https://docs.photonvision.org/en/latest/d
 
 We've also optimized the vision odometry by incorporating 6328's Log-Replay Technology, which allows for adjustments to our pose estimation strategy during replay, as detailed [in this talk](https://www.youtube.com/watch?v=BrzPw6ngx4o&t=2038s).
 ![visionsim1.gif](media/visionsim1.gif)
-We also offer a convenient feature that automatically generates the [Advantage Scope Fix Camera Config](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/tabs/3D-FIELD.md#fixed-camera), making it easy to set up and view the camera's perspective in Advantage Scope. [Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/utils/CustomConfigs/PhotonCameraProperties.java).
+We also offer a convenient feature that automatically generates the [Advantage Scope Fix Camera Config](https://github.com/Mechanical-Advantage/AdvantageScope/blob/main/docs/tabs/3D-FIELD.md#fixed-camera), making it easy to set up and view the camera's perspective in Advantage Scope. [Source Code](https://github.com/Shenzhen-Robotics-Alliance/Maple-Swerve-Skeleton/blob/main/src/main/java/frc/robot/subsystems/vision/apriltags/PhotonCameraProperties.java).
 ![visionsim2.gif](media/visionsim2.gif)
 
 ## Setup Guide
