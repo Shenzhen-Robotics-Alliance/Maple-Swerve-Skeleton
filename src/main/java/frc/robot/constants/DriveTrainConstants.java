@@ -17,7 +17,7 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
  */
 public class DriveTrainConstants {
     /** numbers that needs to be changed to fit each robot TODO: change these numbers to match your robot */
-    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.2;
+    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.05;
 
     public static final Mass ROBOT_MASS = Kilograms.of(45); // robot weight with bumpers
 
@@ -37,7 +37,7 @@ public class DriveTrainConstants {
     public static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.025);
 
     /* adjust current limit */
-    public static final Current DRIVE_CURRENT_LIMIT = Amps.of(60);
+    public static final Current DRIVE_CURRENT_LIMIT = Amps.of(80);
     public static final Current STEER_CURRENT_LIMIT = Amps.of(20);
 
     /** translations of the modules to the robot center, in FL, FR, BL, BR */
@@ -94,11 +94,6 @@ public class DriveTrainConstants {
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(ROBOT_MASS.in(Kilograms)
             * (BUMPER_WIDTH.in(Meters) * BUMPER_WIDTH.in(Meters) + BUMPER_LENGTH.in(Meters) * BUMPER_LENGTH.in(Meters))
             / 12.0);
-
-    /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
-    public static final double BUMPER_COEFFICIENT_OF_FRICTION = 0.65;
-    /* https://simple.wikipedia.org/wiki/Coefficient_of_restitution */
-    public static final double BUMPER_COEFFICIENT_OF_RESTITUTION = 0.08;
 
     public static final Supplier<GyroSimulation> gyroSimulationFactory = GyroSimulation.getPigeon2();
 

@@ -49,15 +49,15 @@ public class ModuleIOTalon implements ModuleIO {
         cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANbusName);
 
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
-        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_CURRENT_LIMIT.in(Amps);
-        driveConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        driveConfig.CurrentLimits.StatorCurrentLimit = DRIVE_CURRENT_LIMIT.in(Amps);
+        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
         driveTalon.setInverted(moduleConstants.DriveMotorInverted);
         setDriveBrake(true);
 
         var steerConfig = moduleConstants.SteerMotorInitialConfigs;
-        steerConfig.CurrentLimits.SupplyCurrentLimit = STEER_CURRENT_LIMIT.in(Amps);
-        steerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        steerConfig.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT.in(Amps);
+        steerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
         steerTalon.setInverted(moduleConstants.SteerMotorInverted);
         setSteerBrake(true);
@@ -69,12 +69,12 @@ public class ModuleIOTalon implements ModuleIO {
         driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
         driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
         driveMotorAppliedVoltage = driveTalon.getMotorVoltage();
-        driveMotorCurrent = driveTalon.getSupplyCurrent();
+        driveMotorCurrent = driveTalon.getStatorCurrent();
 
         steerEncoderAbsolutePositionRevolutions = OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
         steerEncoderVelocityRevolutionsPerSecond = cancoder.getVelocity();
         steerMotorAppliedVolts = steerTalon.getMotorVoltage();
-        steerMotorCurrent = steerTalon.getSupplyCurrent();
+        steerMotorCurrent = steerTalon.getStatorCurrent();
 
         periodicallyRefreshedSignals = new BaseStatusSignal[] {
             driveEncoderUngearedRevolutionsPerSecond,

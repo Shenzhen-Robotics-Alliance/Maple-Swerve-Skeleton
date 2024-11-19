@@ -5,8 +5,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
-
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -120,14 +118,16 @@ public class RobotContainer {
                                 .withSwerveModule(() -> new SwerveModuleSimulation(
                                         DriveTrainConstants.DRIVE_MOTOR,
                                         DriveTrainConstants.STEER_MOTOR,
-                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT.in(Amps),
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
-                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE.in(Volts),
-                                        DriveTrainConstants.STEER_FRICTION_VOLTAGE.in(Volts),
-                                        DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
-                                        DriveTrainConstants.WHEEL_RADIUS.in(Meters),
-                                        DriveTrainConstants.STEER_INERTIA.in(KilogramSquareMeters))),
+                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                        DriveTrainConstants.STEER_CURRENT_LIMIT,
+                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
+                                        DriveTrainConstants.STEER_FRICTION_VOLTAGE,
+                                        DriveTrainConstants.WHEEL_RADIUS,
+                                        DriveTrainConstants.STEER_INERTIA,
+                                        DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION))
+                                .withGyro(DriveTrainConstants.gyroSimulationFactory),
                         new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 

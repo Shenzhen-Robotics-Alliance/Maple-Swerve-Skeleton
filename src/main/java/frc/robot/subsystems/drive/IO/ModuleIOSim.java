@@ -5,9 +5,8 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.math.util.Units;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.ControlRequest;
@@ -27,21 +26,26 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        inputs.driveWheelFinalRevolutions = Units.radiansToRotations(moduleSimulation.getDriveWheelFinalPositionRad());
+        inputs.driveWheelFinalRevolutions =
+                moduleSimulation.getDriveWheelFinalPosition().in(Revolutions);
         inputs.driveWheelFinalVelocityRevolutionsPerSec =
-                Units.radiansToRotations(moduleSimulation.getDriveWheelFinalSpeedRadPerSec());
-        inputs.driveMotorAppliedVolts = moduleSimulation.getDriveMotorAppliedVolts();
-        inputs.driveMotorCurrentAmps = moduleSimulation.getDriveMotorSupplyCurrentAmps();
+                moduleSimulation.getDriveWheelFinalSpeed().in(RevolutionsPerSecond);
+        inputs.driveMotorAppliedVolts =
+                moduleSimulation.getDriveMotorAppliedVoltage().in(Volts);
+        inputs.driveMotorCurrentAmps =
+                moduleSimulation.getDriveMotorStatorCurrent().in(Amps);
 
         inputs.steerFacing = moduleSimulation.getSteerAbsoluteFacing();
-        inputs.steerVelocityRadPerSec = moduleSimulation.getSteerAbsoluteEncoderSpeedRadPerSec();
-        inputs.steerMotorAppliedVolts = moduleSimulation.getSteerMotorAppliedVolts();
-        inputs.steerMotorCurrentAmps = moduleSimulation.getSteerMotorSupplyCurrentAmps();
+        inputs.steerVelocityRadPerSec =
+                moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
+        inputs.steerMotorAppliedVolts =
+                moduleSimulation.getSteerMotorAppliedVoltage().in(Volts);
+        inputs.steerMotorCurrentAmps =
+                moduleSimulation.getSteerMotorStatorCurrent().in(Amps);
 
-        inputs.odometryDriveWheelRevolutions = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositionsRad())
-                .map(Units::radiansToRotations)
+        inputs.odometryDriveWheelRevolutions = Arrays.stream(moduleSimulation.getCachedDriveWheelFinalPositions())
+                .mapToDouble(angle -> angle.in(Revolutions))
                 .toArray();
-
         inputs.odometrySteerPositions = moduleSimulation.getCachedSteerAbsolutePositions();
 
         inputs.hardwareConnected = true;
