@@ -4,24 +4,27 @@
 
 package frc.robot.subsystems.drive.IO;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.Queue;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon;
-    private final StatusSignal<Double> yaw;
-    private final Queue<Double> yawPositionInput;
-    private final StatusSignal<Double> yawVelocity;
+    private final StatusSignal<Angle> yaw;
+    private final Queue<Angle> yawPositionInput;
+    private final StatusSignal<AngularVelocity> yawVelocity;
 
     public GyroIOPigeon2(SwerveDrivetrainConstants drivetrainConstants) {
-        this(drivetrainConstants.Pigeon2Id, drivetrainConstants.CANbusName, drivetrainConstants.Pigeon2Configs);
+        this(drivetrainConstants.Pigeon2Id, drivetrainConstants.CANBusName, drivetrainConstants.Pigeon2Configs);
     }
 
     public GyroIOPigeon2(int Pigeon2Id, String CANbusName, Pigeon2Configuration Pigeon2Configs) {
@@ -41,12 +44,15 @@ public class GyroIOPigeon2 implements GyroIO {
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {
-        inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).isOK();
-        inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
-        inputs.yawVelocityRadPerSec = Units.degreesToRadians(yawVelocity.getValueAsDouble());
+        inputs.connected = BaseStatusSignal.refreshAll(yawVelocity).isOK();
+        inputs.yawVelocityRadPerSec = yawVelocity.getValue().in(RadiansPerSecond);
 
         inputs.odometryYawPositions =
-                yawPositionInput.stream().map(Rotation2d::fromDegrees).toArray(Rotation2d[]::new);
+                yawPositionInput.stream().map(Rotation2d::new).toArray(Rotation2d[]::new);
+
         yawPositionInput.clear();
+
+        if (inputs.odometryYawPositions.length > 0)
+            inputs.yawPosition = inputs.odometryYawPositions[inputs.odometryYawPositions.length - 1];
     }
 }

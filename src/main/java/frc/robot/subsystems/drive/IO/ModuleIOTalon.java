@@ -5,7 +5,7 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -14,11 +14,14 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import java.util.Queue;
 
 public class ModuleIOTalon implements ModuleIO {
@@ -27,15 +30,15 @@ public class ModuleIOTalon implements ModuleIO {
     private final TalonFX steerTalon;
     private final CANcoder cancoder;
 
-    private final Queue<Double> driveEncoderUngearedRevolutions;
-    private final StatusSignal<Double> driveEncoderUngearedRevolutionsPerSecond,
-            driveMotorAppliedVoltage,
-            driveMotorCurrent;
+    private final Queue<Angle> driveEncoderUngearedPosition;
+    private final StatusSignal<AngularVelocity> driveEncoderUngearedVelocity;
+    private final StatusSignal<Voltage> driveMotorAppliedVoltage;
+    private final StatusSignal<Current> driveMotorCurrent;
 
-    private final Queue<Double> steerEncoderAbsolutePositionRevolutions;
-    private final StatusSignal<Double> steerEncoderVelocityRevolutionsPerSecond,
-            steerMotorAppliedVolts,
-            steerMotorCurrent;
+    private final Queue<Angle> steerEncoderAbsolutePosition;
+    private final StatusSignal<AngularVelocity> steerEncoderVelocity;
+    private final StatusSignal<Voltage> steerMotorAppliedVolts;
+    private final StatusSignal<Current> steerMotorCurrent;
 
     private final BaseStatusSignal[] periodicallyRefreshedSignals;
 
@@ -44,45 +47,40 @@ public class ModuleIOTalon implements ModuleIO {
     public ModuleIOTalon(
             SwerveDrivetrainConstants drivetrainConstants, SwerveModuleConstants moduleConstants, String name) {
         this.name = name;
-        driveTalon = new TalonFX(moduleConstants.DriveMotorId, drivetrainConstants.CANbusName);
-        steerTalon = new TalonFX(moduleConstants.SteerMotorId, drivetrainConstants.CANbusName);
-        cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANbusName);
+        driveTalon = new TalonFX(moduleConstants.DriveMotorId, drivetrainConstants.CANBusName);
+        steerTalon = new TalonFX(moduleConstants.SteerMotorId, drivetrainConstants.CANBusName);
+        cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANBusName);
 
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
         driveConfig.CurrentLimits.StatorCurrentLimit = DRIVE_CURRENT_LIMIT.in(Amps);
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
-        driveTalon.setInverted(moduleConstants.DriveMotorInverted);
         setDriveBrake(true);
 
         var steerConfig = moduleConstants.SteerMotorInitialConfigs;
         steerConfig.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT.in(Amps);
         steerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
-        steerTalon.setInverted(moduleConstants.SteerMotorInverted);
         setSteerBrake(true);
 
         var encoderConfig = moduleConstants.CANcoderInitialConfigs;
         encoderConfig.MagnetSensor.MagnetOffset = moduleConstants.CANcoderOffset;
         cancoder.getConfigurator().apply(encoderConfig);
 
-        driveEncoderUngearedRevolutions = OdometryThread.registerSignalInput(driveTalon.getPosition());
-        driveEncoderUngearedRevolutionsPerSecond = driveTalon.getVelocity();
+        driveEncoderUngearedPosition = OdometryThread.registerSignalInput(driveTalon.getPosition());
+        driveEncoderUngearedVelocity = driveTalon.getVelocity();
         driveMotorAppliedVoltage = driveTalon.getMotorVoltage();
         driveMotorCurrent = driveTalon.getStatorCurrent();
 
-        steerEncoderAbsolutePositionRevolutions = OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
-        steerEncoderVelocityRevolutionsPerSecond = cancoder.getVelocity();
+        steerEncoderAbsolutePosition = OdometryThread.registerSignalInput(cancoder.getAbsolutePosition());
+        steerEncoderVelocity = cancoder.getVelocity();
         steerMotorAppliedVolts = steerTalon.getMotorVoltage();
         steerMotorCurrent = steerTalon.getStatorCurrent();
 
         periodicallyRefreshedSignals = new BaseStatusSignal[] {
-            driveEncoderUngearedRevolutionsPerSecond,
-            driveMotorAppliedVoltage,
-            driveMotorCurrent,
-            steerEncoderVelocityRevolutionsPerSecond,
-            steerMotorAppliedVolts,
-            steerMotorCurrent
+            driveEncoderUngearedVelocity, driveMotorAppliedVoltage,
+            driveMotorCurrent, steerEncoderVelocity,
+            steerMotorAppliedVolts, steerMotorCurrent
         };
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, periodicallyRefreshedSignals);
@@ -97,34 +95,28 @@ public class ModuleIOTalon implements ModuleIO {
         inputs.hardwareConnected =
                 BaseStatusSignal.refreshAll(periodicallyRefreshedSignals).isOK();
 
-        inputs.odometryDriveWheelRevolutions = driveEncoderUngearedRevolutions.stream()
-                .mapToDouble(value -> value / DRIVE_GEAR_RATIO)
+        inputs.odometryDriveWheelRevolutions = driveEncoderUngearedPosition.stream()
+                .mapToDouble(value -> value.in(Rotations) / DRIVE_GEAR_RATIO)
                 .toArray();
-        driveEncoderUngearedRevolutions.clear();
+        driveEncoderUngearedPosition.clear();
         if (inputs.odometryDriveWheelRevolutions.length > 0)
             inputs.driveWheelFinalRevolutions =
                     inputs.odometryDriveWheelRevolutions[inputs.odometryDriveWheelRevolutions.length - 1];
 
-        inputs.odometrySteerPositions = steerEncoderAbsolutePositionRevolutions.stream()
-                .map(this::getSteerFacingFromCANCoderReading)
-                .toArray(Rotation2d[]::new);
-        steerEncoderAbsolutePositionRevolutions.clear();
+        inputs.odometrySteerPositions =
+                steerEncoderAbsolutePosition.stream().map(Rotation2d::new).toArray(Rotation2d[]::new);
+        steerEncoderAbsolutePosition.clear();
         if (inputs.odometrySteerPositions.length > 0)
             inputs.steerFacing = inputs.odometrySteerPositions[inputs.odometrySteerPositions.length - 1];
 
         inputs.driveWheelFinalVelocityRevolutionsPerSec =
-                driveEncoderUngearedRevolutionsPerSecond.getValueAsDouble() / DRIVE_GEAR_RATIO;
-        inputs.driveMotorAppliedVolts = driveMotorAppliedVoltage.getValueAsDouble();
-        inputs.driveMotorCurrentAmps = driveMotorCurrent.getValueAsDouble();
+                driveEncoderUngearedVelocity.getValue().in(RotationsPerSecond) / DRIVE_GEAR_RATIO;
+        inputs.driveMotorAppliedVolts = driveMotorAppliedVoltage.getValue().in(Volts);
+        inputs.driveMotorCurrentAmps = driveMotorCurrent.getValue().in(Amps);
 
-        inputs.steerVelocityRadPerSec =
-                Units.rotationsToRadians(steerEncoderVelocityRevolutionsPerSecond.getValueAsDouble());
-        inputs.steerMotorAppliedVolts = steerMotorAppliedVolts.getValueAsDouble();
-        inputs.steerMotorCurrentAmps = steerMotorCurrent.getValueAsDouble();
-    }
-
-    private Rotation2d getSteerFacingFromCANCoderReading(double canCoderReadingRotations) {
-        return Rotation2d.fromRotations(canCoderReadingRotations);
+        inputs.steerVelocityRadPerSec = steerEncoderVelocity.getValue().in(RadiansPerSecond);
+        inputs.steerMotorAppliedVolts = steerMotorAppliedVolts.getValue().in(Volts);
+        inputs.steerMotorCurrentAmps = steerMotorCurrent.getValue().in(Amps);
     }
 
     @Override

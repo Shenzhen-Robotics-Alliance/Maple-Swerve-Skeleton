@@ -16,11 +16,11 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface OdometryThread {
-    final class OdometryDoubleInput {
-        private final Supplier<Double> supplier;
-        private final Queue<Double> queue;
+    class OdometryInput<T> {
+        private final Supplier<T> supplier;
+        private final Queue<T> queue;
 
-        public OdometryDoubleInput(Supplier<Double> signal) {
+        public OdometryInput(Supplier<T> signal) {
             this.supplier = signal;
             this.queue = new ArrayBlockingQueue<>(ODOMETRY_CACHE_CAPACITY);
         }
@@ -30,26 +30,26 @@ public interface OdometryThread {
         }
     }
 
-    List<OdometryDoubleInput> registeredInputs = new ArrayList<>();
+    List<OdometryInput> registeredInputs = new ArrayList<>();
     List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
 
-    static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
+    static <T> Queue<T> registerSignalInput(StatusSignal<T> signal) {
         signal.setUpdateFrequency(ODOMETRY_FREQUENCY, ODOMETRY_WAIT_TIMEOUT_SECONDS);
         registeredStatusSignals.add(signal);
         return registerInput(signal.asSupplier());
     }
 
-    static Queue<Double> registerInput(Supplier<Double> supplier) {
-        final OdometryDoubleInput odometryDoubleInput = new OdometryDoubleInput(supplier);
-        registeredInputs.add(odometryDoubleInput);
-        return odometryDoubleInput.queue;
+    static <T> Queue<T> registerInput(Supplier<T> supplier) {
+        final OdometryInput odometryInput = new OdometryInput(supplier);
+        registeredInputs.add(odometryInput);
+        return odometryInput.queue;
     }
 
     static OdometryThread createInstance(SwerveDrive.DriveType type) {
         return switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> new OdometryThreadReal(
                     type,
-                    registeredInputs.toArray(new OdometryDoubleInput[0]),
+                    registeredInputs.toArray(new OdometryInput[0]),
                     registeredStatusSignals.toArray(new BaseStatusSignal[0]));
             case SIM -> new OdometryThreadSim();
             case REPLAY -> inputs -> {};
