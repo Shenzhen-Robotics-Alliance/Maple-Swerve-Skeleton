@@ -47,6 +47,7 @@ public class JoystickDrive extends Command {
 
         super.addRequirements(driveSubsystem);
         resetSensitivity();
+        SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 
     @Override
