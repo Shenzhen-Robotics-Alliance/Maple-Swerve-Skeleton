@@ -70,12 +70,11 @@ public class AIRobotInSimulation extends SubsystemBase {
 
     /* The PathPlanner configuration for the opponent robots. */
     private static final RobotConfig PP_CONFIG = new RobotConfig(
-            55,
-            8,
+            Kilograms.of(55),
+            KilogramSquareMeters.of(6),
             new ModuleConfig(
                     Units.inchesToMeters(2), 3.5, 1.2, DCMotor.getFalcon500(1).withReduction(8.14), 60, 1),
-            0.6,
-            0.6);
+            Meters.of(0.6));
     private static final PPHolonomicDriveController driveController =
             new PPHolonomicDriveController(new PIDConstants(5.0, 0.02), new PIDConstants(7.0, 0.05));
 

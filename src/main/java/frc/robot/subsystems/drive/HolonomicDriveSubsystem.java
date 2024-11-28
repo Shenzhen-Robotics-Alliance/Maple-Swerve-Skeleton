@@ -132,8 +132,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                                 DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
                                 DriveTrainConstants.DRIVE_CURRENT_LIMIT,
                                 1),
-                        DriveTrainConstants.TRACK_WIDTH,
-                        DriveTrainConstants.TRACK_LENGTH),
+                        DriveTrainConstants.MODULE_TRANSLATIONS),
                 FieldMirroringUtils::isSidePresentedAsRed,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
