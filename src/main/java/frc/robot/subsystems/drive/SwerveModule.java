@@ -48,8 +48,6 @@ public class SwerveModule extends MapleSubsystem {
 
         setPoint = new SwerveModuleState();
         turnCloseLoop.calculate(getSteerFacing().getRadians()); // activate close loop controller
-        io.setDriveBrake(true);
-        io.setSteerBrake(true);
     }
 
     public void updateOdometryInputs() {

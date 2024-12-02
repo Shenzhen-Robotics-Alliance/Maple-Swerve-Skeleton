@@ -45,10 +45,4 @@ public interface ModuleIO {
      * @param powerPercent from -1 to 1, where 1 is counter-clockwise
      */
     default void setSteerPowerPercent(double powerPercent) {}
-
-    /** Enable or disable brake mode on the drive motor. */
-    default void setDriveBrake(boolean enable) {}
-
-    /** Enable or disable brake mode on the turn motor. */
-    default void setSteerBrake(boolean enable) {}
 }

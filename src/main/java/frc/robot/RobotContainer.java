@@ -84,25 +84,13 @@ public class RobotContainer {
                 driveSimulation = null;
 
                 powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
-
-                /* CTRE Chassis: */
                 drive = new SwerveDrive(
-                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
+                        SwerveDrive.DriveType.GENERIC,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft, "FrontLeft"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontRight, "FrontRight"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight"));
-
-                /* REV Chassis */
-                //                drive = new SwerveDrive(
-                //                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
-                //                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
-                //                        new ModuleIOSpark(0),
-                //                        new ModuleIOSpark(1),
-                //                        new ModuleIOSpark(2),
-                //                        new ModuleIOSpark(3)
-                //                );
+                        new ModuleIOSpark(0),
+                        new ModuleIOSpark(1),
+                        new ModuleIOSpark(2),
+                        new ModuleIOSpark(3));
 
                 aprilTagVision =
                         new AprilTagVision(new AprilTagVisionIOReal(camerasProperties), camerasProperties, drive);

@@ -55,13 +55,13 @@ public class ModuleIOTalon implements ModuleIO {
         driveConfig.CurrentLimits.StatorCurrentLimit = DRIVE_CURRENT_LIMIT.in(Amps);
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
-        setDriveBrake(true);
+        driveTalon.setNeutralMode(NeutralModeValue.Brake);
 
         var steerConfig = moduleConstants.SteerMotorInitialConfigs;
         steerConfig.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT.in(Amps);
         steerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         steerTalon.getConfigurator().apply(steerConfig);
-        setSteerBrake(true);
+        steerTalon.setNeutralMode(NeutralModeValue.Brake);
 
         var encoderConfig = moduleConstants.CANcoderInitialConfigs;
         encoderConfig.MagnetSensor.MagnetOffset = moduleConstants.CANcoderOffset;
@@ -128,15 +128,5 @@ public class ModuleIOTalon implements ModuleIO {
     @Override
     public void setSteerPowerPercent(double powerPercent) {
         steerTalon.setControl(new DutyCycleOut(powerPercent).withEnableFOC(true));
-    }
-
-    @Override
-    public void setDriveBrake(boolean enable) {
-        driveTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    }
-
-    @Override
-    public void setSteerBrake(boolean enable) {
-        steerTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     }
 }

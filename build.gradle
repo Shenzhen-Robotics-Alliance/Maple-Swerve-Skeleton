@@ -37,7 +37,7 @@ deploy {
                     jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
                     jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
                     jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
-                    jvmArgs.add("-Djava.rmi.server.hostname=172.22.11.2")
+                    jvmArgs.add("-Djava.rmi.server.hostname=10.28.72.2")
                 }
 
                 // Static files artifact

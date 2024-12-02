@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Launch Shuffleboard" type="JarApplication" activateToolWindowBeforeRun="false">
+    <option name="JAR_PATH" value="$USER_HOME$/wpilib/2024/tools/artifacts/Shuffleboard-2024.3.1-macarm64.jar" />
+    <module name="Crescendo-AdvantageKit.main" />
+    <method v="2" />
+  </configuration>
+</component>
