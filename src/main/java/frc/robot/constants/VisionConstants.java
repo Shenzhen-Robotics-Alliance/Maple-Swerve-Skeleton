@@ -11,14 +11,10 @@ public class VisionConstants {
     public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 0.8,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(10),
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.3,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(6),
-
-            /* only do odometry calibration if standard error is not greater than */
-            TRANSLATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT = 0.4,
-            ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT = Math.toRadians(20),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 2,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(30),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.5,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(8),
 
             /* standard deviation for odometry and gyros */
             ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
