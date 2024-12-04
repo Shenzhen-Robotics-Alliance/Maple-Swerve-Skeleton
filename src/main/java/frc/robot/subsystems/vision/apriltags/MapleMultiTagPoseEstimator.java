@@ -179,16 +179,16 @@ public class MapleMultiTagPoseEstimator {
                 validRobotPoseEstimationsSingleTag.size() > 1 || (!validRobotPoseEstimationsMultiTag.isEmpty());
         if (!resultsCountSufficient) return Optional.empty();
 
-        final List<Statistics.Estimation> robotPoseEstimationsXMeters = new ArrayList<>(),
-                robotPoseEstimationsYMeters = new ArrayList<>(),
-                robotPoseEstimationsThetaRadians = new ArrayList<>();
+        final List<Statistics.Estimation> robotPoseEstimationsXMeters = new ArrayList<>();
+        final List<Statistics.Estimation> robotPoseEstimationsYMeters = new ArrayList<>();
+        final List<Statistics.RotationEstimation> robotPoseEstimationsTheta = new ArrayList<>();
         for (Pose3d robotPoseEstimationSingleTag : validRobotPoseEstimationsSingleTag) {
             robotPoseEstimationsXMeters.add(new Statistics.Estimation(
                     robotPoseEstimationSingleTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
                     robotPoseEstimationSingleTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
-            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getRotation().getZ(),
+            robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
+                    robotPoseEstimationSingleTag.getRotation().toRotation2d(),
                     ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION));
         }
         for (Pose3d robotPoseEstimationMultiTag : validRobotPoseEstimationsMultiTag) {
@@ -196,26 +196,25 @@ public class MapleMultiTagPoseEstimator {
                     robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
                     robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
-            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getRotation().getZ(), ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
+            robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
+                    robotPoseEstimationMultiTag.getRotation().toRotation2d(),
+                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
         }
 
-        final Statistics.Estimation
-                robotPoseFinalEstimationXMeters = Statistics.linearFilter(robotPoseEstimationsXMeters),
-                robotPoseFinalEstimationYMeters = Statistics.linearFilter(robotPoseEstimationsYMeters),
-                robotPoseFinalEstimationThetaRadians = Statistics.linearFilter(robotPoseEstimationsThetaRadians);
+        final Statistics.Estimation robotPoseFinalEstimationXMeters =
+                Statistics.linearFilter(robotPoseEstimationsXMeters);
+        final Statistics.Estimation robotPoseFinalEstimationYMeters =
+                Statistics.linearFilter(robotPoseEstimationsYMeters);
+        final Statistics.RotationEstimation robotPoseFinalEstimationTheta =
+                Statistics.rotationFilter(robotPoseEstimationsTheta);
         final Translation2d translationPointEstimate =
                 new Translation2d(robotPoseFinalEstimationXMeters.center(), robotPoseFinalEstimationYMeters.center());
-        final Rotation2d rotationPointEstimate = Rotation2d.fromRadians(robotPoseFinalEstimationThetaRadians.center());
-        final double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
-                estimationStandardErrorY = robotPoseFinalEstimationYMeters.standardDeviation(),
-                estimationStandardErrorTheta = robotPoseFinalEstimationThetaRadians.standardDeviation();
 
         return Optional.of(new RobotPoseEstimationResult(
-                new Pose2d(translationPointEstimate, rotationPointEstimate),
-                estimationStandardErrorX,
-                estimationStandardErrorY,
-                estimationStandardErrorTheta));
+                new Pose2d(translationPointEstimate, robotPoseFinalEstimationTheta.center()),
+                robotPoseFinalEstimationXMeters.standardDeviation(),
+                robotPoseFinalEstimationYMeters.standardDeviation(),
+                robotPoseFinalEstimationTheta.standardDeviationRad()));
     }
 
     /** Log the filtering data */
