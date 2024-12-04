@@ -37,6 +37,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -296,7 +297,9 @@ public class RobotContainer {
         driverXBox
                 .start()
                 .onTrue(Commands.runOnce(
-                                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                () -> drive.setPose(new Pose2d(
+                                        drive.getPose().getTranslation(),
+                                        FieldMirroringUtils.getCurrentAllianceDriverStationFacing())),
                                 drive)
                         .ignoringDisable(true));
 
