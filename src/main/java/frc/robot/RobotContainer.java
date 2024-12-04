@@ -121,7 +121,7 @@ public class RobotContainer {
                                         DriveTrainConstants.STEER_MOTOR,
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
-                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT_ANTI_SLIP,
                                         DriveTrainConstants.STEER_CURRENT_LIMIT,
                                         DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
                                         DriveTrainConstants.STEER_FRICTION_VOLTAGE,

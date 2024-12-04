@@ -36,7 +36,10 @@ public class DriveTrainConstants {
     public static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.025);
 
     /* adjust current limit */
-    public static final Current DRIVE_CURRENT_LIMIT = Amps.of(80);
+    public static final Current DRIVE_CURRENT_LIMIT_ANTI_SLIP = Amps.of(50);
+    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(120);
+    public static final Time DRIVE_OVERHEAT_PROTECTION_TIME = Seconds.of(1.5);
+    public static final Current DRIVE_OVERHEAT_PROTECTION_CURRENT = Amps.of(70);
     public static final Current STEER_CURRENT_LIMIT = Amps.of(20);
 
     /** translations of the modules to the robot center, in FL, FR, BL, BR */
@@ -61,7 +64,7 @@ public class DriveTrainConstants {
 
     /* force = torque / distance */
     public static final Force MAX_PROPELLING_FORCE = NewtonMeters.of(
-                    DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT.in(Amps)) * DRIVE_GEAR_RATIO)
+                    DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT_ANTI_SLIP.in(Amps)) * DRIVE_GEAR_RATIO)
             .divide(WHEEL_RADIUS);
 
     /* floor_speed = wheel_angular_velocity * wheel_radius */
