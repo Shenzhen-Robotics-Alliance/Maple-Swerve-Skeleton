@@ -18,7 +18,7 @@ public class VisionConstants {
 
             /* standard deviation for odometry and gyros */
             ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
-            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.3);
+            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.1);
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             new PhotonCameraProperties(
@@ -51,7 +51,7 @@ public class VisionConstants {
                     new Translation2d(0.229, 0.348),
                     0.2,
                     Rotation2d.fromDegrees(30),
-                    30,
+                    35,
                     180 // upside-down
                     ),
             new PhotonCameraProperties(
@@ -67,7 +67,7 @@ public class VisionConstants {
                     new Translation2d(0.229, -0.348),
                     0.2,
                     Rotation2d.fromDegrees(-30),
-                    30,
+                    35,
                     180 // upside-down
                     ),
             new PhotonCameraProperties(
@@ -83,7 +83,7 @@ public class VisionConstants {
                     new Translation2d(-0.229, 0.330),
                     0.2,
                     Rotation2d.fromDegrees(150),
-                    35,
+                    40,
                     180 // upside-down
                     ),
             new PhotonCameraProperties(
@@ -99,7 +99,7 @@ public class VisionConstants {
                     new Translation2d(-0.229, -0.330),
                     0.2,
                     Rotation2d.fromDegrees(-150),
-                    35,
+                    40,
                     180 // upside-down
                     ));
 }
