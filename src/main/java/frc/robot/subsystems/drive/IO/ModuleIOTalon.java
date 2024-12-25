@@ -14,6 +14,7 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -54,12 +55,18 @@ public class ModuleIOTalon implements ModuleIO {
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
         driveConfig.CurrentLimits.StatorCurrentLimit = DRIVE_CURRENT_LIMIT_ANTI_SLIP.in(Amps);
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        driveConfig.MotorOutput.Inverted = moduleConstants.DriveMotorInverted
+                ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive;
         driveTalon.getConfigurator().apply(driveConfig);
         setDriveBrake(true);
 
         var steerConfig = moduleConstants.SteerMotorInitialConfigs;
         steerConfig.CurrentLimits.StatorCurrentLimit = STEER_CURRENT_LIMIT.in(Amps);
         steerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        steerConfig.MotorOutput.Inverted = moduleConstants.SteerMotorInverted
+                ? InvertedValue.Clockwise_Positive
+                : InvertedValue.CounterClockwise_Positive;
         steerTalon.getConfigurator().apply(steerConfig);
         setSteerBrake(true);
 

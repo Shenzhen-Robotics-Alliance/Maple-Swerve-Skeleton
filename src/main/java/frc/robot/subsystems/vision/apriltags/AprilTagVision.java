@@ -6,6 +6,7 @@ import static frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator.R
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
@@ -71,15 +72,10 @@ public class AprilTagVision extends MapleSubsystem {
     }
 
     private double getResultsTimeStamp() {
-        return inputs.inputsFetchedRealTimeStampSeconds - getResultsAverageLatencySeconds(inputs.camerasInputs);
-    }
-
-    private static double getResultsAverageLatencySeconds(AprilTagVisionIO.CameraInputs[] camerasInputs) {
-        if (camerasInputs.length == 0) return 0;
-        double totalLatencySeconds = 0;
-        for (AprilTagVisionIO.CameraInputs cameraInputs : camerasInputs)
-            totalLatencySeconds += cameraInputs.resultsDelaySeconds;
-
-        return totalLatencySeconds / camerasInputs.length;
+        if (inputs.camerasInputs.length == 0) return Timer.getTimestamp();
+        double totalTimeStampSeconds = 0;
+        for (AprilTagVisionIO.CameraInputs cameraInputs : inputs.camerasInputs)
+            totalTimeStampSeconds += cameraInputs.timeStampSeconds;
+        return totalTimeStampSeconds / inputs.camerasInputs.length;
     }
 }
