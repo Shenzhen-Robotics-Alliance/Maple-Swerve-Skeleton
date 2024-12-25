@@ -38,6 +38,7 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -47,7 +48,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  */
 public class RobotContainer {
     // pdp for akit logging
-    public final PowerDistribution powerDistribution;
+    public final LoggedPowerDistribution powerDistribution;
     // Subsystems
     public final SwerveDrive drive;
     public final AprilTagVision aprilTagVision;
@@ -83,7 +84,7 @@ public class RobotContainer {
                 // Real robot, instantiate hardware IO implementations
                 driveSimulation = null;
 
-                powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
+                powerDistribution = LoggedPowerDistribution.getInstance(0, PowerDistribution.ModuleType.kCTRE);
 
                 /* CTRE Chassis: */
                 drive = new SwerveDrive(
@@ -129,7 +130,7 @@ public class RobotContainer {
                         new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
-                powerDistribution = new PowerDistribution();
+                powerDistribution = LoggedPowerDistribution.getInstance();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim frontLeft = new ModuleIOSim(driveSimulation.getModules()[0]),
                         frontRight = new ModuleIOSim(driveSimulation.getModules()[1]),
@@ -154,7 +155,7 @@ public class RobotContainer {
             default -> {
                 this.driveSimulation = null;
 
-                powerDistribution = new PowerDistribution();
+                powerDistribution = LoggedPowerDistribution.getInstance();
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.GENERIC,
