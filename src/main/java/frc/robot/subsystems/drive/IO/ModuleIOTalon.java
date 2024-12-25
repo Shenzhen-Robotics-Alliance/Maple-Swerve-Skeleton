@@ -52,7 +52,7 @@ public class ModuleIOTalon implements ModuleIO {
         cancoder = new CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANBusName);
 
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
-        driveConfig.CurrentLimits.StatorCurrentLimit = DRIVE_CURRENT_LIMIT.in(Amps);
+        driveConfig.CurrentLimits.StatorCurrentLimit = DRIVE_CURRENT_LIMIT_ANTI_SLIP.in(Amps);
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         driveTalon.getConfigurator().apply(driveConfig);
         setDriveBrake(true);

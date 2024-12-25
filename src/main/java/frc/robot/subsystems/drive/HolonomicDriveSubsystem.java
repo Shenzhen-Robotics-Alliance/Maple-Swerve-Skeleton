@@ -130,7 +130,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                                 DriveTrainConstants.CHASSIS_MAX_VELOCITY,
                                 DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
                                 DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
-                                DriveTrainConstants.DRIVE_CURRENT_LIMIT,
+                                DriveTrainConstants.DRIVE_CURRENT_LIMIT_ANTI_SLIP,
                                 1),
                         DriveTrainConstants.MODULE_TRANSLATIONS),
                 FieldMirroringUtils::isSidePresentedAsRed,

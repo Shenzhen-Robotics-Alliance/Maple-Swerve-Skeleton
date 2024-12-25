@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import java.util.Arrays;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SimplifiedSwerveDriveSimulation;
+import org.ironmaple.simulation.drivesims.SelfControlledSwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.seasonspecific.crescendo2024.NoteOnFly;
@@ -139,7 +139,7 @@ public class AIRobotInSimulation extends SubsystemBase {
         }
     }
 
-    private final SimplifiedSwerveDriveSimulation driveSimulation;
+    private final SelfControlledSwerveDriveSimulation driveSimulation;
     private final Pose2d queeningPose;
     private final int id;
 
@@ -147,7 +147,7 @@ public class AIRobotInSimulation extends SubsystemBase {
         this.id = id;
         this.queeningPose = ROBOT_QUEENING_POSITIONS[id];
         this.driveSimulation =
-                new SimplifiedSwerveDriveSimulation(new SwerveDriveSimulation(DRIVETRAIN_CONFIG, queeningPose));
+                new SelfControlledSwerveDriveSimulation(new SwerveDriveSimulation(DRIVETRAIN_CONFIG, queeningPose));
 
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation.getDriveTrainSimulation());
     }

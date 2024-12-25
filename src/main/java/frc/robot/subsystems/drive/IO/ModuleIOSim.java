@@ -7,9 +7,10 @@ package frc.robot.subsystems.drive.IO;
 
 import static edu.wpi.first.units.Units.*;
 
+import frc.robot.constants.DriveTrainConstants;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
-import org.ironmaple.simulation.motorsims.ControlRequest;
+import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
 /**
  * Physics sim implementation of module IO.
@@ -19,9 +20,16 @@ import org.ironmaple.simulation.motorsims.ControlRequest;
  */
 public class ModuleIOSim implements ModuleIO {
     private final SwerveModuleSimulation moduleSimulation;
+    private final SimulatedMotorController.GenericMotorController driveMotor, steerMotor;
 
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
+        this.driveMotor = moduleSimulation
+                .useGenericMotorControllerForDrive()
+                .withCurrentLimit(DriveTrainConstants.DRIVE_CURRENT_LIMIT_ANTI_SLIP);
+        this.steerMotor = moduleSimulation
+                .useGenericControllerForSteer()
+                .withCurrentLimit(DriveTrainConstants.STEER_CURRENT_LIMIT);
     }
 
     @Override
@@ -53,12 +61,11 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void setDriveVoltage(double volts) {
-        moduleSimulation.requestDriveControl(new ControlRequest.VoltageOut(Volts.of(volts)));
+        driveMotor.requestVoltage(Volts.of(volts));
     }
 
     @Override
     public void setSteerPowerPercent(double powerPercent) {
-        moduleSimulation.requestSteerControl(
-                new ControlRequest.VoltageOut(Volts.of(12).times(powerPercent)));
+        steerMotor.requestVoltage(Volts.of(12).times(powerPercent));
     }
 }

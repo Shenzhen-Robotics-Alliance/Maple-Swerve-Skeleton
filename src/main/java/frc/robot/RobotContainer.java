@@ -8,7 +8,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -37,6 +36,7 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -120,8 +120,6 @@ public class RobotContainer {
                                         DriveTrainConstants.STEER_MOTOR,
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
-                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT,
-                                        DriveTrainConstants.STEER_CURRENT_LIMIT,
                                         DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
                                         DriveTrainConstants.STEER_FRICTION_VOLTAGE,
                                         DriveTrainConstants.WHEEL_RADIUS,
@@ -296,7 +294,9 @@ public class RobotContainer {
         driverXBox
                 .start()
                 .onTrue(Commands.runOnce(
-                                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                () -> drive.setPose(new Pose2d(
+                                        drive.getPose().getTranslation(),
+                                        FieldMirroringUtils.getCurrentAllianceDriverStationFacing())),
                                 drive)
                         .ignoringDisable(true));
 
@@ -334,8 +334,7 @@ public class RobotContainer {
         if (driveSimulation == null) return;
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput(
-                "FieldSimulation/Notes",
-                SimulatedArena.getInstance().getGamePiecesByType("Note").toArray(Pose3d[]::new));
+                "FieldSimulation/Notes", SimulatedArena.getInstance().getGamePiecesArrayByType("Note"));
         Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation.getOpponentRobotPoses());
         Logger.recordOutput(
                 "FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation.getAlliancePartnerRobotPoses());

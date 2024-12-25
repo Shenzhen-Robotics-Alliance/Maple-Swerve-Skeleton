@@ -8,6 +8,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.*;
 import java.util.function.Supplier;
+import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 /**
@@ -36,7 +37,10 @@ public class DriveTrainConstants {
     public static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.025);
 
     /* adjust current limit */
-    public static final Current DRIVE_CURRENT_LIMIT = Amps.of(80);
+    public static final Current DRIVE_CURRENT_LIMIT_ANTI_SLIP = Amps.of(50);
+    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(120);
+    public static final Time DRIVE_OVERHEAT_PROTECTION_TIME = Seconds.of(1.5);
+    public static final Current DRIVE_OVERHEAT_PROTECTION_CURRENT = Amps.of(70);
     public static final Current STEER_CURRENT_LIMIT = Amps.of(20);
 
     /** translations of the modules to the robot center, in FL, FR, BL, BR */
@@ -61,14 +65,14 @@ public class DriveTrainConstants {
 
     /* force = torque / distance */
     public static final Force MAX_PROPELLING_FORCE = NewtonMeters.of(
-                    DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT.in(Amps)) * DRIVE_GEAR_RATIO)
-            .divide(WHEEL_RADIUS);
+                    DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT_ANTI_SLIP.in(Amps)) * DRIVE_GEAR_RATIO)
+            .div(WHEEL_RADIUS);
 
     /* floor_speed = wheel_angular_velocity * wheel_radius */
     public static final LinearVelocity CHASSIS_MAX_VELOCITY =
             MetersPerSecond.of(DRIVE_MOTOR.freeSpeedRadPerSec / DRIVE_GEAR_RATIO * WHEEL_RADIUS.in(Meters));
     public static final LinearAcceleration CHASSIS_MAX_ACCELERATION =
-            (LinearAcceleration) Measure.min(MAX_FRICTION_ACCELERATION, MAX_PROPELLING_FORCE.divide(ROBOT_MASS));
+            (LinearAcceleration) Measure.min(MAX_FRICTION_ACCELERATION, MAX_PROPELLING_FORCE.div(ROBOT_MASS));
     public static final AngularVelocity CHASSIS_MAX_ANGULAR_VELOCITY =
             RadiansPerSecond.of(CHASSIS_MAX_VELOCITY.in(MetersPerSecond) / DRIVE_BASE_RADIUS.in(Meters));
     public static final AngularAcceleration CHASSIS_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(
@@ -84,7 +88,7 @@ public class DriveTrainConstants {
             * (BUMPER_WIDTH.in(Meters) * BUMPER_WIDTH.in(Meters) + BUMPER_LENGTH.in(Meters) * BUMPER_LENGTH.in(Meters))
             / 12.0);
 
-    public static final Supplier<GyroSimulation> gyroSimulationFactory = GyroSimulation.getPigeon2();
+    public static final Supplier<GyroSimulation> gyroSimulationFactory = COTS.ofPigeon2();
 
     /* dead configs, don't change them */
     public static final int ODOMETRY_CACHE_CAPACITY = 10;
