@@ -7,8 +7,14 @@ package frc.robot.subsystems.drive.IO;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.DriveTrainConstants;
 import java.util.Arrays;
+import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 
@@ -19,8 +25,22 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
  * The flywheel sims are not physically accurate, but provide a decent approximation for the behavior of the module.
  */
 public class ModuleIOSim implements ModuleIO {
+    private static final double DRIVE_KS = 0.03;
+    private static final double DRIVE_KP = 0.05;
+    private static final double STEER_KP = 8.0;
+    private static final double STEER_KD = 0.0;
+
     private final SwerveModuleSimulation moduleSimulation;
     private final SimulatedMotorController.GenericMotorController driveMotor, steerMotor;
+
+    private boolean driveClosedLoopActivated = false;
+    private boolean steerClosedLoopActivated = false;
+    private final PIDController driveController;
+    private final PIDController steerController;
+    private double driveAppliedVolts = 0.0;
+    private double steerAppliedVolts = 0.0;
+    private double desiredWheelVelocityRadPerSec = 0.0;
+    private Rotation2d desiredSteerFacing = new Rotation2d();
 
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
         this.moduleSimulation = moduleSimulation;
@@ -30,6 +50,13 @@ public class ModuleIOSim implements ModuleIO {
         this.steerMotor = moduleSimulation
                 .useGenericControllerForSteer()
                 .withCurrentLimit(DriveTrainConstants.STEER_CURRENT_LIMIT);
+
+        this.driveController = new PIDController(DRIVE_KP, 0.0, 0.0);
+        this.steerController = new PIDController(STEER_KP, 0.0, STEER_KD);
+
+        // Enable wrapping for turn PID
+        steerController.enableContinuousInput(-Math.PI, Math.PI);
+        SimulatedArena.getInstance().addCustomSimulation((subTickNum) -> runControlLoops());
     }
 
     @Override
@@ -55,17 +82,73 @@ public class ModuleIOSim implements ModuleIO {
                 .mapToDouble(angle -> angle.in(Revolutions))
                 .toArray();
         inputs.odometrySteerPositions = moduleSimulation.getCachedSteerAbsolutePositions();
+    }
 
-        inputs.hardwareConnected = true;
+    public void runControlLoops() {
+        // Run control loops if activated
+        if (driveClosedLoopActivated) calculateDriveControlLoops();
+        else driveController.reset();
+        if (steerClosedLoopActivated) calculateSteerControlLoops();
+        else steerController.reset();
+
+        // Feed voltage to motor simulation
+        driveMotor.requestVoltage(Volts.of(driveAppliedVolts));
+        steerMotor.requestVoltage(Volts.of(steerAppliedVolts));
+    }
+
+    private void calculateDriveControlLoops() {
+        double ffVolts = moduleSimulation.driveMotorConfigs.motor.getVoltage(
+                        0, desiredWheelVelocityRadPerSec * moduleSimulation.DRIVE_GEAR_RATIO)
+                + Math.signum(desiredWheelVelocityRadPerSec) * DRIVE_KS;
+        double fbVolts = driveController.calculate(
+                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond), desiredWheelVelocityRadPerSec);
+        driveAppliedVolts = ffVolts + fbVolts;
+    }
+
+    private void calculateSteerControlLoops() {
+        steerAppliedVolts = steerController.calculate(
+                moduleSimulation.getSteerAbsoluteFacing().getRadians(), desiredSteerFacing.getRadians());
     }
 
     @Override
-    public void setDriveVoltage(double volts) {
-        driveMotor.requestVoltage(Volts.of(volts));
+    public void requestDriveOpenLoop(Voltage output) {
+        this.driveAppliedVolts = output.in(Volts);
+        this.driveClosedLoopActivated = false;
     }
 
     @Override
-    public void setSteerPowerPercent(double powerPercent) {
-        steerMotor.requestVoltage(Volts.of(12).times(powerPercent));
+    public void requestSteerOpenLoop(Voltage output) {
+        this.steerAppliedVolts = output.in(Volts);
+        this.steerClosedLoopActivated = false;
+    }
+
+    @Override
+    public void requestDriveOpenLoop(Current output) {
+        DCMotor driveMotorModel = moduleSimulation.driveMotorConfigs.motor;
+        this.driveAppliedVolts = driveMotorModel.getVoltage(
+                driveMotorModel.getCurrent(output.in(Amps)),
+                moduleSimulation.getDriveEncoderUnGearedSpeed().in(RadiansPerSecond));
+        this.driveClosedLoopActivated = false;
+    }
+
+    @Override
+    public void requestSteerOpenLoop(Current output) {
+        DCMotor steerMotorModel = moduleSimulation.getSteerMotorConfigs().motor;
+        this.driveAppliedVolts = steerMotorModel.getVoltage(
+                steerMotorModel.getCurrent(output.in(Amps)),
+                moduleSimulation.getDriveEncoderUnGearedSpeed().in(RadiansPerSecond));
+        this.steerClosedLoopActivated = false;
+    }
+
+    @Override
+    public void requestDriveVelocityControl(double desiredWheelVelocityRadPerSec) {
+        this.desiredWheelVelocityRadPerSec = desiredWheelVelocityRadPerSec;
+        this.driveClosedLoopActivated = true;
+    }
+
+    @Override
+    public void requestSteerPositionControl(Rotation2d desiredSteerAbsoluteFacing) {
+        this.desiredSteerFacing = desiredSteerAbsoluteFacing;
+        this.steerClosedLoopActivated = true;
     }
 }

@@ -89,10 +89,10 @@ public class RobotContainer {
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.CTRE_ON_CANIVORE,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft, "FrontLeft"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontRight, "FrontRight"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight"));
+                        new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
+                        new ModuleIOTalon(TunerConstants.FrontRight, "FrontRight"),
+                        new ModuleIOTalon(TunerConstants.BackLeft, "BackLeft"),
+                        new ModuleIOTalon(TunerConstants.BackRight, "BackRight"));
 
                 /* REV Chassis */
                 //                drive = new SwerveDrive(

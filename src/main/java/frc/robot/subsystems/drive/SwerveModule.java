@@ -19,7 +19,6 @@ import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.Alert;
-import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
 
@@ -55,7 +54,8 @@ public class SwerveModule extends MapleSubsystem {
     public void updateOdometryInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module-" + name, inputs);
-        this.hardwareFaultAlert.setActivated(!inputs.hardwareConnected);
+        this.hardwareFaultAlert.setActivated(
+                !(inputs.driveMotorConnected && inputs.steerMotorConnected && inputs.steerEncoderConnected));
     }
 
     @Override
@@ -72,36 +72,26 @@ public class SwerveModule extends MapleSubsystem {
         }
     }
 
-    private void runSteerCloseLoop() {
-        turnCloseLoop.setSetpoint(setPoint.angle.getRadians());
-        io.setSteerPowerPercent(turnCloseLoop.calculate(getSteerFacing().getRadians()));
-    }
-
-    private void runDriveControlLoop() {
-        final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
-        io.setDriveVoltage(DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec)
-                + driveCloseLoop.calculate(getDriveVelocityMetersPerSec(), adjustSpeedSetpointMetersPerSec));
-    }
-
     /** Runs the module with the specified setpoint state. Returns the optimized state. */
-    public SwerveModuleState runSetPoint(SwerveModuleState state) {
-        this.setPoint = SwerveModuleState.optimize(state, getSteerFacing());
+    public SwerveModuleState runSetPoint(SwerveModuleState newSetpoint) {
+        newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
-        if (Math.abs(state.speedMetersPerSecond) < 0.01) {
-            io.setDriveVoltage(0);
-            io.setSteerPowerPercent(0);
-            return this.setPoint = new SwerveModuleState();
+        if (Math.abs(newSetpoint.speedMetersPerSecond) < 0.01) {
+            io.stop();
+            return this.setPoint = new SwerveModuleState(0, setPoint.angle);
         }
-        runDriveControlLoop();
-        runSteerCloseLoop();
 
-        return this.setPoint;
+        double desiredWheelVelocityRadPerSec =
+                newSetpoint.speedMetersPerSecond / DriveTrainConstants.WHEEL_RADIUS.in(Meters);
+        io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec);
+        io.requestSteerPositionControl(newSetpoint.angle);
+
+        return this.setPoint = newSetpoint;
     }
 
     @Override
     public void onDisable() {
-        io.setSteerPowerPercent(0);
-        io.setDriveVoltage(0);
+        io.stop();
     }
 
     /** Returns the current turn angle of the module. */
