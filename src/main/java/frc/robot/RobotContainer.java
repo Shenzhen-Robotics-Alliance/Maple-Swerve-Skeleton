@@ -288,7 +288,7 @@ public class RobotContainer {
         drive.setDefaultCommand(joystickDrive);
 
         /* lock chassis with x-formation */
-        driverXBox.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
+        driverXBox.x().whileTrue(drive.lockChassisWithXFormation());
 
         /* reset gyro heading manually (in case the vision does not work) */
         driverXBox

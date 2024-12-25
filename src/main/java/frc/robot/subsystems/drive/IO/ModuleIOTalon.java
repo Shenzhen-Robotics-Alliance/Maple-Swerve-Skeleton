@@ -77,6 +77,10 @@ public class ModuleIOTalon implements ModuleIO {
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -moduleConstants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimit = moduleConstants.SlipCurrent;
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_OVER_CURRENT_PROTECTION.in(Amps);
+        driveConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_OVERHEAT_PROTECTION_TIME.in(Seconds);
+        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = DRIVE_OVERHEAT_PROTECTION.in(Amps);
+
         driveConfig.MotorOutput.Inverted = moduleConstants.DriveMotorInverted
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
@@ -175,14 +179,22 @@ public class ModuleIOTalon implements ModuleIO {
         inputs.steerMotorCurrentAmps = steerMotorCurrentDrawn.getValue().in(Amps);
     }
 
-    @Override
-    public void setDriveBrake(boolean enable) {
-        driveTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    }
+    boolean driveBrakeEnabled = true;
 
     @Override
-    public void setSteerBrake(boolean enable) {
-        steerTalon.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    public void setDriveBrake(boolean enableDriveBrake) {
+        if (driveBrakeEnabled == enableDriveBrake) return;
+        driveTalon.setNeutralMode(enableDriveBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        this.driveBrakeEnabled = enableDriveBrake;
+    }
+
+    boolean steerBrakeEnabled = true;
+
+    @Override
+    public void setSteerBrake(boolean enableSteerBrake) {
+        if (this.steerBrakeEnabled == enableSteerBrake) return;
+        steerTalon.setNeutralMode(enableSteerBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+        this.steerBrakeEnabled = enableSteerBrake;
     }
 
     @Override

@@ -86,8 +86,8 @@ public interface ModuleIO {
     default void requestSteerPositionControl(Rotation2d desiredSteerAbsoluteFacing) {}
 
     /** Enable or disable brake mode on the drive motor. */
-    default void setDriveBrake(boolean enable) {}
+    default void setDriveBrake(boolean enableDriveBrake) {}
 
     /** Enable or disable brake mode on the turn motor. */
-    default void setSteerBrake(boolean enable) {}
+    default void setSteerBrake(boolean enableSteerBrake) {}
 }

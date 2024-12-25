@@ -20,6 +20,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constants.DriveControlLoops;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
@@ -224,11 +227,23 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
      * Locks the chassis and turns the modules to an X formation to resist movement. The lock will be cancelled the next
      * time a nonzero velocity is requested.
      */
-    public void lockChassisWithXFormation() {
+    public Command lockChassisWithXFormation() {
         Rotation2d[] swerveHeadings = new Rotation2d[swerveModules.length];
         for (int i = 0; i < swerveHeadings.length; i++) swerveHeadings[i] = MODULE_TRANSLATIONS[i].getAngle();
-        DRIVE_KINEMATICS.resetHeadings(swerveHeadings);
-        HolonomicDriveSubsystem.super.stop();
+        return new FunctionalCommand(
+                () -> DRIVE_KINEMATICS.resetHeadings(swerveHeadings),
+                () -> {
+                    for (int i = 0; i < swerveModules.length; i++)
+                        swerveModules[i].runSetPoint(new SwerveModuleState(0, swerveHeadings[i]));
+                },
+                (interrupted) -> {},
+                () -> false,
+                this);
+    }
+
+    /** Turns the motor brakes on */
+    public void setMotorBrake(boolean motorBrakeEnabled) {
+        for (SwerveModule module : swerveModules) module.setMotorBrake(motorBrakeEnabled);
     }
 
     /** Returns the module states (turn angles and drive velocities) for all the modules. */
@@ -324,4 +339,12 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                     null);
         });
     }
+
+    private boolean hasHardwareFaults() {
+        if (!gyroInputs.connected) return true;
+        for (SwerveModule module : swerveModules) if (module.hasHardwareFaults()) return true;
+        return false;
+    }
+
+    public final Trigger hardwareFaultsDetected = new Trigger(this::hasHardwareFaults);
 }

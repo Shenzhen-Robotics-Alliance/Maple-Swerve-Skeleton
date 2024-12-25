@@ -31,14 +31,21 @@ public class SwerveModule extends MapleSubsystem {
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
-    private final Alert hardwareFaultAlert;
+    private final Alert driveMotorHardwareFault, steerMotorHardwareFault, steerEncoderHardwareFault;
 
     public SwerveModule(ModuleIO io, String name) {
         super("Module-" + name);
         this.io = io;
         this.name = name;
-        this.hardwareFaultAlert = new Alert("Module-" + name + " Hardware Fault", Alert.AlertType.ERROR);
-        this.hardwareFaultAlert.setActivated(false);
+        this.driveMotorHardwareFault =
+                new Alert("Module-" + name + " Drive Motor Hardware Fault Detected", Alert.AlertType.ERROR);
+        this.steerMotorHardwareFault =
+                new Alert("Module-" + name + " Steer Motor Hardware Fault Detected", Alert.AlertType.ERROR);
+        this.steerEncoderHardwareFault =
+                new Alert("Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.ERROR);
+        this.driveMotorHardwareFault.setActivated(false);
+        this.steerMotorHardwareFault.setActivated(false);
+        this.steerEncoderHardwareFault.setActivated(false);
 
         turnCloseLoop = new MaplePIDController(STEER_CLOSE_LOOP);
         driveCloseLoop = new MaplePIDController(DRIVE_CLOSE_LOOP);
@@ -54,13 +61,15 @@ public class SwerveModule extends MapleSubsystem {
     public void updateOdometryInputs() {
         io.updateInputs(inputs);
         Logger.processInputs("Drive/Module-" + name, inputs);
-        this.hardwareFaultAlert.setActivated(
-                !(inputs.driveMotorConnected && inputs.steerMotorConnected && inputs.steerEncoderConnected));
     }
 
     @Override
     public void periodic(double dt, boolean enabled) {
         updateOdometryPositions();
+
+        this.driveMotorHardwareFault.setActivated(!inputs.driveMotorConnected);
+        this.steerMotorHardwareFault.setActivated(!inputs.steerMotorConnected);
+        this.steerEncoderHardwareFault.setActivated(!inputs.steerEncoderConnected);
     }
 
     private void updateOdometryPositions() {
@@ -92,6 +101,11 @@ public class SwerveModule extends MapleSubsystem {
     @Override
     public void onDisable() {
         io.stop();
+    }
+
+    public void setMotorBrake(boolean motorBrakeEnabled) {
+        io.setDriveBrake(motorBrakeEnabled);
+        io.setSteerBrake(motorBrakeEnabled);
     }
 
     /** Returns the current turn angle of the module. */
@@ -130,5 +144,9 @@ public class SwerveModule extends MapleSubsystem {
     /** Returns the module positions received this cycle. */
     public SwerveModulePosition[] getOdometryPositions() {
         return odometryPositions;
+    }
+
+    public boolean hasHardwareFaults() {
+        return !(inputs.driveMotorConnected && inputs.steerMotorConnected && inputs.steerEncoderConnected);
     }
 }

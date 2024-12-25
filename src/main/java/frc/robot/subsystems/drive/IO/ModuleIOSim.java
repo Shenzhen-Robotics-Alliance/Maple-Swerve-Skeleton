@@ -46,7 +46,7 @@ public class ModuleIOSim implements ModuleIO {
         this.moduleSimulation = moduleSimulation;
         this.driveMotor = moduleSimulation
                 .useGenericMotorControllerForDrive()
-                .withCurrentLimit(DriveTrainConstants.DRIVE_CURRENT_LIMIT_ANTI_SLIP);
+                .withCurrentLimit(DriveTrainConstants.DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT);
         this.steerMotor = moduleSimulation
                 .useGenericControllerForSteer()
                 .withCurrentLimit(DriveTrainConstants.STEER_CURRENT_LIMIT);
