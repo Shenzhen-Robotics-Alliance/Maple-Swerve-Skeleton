@@ -22,19 +22,19 @@ public interface AprilTagVisionIO {
         public CameraInputs() {
             this.fiducialMarksID = new int[MAX_TARGET_PER_CAMERA];
             this.bestCameraToTargets = new Transform3d[MAX_TARGET_PER_CAMERA];
-            clear();
+            clear(false);
         }
 
-        public void clear() {
-            this.cameraConnected = false;
+        public void clear(boolean cameraConnected) {
+            this.cameraConnected = cameraConnected;
             this.timeStampSeconds = 0;
             this.currentTargetsCount = 0;
             Arrays.fill(fiducialMarksID, -1);
             Arrays.fill(bestCameraToTargets, new Transform3d());
         }
 
-        public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult, boolean cameraConnected) {
-            this.cameraConnected = cameraConnected;
+        public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult) {
+            this.cameraConnected = true;
             this.timeStampSeconds = pipelineResult.getTimestampSeconds();
             this.currentTargetsCount = Math.min(pipelineResult.getTargets().size(), MAX_TARGET_PER_CAMERA);
             Arrays.fill(fiducialMarksID, -1);
@@ -86,7 +86,6 @@ public interface AprilTagVisionIO {
     class VisionInputs implements LoggableInputs {
         public final int camerasAmount;
         public final CameraInputs[] camerasInputs;
-        public double inputsFetchedRealTimeStampSeconds = 0;
 
         public VisionInputs(int camerasAmount) {
             this.camerasAmount = camerasAmount;
@@ -97,7 +96,6 @@ public interface AprilTagVisionIO {
         @Override
         public void toLog(LogTable table) {
             table.put("camerasAmount", camerasAmount);
-            table.put("inputsFetchedTimeStamp", inputsFetchedRealTimeStampSeconds);
             for (int i = 0; i < camerasAmount; i++) camerasInputs[i].writeToLog(table, i);
         }
 
@@ -110,7 +108,6 @@ public interface AprilTagVisionIO {
                         + ") does not match the settings in replay"
                         + "\n check if the code have changed");
 
-            inputsFetchedRealTimeStampSeconds = table.get("inputsFetchedTimeStamp", 0.0);
             for (int i = 0; i < camerasAmount; i++) camerasInputs[i].fromLog(table, i);
         }
     }
