@@ -61,6 +61,10 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
+        inputs.driveMotorConnected = true;
+        inputs.steerMotorConnected = true;
+        inputs.steerEncoderConnected = true;
+
         inputs.driveWheelFinalRevolutions =
                 moduleSimulation.getDriveWheelFinalPosition().in(Revolutions);
         inputs.driveWheelFinalVelocityRevolutionsPerSec =

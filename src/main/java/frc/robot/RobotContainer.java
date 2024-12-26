@@ -22,6 +22,8 @@ import frc.robot.constants.*;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.subsystems.led.LEDAnimation;
+import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
@@ -52,6 +54,7 @@ public class RobotContainer {
     // Subsystems
     public final SwerveDrive drive;
     public final AprilTagVision aprilTagVision;
+    public final LEDStatusLight ledStatusLight;
 
     /* an example shooter optimization */
     public final MapleShooterOptimization exampleShooterOptimization;
@@ -169,6 +172,8 @@ public class RobotContainer {
             }
         }
 
+        this.ledStatusLight = new LEDStatusLight(0, 155);
+
         this.drive.configHolonomicPathPlannerAutoBuilder();
 
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
@@ -188,6 +193,7 @@ public class RobotContainer {
 
         configureButtonBindings();
         configureAutoNamedCommands();
+        configureLEDEffects();
     }
 
     private void configureAutoNamedCommands() {
@@ -316,6 +322,10 @@ public class RobotContainer {
                 0.8,
                 2);
         driverXBox.b().whileTrue(exampleAutoAlignment);
+    }
+
+    public void configureLEDEffects() {
+        ledStatusLight.setDefaultCommand(ledStatusLight.showEnableDisableState());
     }
 
     /**

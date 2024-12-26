@@ -29,8 +29,8 @@ public class LEDStatusLight extends MapleSubsystem {
     public LEDStatusLight(int port, int length) {
         super("LED");
         if (led != null) led.close();
-        led = Robot.CURRENT_ROBOT_MODE == RobotMode.REAL ? new AddressableLED(port) : null;
-        if (led != null) led.setLength(length);
+        led = new AddressableLED(port);
+        led.setLength(length);
         this.buffer = new AddressableLEDBuffer(length);
         this.bufferForDashboard = new AddressableLEDBuffer(DASHBOARD_DISPLAY_LENGTH);
         this.animation = DISABLED;
