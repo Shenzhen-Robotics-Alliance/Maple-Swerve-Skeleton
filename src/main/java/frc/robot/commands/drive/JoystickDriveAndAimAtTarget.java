@@ -3,7 +3,6 @@ package frc.robot.commands.drive;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
@@ -44,8 +43,9 @@ public class JoystickDriveAndAimAtTarget extends Command {
 
     @Override
     public void initialize() {
-        SwerveDrive.swerveHeadingController.setHeadingRequest(
-                new ChassisHeadingController.FaceToTargetRequest(targetPositionSupplier, shooterOptimization));
+        ChassisHeadingController.getInstance()
+                .setHeadingRequest(
+                        new ChassisHeadingController.FaceToTargetRequest(targetPositionSupplier, shooterOptimization));
     }
 
     @Override
@@ -57,11 +57,11 @@ public class JoystickDriveAndAimAtTarget extends Command {
     }
 
     public boolean chassisRotationInPosition() {
-        return SwerveDrive.swerveHeadingController.atSetPoint();
+        return ChassisHeadingController.getInstance().atSetPoint();
     }
 
     @Override
     public void end(boolean interrupted) {
-        SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
+        ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 }

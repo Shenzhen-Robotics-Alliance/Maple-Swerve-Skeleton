@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.CommandOnFly;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.ChassisHeadingController;
 import java.util.function.Supplier;
 
@@ -17,7 +16,9 @@ public class PathFindToPose extends CommandOnFly {
             double goalEndVelocity) {
         super(() -> AutoBuilder.pathfindToPose(
                         targetPose.get(), driveSubsystem.getChassisConstrains(speedMultiplier), goalEndVelocity)
-                .beforeStarting(Commands.runOnce(() -> SwerveDrive.swerveHeadingController.setHeadingRequest(
-                        new ChassisHeadingController.NullRequest()))));
+                .beforeStarting(Commands.runOnce(() -> ChassisHeadingController.getInstance()
+                        .setHeadingRequest(new ChassisHeadingController.NullRequest())))
+                .finallyDo(() -> ChassisHeadingController.getInstance()
+                        .setHeadingRequest(new ChassisHeadingController.NullRequest())));
     }
 }

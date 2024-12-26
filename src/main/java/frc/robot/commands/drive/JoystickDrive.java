@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.function.BooleanSupplier;
@@ -19,7 +18,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class JoystickDrive extends Command {
-    protected MapleJoystickDriveInput input;
+    protected final MapleJoystickDriveInput input;
     private final BooleanSupplier useDriverStationCentricSwitch;
     private final Supplier<Integer> povButtonSupplier;
     private final HolonomicDriveSubsystem driveSubsystem;
@@ -47,7 +46,7 @@ public class JoystickDrive extends Command {
 
         super.addRequirements(driveSubsystem);
         resetSensitivity();
-        SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
+        ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 
     @Override
@@ -60,8 +59,6 @@ public class JoystickDrive extends Command {
 
     @Override
     public void execute() {
-        if (input == null) return;
-
         final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
                 driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
@@ -76,10 +73,11 @@ public class JoystickDrive extends Command {
 
         if (previousRotationalInputTimer.hasElapsed(
                 TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS))
-            SwerveDrive.swerveHeadingController.setHeadingRequest(
-                    new ChassisHeadingController.FaceToRotationRequest(currentRotationMaintenanceSetpoint));
+            ChassisHeadingController.getInstance()
+                    .setHeadingRequest(
+                            new ChassisHeadingController.FaceToRotationRequest(currentRotationMaintenanceSetpoint));
         else {
-            SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
+            ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
             currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
         }
 
@@ -107,5 +105,10 @@ public class JoystickDrive extends Command {
 
     public void resetSensitivity() {
         setSensitivity(DEFAULT_TRANSLATIONAL_SENSITIVITY, DEFAULT_ROTATIONAL_SENSITIVITY);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 }

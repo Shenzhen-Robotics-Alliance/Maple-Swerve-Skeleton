@@ -1,11 +1,17 @@
 package frc.robot.utils;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static frc.robot.constants.DriveTrainConstants.CHASSIS_MAX_ANGULAR_ACCELERATION;
+import static frc.robot.constants.DriveTrainConstants.CHASSIS_MAX_ANGULAR_VELOCITY;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.Robot;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
@@ -237,5 +243,19 @@ public class ChassisHeadingController {
 
     public boolean atSetPoint() {
         return atSetPoint;
+    }
+
+    private static ChassisHeadingController instance = null;
+
+    public static ChassisHeadingController getInstance() {
+        if (instance == null)
+            instance = new ChassisHeadingController(
+                    new TrapezoidProfile.Constraints(
+                            CHASSIS_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
+                            CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)),
+                    DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP,
+                    new Rotation2d());
+
+        return instance;
     }
 }

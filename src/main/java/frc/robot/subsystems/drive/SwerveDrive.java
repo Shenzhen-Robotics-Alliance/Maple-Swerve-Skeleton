@@ -18,12 +18,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.constants.DriveControlLoops;
+import frc.robot.Robot;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
@@ -54,12 +53,6 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final OdometryThread odometryThread;
     private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR),
             visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.INFO);
-    public static final ChassisHeadingController swerveHeadingController = new ChassisHeadingController(
-            new TrapezoidProfile.Constraints(
-                    CHASSIS_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
-                    CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)),
-            DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP,
-            new Rotation2d());
 
     public SwerveDrive(
             DriveType type,
@@ -199,10 +192,12 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override
     public void runRawChassisSpeeds(ChassisSpeeds speeds) {
         OptionalDouble angularVelocityOverride =
-                swerveHeadingController.calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
-        if (angularVelocityOverride.isPresent())
+                ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
+        if (angularVelocityOverride.isPresent()) {
             speeds = new ChassisSpeeds(
                     speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, angularVelocityOverride.getAsDouble());
+            speeds = ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs);
+        }
 
         SwerveModuleState[] setPointStates = DRIVE_KINEMATICS.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setPointStates, CHASSIS_MAX_VELOCITY);

@@ -293,7 +293,9 @@ public class RobotContainer {
                 : MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
         final JoystickDrive joystickDrive =
                 new JoystickDrive(driveInput, () -> true, driverXBox.getHID()::getPOV, drive);
-        drive.setDefaultCommand(joystickDrive);
+        // drive.setDefaultCommand(joystickDrive);
+        drive.setDefaultCommand(
+                new ClockDrive(drive, driveInput, () -> -driverXBox.getRightY(), () -> -driverXBox.getRightX()));
 
         /* lock chassis with x-formation */
         driverXBox.x().whileTrue(drive.lockChassisWithXFormation());
