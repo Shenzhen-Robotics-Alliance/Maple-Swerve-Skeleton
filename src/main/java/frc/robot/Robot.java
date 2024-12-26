@@ -5,6 +5,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.constants.RobotMode;
@@ -82,7 +83,7 @@ public class Robot extends LoggedRobot {
         if (robotContainer.drive.hardwareFaultsDetected.getAsBoolean())
             robotContainer
                     .ledStatusLight
-                    .playAnimationPeriodically(new LEDAnimation.Breathe(255, 0, 0), 2)
+                    .playAnimationPeriodically(new LEDAnimation.Breathe(new Color(255, 0, 0)), 2)
                     .until(robotContainer.drive.hardwareFaultsDetected.negate())
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
                     .schedule();

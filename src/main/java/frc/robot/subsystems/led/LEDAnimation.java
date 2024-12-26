@@ -1,123 +1,110 @@
 package frc.robot.subsystems.led;
 
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import org.ironmaple.utils.mathutils.MapleCommonMath;
+import edu.wpi.first.wpilibj.util.Color;
+import java.util.Arrays;
 
 public sealed interface LEDAnimation {
     /**
      * Plays one frame the animation
      *
-     * @param buffer the {@link AddressableLEDBuffer} to play on
+     * @param colors an array containing a series of {@link Color} that this function will modify
      * @param t the time of the frame. 0~1 represents a full animation cycle
      */
-    void play(AddressableLEDBuffer buffer, double t);
+    void play(Color[] colors, double t);
+
+    static double oscillate(double t) {
+        return 0.5 + 0.5 * Math.sin(2 * Math.PI * t);
+    }
 
     final class Breathe implements LEDAnimation {
-        private final int colorR, colorG, colorB;
+        private final Color color;
 
-        public Breathe(int colorR, int colorG, int colorB) {
-            this.colorR = colorR;
-            this.colorG = colorG;
-            this.colorB = colorB;
+        public Breathe(Color color) {
+            this.color = color;
         }
 
         @Override
-        public void play(AddressableLEDBuffer buffer, double t) {
-            final double brightness = 0.5 + 0.5 * Math.sin(t * Math.PI);
-            for (int i = 0; i < buffer.getLength(); i++)
-                buffer.setRGB(i, (int) (colorR * brightness), (int) (colorG * brightness), (int) (colorB * brightness));
+        public void play(Color[] colors, double t) {
+            final double brightness = oscillate(t);
+            for (int i = 0; i < colors.length; i++)
+                colors[i] = new Color(color.red * brightness, color.green * brightness, color.blue * brightness);
         }
     }
 
     final class ShowColor implements LEDAnimation {
-        private final int colorR, colorG, colorB;
+        private final Color color;
 
-        public ShowColor(int colorR, int colorG, int colorB) {
-            this.colorR = colorR;
-            this.colorG = colorG;
-            this.colorB = colorB;
+        public ShowColor(Color color) {
+            this.color = color;
         }
 
         @Override
-        public void play(AddressableLEDBuffer buffer, double t) {
-            for (int i = 0; i < buffer.getLength(); i++) buffer.setRGB(i, colorR, colorG, colorB);
+        public void play(Color[] colors, double t) {
+            Arrays.fill(colors, color);
         }
     }
 
     final class SlideBackAndForth extends Slide {
-        public SlideBackAndForth(int colorR, int colorG, int colorB, double slideLength) {
-            super(colorR, colorG, colorB, slideLength);
+        public SlideBackAndForth(Color color) {
+            super(color);
         }
 
         @Override
-        public void play(AddressableLEDBuffer buffer, double t) {
-            super.play(buffer, 0.5 + 0.5 * Math.sin(t * Math.PI));
+        public void play(Color[] colors, double t) {
+            super.play(colors, oscillate(t));
         }
     }
 
     sealed class Slide implements LEDAnimation {
-        private final int colorR, colorG, colorB;
-        private final double slideLength;
+        private final Color color;
 
-        public Slide(int colorR, int colorG, int colorB, double slideLength) {
-            this.colorR = colorR;
-            this.colorG = colorG;
-            this.colorB = colorB;
-            this.slideLength = slideLength;
+        public Slide(Color color) {
+            this.color = color;
         }
 
         @Override
-        public void play(AddressableLEDBuffer buffer, double t) {
-            int halfLength = buffer.getLength() / 2;
-            double lowerEdge = MapleCommonMath.linearInterpretation(0, -slideLength, 1, 1, t);
-            double upperEdge = lowerEdge + slideLength;
-            /* strip is half the entire led */
-            for (int i = 0; i < halfLength; i++) {
-                int r = colorR, g = colorG, b = colorB;
-                if (i >= (int) (upperEdge * halfLength) || i <= (int) (lowerEdge * halfLength)) r = g = b = 0;
-                buffer.setRGB(halfLength + i, r, g, b);
-                buffer.setRGB(halfLength - i - 1, r, g, b);
+        public void play(Color[] colors, double t) {
+            if (t < 0.5) playSlideForward(colors, t * 2);
+            else playSlideBackwards(colors, (t - 0.5) * 2);
+        }
+
+        private void playSlideForward(Color[] colors, double t) {
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = i < t * colors.length ? color : new Color();
+            }
+        }
+
+        private void playSlideBackwards(Color[] colors, double t) {
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = i > t * colors.length ? color : new Color();
             }
         }
     }
 
     final class Charging implements LEDAnimation {
-        private final int colorR, colorG, colorB;
+        private final Color color;
 
-        public Charging(int colorR, int colorG, int colorB) {
-            this.colorR = colorR;
-            this.colorG = colorG;
-            this.colorB = colorB;
+        public Charging(Color color) {
+            this.color = color;
         }
 
         @Override
-        public void play(AddressableLEDBuffer buffer, double t) {
-            final int edge = (int) (t * buffer.getLength() / 2);
-            final double coolDownTime = 0.2;
-
-            t *= 1 + coolDownTime;
-            for (int i = 0; i < buffer.getLength() / 2; i++) {
-                int r = colorR, g = colorG, b = colorB;
-                if (t > 1) {
-                    double brightness = (1 + coolDownTime - t) / coolDownTime;
-                    r = (int) (r * brightness);
-                    g = (int) (g * brightness);
-                    b = (int) (b * brightness);
-                } else if (i > edge) r = g = b = 0;
-                buffer.setRGB(buffer.getLength() / 2 + 1 - i, r, g, b);
-                buffer.setRGB(buffer.getLength() / 2 - 1 + i, r, g, b);
+        public void play(Color[] colors, double t) {
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = i < t * colors.length
+                        ? new Color(color.red * t + 0.2, color.green * t + 0.2, color.blue * t + 0.2)
+                        : new Color();
             }
         }
     }
 
     final class Rainbow implements LEDAnimation {
         @Override
-        public void play(AddressableLEDBuffer buffer, double t) {
+        public void play(Color[] colors, double t) {
             final int firstPixelHue = (int) (t * 180), v = 128;
-            for (var i = 0; i < buffer.getLength() / 2; i++) {
-                final int colorH = (firstPixelHue + (i * 180 / buffer.getLength())) % 180;
-                buffer.setHSV(buffer.getLength() / 2 + i, colorH, 255, v);
-                buffer.setHSV(buffer.getLength() / 2 - i, colorH, 255, v);
+            for (var i = 0; i < colors.length; i++) {
+                int colorH = (firstPixelHue + (i * 180 / colors.length)) % 180;
+                colors[i] = Color.fromHSV(colorH, 255, 128);
             }
         }
     }
