@@ -12,6 +12,7 @@ import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -34,6 +35,21 @@ public interface HolonomicDriveSubsystem extends Subsystem {
 
     /** Returns the current odometry Pose. */
     Pose2d getPose();
+
+    default Pose2d getPoseWithLookAhead(double translationalLookAheadTime, double rotationalLookAheadTime) {
+        Pose2d currentPose = getPose();
+        ChassisSpeeds speeds = getMeasuredChassisSpeedsFieldRelative();
+        Transform2d lookAhead = new Transform2d(
+                speeds.vxMetersPerSecond * translationalLookAheadTime,
+                speeds.vyMetersPerSecond * translationalLookAheadTime,
+                Rotation2d.fromRadians(speeds.omegaRadiansPerSecond * rotationalLookAheadTime));
+
+        return currentPose.plus(lookAhead);
+    }
+
+    default Pose2d getPoseWithLookAhead() {
+        return getPoseWithLookAhead(TRANSLATIONAL_LOOKAHEAD_TIME, ROTATIONAL_LOOKAHEAD_TIME);
+    }
 
     default Rotation2d getFacing() {
         return getPose().getRotation();
@@ -115,7 +131,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
 
     default void configHolonomicPathPlannerAutoBuilder() {
         AutoBuilder.configure(
-                this::getPose,
+                this::getPoseWithLookAhead,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRawChassisSpeeds,

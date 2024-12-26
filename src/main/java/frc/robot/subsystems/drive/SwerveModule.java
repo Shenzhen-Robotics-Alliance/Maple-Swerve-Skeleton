@@ -6,9 +6,7 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.constants.DriveControlLoops.*;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -19,7 +17,6 @@ import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.Alert;
-import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule extends MapleSubsystem {
@@ -27,7 +24,6 @@ public class SwerveModule extends MapleSubsystem {
     private final String name;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
 
-    private final PIDController turnCloseLoop, driveCloseLoop;
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
@@ -47,13 +43,9 @@ public class SwerveModule extends MapleSubsystem {
         this.steerMotorHardwareFault.setActivated(false);
         this.steerEncoderHardwareFault.setActivated(false);
 
-        turnCloseLoop = new MaplePIDController(STEER_CLOSE_LOOP);
-        driveCloseLoop = new MaplePIDController(DRIVE_CLOSE_LOOP);
-
         CommandScheduler.getInstance().unregisterSubsystem(this);
 
         setPoint = new SwerveModuleState();
-        turnCloseLoop.calculate(getSteerFacing().getRadians()); // activate close loop controller
         io.setDriveBrake(true);
         io.setSteerBrake(true);
     }
