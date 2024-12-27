@@ -104,8 +104,8 @@ public class TunerConstants {
     public static final double kSteerInertia = 0.01;
     public static final double kDriveInertia = 0.01;
     // Simulated voltage necessary to overcome friction
-    public static final Voltage kSteerFrictionVoltage = Volts.of(0.25);
-    public static final Voltage kDriveFrictionVoltage = Volts.of(0.25);
+    public static final Voltage kSteerFrictionVoltage = Volts.of(0.05);
+    public static final Voltage kDriveFrictionVoltage = Volts.of(0.05);
 
     public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
             .withCANBusName(kCANBus.getName())

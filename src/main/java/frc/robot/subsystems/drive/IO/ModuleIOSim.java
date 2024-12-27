@@ -25,7 +25,7 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
  * The flywheel sims are not physically accurate, but provide a decent approximation for the behavior of the module.
  */
 public class ModuleIOSim implements ModuleIO {
-    private static final double DRIVE_KS = 0.03;
+    private static final double DRIVE_KS = 0.04;
     private static final double DRIVE_KP = 0.05;
     private static final double STEER_KP = 8.0;
     private static final double STEER_KD = 0.0;

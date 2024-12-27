@@ -33,9 +33,9 @@ public class VisionConstants {
                     720,
                     new Translation2d(
                             0.330, -0.127), // the outing position of the camera in relative to the robot center
-                    0.15, // the mounting height, in meters
+                    0.25, // the mounting height, in meters
                     Rotation2d.fromDegrees(0), // the camera facing, 0 is front, positive is counter-clockwise
-                    32, // camera pitch angle, in degrees
+                    24, // camera pitch angle, in degrees
                     180 // camera roll angle, 0 for up-right and 180 for upside-down
                     ),
             new PhotonCameraProperties(
@@ -49,9 +49,9 @@ public class VisionConstants {
                     1280,
                     720,
                     new Translation2d(0.229, 0.348),
-                    0.15,
+                    0.2,
                     Rotation2d.fromDegrees(30),
-                    35,
+                    30,
                     180 // upside-down
                     ),
             new PhotonCameraProperties(
@@ -65,9 +65,9 @@ public class VisionConstants {
                     1280,
                     720,
                     new Translation2d(0.229, -0.348),
-                    0.15,
+                    0.2,
                     Rotation2d.fromDegrees(-30),
-                    35,
+                    30,
                     180 // upside-down
                     ),
             new PhotonCameraProperties(
@@ -81,7 +81,7 @@ public class VisionConstants {
                     1280,
                     720,
                     new Translation2d(-0.229, 0.330),
-                    0.15,
+                    0.2,
                     Rotation2d.fromDegrees(150),
                     35,
                     180 // upside-down
@@ -97,7 +97,7 @@ public class VisionConstants {
                     1280,
                     720,
                     new Translation2d(-0.229, -0.330),
-                    0.15,
+                    0.2,
                     Rotation2d.fromDegrees(-150),
                     35,
                     180 // upside-down
