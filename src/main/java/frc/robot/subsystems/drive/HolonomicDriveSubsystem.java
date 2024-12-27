@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
@@ -32,6 +33,13 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param speeds a discrete chassis speed, robot-centric
      */
     void runRawChassisSpeeds(ChassisSpeeds speeds);
+
+    /**
+     * runs a ChassisSpeeds without doing any pre-processing
+     *
+     * @param speeds a discrete chassis speed, robot-centric
+     */
+    void runRawChassisSpeeds(ChassisSpeeds speeds, Force[] moduleFeedforwardForcesX, Force[] moduleFeedforwardForcesY);
 
     /** Returns the current odometry Pose. */
     Pose2d getPose();

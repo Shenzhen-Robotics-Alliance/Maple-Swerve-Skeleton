@@ -218,12 +218,14 @@ public class ModuleIOTalon implements ModuleIO {
     }
 
     @Override
-    public void requestDriveVelocityControl(double desiredWheelVelocityRadPerSec) {
+    public void requestDriveVelocityControl(
+            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {
         double motorVelocityRotPerSec =
                 Units.radiansToRotations(desiredWheelVelocityRadPerSec) * moduleConstants.DriveMotorGearRatio;
         driveTalon.setControl(
                 switch (moduleConstants.DriveMotorClosedLoopOutput) {
-                    case Voltage -> new VelocityVoltage(motorVelocityRotPerSec);
+                    case Voltage -> new VelocityVoltage(motorVelocityRotPerSec)
+                            .withFeedForward(additionalFeedforwardVoltage);
                     case TorqueCurrentFOC -> new VelocityTorqueCurrentFOC(motorVelocityRotPerSec);
                 });
     }

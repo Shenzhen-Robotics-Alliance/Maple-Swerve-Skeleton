@@ -40,6 +40,7 @@ public class ModuleIOSim implements ModuleIO {
     private double driveAppliedVolts = 0.0;
     private double steerAppliedVolts = 0.0;
     private double desiredWheelVelocityRadPerSec = 0.0;
+    private double torqueFeedforwardVolts = 0.0;
     private Rotation2d desiredSteerFacing = new Rotation2d();
 
     public ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
@@ -103,7 +104,8 @@ public class ModuleIOSim implements ModuleIO {
     private void calculateDriveControlLoops() {
         double ffVolts = moduleSimulation.driveMotorConfigs.motor.getVoltage(
                         0, desiredWheelVelocityRadPerSec * moduleSimulation.DRIVE_GEAR_RATIO)
-                + Math.signum(desiredWheelVelocityRadPerSec) * DRIVE_KS;
+                + Math.signum(desiredWheelVelocityRadPerSec) * DRIVE_KS
+                + torqueFeedforwardVolts;
         double fbVolts = driveController.calculate(
                 moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond), desiredWheelVelocityRadPerSec);
         driveAppliedVolts = ffVolts + fbVolts;
@@ -117,6 +119,7 @@ public class ModuleIOSim implements ModuleIO {
     @Override
     public void requestDriveOpenLoop(Voltage output) {
         this.driveAppliedVolts = output.in(Volts);
+        this.torqueFeedforwardVolts = 0;
         this.driveClosedLoopActivated = false;
     }
 
@@ -133,6 +136,7 @@ public class ModuleIOSim implements ModuleIO {
                 driveMotorModel.getCurrent(output.in(Amps)),
                 moduleSimulation.getDriveEncoderUnGearedSpeed().in(RadiansPerSecond));
         this.driveClosedLoopActivated = false;
+        this.torqueFeedforwardVolts = 0;
     }
 
     @Override
@@ -145,9 +149,11 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void requestDriveVelocityControl(double desiredWheelVelocityRadPerSec) {
+    public void requestDriveVelocityControl(
+            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {
         this.desiredWheelVelocityRadPerSec = desiredWheelVelocityRadPerSec;
         this.driveClosedLoopActivated = true;
+        this.torqueFeedforwardVolts = additionalFeedforwardVoltage.in(Volts);
     }
 
     @Override

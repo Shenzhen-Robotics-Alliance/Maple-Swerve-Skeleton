@@ -75,8 +75,10 @@ public interface ModuleIO {
      * Runs a velocity close-loop control on the drive motor
      *
      * @param desiredWheelVelocityRadPerSec the desired angular velocity of the wheel, in radians / second
+     * @param additionalFeedforwardVoltage additional feedforward voltage for torque feedforward
      */
-    default void requestDriveVelocityControl(double desiredWheelVelocityRadPerSec) {}
+    default void requestDriveVelocityControl(
+            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {}
 
     /**
      * Runs a position close-loop control on the steer motor

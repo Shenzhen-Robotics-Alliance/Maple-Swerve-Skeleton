@@ -5,14 +5,17 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveTrainConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.constants.DriveTrainConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
@@ -74,7 +77,8 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     /** Runs the module with the specified setpoint state. Returns the optimized state. */
-    public SwerveModuleState runSetPoint(SwerveModuleState newSetpoint) {
+    public SwerveModuleState runSetPoint(
+            SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
         newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
         if (Math.abs(newSetpoint.speedMetersPerSecond) < 0.01) {
@@ -82,9 +86,16 @@ public class SwerveModule extends MapleSubsystem {
             return this.setPoint = new SwerveModuleState(0, setPoint.angle);
         }
 
-        double desiredWheelVelocityRadPerSec =
-                newSetpoint.speedMetersPerSecond / DriveTrainConstants.WHEEL_RADIUS.in(Meters);
-        io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec);
+        double desiredWheelVelocityRadPerSec = newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters);
+        Translation2d force2d = new Translation2d(
+                robotRelativeFeedforwardForceX.in(Newtons), robotRelativeFeedforwardForceY.in(Newtons));
+        // project force to swerve heading
+        double moduleFeedforwardForceNewtons =
+                force2d.getNorm() * force2d.getAngle().minus(getSteerFacing()).getCos();
+        double wheelFeedforwardTorque = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
+        double motorFeedforwardTorque = wheelFeedforwardTorque / DRIVE_GEAR_RATIO;
+        Voltage motorFeedforwardVoltage = Volts.of(DRIVE_MOTOR.getVoltage(motorFeedforwardTorque, 0));
+        io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec, motorFeedforwardVoltage);
         io.requestSteerPositionControl(newSetpoint.angle);
 
         return this.setPoint = newSetpoint;
@@ -115,7 +126,7 @@ public class SwerveModule extends MapleSubsystem {
     }
 
     private double driveWheelRevolutionsToMeters(double driveWheelRevolutions) {
-        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS.in(Meters);
+        return Units.rotationsToRadians(driveWheelRevolutions) * WHEEL_RADIUS.in(Meters);
     }
 
     /** Returns the current drive velocity of the module in meters per second. */
