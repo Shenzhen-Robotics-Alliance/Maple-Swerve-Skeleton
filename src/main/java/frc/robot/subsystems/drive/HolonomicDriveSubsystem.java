@@ -9,13 +9,13 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
@@ -39,7 +39,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      *
      * @param speeds a discrete chassis speed, robot-centric
      */
-    void runRawChassisSpeeds(ChassisSpeeds speeds, Force[] moduleFeedforwardForcesX, Force[] moduleFeedforwardForcesY);
+    void runRawChassisSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards);
 
     /** Returns the current odometry Pose. */
     Pose2d getPose();
@@ -142,7 +142,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::getPoseWithLookAhead,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
-                this::runRawChassisSpeeds,
+                this::runRawChassisSpeedsWithFeedforwards,
                 new PPHolonomicDriveController(
                         CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
                         CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),

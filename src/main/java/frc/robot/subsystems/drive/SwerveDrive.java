@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 import static frc.robot.constants.VisionConstants.*;
 
+import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +19,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -31,7 +31,6 @@ import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.Alert;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleTimeUtils;
-import java.util.Arrays;
 import java.util.OptionalDouble;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -193,14 +192,11 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public void runRawChassisSpeeds(ChassisSpeeds speeds) {
-        Force[] feedforwardsModuleForce = new Force[4];
-        Arrays.fill(feedforwardsModuleForce, Newtons.zero());
-        runRawChassisSpeeds(speeds, feedforwardsModuleForce, feedforwardsModuleForce);
+        runRawChassisSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
     }
 
     @Override
-    public void runRawChassisSpeeds(
-            ChassisSpeeds speeds, Force[] moduleFeedforwardForcesX, Force[] moduleFeedforwardForcesY) {
+    public void runRawChassisSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
         OptionalDouble angularVelocityOverride =
                 ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
         if (angularVelocityOverride.isPresent()) {
@@ -216,7 +212,9 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
         for (int i = 0; i < 4; i++)
             optimizedSetpointStates[i] = swerveModules[i].runSetPoint(
-                    setPointStates[i], moduleFeedforwardForcesX[i], moduleFeedforwardForcesY[i]);
+                    setPointStates[i],
+                    feedforwards.robotRelativeForcesX()[i],
+                    feedforwards.robotRelativeForcesY()[i]);
 
         Logger.recordOutput("SwerveStates/Setpoints", setPointStates);
         Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);

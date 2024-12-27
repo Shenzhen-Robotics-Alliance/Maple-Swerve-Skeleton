@@ -96,6 +96,7 @@ public class SwerveModule extends MapleSubsystem {
         double motorFeedforwardTorque = wheelFeedforwardTorque / DRIVE_GEAR_RATIO;
         Voltage motorFeedforwardVoltage = Volts.of(DRIVE_MOTOR.getVoltage(motorFeedforwardTorque, 0));
         io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec, motorFeedforwardVoltage);
+        Logger.recordOutput("ModuleFeedforwards/" + name + "/Voltage", motorFeedforwardVoltage.in(Volts));
         io.requestSteerPositionControl(newSetpoint.angle);
 
         return this.setPoint = newSetpoint;
