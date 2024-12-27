@@ -1,6 +1,5 @@
 package frc.robot.subsystems.vision.apriltags;
 
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Arrays;
@@ -13,6 +12,7 @@ public interface AprilTagVisionIO {
     class CameraInputs {
         public static final int MAX_TARGET_PER_CAMERA = 5;
         public boolean cameraConnected;
+        public boolean newPipeLineResultAvailable;
         public double timeStampSeconds;
         public int currentTargetsCount;
         public final int[] fiducialMarksID;
@@ -26,6 +26,7 @@ public interface AprilTagVisionIO {
         }
 
         public void clear(boolean cameraConnected) {
+            this.newPipeLineResultAvailable = false;
             this.cameraConnected = cameraConnected;
             this.timeStampSeconds = 0;
             this.currentTargetsCount = 0;
@@ -34,6 +35,7 @@ public interface AprilTagVisionIO {
         }
 
         public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult) {
+            this.newPipeLineResultAvailable = true;
             this.cameraConnected = true;
             this.timeStampSeconds = pipelineResult.getTimestampSeconds();
             this.currentTargetsCount = Math.min(pipelineResult.getTargets().size(), MAX_TARGET_PER_CAMERA);
@@ -48,11 +50,10 @@ public interface AprilTagVisionIO {
                     : Optional.empty();
         }
 
-        private static final Transform3d NULL_TRANSFORM = new Transform3d(-114514, -114514, -114514, new Rotation3d());
-
         public void fromLog(LogTable table, int cameraID) {
             final String cameraKey = "Camera" + cameraID;
             this.cameraConnected = table.get(cameraKey + "Connected", false);
+            this.newPipeLineResultAvailable = table.get(cameraKey + "NewPipeLineResultAvailable", false);
             this.timeStampSeconds = table.get(cameraKey + "TimeStampSeconds", 0.0);
             this.currentTargetsCount = table.get(cameraKey + "CurrentTargetsCount", 0);
             final int[] fiducialMarkIDLogged = table.get(cameraKey + "FiducialMarksID", new int[MAX_TARGET_PER_CAMERA]);
@@ -74,6 +75,7 @@ public interface AprilTagVisionIO {
         public void writeToLog(LogTable table, int cameraID) {
             final String cameraKey = "Camera" + cameraID;
             table.put(cameraKey + "Connected", cameraConnected);
+            table.put(cameraKey + "NewPipeLineResultAvailable", this.newPipeLineResultAvailable);
             table.put(cameraKey + "TimeStampSeconds", timeStampSeconds);
             table.put(cameraKey + "CurrentTargetsCount", currentTargetsCount);
             table.put(cameraKey + "FiducialMarksID", fiducialMarksID);

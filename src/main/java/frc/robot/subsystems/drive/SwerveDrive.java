@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
-import frc.robot.constants.DriveControlLoops;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
@@ -192,10 +191,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public void runRawChassisSpeeds(ChassisSpeeds speeds) {
-        OptionalDouble angularVelocityOverride = ChassisHeadingController.getInstance()
-                .calculate(
-                        getMeasuredChassisSpeedsFieldRelative(),
-                        getPoseWithLookAhead(0, DriveControlLoops.ROTATIONAL_LOOKAHEAD_TIME));
+        OptionalDouble angularVelocityOverride =
+                ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
         if (angularVelocityOverride.isPresent()) {
             speeds = new ChassisSpeeds(
                     speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, angularVelocityOverride.getAsDouble());

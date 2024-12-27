@@ -73,9 +73,13 @@ public class AprilTagVision extends MapleSubsystem {
 
     private double getResultsTimeStamp() {
         if (inputs.camerasInputs.length == 0) return Timer.getTimestamp();
-        double totalTimeStampSeconds = 0;
-        for (AprilTagVisionIO.CameraInputs cameraInputs : inputs.camerasInputs)
-            totalTimeStampSeconds += cameraInputs.timeStampSeconds;
-        return totalTimeStampSeconds / inputs.camerasInputs.length;
+        double totalTimeStampSeconds = 0, camerasUsed = 0;
+        for (AprilTagVisionIO.CameraInputs cameraInputs : inputs.camerasInputs) {
+            if (cameraInputs.newPipeLineResultAvailable) {
+                totalTimeStampSeconds += cameraInputs.timeStampSeconds;
+                camerasUsed++;
+            }
+        }
+        return totalTimeStampSeconds / camerasUsed;
     }
 }

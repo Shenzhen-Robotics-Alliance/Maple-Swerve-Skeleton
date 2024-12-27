@@ -76,13 +76,15 @@ public class MapleMultiTagPoseEstimator {
                     + camerasProperties.size());
 
         for (int i = 0; i < cameraInputs.length; i++)
-            fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i), currentOdometryPose);
+            if (cameraInputs[i].newPipeLineResultAvailable)
+                fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i), currentOdometryPose);
     }
 
     private void fetchSingleCameraInputs(
             AprilTagVisionIO.CameraInputs cameraInput,
             PhotonCameraProperties cameraProperty,
             Pose2d currentOdometryPose) {
+
         calculateVisibleTagsPosesForLog(cameraInput, cameraProperty, currentOdometryPose);
 
         /* if there is multi-solvepnp result, we only trust that */
@@ -181,16 +183,16 @@ public class MapleMultiTagPoseEstimator {
         if (!resultsCountSufficient) return Optional.empty();
 
         final List<Statistics.Estimation> robotPoseEstimationsXMeters = new ArrayList<>(),
-                robotPoseEstimationsYMeters = new ArrayList<>(),
-                robotPoseEstimationsThetaRadians = new ArrayList<>();
+                robotPoseEstimationsYMeters = new ArrayList<>();
+        final List<Statistics.RotationEstimation> robotPoseEstimationsTheta = new ArrayList<>();
 
         for (Pose3d robotPoseEstimationSingleTag : validRobotPoseEstimationsSingleTag) {
             robotPoseEstimationsXMeters.add(new Statistics.Estimation(
                     robotPoseEstimationSingleTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
                     robotPoseEstimationSingleTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
-            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getRotation().getZ(),
+            robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
+                    robotPoseEstimationSingleTag.getRotation().toRotation2d(),
                     ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION));
         }
 
@@ -199,42 +201,35 @@ public class MapleMultiTagPoseEstimator {
                     robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
                     robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
-            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getRotation().getZ(), ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
+            robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
+                    robotPoseEstimationMultiTag.getRotation().toRotation2d(),
+                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
         }
 
         final Statistics.Estimation
                 robotPoseFinalEstimationXMeters = Statistics.linearFilter(robotPoseEstimationsXMeters),
-                robotPoseFinalEstimationYMeters = Statistics.linearFilter(robotPoseEstimationsYMeters),
-                robotPoseFinalEstimationThetaRadians = Statistics.linearFilter(robotPoseEstimationsThetaRadians);
+                robotPoseFinalEstimationYMeters = Statistics.linearFilter(robotPoseEstimationsYMeters);
+        final Statistics.RotationEstimation robotPoseFinalEstimationTheta =
+                Statistics.rotationFilter(robotPoseEstimationsTheta);
 
         final Translation2d translationPointEstimate =
                 new Translation2d(robotPoseFinalEstimationXMeters.center(), robotPoseFinalEstimationYMeters.center());
-        final Rotation2d rotationPointEstimate = Rotation2d.fromRadians(robotPoseFinalEstimationThetaRadians.center());
+        final Rotation2d rotationPointEstimate = robotPoseFinalEstimationTheta.center();
 
-        final double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
-                estimationStandardErrorY = robotPoseFinalEstimationYMeters.standardDeviation(),
-                estimationStandardErrorTheta = robotPoseFinalEstimationThetaRadians.standardDeviation();
+        final double estimationStandardDevsX = robotPoseFinalEstimationXMeters.standardDeviation(),
+                estimationStandardDevsY = robotPoseFinalEstimationYMeters.standardDeviation(),
+                estimationStandardErrorTheta = robotPoseFinalEstimationTheta.standardDeviationRad();
 
         Logger.recordOutput(
-                "Vision/MeasurementErrors/translationalStandardError",
-                Math.hypot(estimationStandardErrorX, estimationStandardErrorY));
+                "Vision/MeasurementErrors/translationalStandardDevs",
+                Math.hypot(estimationStandardDevsX, estimationStandardDevsY));
         Logger.recordOutput(
-                "Vision/MeasurementErrors/rotationalStandardError", Math.toDegrees(estimationStandardErrorTheta));
-
-        final double translationStdDev = Math.hypot(
-                Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
-                Statistics.getStandardDeviation(robotPoseEstimationsYMeters));
-        final double rotationStdDev = Statistics.getStandardDeviation(robotPoseEstimationsThetaRadians);
-        Logger.recordOutput("Vision/MeasurementErrors/translationalStdDev", translationStdDev);
-        Logger.recordOutput("Vision/MeasurementErrors/rotationalStdDev", Math.toDegrees(rotationStdDev));
-        if (translationStdDev > TRANSLATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT
-                || rotationStdDev > ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT) return Optional.empty();
+                "Vision/MeasurementErrors/rotationalStandardDevs", Math.toDegrees(estimationStandardErrorTheta));
 
         return Optional.of(new RobotPoseEstimationResult(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
-                estimationStandardErrorX,
-                estimationStandardErrorY,
+                estimationStandardDevsX,
+                estimationStandardDevsY,
                 estimationStandardErrorTheta));
     }
 
