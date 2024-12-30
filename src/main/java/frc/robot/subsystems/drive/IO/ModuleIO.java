@@ -5,8 +5,6 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -37,11 +35,6 @@ public interface ModuleIO {
     void updateInputs(ModuleIOInputs inputs);
 
     default void calibrate() {}
-
-    default void stop() {
-        requestDriveOpenLoop(Volts.zero());
-        requestSteerOpenLoop(Volts.zero());
-    }
 
     /**
      * Run the drive motor at a specified voltage open-loop control

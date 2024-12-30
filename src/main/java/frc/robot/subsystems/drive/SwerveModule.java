@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -79,10 +80,10 @@ public class SwerveModule extends MapleSubsystem {
     /** Runs the module with the specified setpoint state. Returns the optimized state. */
     public SwerveModuleState runSetPoint(
             SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
-        newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
+        newSetpoint = SwerveModuleState.optimize(newSetpoint, setPoint.angle);
 
         if (Math.abs(newSetpoint.speedMetersPerSecond) < 0.01) {
-            io.stop();
+            stop();
             return this.setPoint = new SwerveModuleState(0, setPoint.angle);
         }
 
@@ -104,12 +105,21 @@ public class SwerveModule extends MapleSubsystem {
 
     @Override
     public void onDisable() {
-        io.stop();
+        stop();
     }
 
-    public void setMotorBrake(boolean motorBrakeEnabled) {
-        io.setDriveBrake(motorBrakeEnabled);
-        io.setSteerBrake(motorBrakeEnabled);
+    public void stop() {
+        io.requestDriveOpenLoop(Volts.zero());
+        io.requestSteerOpenLoop(Volts.zero());
+    }
+
+    private boolean brakeEnabled = true;
+
+    public void setMotorBrake(boolean enableMotorBrake) {
+        if (brakeEnabled == enableMotorBrake) return;
+        io.setDriveBrake(enableMotorBrake);
+        io.setSteerBrake(enableMotorBrake);
+        this.brakeEnabled = enableMotorBrake;
     }
 
     /** Returns the current turn angle of the module. */
@@ -152,5 +162,17 @@ public class SwerveModule extends MapleSubsystem {
 
     public boolean hasHardwareFaults() {
         return !(inputs.driveMotorConnected && inputs.steerMotorConnected && inputs.steerEncoderConnected);
+    }
+
+    public void runVoltageCharacterization(Rotation2d steerFacing, Voltage driveVoltageOut) {
+        setMotorBrake(true);
+        io.requestSteerPositionControl(steerFacing);
+        io.requestDriveOpenLoop(driveVoltageOut);
+    }
+
+    public void runCurrentCharacterization(Rotation2d steerFacing, Current driveCurrentOut) {
+        setMotorBrake(true);
+        io.requestSteerPositionControl(steerFacing);
+        io.requestDriveOpenLoop(driveCurrentOut);
     }
 }

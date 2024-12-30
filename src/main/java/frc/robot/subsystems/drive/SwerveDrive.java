@@ -19,10 +19,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
@@ -353,4 +355,23 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     public final Trigger hardwareFaultsDetected = new Trigger(this::hasHardwareFaults);
+
+    private void runCharacterization(Voltage voltage) {
+        SwerveModuleState[] moduleStates = DRIVE_KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 1));
+        for (int i = 0; i < swerveModules.length; i++)
+            swerveModules[i].runVoltageCharacterization(moduleStates[i].angle, voltage);
+    }
+
+    private final SysIdRoutine sysId = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                    null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+            new SysIdRoutine.Mechanism(this::runCharacterization, null, this));
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysId.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysId.dynamic(direction);
+    }
 }

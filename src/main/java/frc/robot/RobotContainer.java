@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
 import frc.robot.constants.*;
@@ -226,9 +227,17 @@ public class RobotContainer {
         return autoSendableChooser;
     }
 
-    private static SendableChooser<Supplier<Command>> buildTestsChooser() {
+    private SendableChooser<Supplier<Command>> buildTestsChooser() {
         final SendableChooser<Supplier<Command>> testsChooser = new SendableChooser<>();
         testsChooser.setDefaultOption("None", Commands::none);
+        testsChooser.addOption(
+                "Drive SysId- Quasistatic - Forward", () -> drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        testsChooser.addOption(
+                "Drive SysId- Quasistatic - Reverse", () -> drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        testsChooser.addOption(
+                "Drive SysId- Dynamic - Forward", () -> drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        testsChooser.addOption(
+                "Drive SysId- Dynamic - Reverse", () -> drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         // TODO add your tests here (system identification and etc.)
         return testsChooser;
     }
