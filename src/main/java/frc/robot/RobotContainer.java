@@ -64,12 +64,6 @@ public class RobotContainer {
     // Controller
     private final CommandXboxController driverXBox = new CommandXboxController(0);
 
-    public enum JoystickMode {
-        LEFT_HANDED,
-        RIGHT_HANDED
-    }
-    // Dashboard Selections
-    private final LoggedDashboardChooser<JoystickMode> driverModeChooser;
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
 
@@ -181,10 +175,6 @@ public class RobotContainer {
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
         autoChooser = buildAutoChooser();
 
-        driverModeChooser = new LoggedDashboardChooser<>("Driver Mode", new SendableChooser<>());
-        driverModeChooser.addDefaultOption(JoystickMode.LEFT_HANDED.name(), JoystickMode.LEFT_HANDED);
-        driverModeChooser.addOption(JoystickMode.RIGHT_HANDED.name(), JoystickMode.RIGHT_HANDED);
-
         /* you can tune the numbers on dashboard and copy-paste them to here */
         this.exampleShooterOptimization = new MapleShooterOptimization(
                 "ExampleShooter",
@@ -243,16 +233,10 @@ public class RobotContainer {
     }
 
     private boolean isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
-    private boolean isLeftHanded = true;
     private Command autonomousCommand = Commands.none();
     private Auto previouslySelectedAuto = null;
     /** reconfigures button bindings if alliance station has changed re-create autos if not yet created */
     public void checkForCommandChanges() {
-        final boolean isLeftHandedSelected = !JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get());
-        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
-            configureButtonBindings();
-        isLeftHanded = isLeftHandedSelected;
-
         final Auto selectedAuto = autoChooser.get();
         if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || selectedAuto != previouslySelectedAuto) {
             try {
@@ -297,9 +281,7 @@ public class RobotContainer {
      */
     public void configureButtonBindings() {
         /* joystick drive command */
-        final MapleJoystickDriveInput driveInput = JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get())
-                ? MapleJoystickDriveInput.rightHandedJoystick(driverXBox)
-                : MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
+        final MapleJoystickDriveInput driveInput = MapleJoystickDriveInput.rightHandedJoystick(driverXBox);
         final JoystickDrive joystickDrive =
                 new JoystickDrive(driveInput, () -> true, driverXBox.getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
