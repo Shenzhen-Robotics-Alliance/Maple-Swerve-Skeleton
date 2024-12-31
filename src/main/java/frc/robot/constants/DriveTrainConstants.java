@@ -8,6 +8,8 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.*;
 import java.util.function.Supplier;
+
+import frc.robot.generated.TunerConstants;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 

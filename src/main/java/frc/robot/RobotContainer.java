@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
 import frc.robot.constants.*;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;

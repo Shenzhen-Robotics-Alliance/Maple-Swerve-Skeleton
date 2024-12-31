@@ -29,7 +29,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Robot;
-import frc.robot.constants.TunerConstants;
+import frc.robot.generated.TunerConstants;
 import java.util.Queue;
 
 public class ModuleIOTalon implements ModuleIO {
