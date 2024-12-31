@@ -7,9 +7,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.*;
-import java.util.function.Supplier;
-
 import frc.robot.generated.TunerConstants;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
@@ -29,13 +28,13 @@ public class DriveTrainConstants {
     public static final DCMotor STEER_MOTOR = DCMotor.getFalcon500(1);
 
     /** numbers imported from {@link TunerConstants} TODO: for REV chassis, replace them with actual numbers */
-    public static final Distance WHEEL_RADIUS = TunerConstants.kWheelRadius;
+    public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
 
-    public static final double DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio;
-    public static final double STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio;
+    public static final double DRIVE_GEAR_RATIO = TunerConstants.FrontLeft.DriveMotorGearRatio;
+    public static final double STEER_GEAR_RATIO = TunerConstants.FrontLeft.SteerMotorGearRatio;
 
-    public static final Voltage STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage;
-    public static final Voltage DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage;
+    public static final Voltage STEER_FRICTION_VOLTAGE = Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage);
+    public static final Voltage DRIVE_FRICTION_VOLTAGE = Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage);
     public static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.025);
 
     /* adjust current limit */
@@ -47,14 +46,16 @@ public class DriveTrainConstants {
 
     /** translations of the modules to the robot center, in FL, FR, BL, BR */
     public static final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
-        new Translation2d(TunerConstants.kFrontLeftXPos.in(Meters), TunerConstants.kFrontLeftYPos.in(Meters)),
-        new Translation2d(TunerConstants.kFrontRightXPos.in(Meters), TunerConstants.kFrontRightYPos.in(Meters)),
-        new Translation2d(TunerConstants.kBackLeftXPos.in(Meters), TunerConstants.kBackLeftYPos.in(Meters)),
-        new Translation2d(TunerConstants.kBackRightXPos.in(Meters), TunerConstants.kBackRightYPos.in(Meters))
+        new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+        new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+        new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackRight.LocationY),
+        new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
 
-    public static final Distance TRACK_LENGTH = TunerConstants.kFrontLeftXPos.minus(TunerConstants.kBackLeftXPos);
-    public static final Distance TRACK_WIDTH = TunerConstants.kFrontLeftYPos.minus(TunerConstants.kFrontRightYPos);
+    public static final Distance TRACK_LENGTH =
+            MODULE_TRANSLATIONS[0].minus(MODULE_TRANSLATIONS[3]).getMeasureX();
+    public static final Distance TRACK_WIDTH =
+            MODULE_TRANSLATIONS[0].minus(MODULE_TRANSLATIONS[3]).getMeasureY();
 
     /* equations that calculates some constants for the simulator (don't modify) */
     private static final double GRAVITY_CONSTANT = 9.8;
