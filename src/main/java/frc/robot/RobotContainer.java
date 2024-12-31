@@ -282,7 +282,7 @@ public class RobotContainer {
      */
     public void configureButtonBindings() {
         /* joystick drive command */
-        final MapleJoystickDriveInput driveInput = MapleJoystickDriveInput.rightHandedJoystick(driverXBox);
+        final MapleJoystickDriveInput driveInput = MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
         final JoystickDrive joystickDrive =
                 new JoystickDrive(driveInput, () -> true, driverXBox.getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
