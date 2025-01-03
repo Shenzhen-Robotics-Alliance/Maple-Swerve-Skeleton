@@ -41,8 +41,16 @@ public class TunerConstants {
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
+
+    /*
+     * TODO: run characterization to find the gains for your drivetrain, note that:
+     *  1. When analyzing the data, select "Drive/Module-moduleName/DriveWheelFinalVelocityRevolutionsPerSec" as Velocity and "Drive/Module-moduleName/DriveWheelFinalRevolutions" as Position
+     *  2. Select "Rotations" as the unit
+     *  3. The calculated kP and kV ARE NOT CORRECT!!! Divide them by the gear ratio to find the actual gains.
+     *  4. It is recommend to analyze the data for all four modules and take a rough average; when the gains of the modules differs a lot, check your hardware
+     * */
     public static final Slot0Configs driveGains =
-            new Slot0Configs().withKP(0.08).withKI(0).withKD(0).withKS(0.05).withKV(0.124);
+            new Slot0Configs().withKP(0.5 / 5.9).withKI(0).withKD(0).withKS(0.2).withKV(0.68 / 5.9);
 
     // The closed-loop output type to use for the steer motors;
     // This affects the PID/FF gains for the steer motors
