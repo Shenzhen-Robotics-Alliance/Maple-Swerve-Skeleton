@@ -212,6 +212,8 @@ public class RobotContainer {
                 "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories2());
         autoSendableChooser.addOption("Example Pathplanner Auto", new PathPlannerAutoWrapper("Example Auto"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
+        autoSendableChooser.addOption(
+                "Path Following Benchmark", new PathPlannerAutoWrapper("Path Following Benchmark"));
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
