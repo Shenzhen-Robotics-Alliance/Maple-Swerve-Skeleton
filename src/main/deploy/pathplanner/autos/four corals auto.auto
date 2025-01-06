@@ -7,43 +7,49 @@
         {
           "type": "path",
           "data": {
-            "pathName": "shoot preload and second"
+            "pathName": "place first"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "shoot third and fourth"
+            "pathName": "grab second"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "grab fifth and shoot"
+            "pathName": "place second"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "grab sixth and shoot"
+            "pathName": "grab third"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "grab seven and shoot"
+            "pathName": "place third"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "grab eighth and shoot"
+            "pathName": "grab fourth"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "score fourth"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
-  "choreoAuto": true
+  "choreoAuto": false
 }

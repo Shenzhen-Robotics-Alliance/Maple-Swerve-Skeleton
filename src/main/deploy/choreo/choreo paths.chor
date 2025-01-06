@@ -1,6 +1,6 @@
 {
- "name":"choreo fight auto",
- "version":"v2025.0.0",
+ "name":"choreo paths",
+ "version":1,
  "type":"Swerve",
  "variables":{
   "expressions":{},
@@ -28,28 +28,32 @@
    }
   },
   "mass":{
-   "exp":"40 kg",
-   "val":40.0
+   "exp":"150 lbs",
+   "val":68.0388555
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
    "val":6.0
   },
   "gearing":{
-   "exp":"5.9",
-   "val":5.9
+   "exp":"6.5",
+   "val":6.5
   },
   "radius":{
    "exp":"2 in",
    "val":0.0508
   },
   "vmax":{
-   "exp":"502.65482457436696 rad / s",
-   "val":502.65482457436696
+   "exp":"6000 RPM",
+   "val":628.3185307179587
   },
   "tmax":{
-   "exp":"1.162295081967213 N m",
-   "val":1.162295081967213
+   "exp":"1.2 N * m",
+   "val":1.2
+  },
+  "cof":{
+   "exp":"1.5",
+   "val":1.5
   },
   "bumper":{
    "front":{
