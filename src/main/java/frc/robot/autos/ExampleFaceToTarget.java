@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.commands.drive.FollowPathFaceToTarget;
 import java.io.IOException;
-import org.ironmaple.utils.FieldMirroringUtils;
+import org.ironmaple.utils.LegacyFieldMirroringUtils2024;
 import org.json.simple.parser.ParseException;
 
 public class ExampleFaceToTarget implements Auto {
@@ -16,7 +16,7 @@ public class ExampleFaceToTarget implements Auto {
         return FollowPathFaceToTarget.followPathFacetToTarget(
                 PathPlannerPath.fromPathFile("Test Face To Target"),
                 0,
-                FieldMirroringUtils.SPEAKER_POSITION_SUPPLIER,
+                LegacyFieldMirroringUtils2024.SPEAKER_POSITION_SUPPLIER,
                 null);
     }
 

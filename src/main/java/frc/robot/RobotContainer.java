@@ -8,7 +8,9 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,8 +41,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
@@ -116,7 +120,7 @@ public class RobotContainer {
                                 .withBumperSize(DriveTrainConstants.BUMPER_LENGTH, DriveTrainConstants.BUMPER_WIDTH)
                                 .withTrackLengthTrackWidth(
                                         DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
-                                .withSwerveModule(() -> new SwerveModuleSimulation(
+                                .withSwerveModule(new SwerveModuleSimulationConfig(
                                         DriveTrainConstants.DRIVE_MOTOR,
                                         DriveTrainConstants.STEER_MOTOR,
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
@@ -341,10 +345,14 @@ public class RobotContainer {
     public void updateFieldSimAndDisplay() {
         if (driveSimulation == null) return;
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput(
-                "FieldSimulation/Notes", SimulatedArena.getInstance().getGamePiecesArrayByType("Note"));
         Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation.getOpponentRobotPoses());
         Logger.recordOutput(
                 "FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation.getAlliancePartnerRobotPoses());
+        Logger.recordOutput(
+                "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput(
+                "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        Logger.recordOutput("FieldSimulation/StackedAlgae", ReefscapeCoralAlgaeStack.getStackedAlgaePoses());
+        Logger.recordOutput("FieldSimulation/StackedCoral", ReefscapeCoralAlgaeStack.getStackedCoralPoses());
     }
 }

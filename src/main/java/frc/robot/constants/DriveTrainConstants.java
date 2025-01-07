@@ -84,7 +84,7 @@ public class DriveTrainConstants {
     public static final SwerveDriveKinematics DRIVE_KINEMATICS = new SwerveDriveKinematics(MODULE_TRANSLATIONS);
 
     /* for collision detection in simulation */
-    public static final Distance BUMPER_WIDTH = Inches.of(30), BUMPER_LENGTH = Inches.of(30);
+    public static final Distance BUMPER_WIDTH = Inches.of(33), BUMPER_LENGTH = Inches.of(33);
 
     // https://unacademy.com/content/upsc/study-material/physics/moment-of-inertia-of-rectangle-section/
     public static final MomentOfInertia ROBOT_MOI = KilogramSquareMeters.of(ROBOT_MASS.in(Kilograms)

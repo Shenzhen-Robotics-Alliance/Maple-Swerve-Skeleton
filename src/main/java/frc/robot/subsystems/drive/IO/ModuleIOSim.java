@@ -102,8 +102,8 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     private void calculateDriveControlLoops() {
-        double ffVolts = moduleSimulation.driveMotorConfigs.motor.getVoltage(
-                        0, desiredWheelVelocityRadPerSec * moduleSimulation.DRIVE_GEAR_RATIO)
+        double ffVolts = moduleSimulation.config.driveMotorConfigs.motor.getVoltage(
+                        0, desiredWheelVelocityRadPerSec * moduleSimulation.config.DRIVE_GEAR_RATIO)
                 + Math.signum(desiredWheelVelocityRadPerSec) * DRIVE_KS
                 + torqueFeedforwardVolts;
         double fbVolts = driveController.calculate(
@@ -131,7 +131,7 @@ public class ModuleIOSim implements ModuleIO {
 
     @Override
     public void requestDriveOpenLoop(Current output) {
-        DCMotor driveMotorModel = moduleSimulation.driveMotorConfigs.motor;
+        DCMotor driveMotorModel = moduleSimulation.config.driveMotorConfigs.motor;
         this.driveAppliedVolts = driveMotorModel.getVoltage(
                 driveMotorModel.getCurrent(output.in(Amps)),
                 moduleSimulation.getDriveEncoderUnGearedSpeed().in(RadiansPerSecond));
