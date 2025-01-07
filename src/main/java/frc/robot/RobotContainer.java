@@ -321,6 +321,22 @@ public class RobotContainer {
                 0.8,
                 2);
         driverXBox.b().whileTrue(exampleAutoAlignment);
+
+        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
+            driverXBox.a().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
+                    .addGamePieceProjectile(new ReefscapeAlgaeOnFly(
+                                    driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
+                                    new Translation2d(),
+                                    drive.getMeasuredChassisSpeedsRobotRelative(),
+                                    driveSimulation.getSimulatedDriveTrainPose().getRotation(),
+                                    0.4,
+                                    9,
+                                    Math.toRadians(70))
+                            .withProjectileTrajectoryDisplayCallBack(
+                                    (poses) -> Logger.recordOutput(
+                                            "successfulShotsTrajectory", poses.toArray(Pose3d[]::new)),
+                                    (poses) -> Logger.recordOutput(
+                                            "missedShotsTrajectory", poses.toArray(Pose3d[]::new))))));
     }
 
     public void configureLEDEffects() {
