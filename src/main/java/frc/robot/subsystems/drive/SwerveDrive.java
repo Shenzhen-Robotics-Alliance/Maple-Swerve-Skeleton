@@ -26,7 +26,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
-import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
@@ -34,6 +33,7 @@ import frc.robot.utils.Alert;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleTimeUtils;
 import java.util.OptionalDouble;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -342,7 +342,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
             builder.addDoubleProperty(
                     "Robot Angle",
                     () -> getFacing()
-                            .minus(FieldConstants.getDriverStationFacing())
+                            .minus(FieldMirroringUtils.getCurrentAllianceDriverStationFacing())
                             .getRadians(),
                     null);
         });

@@ -210,13 +210,11 @@ public class RobotContainer {
                 "Example Custom Auto With PathPlanner Trajectories",
                 new ExampleCustomAutoWithPathPlannerTrajectories());
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories: Rush", new ExampleCustomAutoWithChoreoTrajectories());
+                "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories());
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories2());
-        autoSendableChooser.addOption("Example Pathplanner Auto", new PathPlannerAutoWrapper("Example Auto"));
+                "Example Pathplanner Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
+        autoSendableChooser.addOption("Example Choreo Auto", new PathPlannerAutoWrapper("Example Auto Choreo"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
-        autoSendableChooser.addOption(
-                "Path Following Benchmark", new PathPlannerAutoWrapper("Path Following Benchmark"));
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
@@ -238,13 +236,14 @@ public class RobotContainer {
         return testsChooser;
     }
 
-    private boolean isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
+    private boolean isDSPresentedAsRed = FieldMirroringUtils.isSidePresentedAsRed();
     private Command autonomousCommand = Commands.none();
     private Auto previouslySelectedAuto = null;
     /** reconfigures button bindings if alliance station has changed re-create autos if not yet created */
     public void checkForCommandChanges() {
         final Auto selectedAuto = autoChooser.get();
-        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || selectedAuto != previouslySelectedAuto) {
+        if (FieldMirroringUtils.isSidePresentedAsRed() != isDSPresentedAsRed
+                || selectedAuto != previouslySelectedAuto) {
             try {
                 this.autonomousCommand =
                         selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
@@ -264,11 +263,11 @@ public class RobotContainer {
         }
 
         previouslySelectedAuto = selectedAuto;
-        isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
+        isDSPresentedAsRed = FieldMirroringUtils.isSidePresentedAsRed();
     }
 
     private void resetFieldAndOdometryForAuto(Pose2d robotStartingPoseAtBlueAlliance) {
-        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
+        final Pose2d startingPose = FieldMirroringUtils.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
 
         if (driveSimulation != null) {
             driveSimulation.setSimulationWorldPose(startingPose);
@@ -307,15 +306,19 @@ public class RobotContainer {
 
         /* TODO: aim at target and drive example, delete it for your project */
         final JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
-                driveInput, drive, FieldConstants.SPEAKER_POSITION_SUPPLIER, exampleShooterOptimization, 0.75);
+                driveInput,
+                drive,
+                () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
+                exampleShooterOptimization,
+                0.75);
         driverXBox.rightTrigger(0.5).whileTrue(exampleFaceTargetWhileDriving);
 
         /* auto alignment example, delete it for your project */
         final AutoAlignment exampleAutoAlignment = new AutoAlignment(
                 drive,
                 /* (position of AMP) */
-                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.3, Rotation2d.fromDegrees(90))),
-                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.74, Rotation2d.fromDegrees(90))),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(1.85, 7.3, Rotation2d.fromDegrees(90))),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(1.85, 7.74, Rotation2d.fromDegrees(90))),
                 new Pose2d(0.04, 0.04, Rotation2d.fromDegrees(2)),
                 0.8,
                 2);

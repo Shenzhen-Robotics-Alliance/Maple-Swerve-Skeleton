@@ -19,7 +19,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
-import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.LocalADStarAK;
 import org.ironmaple.utils.FieldMirroringUtils;
@@ -104,7 +103,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      */
     default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds, boolean discretize) {
-        final Rotation2d driverStationFacing = FieldConstants.getDriverStationFacing();
+        final Rotation2d driverStationFacing = FieldMirroringUtils.getCurrentAllianceDriverStationFacing();
         runRobotCentricChassisSpeeds(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
                         driverStationCentricSpeeds, getPose().getRotation().minus(driverStationFacing)),

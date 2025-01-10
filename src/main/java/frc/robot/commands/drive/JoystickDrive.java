@@ -9,12 +9,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
-import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
 public class JoystickDrive extends Command {
@@ -68,8 +68,8 @@ public class JoystickDrive extends Command {
         if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
 
         if (povButtonSupplier.get() != -1)
-            this.currentRotationMaintenanceSetpoint =
-                    FieldConstants.getDriverStationFacing().minus(Rotation2d.fromDegrees(povButtonSupplier.get()));
+            this.currentRotationMaintenanceSetpoint = FieldMirroringUtils.getCurrentAllianceDriverStationFacing()
+                    .minus(Rotation2d.fromDegrees(povButtonSupplier.get()));
 
         if (previousRotationalInputTimer.hasElapsed(
                 TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS))

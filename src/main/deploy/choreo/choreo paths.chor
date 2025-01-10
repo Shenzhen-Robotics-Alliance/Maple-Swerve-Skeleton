@@ -28,32 +28,32 @@
    }
   },
   "mass":{
-   "exp":"150 lbs",
-   "val":68.0388555
+   "exp":"115 lbs",
+   "val":52.16312255
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
    "val":6.0
   },
   "gearing":{
-   "exp":"6.5",
-   "val":6.5
+   "exp":"5.9",
+   "val":5.9
   },
   "radius":{
    "exp":"2 in",
    "val":0.0508
   },
   "vmax":{
-   "exp":"6000 RPM",
-   "val":628.3185307179587
+   "exp":"5700 RPM",
+   "val":596.9026041820607
   },
   "tmax":{
-   "exp":"1.2 N * m",
-   "val":1.2
+   "exp":"0.8 N * m",
+   "val":0.8
   },
   "cof":{
-   "exp":"1.5",
-   "val":1.5
+   "exp":"1",
+   "val":1.0
   },
   "bumper":{
    "front":{
