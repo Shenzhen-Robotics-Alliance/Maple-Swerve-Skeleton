@@ -11,6 +11,7 @@ import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -62,12 +63,14 @@ public class ModuleIOTalon implements ModuleIO {
     private final Debouncer steerConnectedDebounce = new Debouncer(0.5);
     private final Debouncer steerEncoderConnectedDebounce = new Debouncer(0.5);
 
-    public ModuleIOTalon(SwerveModuleConstants moduleConstants, String name) {
+    public ModuleIOTalon(
+            SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> moduleConstants,
+            String name) {
         this.name = name;
         this.moduleConstants = moduleConstants;
         driveTalon = new TalonFX(moduleConstants.DriveMotorId, TunerConstants.DrivetrainConstants.CANBusName);
         steerTalon = new TalonFX(moduleConstants.SteerMotorId, TunerConstants.DrivetrainConstants.CANBusName);
-        cancoder = new CANcoder(moduleConstants.CANcoderId, TunerConstants.DrivetrainConstants.CANBusName);
+        cancoder = new CANcoder(moduleConstants.EncoderId, TunerConstants.DrivetrainConstants.CANBusName);
 
         // Configure drive motor
         var driveConfig = moduleConstants.DriveMotorInitialConfigs;
@@ -91,7 +94,7 @@ public class ModuleIOTalon implements ModuleIO {
         var turnConfig = new TalonFXConfiguration();
         turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         turnConfig.Slot0 = moduleConstants.SteerMotorGains;
-        turnConfig.Feedback.FeedbackRemoteSensorID = moduleConstants.CANcoderId;
+        turnConfig.Feedback.FeedbackRemoteSensorID = moduleConstants.EncoderId;
         turnConfig.Feedback.FeedbackSensorSource = switch (moduleConstants.FeedbackSource) {
             case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
             case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
@@ -108,9 +111,9 @@ public class ModuleIOTalon implements ModuleIO {
         tryUntilOk(5, () -> steerTalon.getConfigurator().apply(turnConfig, 0.25));
 
         // Configure CANCoder
-        var cancoderConfig = moduleConstants.CANcoderInitialConfigs;
-        cancoderConfig.MagnetSensor.MagnetOffset = moduleConstants.CANcoderOffset;
-        cancoderConfig.MagnetSensor.SensorDirection = moduleConstants.CANcoderInverted
+        var cancoderConfig = moduleConstants.EncoderInitialConfigs;
+        cancoderConfig.MagnetSensor.MagnetOffset = moduleConstants.EncoderOffset;
+        cancoderConfig.MagnetSensor.SensorDirection = moduleConstants.EncoderInverted
                 ? SensorDirectionValue.Clockwise_Positive
                 : SensorDirectionValue.CounterClockwise_Positive;
         cancoder.getConfigurator().apply(cancoderConfig);

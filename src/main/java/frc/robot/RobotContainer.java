@@ -44,7 +44,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralAlgaeStack;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
@@ -322,12 +321,13 @@ public class RobotContainer {
                 2);
         driverXBox.b().whileTrue(exampleAutoAlignment);
 
+        ReefscapeAlgaeOnFly.setHitNetCallBack(() -> System.out.println("ALGAE hits NET!"));
         if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
             driverXBox.a().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
                     .addGamePieceProjectile(new ReefscapeAlgaeOnFly(
                                     driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
                                     new Translation2d(),
-                                    drive.getMeasuredChassisSpeedsRobotRelative(),
+                                    driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                                     driveSimulation.getSimulatedDriveTrainPose().getRotation(),
                                     0.4,
                                     9,
@@ -368,7 +368,5 @@ public class RobotContainer {
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-        Logger.recordOutput("FieldSimulation/StackedAlgae", ReefscapeCoralAlgaeStack.getStackedAlgaePoses());
-        Logger.recordOutput("FieldSimulation/StackedCoral", ReefscapeCoralAlgaeStack.getStackedCoralPoses());
     }
 }
