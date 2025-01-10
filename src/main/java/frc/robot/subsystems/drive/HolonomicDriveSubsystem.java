@@ -16,11 +16,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.LocalADStarAK;
+import frc.robot.utils.PPRobotConfigPrinter;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.ironmaple.utils.mathutils.MapleCommonMath;
 import org.littletonrobotics.junction.Logger;
@@ -137,6 +139,26 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     }
 
     default void configHolonomicPathPlannerAutoBuilder() {
+        RobotConfig robotConfig = new RobotConfig(
+                DriveTrainConstants.ROBOT_MASS,
+                DriveTrainConstants.ROBOT_MOI,
+                new ModuleConfig(
+                        DriveTrainConstants.WHEEL_RADIUS,
+                        DriveTrainConstants.CHASSIS_MAX_VELOCITY,
+                        DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
+                        DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
+                        DriveTrainConstants.DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT,
+                        1),
+                DriveTrainConstants.MODULE_TRANSLATIONS);
+        System.out.println("Generated pathplanner robot config with drive constants: ");
+        PPRobotConfigPrinter.printConfig(robotConfig);
+        try {
+            robotConfig = RobotConfig.fromGUISettings();
+            System.out.println("GUI robot config detected in deploy directory, switching: ");
+            PPRobotConfigPrinter.printConfig(robotConfig);
+        } catch (Exception e) {
+            DriverStation.reportError(e.getMessage(), false);
+        }
         AutoBuilder.configure(
                 this::getPoseWithLookAhead,
                 this::setPose,
@@ -145,17 +167,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 new PPHolonomicDriveController(
                         CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
                         CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),
-                new RobotConfig(
-                        DriveTrainConstants.ROBOT_MASS,
-                        DriveTrainConstants.ROBOT_MOI,
-                        new ModuleConfig(
-                                DriveTrainConstants.WHEEL_RADIUS,
-                                DriveTrainConstants.CHASSIS_MAX_VELOCITY,
-                                DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
-                                DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
-                                DriveTrainConstants.DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT,
-                                1),
-                        DriveTrainConstants.MODULE_TRANSLATIONS),
+                robotConfig,
                 FieldMirroringUtils::isSidePresentedAsRed,
                 this);
         Pathfinding.setPathfinder(new LocalADStarAK());
