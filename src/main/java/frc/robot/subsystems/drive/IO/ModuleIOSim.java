@@ -13,6 +13,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.DriveTrainConstants;
+import frc.robot.generated.TunerConstants;
 import java.util.Arrays;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -25,8 +26,7 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
  * The flywheel sims are not physically accurate, but provide a decent approximation for the behavior of the module.
  */
 public class ModuleIOSim implements ModuleIO {
-    private static final double DRIVE_KS = 0.04;
-    private static final double DRIVE_KP = 0.05;
+    private static final double DRIVE_KP = 0.12;
     private static final double STEER_KP = 8.0;
     private static final double STEER_KD = 0.0;
 
@@ -102,13 +102,16 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     private void calculateDriveControlLoops() {
-        double ffVolts = moduleSimulation.config.driveMotorConfigs.motor.getVoltage(
-                        0, desiredWheelVelocityRadPerSec * moduleSimulation.config.DRIVE_GEAR_RATIO)
-                + Math.signum(desiredWheelVelocityRadPerSec) * DRIVE_KS
-                + torqueFeedforwardVolts;
-        double fbVolts = driveController.calculate(
+        DCMotor motorModel = moduleSimulation.config.driveMotorConfigs.motor;
+        double frictionTorque =
+                motorModel.getTorque(motorModel.getCurrent(0, TunerConstants.FrontLeft.DriveFrictionVoltage))
+                        * Math.signum(desiredWheelVelocityRadPerSec);
+        double velocityFeedforwardVolts = motorModel.getVoltage(
+                frictionTorque, desiredWheelVelocityRadPerSec * moduleSimulation.config.DRIVE_GEAR_RATIO);
+        double feedforwardVolts = velocityFeedforwardVolts + torqueFeedforwardVolts;
+        double feedBackVolts = driveController.calculate(
                 moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond), desiredWheelVelocityRadPerSec);
-        driveAppliedVolts = ffVolts + fbVolts;
+        driveAppliedVolts = feedforwardVolts + feedBackVolts;
     }
 
     private void calculateSteerControlLoops() {

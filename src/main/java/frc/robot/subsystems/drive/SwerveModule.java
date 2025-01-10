@@ -6,6 +6,7 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveControlLoops.USE_TORQUE_FEEDFORWARD;
 import static frc.robot.constants.DriveTrainConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -96,6 +97,7 @@ public class SwerveModule extends MapleSubsystem {
         double wheelFeedforwardTorque = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
         double motorFeedforwardTorque = wheelFeedforwardTorque / DRIVE_GEAR_RATIO;
         Voltage motorFeedforwardVoltage = Volts.of(DRIVE_MOTOR.getVoltage(motorFeedforwardTorque, 0));
+        if (!USE_TORQUE_FEEDFORWARD) motorFeedforwardVoltage = Volts.zero();
         io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec, motorFeedforwardVoltage);
         Logger.recordOutput("ModuleFeedforwards/" + name + "/Voltage", motorFeedforwardVoltage.in(Volts));
         io.requestSteerPositionControl(newSetpoint.angle);

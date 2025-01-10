@@ -18,9 +18,9 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
  */
 public class DriveTrainConstants {
     /** numbers that needs to be changed to fit each robot TODO: change these numbers to match your robot */
-    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.05;
+    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.2;
 
-    public static final Mass ROBOT_MASS = Kilograms.of(45); // robot weight with bumpers
+    public static final Mass ROBOT_MASS = Kilograms.of(55); // robot weight with bumpers
 
     /** TODO: change motor type to match your robot */
     public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60(1);
@@ -72,8 +72,10 @@ public class DriveTrainConstants {
             .div(WHEEL_RADIUS);
 
     /* floor_speed = wheel_angular_velocity * wheel_radius */
-    public static final LinearVelocity CHASSIS_MAX_VELOCITY =
-            MetersPerSecond.of(DRIVE_MOTOR.freeSpeedRadPerSec / DRIVE_GEAR_RATIO * WHEEL_RADIUS.in(Meters));
+    public static final LinearVelocity CHASSIS_MAX_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR.getSpeed(
+                    DRIVE_MOTOR.getTorque(DRIVE_MOTOR.getCurrent(0, TunerConstants.FrontLeft.DriveFrictionVoltage)), 11)
+            / DRIVE_GEAR_RATIO
+            * WHEEL_RADIUS.in(Meters));
     public static final LinearAcceleration CHASSIS_MAX_ACCELERATION =
             (LinearAcceleration) Measure.min(MAX_FRICTION_ACCELERATION, MAX_PROPELLING_FORCE.div(ROBOT_MASS));
     public static final AngularVelocity CHASSIS_MAX_ANGULAR_VELOCITY =
