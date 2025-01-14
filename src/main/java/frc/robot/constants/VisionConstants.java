@@ -1,5 +1,7 @@
 package frc.robot.constants;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,6 +17,8 @@ public class VisionConstants {
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(10),
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.3,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(6),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG = 0.1,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG = Math.toRadians(3),
 
             /* standard deviation for odometry and gyros */
             ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
@@ -23,83 +27,144 @@ public class VisionConstants {
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             new PhotonCameraProperties(
                     "FrontCam",
-                    30,
-                    14,
-                    5,
-                    75,
+                    Hertz.of(30),
+                    Milliseconds.of(14),
+                    Milliseconds.of(5),
+                    Degrees.of(75),
                     0.6,
                     0.2,
                     1280,
                     720,
-                    new Translation2d(
-                            0.330, -0.127), // the outing position of the camera in relative to the robot center
-                    0.25, // the mounting height, in meters
-                    Rotation2d.fromDegrees(0), // the camera facing, 0 is front, positive is counter-clockwise
-                    24, // camera pitch angle, in degrees
-                    180 // camera roll angle, 0 for up-right and 180 for upside-down
-                    ),
+                    new Translation2d(0.3, 0),
+                    Meters.of(0.6),
+                    Rotation2d.fromDegrees(0),
+                    Degrees.of(40),
+                    Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontLeftCam",
-                    30,
-                    14,
-                    5,
-                    75,
+                    Hertz.of(30),
+                    Milliseconds.of(14),
+                    Milliseconds.of(5),
+                    Degrees.of(75),
                     0.6,
                     0.2,
                     1280,
                     720,
-                    new Translation2d(0.229, 0.348),
-                    0.2,
-                    Rotation2d.fromDegrees(30),
-                    30,
-                    180 // upside-down
-                    ),
+                    new Translation2d(0.3, 0.3),
+                    Meters.of(0.6),
+                    Rotation2d.fromDegrees(-30),
+                    Degrees.of(-30),
+                    Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontRightCam",
-                    30,
-                    14,
-                    5,
-                    75,
+                    Hertz.of(30),
+                    Milliseconds.of(14),
+                    Milliseconds.of(5),
+                    Degrees.of(75),
                     0.6,
                     0.2,
                     1280,
                     720,
-                    new Translation2d(0.229, -0.348),
-                    0.2,
-                    Rotation2d.fromDegrees(-30),
-                    30,
-                    180 // upside-down
-                    ),
+                    new Translation2d(0.3, -0.3),
+                    Meters.of(0.6),
+                    Rotation2d.fromDegrees(30),
+                    Degrees.of(-30),
+                    Degrees.zero()),
             new PhotonCameraProperties(
-                    "BackLeftCam",
-                    30,
-                    14,
-                    5,
-                    75,
+                    "BackCam",
+                    Hertz.of(30),
+                    Milliseconds.of(14),
+                    Milliseconds.of(5),
+                    Degrees.of(75),
                     0.6,
                     0.2,
                     1280,
                     720,
-                    new Translation2d(-0.229, 0.330),
-                    0.2,
-                    Rotation2d.fromDegrees(150),
-                    35,
-                    180 // upside-down
-                    ),
-            new PhotonCameraProperties(
-                    "BackRightCam",
-                    30,
-                    14,
-                    5,
-                    75,
-                    0.6,
-                    0.2,
-                    1280,
-                    720,
-                    new Translation2d(-0.229, -0.330),
-                    0.2,
-                    Rotation2d.fromDegrees(-150),
-                    35,
-                    180 // upside-down
-                    ));
+                    new Translation2d(-0.3, 0),
+                    Meters.of(0.3),
+                    Rotation2d.fromDegrees(180),
+                    Degrees.of(40),
+                    Degrees.zero()));
+    //            List.of(
+    //            new PhotonCameraProperties(
+    //                    "FrontCam",
+    //                    30,
+    //                    14,
+    //                    5,
+    //                    75,
+    //                    0.6,
+    //                    0.2,
+    //                    1280,
+    //                    720,
+    //                    new Translation2d(
+    //                            0.330, -0.127), // the outing position of the camera in relative to the robot center
+    //                    0.25, // the mounting height, in meters
+    //                    Rotation2d.fromDegrees(0), // the camera facing, 0 is front, positive is counter-clockwise
+    //                    24, // camera pitch angle, in degrees
+    //                    180 // camera roll angle, 0 for up-right and 180 for upside-down
+    //                    ),
+    //            new PhotonCameraProperties(
+    //                    "FrontLeftCam",
+    //                    30,
+    //                    14,
+    //                    5,
+    //                    75,
+    //                    0.6,
+    //                    0.2,
+    //                    1280,
+    //                    720,
+    //                    new Translation2d(0.229, 0.348),
+    //                    0.2,
+    //                    Rotation2d.fromDegrees(30),
+    //                    30,
+    //                    180 // upside-down
+    //                    ),
+    //            new PhotonCameraProperties(
+    //                    "FrontRightCam",
+    //                    30,
+    //                    14,
+    //                    5,
+    //                    75,
+    //                    0.6,
+    //                    0.2,
+    //                    1280,
+    //                    720,
+    //                    new Translation2d(0.229, -0.348),
+    //                    0.2,
+    //                    Rotation2d.fromDegrees(-30),
+    //                    30,
+    //                    180 // upside-down
+    //                    ),
+    //            new PhotonCameraProperties(
+    //                    "BackLeftCam",
+    //                    30,
+    //                    14,
+    //                    5,
+    //                    75,
+    //                    0.6,
+    //                    0.2,
+    //                    1280,
+    //                    720,
+    //                    new Translation2d(-0.229, 0.330),
+    //                    0.2,
+    //                    Rotation2d.fromDegrees(150),
+    //                    35,
+    //                    180 // upside-down
+    //                    ),
+    //            new PhotonCameraProperties(
+    //                    "BackRightCam",
+    //                    30,
+    //                    14,
+    //                    5,
+    //                    75,
+    //                    0.6,
+    //                    0.2,
+    //                    1280,
+    //                    720,
+    //                    new Translation2d(-0.229, -0.330),
+    //                    0.2,
+    //                    Rotation2d.fromDegrees(-150),
+    //                    35,
+    //                    180 // upside-down
+    //                    ));
 }

@@ -1,24 +1,29 @@
 package frc.robot.subsystems.vision.apriltags;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.photonvision.simulation.SimCameraProperties;
 
 public class PhotonCameraProperties {
     public final String name;
-    public final double frameRate,
-            averageLatencyMS,
-            latencyStandardDeviationMS,
-            calibrationAverageErrorPixel,
-            calibrationErrorStandardDeviation;
+    public final Frequency frameRate;
+    public final Time averageLatency, latencyStandardDeviation;
+    public final double calibrationAverageErrorPixel, calibrationErrorStandardDeviation;
     public final Rotation2d cameraFOVDiag;
     public final int captureWidthPixels, captureHeightPixels;
     public final Transform3d robotToCamera;
 
+    @Deprecated
     public PhotonCameraProperties(
             String name,
-            double frameRate,
+            double frameRateFPS,
             double averageLatencyMS,
             double latencyStandardDeviationMS,
             double cameraFOVDegreesDiag,
@@ -33,10 +38,42 @@ public class PhotonCameraProperties {
             double rotateImageDegrees) {
         this(
                 name,
+                Hertz.of(frameRateFPS),
+                Milliseconds.of(averageLatencyMS),
+                Milliseconds.of(latencyStandardDeviationMS),
+                Degrees.of(cameraFOVDegreesDiag),
+                calibrationAverageErrorPixel,
+                calibrationErrorStandardDeviation,
+                captureWidthPixels,
+                captureHeightPixels,
+                mountPositionOnRobotMeters,
+                Meters.of(mountHeightMeters),
+                cameraFacing,
+                Degrees.of(cameraPitchDegrees),
+                Degrees.of(rotateImageDegrees));
+    }
+
+    public PhotonCameraProperties(
+            String name,
+            Frequency frameRate,
+            Time averageLatency,
+            Time latencyStandardDeviation,
+            Angle cameraFOVDiag,
+            double calibrationAverageErrorPixel,
+            double calibrationErrorStandardDeviation,
+            int captureWidthPixels,
+            int captureHeightPixels,
+            Translation2d mountPositionOnRobotMeters,
+            Distance mountHeight,
+            Rotation2d cameraFacing,
+            Angle cameraPitch,
+            Angle rotateImage) {
+        this(
+                name,
                 frameRate,
-                averageLatencyMS,
-                latencyStandardDeviationMS,
-                Rotation2d.fromDegrees(cameraFOVDegreesDiag),
+                averageLatency,
+                latencyStandardDeviation,
+                new Rotation2d(cameraFOVDiag),
                 calibrationAverageErrorPixel,
                 calibrationErrorStandardDeviation,
                 captureWidthPixels,
@@ -44,17 +81,16 @@ public class PhotonCameraProperties {
                 new Transform3d(
                                 mountPositionOnRobotMeters.getX(),
                                 mountPositionOnRobotMeters.getY(),
-                                mountHeightMeters,
-                                new Rotation3d(0, -Math.toRadians(cameraPitchDegrees), cameraFacing.getRadians()))
-                        .plus(new Transform3d(
-                                new Translation3d(), new Rotation3d(Math.toRadians(rotateImageDegrees), 0, 0))));
+                                mountHeight.in(Meters),
+                                new Rotation3d(0, -cameraPitch.in(Radians), cameraFacing.getRadians()))
+                        .plus(new Transform3d(new Translation3d(), new Rotation3d(rotateImage.in(Radians), 0, 0))));
     }
 
     public PhotonCameraProperties(
             String name,
-            double frameRate,
-            double averageLatencyMS,
-            double latencyStandardDeviationMS,
+            Frequency frameRate,
+            Time averageLatency,
+            Time latencyStandardDeviation,
             Rotation2d cameraFOVDiag,
             double calibrationAverageErrorPixel,
             double calibrationErrorStandardDeviation,
@@ -63,8 +99,8 @@ public class PhotonCameraProperties {
             Transform3d robotToCamera) {
         this.name = name;
         this.frameRate = frameRate;
-        this.averageLatencyMS = averageLatencyMS;
-        this.latencyStandardDeviationMS = latencyStandardDeviationMS;
+        this.averageLatency = averageLatency;
+        this.latencyStandardDeviation = latencyStandardDeviation;
         this.cameraFOVDiag = cameraFOVDiag;
         this.calibrationAverageErrorPixel = calibrationAverageErrorPixel;
         this.calibrationErrorStandardDeviation = calibrationErrorStandardDeviation;
@@ -79,9 +115,9 @@ public class PhotonCameraProperties {
 
     public SimCameraProperties getSimulationProperties() {
         final SimCameraProperties cameraProperties = new SimCameraProperties();
-        cameraProperties.setFPS(frameRate);
-        cameraProperties.setAvgLatencyMs(averageLatencyMS);
-        cameraProperties.setLatencyStdDevMs(latencyStandardDeviationMS);
+        cameraProperties.setFPS(frameRate.in(Hertz));
+        cameraProperties.setAvgLatencyMs(averageLatency.in(Millisecond));
+        cameraProperties.setLatencyStdDevMs(latencyStandardDeviation.in(Millisecond));
         cameraProperties.setCalibration(captureWidthPixels, captureHeightPixels, cameraFOVDiag);
         cameraProperties.setCalibError(calibrationAverageErrorPixel, calibrationErrorStandardDeviation);
         return cameraProperties;
@@ -103,9 +139,9 @@ public class PhotonCameraProperties {
                           cameraToRobot: %s
                         }""",
                 name,
-                frameRate,
-                averageLatencyMS,
-                latencyStandardDeviationMS,
+                frameRate.in(Hertz),
+                averageLatency.in(Milliseconds),
+                latencyStandardDeviation.in(Milliseconds),
                 calibrationAverageErrorPixel,
                 calibrationErrorStandardDeviation,
                 cameraFOVDiag.toString(),
