@@ -13,34 +13,11 @@ import frc.robot.utils.CustomMaths.Statistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.littletonrobotics.junction.Logger;
 
 public class MapleMultiTagPoseEstimator {
-    public static final class RobotPoseEstimationResult {
-        public Pose2d pointEstimation;
-        public double translationXStandardDeviationMeters,
-                translationYStandardDeviationMeters,
-                rotationalStandardDeviationRadians;
-
-        public RobotPoseEstimationResult(
-                Pose2d pointEstimation,
-                double translationXStandardDeviationMeters,
-                double translationYStandardDeviationMeters,
-                double rotationalStandardDeviationRadians) {
-            this.pointEstimation = pointEstimation;
-            this.translationXStandardDeviationMeters = translationXStandardDeviationMeters;
-            this.translationYStandardDeviationMeters = translationYStandardDeviationMeters;
-            this.rotationalStandardDeviationRadians = rotationalStandardDeviationRadians;
-        }
-
-        public Matrix<N3, N1> getEstimationStandardError() {
-            return VecBuilder.fill(
-                    translationXStandardDeviationMeters,
-                    translationYStandardDeviationMeters,
-                    rotationalStandardDeviationRadians);
-        }
-    }
-
+    private OptionalInt tagToFocus;
     public static final boolean LOG_DETAILED_FILTERING_DATA = true;
     // Robot.CURRENT_ROBOT_MODE != RobotMode.REAL;
 
@@ -55,6 +32,15 @@ public class MapleMultiTagPoseEstimator {
         this.fieldLayout = aprilTagFieldLayout;
         this.filter = filter;
         this.camerasProperties = camerasProperties;
+        tagToFocus = OptionalInt.empty();
+    }
+
+    public void enableFocusMode(int tagIdToFocusOn) {
+        this.tagToFocus = OptionalInt.of(tagIdToFocusOn);
+    }
+
+    public void disableFocusMode() {
+        this.tagToFocus = OptionalInt.empty();
     }
 
     final List<Pose3d> robotPose3dObservationsMultiTag = new ArrayList<>(),
@@ -70,10 +56,7 @@ public class MapleMultiTagPoseEstimator {
         observedVisionTargetPoseInFieldLayout.clear();
 
         if (cameraInputs.length != camerasProperties.size())
-            throw new IllegalArgumentException("camera inputs length "
-                    + cameraInputs.length
-                    + " does not match camera properties size "
-                    + camerasProperties.size());
+            throw new CameraInputsLengthNotMatchException(cameraInputs.length, camerasProperties.size());
 
         for (int i = 0; i < cameraInputs.length; i++)
             if (cameraInputs[i].newPipeLineResultAvailable)
@@ -87,20 +70,18 @@ public class MapleMultiTagPoseEstimator {
 
         calculateVisibleTagsPosesForLog(cameraInput, cameraProperty, currentOdometryPose);
 
-        /* if there is multi-solvepnp result, we only trust that */
+        /* add multi-solvepnp result if present */
         Optional<Pose3d> multiSolvePNPPoseEstimation = calculateRobotPose3dFromMultiSolvePNPResult(
                 cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
-        if (multiSolvePNPPoseEstimation.isPresent()) {
-            robotPose3dObservationsMultiTag.add(multiSolvePNPPoseEstimation.get());
-            return;
-        }
+        multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
 
         for (int i = 0; i < cameraInput.currentTargetsCount; i++)
-            calculateRobotPose3dFromSingleObservation(
-                            cameraProperty.robotToCamera,
-                            cameraInput.bestCameraToTargets[i],
-                            cameraInput.fiducialMarksID[i])
-                    .ifPresent(robotPose3dObservationsSingleTag::add);
+            if (tagToFocus.isEmpty() || tagToFocus.getAsInt() == cameraInput.fiducialMarksID[i])
+                calculateRobotPose3dFromSingleObservation(
+                                cameraProperty.robotToCamera,
+                                cameraInput.bestCameraToTargets[i],
+                                cameraInput.fiducialMarksID[i])
+                        .ifPresent(robotPose3dObservationsSingleTag::add);
     }
 
     private Pose3d calculateObservedAprilTagTargetPose(
@@ -177,8 +158,12 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
+        boolean singleTagEstimationsMoreThan1 = validRobotPoseEstimationsSingleTag.size() >= 2;
+        boolean multiTagEstimationPresent = !validRobotPoseEstimationsMultiTag.isEmpty();
+        boolean focusModeEnabledAndSingleTagResultPresent =
+                tagToFocus.isPresent() && (!validRobotPoseEstimationsSingleTag.isEmpty());
         final boolean resultsCountSufficient =
-                validRobotPoseEstimationsSingleTag.size() >= 2 || (!validRobotPoseEstimationsMultiTag.isEmpty());
+                singleTagEstimationsMoreThan1 || multiTagEstimationPresent || focusModeEnabledAndSingleTagResultPresent;
 
         if (!resultsCountSufficient) return Optional.empty();
 
@@ -187,13 +172,18 @@ public class MapleMultiTagPoseEstimator {
         final List<Statistics.RotationEstimation> robotPoseEstimationsTheta = new ArrayList<>();
 
         for (Pose3d robotPoseEstimationSingleTag : validRobotPoseEstimationsSingleTag) {
-            robotPoseEstimationsXMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
-            robotPoseEstimationsYMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
+            double translationalStandardError = tagToFocus.isPresent()
+                    ? TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG
+                    : TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION;
+            double rotationalStandardError = tagToFocus.isPresent()
+                    ? ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG
+                    : ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION;
+            robotPoseEstimationsXMeters.add(
+                    new Statistics.Estimation(robotPoseEstimationSingleTag.getX(), translationalStandardError));
+            robotPoseEstimationsYMeters.add(
+                    new Statistics.Estimation(robotPoseEstimationSingleTag.getY(), translationalStandardError));
             robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
-                    robotPoseEstimationSingleTag.getRotation().toRotation2d(),
-                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION));
+                    robotPoseEstimationSingleTag.getRotation().toRotation2d(), rotationalStandardError));
         }
 
         for (Pose3d robotPoseEstimationMultiTag : validRobotPoseEstimationsMultiTag) {
@@ -255,5 +245,39 @@ public class MapleMultiTagPoseEstimator {
         Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/",
                 observedAprilTagsPoses.toArray(Pose3d[]::new));
+    }
+
+    public static final class CameraInputsLengthNotMatchException extends IllegalStateException {
+        public CameraInputsLengthNotMatchException(int cameraInputsLength, int cameraPropertiesLength) {
+            super("camera inputs length"
+                    + cameraInputsLength
+                    + " does not match cameras properties length: "
+                    + cameraPropertiesLength);
+        }
+    }
+
+    public static final class RobotPoseEstimationResult {
+        public Pose2d pointEstimation;
+        public double translationXStandardDeviationMeters,
+                translationYStandardDeviationMeters,
+                rotationalStandardDeviationRadians;
+
+        public RobotPoseEstimationResult(
+                Pose2d pointEstimation,
+                double translationXStandardDeviationMeters,
+                double translationYStandardDeviationMeters,
+                double rotationalStandardDeviationRadians) {
+            this.pointEstimation = pointEstimation;
+            this.translationXStandardDeviationMeters = translationXStandardDeviationMeters;
+            this.translationYStandardDeviationMeters = translationYStandardDeviationMeters;
+            this.rotationalStandardDeviationRadians = rotationalStandardDeviationRadians;
+        }
+
+        public Matrix<N3, N1> getEstimationStandardError() {
+            return VecBuilder.fill(
+                    translationXStandardDeviationMeters,
+                    translationYStandardDeviationMeters,
+                    rotationalStandardDeviationRadians);
+        }
     }
 }

@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Alert;
@@ -81,5 +82,9 @@ public class AprilTagVision extends MapleSubsystem {
             }
         }
         return totalTimeStampSeconds / camerasUsed;
+    }
+
+    public Command focusOnTarget(int tagId) {
+        return startEnd(() -> multiTagPoseEstimator.enableFocusMode(tagId), multiTagPoseEstimator::disableFocusMode);
     }
 }

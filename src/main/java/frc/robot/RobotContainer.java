@@ -322,7 +322,8 @@ public class RobotContainer {
                 new Pose2d(0.04, 0.04, Rotation2d.fromDegrees(2)),
                 0.8,
                 2);
-        driverXBox.b().whileTrue(exampleAutoAlignment);
+        // driverXBox.b().whileTrue(exampleAutoAlignment);
+        driverXBox.b().whileTrue(aprilTagVision.focusOnTarget(21));
 
         ReefscapeAlgaeOnFly.setHitNetCallBack(() -> System.out.println("ALGAE hits NET!"));
         if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
