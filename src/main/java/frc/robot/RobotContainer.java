@@ -321,10 +321,10 @@ public class RobotContainer {
                 drive,
                 aprilTagVision,
                 () -> new Pose2d(6.2, 4, Rotation2d.k180deg),
-                () -> new Pose2d(5.8, 4, Rotation2d.k180deg),
+                () -> new Pose2d(5.6, 4, Rotation2d.k180deg),
                 OptionalInt.of(21),
-                0.6,
-                MetersPerSecond.of(0.8));
+                0.5,
+                MetersPerSecond.of(0.4));
         driverXBox.b().whileTrue(exampleAutoAlignment);
 
         ReefscapeAlgaeOnFly.setHitNetCallBack(() -> System.out.println("ALGAE hits NET!"));

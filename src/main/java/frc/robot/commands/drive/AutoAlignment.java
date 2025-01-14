@@ -46,7 +46,7 @@ public class AutoAlignment extends SequentialCommandGroup {
         Command pathFindToTargetRough = pathFindToPose(
                         driveSubsystem, roughTarget, speedMultiplier, goalEndVelocityRoughApproach)
                 .until(() -> isPoseErrorInBound(driveSubsystem.getPose(), roughTarget.get(), ROUGH_APPROACH_TOLERANCE));
-        Command preciseAlignment = preciseAlignment(driveSubsystem, preciseTarget);
+        Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget);
         if (tagIdToFocus.isPresent())
             preciseAlignment = preciseAlignment.deadlineFor(vision.focusOnTarget(tagIdToFocus.getAsInt()));
         preciseAlignment = preciseAlignment.beforeStarting(toScheduleAtStartOfPreciseAlignment::schedule);
@@ -75,25 +75,30 @@ public class AutoAlignment extends SequentialCommandGroup {
                 Set.of(driveSubsystem));
     }
 
-    public static Command preciseAlignment(HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> preciseTarget) {
+    public static Command preciseAlignment(
+            HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> roughTarget, Supplier<Pose2d> preciseTarget) {
         return Commands.defer(
                 () -> AutoBuilder.followPath(getPreciseAlignmentPath(
                         driveSubsystem.getPose(),
+                        roughTarget.get(),
                         preciseTarget.get(),
                         driveSubsystem.getMeasuredChassisSpeedsFieldRelative())),
                 Set.of(driveSubsystem));
     }
 
     private static PathPlannerPath getPreciseAlignmentPath(
-            Pose2d currentRobotPose, Pose2d preciseTarget, ChassisSpeeds currentSpeedsFieldRelative) {
+            Pose2d currentRobotPose,
+            Pose2d roughTarget,
+            Pose2d preciseTarget,
+            ChassisSpeeds currentSpeedsFieldRelative) {
         Translation2d currentTranslationalSpeedsMPS = new Translation2d(
                 currentSpeedsFieldRelative.vxMetersPerSecond, currentSpeedsFieldRelative.vyMetersPerSecond);
-        Translation2d deltaPosition = preciseTarget.minus(currentRobotPose).getTranslation();
+        Translation2d deltaPosition = preciseTarget.getTranslation().minus(roughTarget.getTranslation());
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
                 new Pose2d(currentRobotPose.getTranslation(), currentTranslationalSpeedsMPS.getAngle()),
                 new Pose2d(preciseTarget.getTranslation(), deltaPosition.getAngle()));
 
-        PathConstraints constraints = new PathConstraints(1.2, 2.0, Math.toDegrees(180), Math.toDegrees(360));
+        PathConstraints constraints = new PathConstraints(0.8, 1.0, Math.toDegrees(180), Math.toDegrees(360));
 
         PathPlannerPath path = new PathPlannerPath(
                 waypoints,

@@ -158,12 +158,15 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
-        boolean singleTagEstimationsMoreThan1 = validRobotPoseEstimationsSingleTag.size() >= 2;
-        boolean multiTagEstimationPresent = !validRobotPoseEstimationsMultiTag.isEmpty();
-        boolean focusModeEnabledAndSingleTagResultPresent =
-                tagToFocus.isPresent() && (!validRobotPoseEstimationsSingleTag.isEmpty());
-        final boolean resultsCountSufficient =
-                singleTagEstimationsMoreThan1 || multiTagEstimationPresent || focusModeEnabledAndSingleTagResultPresent;
+        //        boolean singleTagEstimationsMoreThan1 = validRobotPoseEstimationsSingleTag.size() >= 2;
+        //        boolean multiTagEstimationPresent = !validRobotPoseEstimationsMultiTag.isEmpty();
+        //        boolean focusModeEnabledAndSingleTagResultPresent =
+        //                tagToFocus.isPresent() && (!validRobotPoseEstimationsSingleTag.isEmpty());
+        //        boolean resultsCountSufficient =
+        //                singleTagEstimationsMoreThan1 || multiTagEstimationPresent ||
+        // focusModeEnabledAndSingleTagResultPresent;
+        boolean resultsCountSufficient =
+                validRobotPoseEstimationsSingleTag.size() + validRobotPoseEstimationsMultiTag.size() > 0;
 
         if (!resultsCountSufficient) return Optional.empty();
 
