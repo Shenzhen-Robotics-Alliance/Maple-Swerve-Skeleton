@@ -5,6 +5,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -38,6 +40,7 @@ import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -314,16 +317,15 @@ public class RobotContainer {
         driverXBox.rightTrigger(0.5).whileTrue(exampleFaceTargetWhileDriving);
 
         /* auto alignment example, delete it for your project */
-        final AutoAlignment exampleAutoAlignment = new AutoAlignment(
+        AutoAlignment exampleAutoAlignment = new AutoAlignment(
                 drive,
-                /* (position of AMP) */
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(1.85, 7.3, Rotation2d.fromDegrees(90))),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(1.85, 7.74, Rotation2d.fromDegrees(90))),
-                new Pose2d(0.04, 0.04, Rotation2d.fromDegrees(2)),
-                0.8,
-                2);
-        // driverXBox.b().whileTrue(exampleAutoAlignment);
-        driverXBox.b().whileTrue(aprilTagVision.focusOnTarget(21));
+                aprilTagVision,
+                () -> new Pose2d(6.2, 4, Rotation2d.k180deg),
+                () -> new Pose2d(5.8, 4, Rotation2d.k180deg),
+                OptionalInt.of(21),
+                0.6,
+                MetersPerSecond.of(0.8));
+        driverXBox.b().whileTrue(exampleAutoAlignment);
 
         ReefscapeAlgaeOnFly.setHitNetCallBack(() -> System.out.println("ALGAE hits NET!"));
         if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
