@@ -10,7 +10,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.*;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
@@ -46,7 +44,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
@@ -69,7 +66,7 @@ public class RobotContainer {
     public final MapleShooterOptimization exampleShooterOptimization;
 
     // Controller
-    private final CommandXboxController driverXBox = new CommandXboxController(0);
+    private final OperatorMap operator = new OperatorMap.LeftHandedPS5(0);
 
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
@@ -289,17 +286,13 @@ public class RobotContainer {
      */
     public void configureButtonBindings() {
         /* joystick drive command */
-        final MapleJoystickDriveInput driveInput = MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
-        final JoystickDrive joystickDrive =
-                new JoystickDrive(driveInput, () -> true, driverXBox.getHID()::getPOV, drive);
+        final MapleJoystickDriveInput driveInput = operator.getDriveInput();
+        final JoystickDrive joystickDrive = new JoystickDrive(
+                driveInput, () -> true, operator.getController().getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
 
-        /* lock chassis with x-formation */
-        driverXBox.x().whileTrue(drive.lockChassisWithXFormation());
-
         /* reset gyro heading manually (in case the vision does not work) */
-        driverXBox
-                .start()
+        operator.resetOdometryButton()
                 .onTrue(Commands.runOnce(
                                 () -> drive.setPose(new Pose2d(
                                         drive.getPose().getTranslation(),
@@ -307,14 +300,17 @@ public class RobotContainer {
                                 drive)
                         .ignoringDisable(true));
 
+        /* lock chassis with x-formation */
+        operator.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
+
         /* TODO: aim at target and drive example, delete it for your project */
-        final JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
+        JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
                 driveInput,
                 drive,
                 () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
                 exampleShooterOptimization,
                 0.75);
-        driverXBox.rightTrigger(0.5).whileTrue(exampleFaceTargetWhileDriving);
+        operator.faceToTargetButton().whileTrue(exampleFaceTargetWhileDriving);
 
         /* auto alignment example, delete it for your project */
         AutoAlignment exampleAutoAlignment = new AutoAlignment(
@@ -325,30 +321,15 @@ public class RobotContainer {
                 OptionalInt.of(21),
                 0.5,
                 MetersPerSecond.of(0.4));
-        driverXBox.b().whileTrue(exampleAutoAlignment);
-
-        ReefscapeAlgaeOnFly.setHitNetCallBack(() -> System.out.println("ALGAE hits NET!"));
-        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
-            driverXBox.a().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
-                    .addGamePieceProjectile(new ReefscapeAlgaeOnFly(
-                                    driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                                    new Translation2d(),
-                                    driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                                    driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                                    0.4,
-                                    9,
-                                    Math.toRadians(70))
-                            .withProjectileTrajectoryDisplayCallBack(
-                                    (poses) -> Logger.recordOutput(
-                                            "successfulShotsTrajectory", poses.toArray(Pose3d[]::new)),
-                                    (poses) -> Logger.recordOutput(
-                                            "missedShotsTrajectory", poses.toArray(Pose3d[]::new))))));
+        operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
     }
 
     public void configureLEDEffects() {
         ledStatusLight.setDefaultCommand(ledStatusLight.showEnableDisableState());
 
-        driverXBox.a().onTrue(ledStatusLight.playAnimation(new LEDAnimation.Charging(Color.kOrange), 1));
+        operator.getController()
+                .button(1)
+                .onTrue(ledStatusLight.playAnimation(new LEDAnimation.Charging(Color.kOrange), 1));
     }
 
     /**
