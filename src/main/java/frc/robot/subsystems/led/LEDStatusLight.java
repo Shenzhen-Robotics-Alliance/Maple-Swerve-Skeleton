@@ -13,14 +13,18 @@ public class LEDStatusLight extends MapleSubsystem {
     private static AddressableLED led = null;
     private final Color[] ledColors;
     private final AddressableLEDBuffer buffer;
+    private final AddressableLEDBufferView view1, view2;
 
     public LEDStatusLight(int port, int length) {
         super("LED");
         // make sure length is even
         length = length / 2 * 2;
-        this.ledColors = new Color[length / 2];
+        this.ledColors = new Color[length / 2 - 1];
         Arrays.fill(ledColors, new Color());
         this.buffer = new AddressableLEDBuffer(length);
+
+        view1 = buffer.createView(0, length / 2).reversed();
+        view2 = buffer.createView(length / 2 + 1, length - 1);
 
         if (led != null) led.close();
         led = new AddressableLED(port);
@@ -32,10 +36,8 @@ public class LEDStatusLight extends MapleSubsystem {
     @Override
     public void periodic(double dt, boolean enabled) {
         for (int i = 0; i < ledColors.length; i++) {
-            int index1 = ledColors.length - 1 - i;
-            buffer.setLED(index1, ledColors[i]);
-            int index2 = ledColors.length + i;
-            buffer.setLED(index2, ledColors[i]);
+            view1.setLED(i, ledColors[i]);
+            view2.setLED(i, ledColors[i]);
         }
 
         led.setData(buffer);
@@ -65,7 +67,7 @@ public class LEDStatusLight extends MapleSubsystem {
 
     public Command showEnableDisableState() {
         return new ConditionalCommand(
-                        playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 3.5)
+                        playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
                                 .until(RobotState::isDisabled),
                         playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
                                 .until(RobotState::isEnabled),
