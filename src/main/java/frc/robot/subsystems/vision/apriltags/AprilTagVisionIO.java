@@ -22,19 +22,24 @@ public interface AprilTagVisionIO {
         public CameraInputs() {
             this.fiducialMarksID = new int[MAX_TARGET_PER_CAMERA];
             this.bestCameraToTargets = new Transform3d[MAX_TARGET_PER_CAMERA];
-            clear(false);
+            markAsDisconnected();
         }
 
-        public void clear(boolean cameraConnected) {
+        public void markAsConnectedButNoResult() {
             this.newPipeLineResultAvailable = false;
-            this.cameraConnected = cameraConnected;
+            this.cameraConnected = true;
             this.timeStampSeconds = 0;
             this.currentTargetsCount = 0;
             Arrays.fill(fiducialMarksID, -1);
             Arrays.fill(bestCameraToTargets, new Transform3d());
         }
 
-        public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult) {
+        public void markAsDisconnected() {
+            markAsConnectedButNoResult();
+            this.cameraConnected = false;
+        }
+
+        public void readFromPhotonPipeLine(PhotonPipelineResult pipelineResult) {
             this.newPipeLineResultAvailable = true;
             this.cameraConnected = true;
             this.timeStampSeconds = pipelineResult.getTimestampSeconds();

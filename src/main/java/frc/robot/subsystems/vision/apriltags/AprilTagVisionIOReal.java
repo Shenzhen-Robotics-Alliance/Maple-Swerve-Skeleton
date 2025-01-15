@@ -20,13 +20,18 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
             throw new IllegalStateException(
                     "inputs camera amount (" + inputs.camerasAmount + ") does not match actual cameras amount");
 
-        for (int i = 0; i < cameras.length; i++) {
-            List<PhotonPipelineResult> results = cameras[i].getAllUnreadResults();
-            // System.out.println("camera" + i + " results list length: " + results.size());
-            if (cameras[i].isConnected() && !results.isEmpty())
-                inputs.camerasInputs[i].fromPhotonPipeLine(results.get(results.size() - 1));
-            else inputs.camerasInputs[i].clear(cameras[i].isConnected());
+        for (int i = 0; i < cameras.length; i++) updateCameraInput(cameras[i], inputs.camerasInputs[i]);
+    }
+
+    private void updateCameraInput(PhotonCamera camera, CameraInputs cameraInput) {
+        if (!camera.isConnected()) {
+            cameraInput.markAsDisconnected();
+            return;
         }
+
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        if (results.isEmpty()) cameraInput.markAsConnectedButNoResult();
+        else cameraInput.readFromPhotonPipeLine(results.get(results.size() - 1));
     }
 
     @Override

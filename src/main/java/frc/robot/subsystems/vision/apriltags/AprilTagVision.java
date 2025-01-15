@@ -4,6 +4,7 @@ import static frc.robot.constants.LogPaths.*;
 import static frc.robot.constants.VisionConstants.*;
 import static frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator.RobotPoseEstimationResult;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
@@ -60,16 +61,22 @@ public class AprilTagVision extends MapleSubsystem {
 
         Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
-        SmartDashboard.putBoolean("Vision Result Trustable", result.isPresent());
-        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Presented", result.isPresent());
+        SmartDashboard.putBoolean("Vision Result Trustable", resultPresent);
+        Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Presented", resultPresent);
     }
 
-    private Pose2d displayVisionPointEstimateResult(Optional<RobotPoseEstimationResult> result) {
-        if (result.isEmpty()) return new Pose2d(-114514, -114514, new Rotation2d());
+    private RobotPoseEstimationResult previousResult =
+            new RobotPoseEstimationResult(new Pose2d(-114514, -114514, new Rotation2d()), 0, 0, 0);
+    private final Debouncer resultPresentDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
+    private boolean resultPresent = false;
 
-        if (Double.isInfinite(result.get().rotationalStandardDeviationRadians))
-            return new Pose2d(result.get().pointEstimation.getTranslation(), driveSubsystem.getFacing());
-        return result.get().pointEstimation;
+    private Pose2d displayVisionPointEstimateResult(Optional<RobotPoseEstimationResult> result) {
+        resultPresent = resultPresentDebouncer.calculate(result.isPresent());
+        if (!resultPresent) return new Pose2d(-114514, -114514, new Rotation2d());
+
+        Pose2d toReturn = result.orElse(previousResult).pointEstimation;
+        result.ifPresent(newResult -> previousResult = newResult);
+        return toReturn;
     }
 
     private double getResultsTimeStamp() {
