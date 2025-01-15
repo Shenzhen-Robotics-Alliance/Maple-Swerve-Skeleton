@@ -1,6 +1,6 @@
 package frc.robot.commands.drive;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.*;
@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,8 +26,12 @@ public class AutoAlignment extends SequentialCommandGroup {
     private static final Pose2d ROUGH_APPROACH_TOLERANCE = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(15));
     private Command toScheduleAtStartOfPreciseAlignment = Commands.none();
 
+    private static final LinearVelocity TRANSITION_SPEED = MetersPerSecond.of(0.2);
+    private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(1.2);
+    private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(2);
+
     public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, AprilTagVision vision, Supplier<Pose2d> targetPose) {
-        this(driveSubsystem, vision, targetPose, targetPose, OptionalInt.empty(), 0.75, MetersPerSecond.of(1));
+        this(driveSubsystem, vision, targetPose, targetPose, OptionalInt.empty(), 0.75);
     }
 
     /**
@@ -39,12 +44,10 @@ public class AutoAlignment extends SequentialCommandGroup {
             Supplier<Pose2d> roughTarget,
             Supplier<Pose2d> preciseTarget,
             OptionalInt tagIdToFocus,
-            double speedMultiplier,
-            LinearVelocity goalEndVelocityRoughApproach) {
+            double speedMultiplier) {
         super.addRequirements(driveSubsystem);
 
-        Command pathFindToTargetRough = pathFindToPose(
-                        driveSubsystem, roughTarget, speedMultiplier, goalEndVelocityRoughApproach)
+        Command pathFindToTargetRough = pathFindToPose(driveSubsystem, roughTarget, speedMultiplier, TRANSITION_SPEED)
                 .until(() -> isPoseErrorInBound(driveSubsystem.getPose(), roughTarget.get(), ROUGH_APPROACH_TOLERANCE));
         Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget);
         if (tagIdToFocus.isPresent())
@@ -98,12 +101,16 @@ public class AutoAlignment extends SequentialCommandGroup {
                 new Pose2d(currentRobotPose.getTranslation(), currentTranslationalSpeedsMPS.getAngle()),
                 new Pose2d(preciseTarget.getTranslation(), deltaPosition.getAngle()));
 
-        PathConstraints constraints = new PathConstraints(0.8, 1.0, Math.toDegrees(180), Math.toDegrees(360));
+        PathConstraints constraints = new PathConstraints(
+                PRECISE_ALIGNMENT_MAX_VELOCITY,
+                PRECISE_ALIGNMENT_MAX_ACCELERATION,
+                DegreesPerSecond.of(180),
+                DegreesPerSecondPerSecond.of(360));
 
         PathPlannerPath path = new PathPlannerPath(
                 waypoints,
                 constraints,
-                new IdealStartingState(currentTranslationalSpeedsMPS.getNorm(), currentRobotPose.getRotation()),
+                new IdealStartingState(TRANSITION_SPEED, currentRobotPose.getRotation()),
                 new GoalEndState(0.0, preciseTarget.getRotation()));
         path.preventFlipping = true;
 

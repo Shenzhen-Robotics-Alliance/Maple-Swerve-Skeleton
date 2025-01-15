@@ -5,8 +5,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -66,7 +64,7 @@ public class RobotContainer {
     public final MapleShooterOptimization exampleShooterOptimization;
 
     // Controller
-    private final OperatorMap operator = new OperatorMap.LeftHandedPS5(0);
+    private final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
 
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
@@ -316,11 +314,10 @@ public class RobotContainer {
         AutoAlignment exampleAutoAlignment = new AutoAlignment(
                 drive,
                 aprilTagVision,
-                () -> new Pose2d(6.2, 4, Rotation2d.k180deg),
-                () -> new Pose2d(5.6, 4, Rotation2d.k180deg),
+                () -> new Pose2d(6.4, 4, Rotation2d.k180deg),
+                () -> new Pose2d(5.74, 3.8, Rotation2d.k180deg),
                 OptionalInt.of(21),
-                0.5,
-                MetersPerSecond.of(0.4));
+                0.6);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
     }
 
