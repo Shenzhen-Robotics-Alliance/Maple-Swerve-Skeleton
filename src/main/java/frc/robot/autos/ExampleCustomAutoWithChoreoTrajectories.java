@@ -32,7 +32,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         robot.aprilTagVision,
                         PathPlannerPath.fromChoreoTrajectory("place second"),
                         () -> FieldMirroringUtils.toCurrentAlliancePose(
-                                new Pose2d(4.99, 5.17, Rotation2d.fromDegrees(-120))),
+                                new Pose2d(5.00, 5.17, Rotation2d.fromDegrees(-120))),
                         () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(11) : OptionalInt.of(20))
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab third"))
@@ -50,11 +50,21 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab fourth"))
                 .asProxy());
 
+        //        commandGroup.addCommands(AutoAlignment.followPathAndAutoAlign(
+        //                        robot.drive,
+        //                        robot.aprilTagVision,
+        //                        PathPlannerPath.fromChoreoTrajectory("place fourth center"),
+        //                        () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(3.24, 4.19,
+        // Rotation2d.kZero)),
+        //                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(7) :
+        // OptionalInt.of(18))
+        //                .asProxy());
         commandGroup.addCommands(AutoAlignment.followPathAndAutoAlign(
                         robot.drive,
                         robot.aprilTagVision,
                         PathPlannerPath.fromChoreoTrajectory("place fourth"),
-                        () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(3.24, 4.19, Rotation2d.kZero)),
+                        () -> FieldMirroringUtils.toCurrentAlliancePose(
+                                new Pose2d(3.73, 5.03, Rotation2d.fromDegrees(-60))),
                         () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(7) : OptionalInt.of(18))
                 .asProxy());
         return commandGroup;
