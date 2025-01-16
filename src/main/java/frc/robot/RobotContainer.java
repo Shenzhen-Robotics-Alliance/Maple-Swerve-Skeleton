@@ -9,6 +9,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -43,6 +44,7 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.ironmaple.utils.FieldMirroringUtils;
+import org.ironmaple.utils.mathutils.MapleCommonMath;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -53,6 +55,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * Instead, the structure of the robot (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+    public static final boolean SIMULATE_AUTO_PLACEMENT_INACCURACY = true;
+
     // pdp for akit logging
     public final LoggedPowerDistribution powerDistribution;
     // Subsystems
@@ -213,6 +217,7 @@ public class RobotContainer {
                 "Example Pathplanner Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
         autoSendableChooser.addOption("Example Choreo Auto", new PathPlannerAutoWrapper("Example Auto Choreo"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
+        autoSendableChooser.addOption("Example Auto Alignment", new ExampleCustomAutoWithAutoAlignment());
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
@@ -240,25 +245,23 @@ public class RobotContainer {
     /** reconfigures button bindings if alliance station has changed re-create autos if not yet created */
     public void checkForCommandChanges() {
         final Auto selectedAuto = autoChooser.get();
-        if (FieldMirroringUtils.isSidePresentedAsRed() != isDSPresentedAsRed
-                || selectedAuto != previouslySelectedAuto) {
-            try {
-                this.autonomousCommand =
-                        selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
-                configureAutoTriggers(
-                        new PathPlannerAuto(autonomousCommand, selectedAuto.getStartingPoseAtBlueAlliance()));
-            } catch (Exception e) {
-                this.autonomousCommand = Commands.none();
-                DriverStation.reportError(
-                        "Error Occurred while obtaining autonomous command: \n"
-                                + e.getMessage()
-                                + "\n"
-                                + Arrays.toString(e.getStackTrace()),
-                        false);
-                throw new RuntimeException(e);
-            }
-            resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
+        if (FieldMirroringUtils.isSidePresentedAsRed() == isDSPresentedAsRed & selectedAuto == previouslySelectedAuto)
+            return;
+
+        try {
+            this.autonomousCommand = selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
+            configureAutoTriggers(new PathPlannerAuto(autonomousCommand, selectedAuto.getStartingPoseAtBlueAlliance()));
+        } catch (Exception e) {
+            this.autonomousCommand = Commands.none();
+            DriverStation.reportError(
+                    "Error Occurred while obtaining autonomous command: \n"
+                            + e.getMessage()
+                            + "\n"
+                            + Arrays.toString(e.getStackTrace()),
+                    false);
+            throw new RuntimeException(e);
         }
+        resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
 
         previouslySelectedAuto = selectedAuto;
         isDSPresentedAsRed = FieldMirroringUtils.isSidePresentedAsRed();
@@ -268,13 +271,20 @@ public class RobotContainer {
         final Pose2d startingPose = FieldMirroringUtils.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
 
         if (driveSimulation != null) {
-            driveSimulation.setSimulationWorldPose(startingPose);
+            Transform2d placementError = new Transform2d(
+                    MapleCommonMath.generateRandomNormal(0, 0.2),
+                    MapleCommonMath.generateRandomNormal(0, 0.2),
+                    Rotation2d.fromDegrees(MapleCommonMath.generateRandomNormal(0, 1)));
+            driveSimulation.setSimulationWorldPose(startingPose.plus(placementError));
             SimulatedArena.getInstance().resetFieldForAuto();
-            updateFieldSimAndDisplay();
         }
 
-        drive.periodic();
-        drive.setPose(startingPose);
+        aprilTagVision
+                .focusOnTarget(-1)
+                .withTimeout(0.1)
+                .andThen(Commands.runOnce(() -> drive.setPose(startingPose), drive))
+                .ignoringDisable(true)
+                .schedule();
     }
 
     /**
@@ -311,12 +321,12 @@ public class RobotContainer {
         operator.faceToTargetButton().whileTrue(exampleFaceTargetWhileDriving);
 
         /* auto alignment example, delete it for your project */
-        AutoAlignment exampleAutoAlignment = new AutoAlignment(
+        Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
                 () -> new Pose2d(6.4, 4, Rotation2d.k180deg),
                 () -> new Pose2d(5.74, 3.8, Rotation2d.k180deg),
-                OptionalInt.of(21),
+                () -> OptionalInt.of(21),
                 0.6);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
     }
