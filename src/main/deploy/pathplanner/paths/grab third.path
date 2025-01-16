@@ -67,7 +67,7 @@
   "folder": "four corals",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": -120.06858282186235
   },
   "useDefaultConstraints": true
 }
