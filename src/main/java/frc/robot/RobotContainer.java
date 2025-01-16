@@ -214,8 +214,7 @@ public class RobotContainer {
         autoSendableChooser.addOption(
                 "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories());
         autoSendableChooser.addOption(
-                "Example Pathplanner Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
-        autoSendableChooser.addOption("Example Choreo Auto", new PathPlannerAutoWrapper("Example Auto Choreo"));
+                "Example Pathplanner GUI Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
         autoSendableChooser.addOption("Example Auto Alignment", new ExampleCustomAutoWithAutoAlignment());
         // TODO: add your autos here
