@@ -15,13 +15,20 @@ public class ExampleCustomAutoWithPathPlannerTrajectories implements Auto {
     public Command getAutoCommand(RobotContainer robot) throws IOException, ParseException {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
 
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place first")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab second")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place second")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab third")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place third")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab fourth")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("score fourth")));
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place first"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab second"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place second"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab third"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place third"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab fourth"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("score fourth"))
+                .asProxy());
 
         return commandGroup;
     }

@@ -13,7 +13,6 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.utils.ChassisHeadingController;
@@ -21,46 +20,85 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.ironmaple.utils.FieldMirroringUtils;
 
-public class AutoAlignment extends SequentialCommandGroup {
+public class AutoAlignment {
     private static final Pose2d ROUGH_APPROACH_TOLERANCE = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(15));
-    private Command toScheduleAtStartOfPreciseAlignment = Commands.none();
 
     private static final LinearVelocity TRANSITION_SPEED = MetersPerSecond.of(0.2);
     private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(1.2);
     private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(2);
 
-    public AutoAlignment(HolonomicDriveSubsystem driveSubsystem, AprilTagVision vision, Supplier<Pose2d> targetPose) {
-        this(driveSubsystem, vision, targetPose, targetPose, OptionalInt.empty(), 0.75);
+    public static Command pathFindAndAutoAlign(
+            HolonomicDriveSubsystem driveSubsystem,
+            AprilTagVision vision,
+            Supplier<Pose2d> roughTarget,
+            Supplier<Pose2d> preciseTarget,
+            Supplier<OptionalInt> tagIdToFocus,
+            double pathFindingSpeedRatio) {
+        return pathFindAndAutoAlign(
+                driveSubsystem,
+                vision,
+                roughTarget,
+                preciseTarget,
+                tagIdToFocus,
+                pathFindingSpeedRatio,
+                Commands.none());
     }
 
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
      * path-find to the target pose, roughly 2. accurate auto alignment
      */
-    public AutoAlignment(
+    public static Command pathFindAndAutoAlign(
             HolonomicDriveSubsystem driveSubsystem,
             AprilTagVision vision,
             Supplier<Pose2d> roughTarget,
             Supplier<Pose2d> preciseTarget,
-            OptionalInt tagIdToFocus,
-            double speedMultiplier) {
-        super.addRequirements(driveSubsystem);
-
-        Command pathFindToTargetRough = pathFindToPose(driveSubsystem, roughTarget, speedMultiplier, TRANSITION_SPEED)
+            Supplier<OptionalInt> tagIdToFocus,
+            double pathFindingSpeedRatio,
+            Command toScheduleAtStartOfPreciseAlignment) {
+        Command pathFindToRoughTarget = pathFindToPose(
+                        driveSubsystem, roughTarget, pathFindingSpeedRatio, TRANSITION_SPEED)
                 .until(() -> isPoseErrorInBound(driveSubsystem.getPose(), roughTarget.get(), ROUGH_APPROACH_TOLERANCE));
         Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget);
-        if (tagIdToFocus.isPresent())
-            preciseAlignment = preciseAlignment.deadlineFor(vision.focusOnTarget(tagIdToFocus.getAsInt()));
+        preciseAlignment = preciseAlignment.deadlineFor(vision.focusOnTarget(tagIdToFocus));
         preciseAlignment = preciseAlignment.beforeStarting(toScheduleAtStartOfPreciseAlignment::schedule);
 
-        super.addCommands(pathFindToTargetRough);
-        super.addCommands(preciseAlignment);
+        return pathFindToRoughTarget.andThen(preciseAlignment);
     }
 
-    public AutoAlignment withScheduleCommandAtStartOfPreciseAlignment(Command toScheduleAtStartOfPreciseAlignment) {
-        this.toScheduleAtStartOfPreciseAlignment = toScheduleAtStartOfPreciseAlignment;
-        return this;
+    public static Command followPathAndAutoAlign(
+            HolonomicDriveSubsystem driveSubsystem,
+            AprilTagVision vision,
+            PathPlannerPath path,
+            Supplier<Pose2d> preciseTarget,
+            Supplier<OptionalInt> tagIdToFocus) {
+        return followPathAndAutoAlign(driveSubsystem, vision, path, preciseTarget, tagIdToFocus, Commands.none());
+    }
+
+    public static Command followPathAndAutoAlign(
+            HolonomicDriveSubsystem driveSubsystem,
+            AprilTagVision vision,
+            PathPlannerPath path,
+            Supplier<Pose2d> preciseTarget,
+            Supplier<OptionalInt> tagIdToFocus,
+            Command toScheduleAtStartOfPreciseAlignment) {
+        Pose2d pathEndingPoseAtBlue = new Pose2d(
+                path.getPathPoses().get(path.getPathPoses().size() - 1).getTranslation(),
+                path.getGoalEndState().rotation());
+        Command followPath = AutoBuilder.followPath(path)
+                .until(() -> isPoseErrorInBound(
+                        driveSubsystem.getPose(),
+                        FieldMirroringUtils.toCurrentAlliancePose(pathEndingPoseAtBlue),
+                        ROUGH_APPROACH_TOLERANCE));
+
+        Command preciseAlignment = preciseAlignment(
+                driveSubsystem, () -> FieldMirroringUtils.toCurrentAlliancePose(pathEndingPoseAtBlue), preciseTarget);
+        preciseAlignment = preciseAlignment.deadlineFor(vision.focusOnTarget(tagIdToFocus));
+        preciseAlignment = preciseAlignment.beforeStarting(toScheduleAtStartOfPreciseAlignment::schedule);
+
+        return followPath.andThen(preciseAlignment);
     }
 
     public static Command pathFindToPose(

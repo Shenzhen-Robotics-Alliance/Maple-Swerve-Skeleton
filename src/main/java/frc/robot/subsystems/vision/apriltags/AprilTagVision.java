@@ -15,6 +15,8 @@ import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Alert;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class AprilTagVision extends MapleSubsystem {
@@ -93,5 +95,11 @@ public class AprilTagVision extends MapleSubsystem {
 
     public Command focusOnTarget(int tagId) {
         return startEnd(() -> multiTagPoseEstimator.enableFocusMode(tagId), multiTagPoseEstimator::disableFocusMode);
+    }
+
+    public Command focusOnTarget(Supplier<OptionalInt> tagIdSupplier) {
+        return startEnd(
+                () -> tagIdSupplier.get().ifPresent(multiTagPoseEstimator::enableFocusMode),
+                multiTagPoseEstimator::disableFocusMode);
     }
 }
