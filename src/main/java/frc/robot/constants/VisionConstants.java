@@ -15,10 +15,10 @@ public class VisionConstants {
             /* default standard error for vision observation, if only one apriltag observed */
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 1.5,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(15),
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.3,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(6),
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG = 0.1,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG = Math.toRadians(3),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.5,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(8),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG = 0.5,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG = Math.toRadians(8),
 
             /* standard deviation for odometry and gyros */
             ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
@@ -51,7 +51,7 @@ public class VisionConstants {
                     1280,
                     720,
                     new Translation2d(0.2, 0.3),
-                    Meters.of(0.55),
+                    Meters.of(0.7),
                     Rotation2d.fromDegrees(-35),
                     Degrees.of(-25),
                     Degrees.zero()),
@@ -66,7 +66,7 @@ public class VisionConstants {
                     1280,
                     720,
                     new Translation2d(0.2, -0.3),
-                    Meters.of(0.55),
+                    Meters.of(0.7),
                     Rotation2d.fromDegrees(35),
                     Degrees.of(-25),
                     Degrees.zero()),

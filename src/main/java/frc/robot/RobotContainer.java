@@ -325,9 +325,9 @@ public class RobotContainer {
         Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> new Pose2d(6.4, 4, Rotation2d.k180deg),
-                () -> new Pose2d(5.74, 3.8, Rotation2d.k180deg),
-                () -> OptionalInt.of(21),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.4, 4, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.74, 3.8, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
                 0.6);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
     }

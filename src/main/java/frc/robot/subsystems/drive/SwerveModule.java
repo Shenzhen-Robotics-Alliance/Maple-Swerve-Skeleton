@@ -83,11 +83,6 @@ public class SwerveModule extends MapleSubsystem {
             SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
         newSetpoint = SwerveModuleState.optimize(newSetpoint, setPoint.angle);
 
-        if (Math.abs(newSetpoint.speedMetersPerSecond) < 0.01) {
-            stop();
-            return this.setPoint = new SwerveModuleState(0, setPoint.angle);
-        }
-
         double desiredWheelVelocityRadPerSec = newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters);
         Translation2d force2d = new Translation2d(
                 robotRelativeFeedforwardForceX.in(Newtons), robotRelativeFeedforwardForceY.in(Newtons));
