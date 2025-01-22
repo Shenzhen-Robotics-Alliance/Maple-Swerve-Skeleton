@@ -2,7 +2,6 @@ package frc.robot.subsystems.vision.apriltags;
 
 import static frc.robot.constants.LogPaths.*;
 import static frc.robot.constants.VisionConstants.*;
-import static frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator.RobotPoseEstimationResult;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotState;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.Alert;
@@ -47,7 +47,7 @@ public class AprilTagVision extends MapleSubsystem {
         this.driveSubsystem = driveSubsystem;
     }
 
-    private Optional<RobotPoseEstimationResult> result = Optional.empty();
+    private Optional<MapleMultiTagPoseEstimator.VisionObservation> result = Optional.empty();
 
     @Override
     public void periodic(double dt, boolean enabled) {
@@ -57,9 +57,9 @@ public class AprilTagVision extends MapleSubsystem {
         for (int i = 0; i < inputs.camerasInputs.length; i++)
             this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
 
-        result = multiTagPoseEstimator.estimateRobotPose(inputs.camerasInputs, driveSubsystem.getPose());
-        result.ifPresent(robotPoseEstimationResult ->
-                driveSubsystem.addVisionMeasurement(robotPoseEstimationResult, getResultsTimeStamp()));
+        result = multiTagPoseEstimator.estimateRobotPose(
+                inputs.camerasInputs, driveSubsystem.getPose(), getResultsTimeStamp());
+        result.ifPresent(RobotState.getInstance()::addVisionObservation);
 
         Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Results/Estimated Pose", displayVisionPointEstimateResult(result));
@@ -67,17 +67,19 @@ public class AprilTagVision extends MapleSubsystem {
         Logger.recordOutput(APRIL_TAGS_VISION_PATH + "Results/Presented", resultPresent);
     }
 
-    private RobotPoseEstimationResult previousResult =
-            new RobotPoseEstimationResult(new Pose2d(-114514, -114514, new Rotation2d()), 0, 0, 0);
+    private static final Pose2d EMPTY_DISPLAY = new Pose2d(-114514, -114514, new Rotation2d());
+    private Optional<MapleMultiTagPoseEstimator.VisionObservation> previousResult = Optional.empty();
     private final Debouncer resultPresentDebouncer = new Debouncer(0.1, Debouncer.DebounceType.kFalling);
     private boolean resultPresent = false;
 
-    private Pose2d displayVisionPointEstimateResult(Optional<RobotPoseEstimationResult> result) {
+    private Pose2d displayVisionPointEstimateResult(Optional<MapleMultiTagPoseEstimator.VisionObservation> result) {
         resultPresent = resultPresentDebouncer.calculate(result.isPresent());
-        if (!resultPresent) return new Pose2d(-114514, -114514, new Rotation2d());
+        if (!resultPresent) return EMPTY_DISPLAY;
 
-        Pose2d toReturn = result.orElse(previousResult).pointEstimation;
-        result.ifPresent(newResult -> previousResult = newResult);
+        Pose2d toReturn = result.orElse(
+                        previousResult.orElse(new MapleMultiTagPoseEstimator.VisionObservation(EMPTY_DISPLAY, null, 0)))
+                .visionPose();
+        result.ifPresent(newResult -> previousResult = Optional.of(newResult));
         return toReturn;
     }
 

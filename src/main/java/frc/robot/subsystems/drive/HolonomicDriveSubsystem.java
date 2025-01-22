@@ -20,7 +20,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.DriveTrainConstants;
-import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.LocalADStarAK;
 import frc.robot.utils.PPRobotConfigPrinter;
 import org.ironmaple.utils.FieldMirroringUtils;
@@ -66,15 +65,6 @@ public interface HolonomicDriveSubsystem extends Subsystem {
 
     /** Resets the current odometry Pose to a given Pose */
     void setPose(Pose2d currentPose);
-
-    /**
-     * Adds a vision measurement to the pose estimator.
-     *
-     * @param poseEstimationResult the pose estimation result
-     * @param timestamp The timestamp of the vision measurement in seconds.
-     */
-    default void addVisionMeasurement(
-            MapleMultiTagPoseEstimator.RobotPoseEstimationResult poseEstimationResult, double timestamp) {}
 
     /** @return the measured(actual) velocities of the chassis, robot-relative */
     ChassisSpeeds getMeasuredChassisSpeedsRobotRelative();
@@ -163,10 +153,10 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         Pathfinding.setPathfinder(new LocalADStarAK());
         PathPlannerLogging.setLogActivePathCallback((activePath) -> {
             final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
-            Logger.recordOutput("Odometry/Trajectory", trajectory);
+            Logger.recordOutput("RobotState/Trajectory", trajectory);
         });
         PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose));
+                (targetPose) -> Logger.recordOutput("RobotState/TrajectorySetpoint", targetPose));
     }
 
     static boolean isZero(ChassisSpeeds chassisSpeeds) {

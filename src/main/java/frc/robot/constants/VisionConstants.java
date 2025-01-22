@@ -6,11 +6,13 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import java.util.List;
 
 public class VisionConstants {
     public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final Time POSE_BUFFER_DURATION = Seconds.of(2.5);
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 1.5,

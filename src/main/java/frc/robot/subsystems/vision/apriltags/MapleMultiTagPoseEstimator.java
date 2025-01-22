@@ -140,8 +140,8 @@ public class MapleMultiTagPoseEstimator {
      * @param cameraInputs the inputs of the cameras
      * @return (optionally) the best guess of the robot pose and the standard error, if there are valid targets
      */
-    public Optional<RobotPoseEstimationResult> estimateRobotPose(
-            AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose) {
+    public Optional<VisionObservation> estimateRobotPose(
+            AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose, double timeStampSeconds) {
         if (cameraInputs.length != camerasProperties.size())
             throw new IllegalStateException("camera inputs length"
                     + cameraInputs.length
@@ -154,10 +154,10 @@ public class MapleMultiTagPoseEstimator {
 
         if (LOG_DETAILED_FILTERING_DATA) logFilteringData();
 
-        return getEstimationResultFromValidObservations();
+        return getEstimationResultFromValidObservations(timeStampSeconds);
     }
 
-    private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
+    private Optional<VisionObservation> getEstimationResultFromValidObservations(double timeStampSeconds) {
         //        boolean singleTagEstimationsMoreThan1 = validRobotPoseEstimationsSingleTag.size() >= 2;
         //        boolean multiTagEstimationPresent = !validRobotPoseEstimationsMultiTag.isEmpty();
         //        boolean focusModeEnabledAndSingleTagResultPresent =
@@ -219,11 +219,11 @@ public class MapleMultiTagPoseEstimator {
         Logger.recordOutput(
                 "Vision/MeasurementErrors/rotationalStandardDevs", Math.toDegrees(estimationStandardErrorTheta));
 
-        return Optional.of(new RobotPoseEstimationResult(
+        return Optional.of(VisionObservation.create(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
-                estimationStandardDevsX,
-                estimationStandardDevsY,
-                estimationStandardErrorTheta));
+                Math.hypot(estimationStandardDevsX, estimationStandardDevsY),
+                estimationStandardErrorTheta,
+                timeStampSeconds));
     }
 
     /** Log the filtering data */
@@ -250,37 +250,28 @@ public class MapleMultiTagPoseEstimator {
                 observedAprilTagsPoses.toArray(Pose3d[]::new));
     }
 
+    public record VisionObservation(Pose2d visionPose, Matrix<N3, N1> stdDevs, double timestamp) {
+        public static VisionObservation create(
+                Pose2d visionPose,
+                double translationalStandardDeviation,
+                double rotationalStandardDeviation,
+                double timestamp) {
+            return new VisionObservation(
+                    visionPose,
+                    VecBuilder.fill(
+                            translationalStandardDeviation,
+                            translationalStandardDeviation,
+                            rotationalStandardDeviation),
+                    timestamp);
+        }
+    }
+
     public static final class CameraInputsLengthNotMatchException extends IllegalStateException {
         public CameraInputsLengthNotMatchException(int cameraInputsLength, int cameraPropertiesLength) {
             super("camera inputs length"
                     + cameraInputsLength
                     + " does not match cameras properties length: "
                     + cameraPropertiesLength);
-        }
-    }
-
-    public static final class RobotPoseEstimationResult {
-        public Pose2d pointEstimation;
-        public double translationXStandardDeviationMeters,
-                translationYStandardDeviationMeters,
-                rotationalStandardDeviationRadians;
-
-        public RobotPoseEstimationResult(
-                Pose2d pointEstimation,
-                double translationXStandardDeviationMeters,
-                double translationYStandardDeviationMeters,
-                double rotationalStandardDeviationRadians) {
-            this.pointEstimation = pointEstimation;
-            this.translationXStandardDeviationMeters = translationXStandardDeviationMeters;
-            this.translationYStandardDeviationMeters = translationYStandardDeviationMeters;
-            this.rotationalStandardDeviationRadians = rotationalStandardDeviationRadians;
-        }
-
-        public Matrix<N3, N1> getEstimationStandardError() {
-            return VecBuilder.fill(
-                    translationXStandardDeviationMeters,
-                    translationYStandardDeviationMeters,
-                    rotationalStandardDeviationRadians);
         }
     }
 }
