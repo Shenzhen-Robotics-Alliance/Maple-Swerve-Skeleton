@@ -301,6 +301,20 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
             new SysIdRoutine.Config(
                     null, null, null, (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(this::runCharacterization, null, this));
+    /*
+    * To run characterization for swerve:
+    *   1. Select SysId command on dashboard and run robot test.
+    *   2. Export the log file using AdvantageScope, (Format: "WPILOG", Timestamps:"AdvantageKit Cycles", Prefixes:"Drive/,RealOutputs/Drive/SysIdState").
+    *   3. Open the exported log file with Wpilib SysId Tool, select the data:
+    *       - Test State: RealOutputs/Drive/SysIdState
+    *       - Velocity: Drive/Module-MODULE_NAME/DriveWheelFinalVelocityRevolutionsPerSecond
+    *       - Position: Drive/Module-MODULE_NAME/DriveWheelFinalRevolutions
+    *       - Voltage: Drive/Module-MODULE_NAME/DriveAppliedVolts
+    *   4. Calculate the gains for ALL FOUR modules, take the average.
+    *       - Note that if the difference between modules are too big, SOMETHING IS WRONG.
+    *   4. The calculated kS is correct; but kV NEEDS TO BE DIVIDED BY GEAR RATIO.
+    *   5. Don't use the calculated kP, tune the kP manually.
+    * */
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
         return sysId.quasistatic(direction);
