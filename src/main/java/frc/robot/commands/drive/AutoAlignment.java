@@ -25,9 +25,9 @@ import org.ironmaple.utils.FieldMirroringUtils;
 public class AutoAlignment {
     private static final Pose2d ROUGH_APPROACH_TOLERANCE = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(15));
 
-    private static final LinearVelocity TRANSITION_SPEED = MetersPerSecond.of(0.5);
-    private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(0.7);
-    private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.7);
+    private static final LinearVelocity TRANSITION_SPEED = MetersPerSecond.of(0.4);
+    private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(0.8);
+    private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(1);
 
     public static Command pathFindAndAutoAlign(
             HolonomicDriveSubsystem driveSubsystem,
