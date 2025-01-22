@@ -26,8 +26,8 @@ public class AutoAlignment {
     private static final Pose2d ROUGH_APPROACH_TOLERANCE = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(15));
 
     private static final LinearVelocity TRANSITION_SPEED = MetersPerSecond.of(0.5);
-    private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(1);
-    private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(2);
+    private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(0.7);
+    private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(0.7);
 
     public static Command pathFindAndAutoAlign(
             HolonomicDriveSubsystem driveSubsystem,
@@ -107,13 +107,17 @@ public class AutoAlignment {
             double speedMultiplier,
             LinearVelocity goalEndVelocity) {
         return Commands.defer(
-                () -> AutoBuilder.pathfindToPose(
-                                targetPose.get(), driveSubsystem.getChassisConstrains(speedMultiplier), goalEndVelocity)
-                        .beforeStarting(Commands.runOnce(() -> ChassisHeadingController.getInstance()
-                                .setHeadingRequest(new ChassisHeadingController.NullRequest())))
-                        .finallyDo(() -> ChassisHeadingController.getInstance()
-                                .setHeadingRequest(new ChassisHeadingController.NullRequest())),
-                Set.of(driveSubsystem));
+                        () -> AutoBuilder.pathfindToPose(
+                                        targetPose.get(),
+                                        driveSubsystem.getChassisConstrains(speedMultiplier),
+                                        goalEndVelocity)
+                                .beforeStarting(Commands.runOnce(() -> ChassisHeadingController.getInstance()
+                                        .setHeadingRequest(new ChassisHeadingController.NullRequest())))
+                                .finallyDo(() -> ChassisHeadingController.getInstance()
+                                        .setHeadingRequest(new ChassisHeadingController.NullRequest())),
+                        Set.of(driveSubsystem))
+                .finallyDo(() -> JoystickDrive.currentRotationMaintenanceSetpoint =
+                        targetPose.get().getRotation());
     }
 
     public static Command preciseAlignment(

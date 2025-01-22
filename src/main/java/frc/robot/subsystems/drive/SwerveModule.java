@@ -6,6 +6,7 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveControlLoops.SWERVE_VELOCITY_DEADBAND;
 import static frc.robot.constants.DriveControlLoops.USE_TORQUE_FEEDFORWARD;
 import static frc.robot.constants.DriveTrainConstants.*;
 
@@ -78,10 +79,20 @@ public class SwerveModule extends MapleSubsystem {
         }
     }
 
-    /** Runs the module with the specified setpoint state. Returns the optimized state. */
     public SwerveModuleState runSetPoint(
             SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
-        newSetpoint = SwerveModuleState.optimize(newSetpoint, setPoint.angle);
+        if (Math.abs(newSetpoint.speedMetersPerSecond) < SWERVE_VELOCITY_DEADBAND.in(MetersPerSecond)) {
+            stop();
+            return this.setPoint = new SwerveModuleState(0, setPoint.angle);
+        }
+
+        return forceRunSetPoint(newSetpoint, robotRelativeFeedforwardForceX, robotRelativeFeedforwardForceY);
+    }
+
+    /** Runs the module with the specified setpoint state. Returns the optimized state. */
+    public SwerveModuleState forceRunSetPoint(
+            SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
+        newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
         double desiredWheelVelocityRadPerSec = newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters);
         Translation2d force2d = new Translation2d(

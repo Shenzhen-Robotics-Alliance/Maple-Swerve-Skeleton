@@ -25,7 +25,7 @@ public class JoystickDrive extends Command {
 
     protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
     private ChassisSpeeds currentPilotInputSpeeds;
-    protected Rotation2d currentRotationMaintenanceSetpoint;
+    public static Rotation2d currentRotationMaintenanceSetpoint;
 
     private double translationalSensitivity, rotationalSensitivity;
 

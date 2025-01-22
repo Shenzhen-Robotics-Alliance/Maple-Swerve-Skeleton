@@ -68,7 +68,7 @@ public class RobotContainer {
     public final MapleShooterOptimization exampleShooterOptimization;
 
     // Controller
-    private final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
+    private final OperatorMap operator = new OperatorMap.LeftHandedPS5(0);
 
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
@@ -325,8 +325,8 @@ public class RobotContainer {
         Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.4, 4, Rotation2d.k180deg)),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.74, 3.8, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.6, 4, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.81, 3.86, Rotation2d.k180deg)),
                 () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
                 0.6);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);

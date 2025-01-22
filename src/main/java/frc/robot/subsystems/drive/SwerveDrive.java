@@ -241,7 +241,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 () -> DRIVE_KINEMATICS.resetHeadings(swerveHeadings),
                 () -> {
                     for (int i = 0; i < swerveModules.length; i++)
-                        swerveModules[i].runSetPoint(
+                        swerveModules[i].forceRunSetPoint(
                                 new SwerveModuleState(0, swerveHeadings[i]), Newtons.zero(), Newtons.zero());
                 },
                 (interrupted) -> {},
