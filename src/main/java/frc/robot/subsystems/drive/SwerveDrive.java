@@ -193,12 +193,12 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     @Override
-    public void runRawChassisSpeeds(ChassisSpeeds speeds) {
-        runRawChassisSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
+    public void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
+        runRobotCentricSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
     }
 
     @Override
-    public void runRawChassisSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+    public void runRobotCentricSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
         OptionalDouble angularVelocityOverride =
                 ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
         if (angularVelocityOverride.isPresent()) {

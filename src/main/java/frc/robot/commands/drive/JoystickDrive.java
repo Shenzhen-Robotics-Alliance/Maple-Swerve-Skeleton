@@ -90,7 +90,7 @@ public class JoystickDrive extends Command {
 
         if (useDriverStationCentricSwitch.getAsBoolean())
             driveSubsystem.runDriverStationCentricChassisSpeeds(currentPilotInputSpeeds, true);
-        else driveSubsystem.runRobotCentricChassisSpeeds(currentPilotInputSpeeds, true);
+        else driveSubsystem.runRobotCentricChassisSpeeds(currentPilotInputSpeeds);
 
         Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
         Logger.recordOutput(

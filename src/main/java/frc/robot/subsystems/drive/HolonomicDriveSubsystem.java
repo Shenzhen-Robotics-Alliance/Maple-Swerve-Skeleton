@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.constants.DriveControlLoops.*;
 import static frc.robot.constants.JoystickConfigs.*;
 
@@ -18,7 +19,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.Robot;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.LocalADStarAK;
@@ -33,14 +33,14 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      *
      * @param speeds a discrete chassis speed, robot-centric
      */
-    void runRawChassisSpeeds(ChassisSpeeds speeds);
+    void runRobotCentricChassisSpeeds(ChassisSpeeds speeds);
 
     /**
      * runs a ChassisSpeeds without doing any pre-processing
      *
      * @param speeds a discrete chassis speed, robot-centric
      */
-    void runRawChassisSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards);
+    void runRobotCentricSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards);
 
     /** Returns the current odometry Pose. */
     Pose2d getPose();
@@ -105,11 +105,12 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param driverStationCentricSpeeds a continuous chassis speeds, driverstation-centric, normally from a gamepad
      */
     default void runDriverStationCentricChassisSpeeds(ChassisSpeeds driverStationCentricSpeeds, boolean discretize) {
+        if (discretize)
+            driverStationCentricSpeeds =
+                    ChassisSpeeds.discretize(driverStationCentricSpeeds, DISCRETIZE_TIME.in(Seconds));
         final Rotation2d driverStationFacing = FieldMirroringUtils.getCurrentAllianceDriverStationFacing();
-        runRobotCentricChassisSpeeds(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        driverStationCentricSpeeds, getPose().getRotation().minus(driverStationFacing)),
-                discretize);
+        runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                driverStationCentricSpeeds, getPose().getRotation().minus(driverStationFacing)));
     }
 
     /**
@@ -118,24 +119,13 @@ public interface HolonomicDriveSubsystem extends Subsystem {
      * @param fieldCentricSpeeds a continuous chassis speeds, field-centric, normally from a pid position controller
      */
     default void runFieldCentricChassisSpeeds(ChassisSpeeds fieldCentricSpeeds, boolean discretize) {
-        runRobotCentricChassisSpeeds(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                        fieldCentricSpeeds, getPose().getRotation()),
-                discretize);
+        if (discretize) fieldCentricSpeeds = ChassisSpeeds.discretize(fieldCentricSpeeds, DISCRETIZE_TIME.in(Seconds));
+        runRobotCentricChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(
+                fieldCentricSpeeds, getPose().getRotation()));
     }
 
     default void stop() {
-        runRobotCentricChassisSpeeds(new ChassisSpeeds(), false);
-    }
-
-    /**
-     * runs a ChassisSpeeds, pre-processed with ChassisSpeeds.discretize()
-     *
-     * @param speeds a continuous chassis speed, robot-centric
-     */
-    default void runRobotCentricChassisSpeeds(ChassisSpeeds speeds, boolean discretize) {
-        if (discretize) speeds = ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs);
-        runRawChassisSpeeds(speeds);
+        runRobotCentricChassisSpeeds(new ChassisSpeeds());
     }
 
     default void configHolonomicPathPlannerAutoBuilder() {
@@ -163,7 +153,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::getPoseWithLookAhead,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
-                this::runRawChassisSpeedsWithFeedforwards,
+                this::runRobotCentricSpeedsWithFeedforwards,
                 new PPHolonomicDriveController(
                         CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
                         CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),

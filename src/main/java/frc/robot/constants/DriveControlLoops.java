@@ -1,11 +1,14 @@
 package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
 public class DriveControlLoops {
+    public static final Time DISCRETIZE_TIME = Seconds.of(0.03);
     public static final LinearVelocity SWERVE_VELOCITY_DEADBAND = MetersPerSecond.of(0.03);
     public static final MaplePIDController.MaplePIDConfig CHASSIS_ROTATION_CLOSE_LOOP =
             new MaplePIDController.MaplePIDConfig(
