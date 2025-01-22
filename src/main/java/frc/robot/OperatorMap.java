@@ -135,12 +135,12 @@ public interface OperatorMap {
 
         @Override
         public Trigger autoAlignmentButton() {
-            return ps5Controller.R2();
+            return ps5Controller.R1();
         }
 
         @Override
         public Trigger faceToTargetButton() {
-            return ps5Controller.R1();
+            return ps5Controller.cross();
         }
 
         @Override
