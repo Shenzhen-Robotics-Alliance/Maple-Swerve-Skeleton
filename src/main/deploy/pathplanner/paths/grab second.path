@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 1.55,
-        "y": 7.3
+        "x": 1.3468525922195926,
+        "y": 7.1065265649479565
       },
       "prevControl": {
-        "x": 3.125511363636363,
-        "y": 5.844147727272727
+        "x": 2.922363955855957,
+        "y": 5.650674292220684
       },
       "nextControl": null,
       "isLocked": false,
@@ -67,7 +67,7 @@
   "folder": "four corals",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": -123.69006752597983
   },
   "useDefaultConstraints": true
 }
