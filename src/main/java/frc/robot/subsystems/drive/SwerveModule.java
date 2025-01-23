@@ -18,11 +18,11 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
-import frc.robot.utils.Alert;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule extends MapleSubsystem {
@@ -40,14 +40,14 @@ public class SwerveModule extends MapleSubsystem {
         this.io = io;
         this.name = name;
         this.driveMotorHardwareFault =
-                new Alert("Module-" + name + " Drive Motor Hardware Fault Detected", Alert.AlertType.ERROR);
+                new Alert("Module-" + name + " Drive Motor Hardware Fault Detected", Alert.AlertType.kError);
         this.steerMotorHardwareFault =
-                new Alert("Module-" + name + " Steer Motor Hardware Fault Detected", Alert.AlertType.ERROR);
+                new Alert("Module-" + name + " Steer Motor Hardware Fault Detected", Alert.AlertType.kError);
         this.steerEncoderHardwareFault =
-                new Alert("Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.ERROR);
-        this.driveMotorHardwareFault.setActivated(false);
-        this.steerMotorHardwareFault.setActivated(false);
-        this.steerEncoderHardwareFault.setActivated(false);
+                new Alert("Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.kError);
+        this.driveMotorHardwareFault.set(false);
+        this.steerMotorHardwareFault.set(false);
+        this.steerEncoderHardwareFault.set(false);
 
         CommandScheduler.getInstance().unregisterSubsystem(this);
 
@@ -65,9 +65,9 @@ public class SwerveModule extends MapleSubsystem {
     public void periodic(double dt, boolean enabled) {
         updateOdometryPositions();
 
-        this.driveMotorHardwareFault.setActivated(!inputs.driveMotorConnected);
-        this.steerMotorHardwareFault.setActivated(!inputs.steerMotorConnected);
-        this.steerEncoderHardwareFault.setActivated(!inputs.steerEncoderConnected);
+        this.driveMotorHardwareFault.set(!inputs.driveMotorConnected);
+        this.steerMotorHardwareFault.set(!inputs.steerMotorConnected);
+        this.steerEncoderHardwareFault.set(!inputs.steerEncoderConnected);
     }
 
     private void updateOdometryPositions() {

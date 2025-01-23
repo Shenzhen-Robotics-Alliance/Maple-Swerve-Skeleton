@@ -19,11 +19,16 @@ import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Alert;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
+import frc.robot.utils.MapleTimeUtils;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class RobotState {
+    private final Alert visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.kInfo);
+    private double previousVisionResultTimeStamp = 0;
+
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer;
     private final Matrix<N3, N1> qStdDevs;
 
@@ -115,6 +120,8 @@ public class RobotState {
         // Recalculate current estimate by applying scaled transform to old estimate
         // then replaying odometry data
         estimatedPose = estimateAtTime.plus(scaledTransform).plus(sampleToOdometryTransform);
+
+        previousVisionResultTimeStamp = MapleTimeUtils.getLogTimeSeconds();
     }
 
     public Rotation2d getRotation() {
@@ -127,6 +134,14 @@ public class RobotState {
 
     public Pose2d getEstimatedPose() {
         return estimatedPose;
+    }
+
+    public void updateAlerts() {
+        double timeNotVisionResultSeconds = MapleTimeUtils.getLogTimeSeconds() - previousVisionResultTimeStamp;
+        visionNoResultAlert.set(timeNotVisionResultSeconds > 10);
+        if (visionNoResultAlert.get())
+            visionNoResultAlert.setText(
+                    String.format("No vision pose estimation for %.2f Seconds", timeNotVisionResultSeconds));
     }
 
     public record OdometryObservation(

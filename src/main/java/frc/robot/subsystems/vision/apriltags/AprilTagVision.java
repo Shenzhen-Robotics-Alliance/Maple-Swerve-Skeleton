@@ -6,13 +6,13 @@ import static frc.robot.constants.VisionConstants.*;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotState;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.utils.Alert;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -26,6 +26,8 @@ public class AprilTagVision extends MapleSubsystem {
     private final MapleMultiTagPoseEstimator multiTagPoseEstimator;
     private final HolonomicDriveSubsystem driveSubsystem;
     private final Alert[] camerasDisconnectedAlerts;
+    private final Alert[] camerasNoResultAlerts;
+    private final Debouncer[] camerasNoResultDebouncer;
 
     public AprilTagVision(
             AprilTagVisionIO io,
@@ -35,11 +37,17 @@ public class AprilTagVision extends MapleSubsystem {
         this.io = io;
         this.inputs = new AprilTagVisionIO.VisionInputs(camerasProperties.size());
         this.camerasDisconnectedAlerts = new Alert[camerasProperties.size()];
+        this.camerasNoResultAlerts = new Alert[camerasProperties.size()];
+        this.camerasNoResultDebouncer = new Debouncer[camerasProperties.size()];
         for (int i = 0; i < camerasProperties.size(); i++) {
             this.camerasDisconnectedAlerts[i] = new Alert(
                     "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' disconnected",
-                    Alert.AlertType.WARNING);
-            this.camerasDisconnectedAlerts[i].setActivated(false);
+                    Alert.AlertType.kError);
+            this.camerasNoResultAlerts[i] = new Alert(
+                    "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' no result",
+                    Alert.AlertType.kWarning);
+            this.camerasNoResultDebouncer[i] = new Debouncer(0.5);
+            this.camerasDisconnectedAlerts[i].set(false);
         }
 
         this.multiTagPoseEstimator = new MapleMultiTagPoseEstimator(
@@ -54,8 +62,11 @@ public class AprilTagVision extends MapleSubsystem {
         io.updateInputs(inputs);
         Logger.processInputs(APRIL_TAGS_VISION_PATH + "Inputs", inputs);
 
-        for (int i = 0; i < inputs.camerasInputs.length; i++)
-            this.camerasDisconnectedAlerts[i].setActivated(!inputs.camerasInputs[i].cameraConnected);
+        for (int i = 0; i < inputs.camerasInputs.length; i++) {
+            this.camerasDisconnectedAlerts[i].set(!inputs.camerasInputs[i].cameraConnected);
+            this.camerasNoResultAlerts[i].set(camerasDisconnectedAlerts[i].get()
+                    && camerasNoResultDebouncer[i].calculate(!inputs.camerasInputs[i].newPipeLineResultAvailable));
+        }
 
         result = multiTagPoseEstimator.estimateRobotPose(
                 inputs.camerasInputs, driveSubsystem.getPose(), getResultsTimeStamp());

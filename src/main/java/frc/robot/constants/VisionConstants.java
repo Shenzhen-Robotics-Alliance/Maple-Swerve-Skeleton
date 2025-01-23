@@ -27,21 +27,21 @@ public class VisionConstants {
             GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.3);
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
-            new PhotonCameraProperties(
-                    "FrontCam",
-                    Hertz.of(30),
-                    Milliseconds.of(14),
-                    Milliseconds.of(5),
-                    Degrees.of(75),
-                    0.6,
-                    0.2,
-                    1280,
-                    720,
-                    new Translation2d(0.3, 0),
-                    Meters.of(0.7),
-                    Rotation2d.fromDegrees(0),
-                    Degrees.of(40),
-                    Degrees.zero()),
+            //            new PhotonCameraProperties(
+            //                    "FrontCam",
+            //                    Hertz.of(30),
+            //                    Milliseconds.of(14),
+            //                    Milliseconds.of(5),
+            //                    Degrees.of(75),
+            //                    0.6,
+            //                    0.2,
+            //                    1280,
+            //                    720,
+            //                    new Translation2d(0.3, 0),
+            //                    Meters.of(0.7),
+            //                    Rotation2d.fromDegrees(0),
+            //                    Degrees.of(40),
+            //                    Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontLeftCam",
                     Hertz.of(30),
@@ -71,22 +71,23 @@ public class VisionConstants {
                     Meters.of(0.56),
                     Rotation2d.fromDegrees(35),
                     Degrees.of(-25),
-                    Degrees.zero()),
-            new PhotonCameraProperties(
-                    "BackCam",
-                    Hertz.of(30),
-                    Milliseconds.of(14),
-                    Milliseconds.of(5),
-                    Degrees.of(75),
-                    0.6,
-                    0.2,
-                    1280,
-                    720,
-                    new Translation2d(-0.3, 0),
-                    Meters.of(0.3),
-                    Rotation2d.fromDegrees(180),
-                    Degrees.of(40),
-                    Degrees.zero()));
+                    Degrees.zero())
+            //            new PhotonCameraProperties(
+            //                    "BackCam",
+            //                    Hertz.of(30),
+            //                    Milliseconds.of(14),
+            //                    Milliseconds.of(5),
+            //                    Degrees.of(75),
+            //                    0.6,
+            //                    0.2,
+            //                    1280,
+            //                    720,
+            //                    new Translation2d(-0.3, 0),
+            //                    Meters.of(0.3),
+            //                    Rotation2d.fromDegrees(180),
+            //                    Degrees.of(40),
+            //                    Degrees.zero())
+            );
     //            List.of(
     //            new PhotonCameraProperties(
     //                    "FrontCam",

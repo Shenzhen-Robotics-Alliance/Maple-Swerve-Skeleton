@@ -7,7 +7,6 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.DriveTrainConstants.*;
-import static frc.robot.constants.VisionConstants.*;
 
 import com.pathplanner.lib.util.DriveFeedforwards;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -26,7 +26,6 @@ import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
-import frc.robot.utils.Alert;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleTimeUtils;
 import java.util.Optional;
@@ -48,8 +47,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final SwerveModule[] swerveModules;
 
     private final OdometryThread odometryThread;
-    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.ERROR),
-            visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.INFO);
+    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.kError);
 
     public SwerveDrive(
             DriveType type,
@@ -72,8 +70,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 
-        gyroDisconnectedAlert.setActivated(false);
-        visionNoResultAlert.setActivated(false);
+        gyroDisconnectedAlert.set(false);
 
         startDashboardDisplay();
     }
@@ -90,11 +87,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 timeStampIndex < odometryThreadInputs.measurementTimeStamps.length;
                 timeStampIndex++) feedSingleOdometryDataToPositionEstimator(timeStampIndex);
 
-        final double timeNotVisionResultSeconds = MapleTimeUtils.getLogTimeSeconds() - previousMeasurementTimeStamp;
-        visionNoResultAlert.setText(
-                String.format("AprilTag Vision No Result For %.2f (s)", timeNotVisionResultSeconds));
-        visionNoResultAlert.setActivated(timeNotVisionResultSeconds > 4);
-
+        RobotState.getInstance().updateAlerts();
         Logger.recordOutput("RobotState/OdometryPose", RobotState.getInstance().getOdometryPose());
         Logger.recordOutput("RobotState/EstimatedPose", RobotState.getInstance().getEstimatedPose());
     }
@@ -108,7 +101,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        gyroDisconnectedAlert.setActivated(!gyroInputs.connected);
+        gyroDisconnectedAlert.set(!gyroInputs.connected);
 
         odometryThread.unlockOdometry();
     }
@@ -247,8 +240,6 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     public double getChassisMaxAngularAccelerationRadPerSecSq() {
         return CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond);
     }
-
-    private double previousMeasurementTimeStamp = -1;
 
     private void startDashboardDisplay() {
         SmartDashboard.putData("Swerve Drive", builder -> {
