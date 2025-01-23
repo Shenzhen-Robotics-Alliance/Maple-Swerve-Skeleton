@@ -7,12 +7,27 @@
    "maxvel":{
     "dimension":"LinVel",
     "var":{
-     "exp":"1.5 m / s",
-     "val":1.5
+     "exp":"3.5 m / s",
+     "val":3.5
     }
    }
   },
-  "poses":{}
+  "poses":{
+   "station":{
+    "x":{
+     "exp":"1.5 m",
+     "val":1.5
+    },
+    "y":{
+     "exp":"7.2 m",
+     "val":7.2
+    },
+    "heading":{
+     "exp":"-0.94 rad",
+     "val":-0.94
+    }
+   }
+  }
  },
  "config":{
   "frontLeft":{
