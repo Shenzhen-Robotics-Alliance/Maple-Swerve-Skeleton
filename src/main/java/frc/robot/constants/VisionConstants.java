@@ -16,7 +16,7 @@ public class VisionConstants {
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 1.5,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(15),
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(30),
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.5,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(8),
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG = 0.5,
@@ -24,7 +24,7 @@ public class VisionConstants {
 
             /* standard deviation for odometry and gyros */
             ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
-            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.3);
+            GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.2);
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             //            new PhotonCameraProperties(
