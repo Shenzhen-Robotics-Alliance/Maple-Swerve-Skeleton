@@ -38,8 +38,8 @@ public class DriveTrainConstants {
     public static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.025);
 
     /* adjust current limit */
-    public static final Current DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT = Amps.of(60);
-    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(100);
+    public static final Current DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT = Amps.of(80);
+    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(120);
     public static final Time DRIVE_OVERHEAT_PROTECTION_TIME = Seconds.of(1.5);
     public static final Current DRIVE_OVERHEAT_PROTECTION = Amps.of(80);
     public static final Current STEER_CURRENT_LIMIT = Amps.of(20);

@@ -3,7 +3,15 @@
  "version":1,
  "type":"Swerve",
  "variables":{
-  "expressions":{},
+  "expressions":{
+   "maxvel":{
+    "dimension":"LinVel",
+    "var":{
+     "exp":"1.5 m / s",
+     "val":1.5
+    }
+   }
+  },
   "poses":{}
  },
  "config":{
@@ -36,20 +44,20 @@
    "val":6.0
   },
   "gearing":{
-   "exp":"5.9",
-   "val":5.9
+   "exp":"5.36",
+   "val":5.36
   },
   "radius":{
    "exp":"2 in",
    "val":0.0508
   },
   "vmax":{
-   "exp":"4800 RPM",
-   "val":502.6548245743669
+   "exp":"5200 RPM",
+   "val":544.5427266222308
   },
   "tmax":{
-   "exp":"1 N * m",
-   "val":1.0
+   "exp":"0.9 N * m",
+   "val":0.9
   },
   "cof":{
    "exp":"1.2",
