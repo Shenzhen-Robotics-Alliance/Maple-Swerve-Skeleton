@@ -25,25 +25,15 @@ import org.ironmaple.utils.FieldMirroringUtils;
 public class AutoAlignment {
     private static final Pose2d ROUGH_APPROACH_TOLERANCE = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(15));
 
-    private static final LinearVelocity TRANSITION_SPEED = MetersPerSecond.of(0.4);
-    private static final LinearVelocity PRECISE_ALIGNMENT_MAX_VELOCITY = MetersPerSecond.of(0.8);
-    private static final LinearAcceleration PRECISE_ALIGNMENT_MAX_ACCELERATION = MetersPerSecondPerSecond.of(1);
-
     public static Command pathFindAndAutoAlign(
             HolonomicDriveSubsystem driveSubsystem,
             AprilTagVision vision,
             Supplier<Pose2d> roughTarget,
             Supplier<Pose2d> preciseTarget,
             Supplier<OptionalInt> tagIdToFocus,
-            double pathFindingSpeedRatio) {
+            AutoAlignmentConfigurations config) {
         return pathFindAndAutoAlign(
-                driveSubsystem,
-                vision,
-                roughTarget,
-                preciseTarget,
-                tagIdToFocus,
-                pathFindingSpeedRatio,
-                Commands.none());
+                driveSubsystem, vision, roughTarget, preciseTarget, tagIdToFocus, config, Commands.none());
     }
 
     /**
@@ -56,12 +46,12 @@ public class AutoAlignment {
             Supplier<Pose2d> roughTarget,
             Supplier<Pose2d> preciseTarget,
             Supplier<OptionalInt> tagIdToFocus,
-            double pathFindingSpeedRatio,
+            AutoAlignmentConfigurations config,
             Command toScheduleAtStartOfPreciseAlignment) {
         Command pathFindToRoughTarget = pathFindToPose(
-                        driveSubsystem, roughTarget, pathFindingSpeedRatio, TRANSITION_SPEED)
+                        driveSubsystem, roughTarget, config.roughApproachSpeedFactor, config.transitionSpeed)
                 .until(() -> isPoseErrorInBound(driveSubsystem.getPose(), roughTarget.get(), ROUGH_APPROACH_TOLERANCE));
-        Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget);
+        Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget, config);
         preciseAlignment = preciseAlignment.deadlineFor(vision.focusOnTarget(tagIdToFocus));
         preciseAlignment = preciseAlignment.beforeStarting(toScheduleAtStartOfPreciseAlignment::schedule);
 
@@ -73,8 +63,10 @@ public class AutoAlignment {
             AprilTagVision vision,
             PathPlannerPath path,
             Supplier<Pose2d> preciseTarget,
-            Supplier<OptionalInt> tagIdToFocus) {
-        return followPathAndAutoAlign(driveSubsystem, vision, path, preciseTarget, tagIdToFocus, Commands.none());
+            Supplier<OptionalInt> tagIdToFocus,
+            AutoAlignmentConfigurations config) {
+        return followPathAndAutoAlign(
+                driveSubsystem, vision, path, preciseTarget, tagIdToFocus, config, Commands.none());
     }
 
     public static Command followPathAndAutoAlign(
@@ -83,6 +75,7 @@ public class AutoAlignment {
             PathPlannerPath path,
             Supplier<Pose2d> preciseTarget,
             Supplier<OptionalInt> tagIdToFocus,
+            AutoAlignmentConfigurations config,
             Command toScheduleAtStartOfPreciseAlignment) {
         Pose2d pathEndingPoseAtBlue = new Pose2d(
                 path.getPathPoses().get(path.getPathPoses().size() - 1).getTranslation(),
@@ -94,7 +87,10 @@ public class AutoAlignment {
                         ROUGH_APPROACH_TOLERANCE));
 
         Command preciseAlignment = preciseAlignment(
-                driveSubsystem, () -> FieldMirroringUtils.toCurrentAlliancePose(pathEndingPoseAtBlue), preciseTarget);
+                driveSubsystem,
+                () -> FieldMirroringUtils.toCurrentAlliancePose(pathEndingPoseAtBlue),
+                preciseTarget,
+                config);
         preciseAlignment = preciseAlignment.deadlineFor(vision.focusOnTarget(tagIdToFocus));
         preciseAlignment = preciseAlignment.beforeStarting(toScheduleAtStartOfPreciseAlignment::schedule);
 
@@ -121,13 +117,17 @@ public class AutoAlignment {
     }
 
     public static Command preciseAlignment(
-            HolonomicDriveSubsystem driveSubsystem, Supplier<Pose2d> roughTarget, Supplier<Pose2d> preciseTarget) {
+            HolonomicDriveSubsystem driveSubsystem,
+            Supplier<Pose2d> roughTarget,
+            Supplier<Pose2d> preciseTarget,
+            AutoAlignmentConfigurations config) {
         return Commands.defer(
                 () -> AutoBuilder.followPath(getPreciseAlignmentPath(
                         driveSubsystem.getPose(),
                         roughTarget.get(),
                         preciseTarget.get(),
-                        driveSubsystem.getMeasuredChassisSpeedsFieldRelative())),
+                        driveSubsystem.getMeasuredChassisSpeedsFieldRelative(),
+                        config)),
                 Set.of(driveSubsystem));
     }
 
@@ -135,7 +135,8 @@ public class AutoAlignment {
             Pose2d currentRobotPose,
             Pose2d roughTarget,
             Pose2d preciseTarget,
-            ChassisSpeeds currentSpeedsFieldRelative) {
+            ChassisSpeeds currentSpeedsFieldRelative,
+            AutoAlignmentConfigurations config) {
         Translation2d currentTranslationalSpeedsMPS = new Translation2d(
                 currentSpeedsFieldRelative.vxMetersPerSecond, currentSpeedsFieldRelative.vyMetersPerSecond);
         Translation2d deltaPosition = preciseTarget.getTranslation().minus(roughTarget.getTranslation());
@@ -144,15 +145,15 @@ public class AutoAlignment {
                 new Pose2d(preciseTarget.getTranslation(), deltaPosition.getAngle()));
 
         PathConstraints constraints = new PathConstraints(
-                PRECISE_ALIGNMENT_MAX_VELOCITY,
-                PRECISE_ALIGNMENT_MAX_ACCELERATION,
+                config.preciseAlignmentSpeed,
+                config.preciseAlignmentMaxAcceleration,
                 DegreesPerSecond.of(180),
                 DegreesPerSecondPerSecond.of(360));
 
         PathPlannerPath path = new PathPlannerPath(
                 waypoints,
                 constraints,
-                new IdealStartingState(TRANSITION_SPEED, currentRobotPose.getRotation()),
+                new IdealStartingState(config.transitionSpeed, currentRobotPose.getRotation()),
                 new GoalEndState(0.0, preciseTarget.getRotation()));
         path.preventFlipping = true;
 
@@ -165,5 +166,14 @@ public class AutoAlignment {
                 && Math.abs(difference.getY()) < tolerance.getY()
                 && Math.abs(difference.getRotation().getRadians())
                         < tolerance.getRotation().getRadians();
+    }
+
+    public record AutoAlignmentConfigurations(
+            double roughApproachSpeedFactor,
+            LinearVelocity transitionSpeed,
+            LinearVelocity preciseAlignmentSpeed,
+            LinearAcceleration preciseAlignmentMaxAcceleration) {
+        public static final AutoAlignmentConfigurations DEFAULT_CONFIG = new AutoAlignmentConfigurations(
+                0.6, MetersPerSecond.of(2), MetersPerSecond.of(2), MetersPerSecondPerSecond.of(4));
     }
 }

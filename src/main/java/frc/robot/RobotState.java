@@ -39,9 +39,9 @@ public class RobotState {
     private RobotState() {
         this.qStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
         this.poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_DURATION.in(Seconds));
-        qStdDevs.set(0, 0, Math.pow(ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, 2));
-        qStdDevs.set(1, 0, Math.pow(ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, 2));
-        qStdDevs.set(2, 0, Math.pow(GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS, 2));
+        qStdDevs.set(0, 0, ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS);
+        qStdDevs.set(1, 0, ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS);
+        qStdDevs.set(2, 0, GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS);
     }
 
     public void resetPose(Pose2d pose) {

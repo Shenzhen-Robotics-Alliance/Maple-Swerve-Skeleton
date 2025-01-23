@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.drive.AutoAlignment;
+import frc.robot.constants.DriveControlLoops;
 import java.io.IOException;
 import java.util.OptionalInt;
 import org.ironmaple.utils.FieldMirroringUtils;
@@ -23,7 +24,8 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
                         PathPlannerPath.fromChoreoTrajectory("auto2 - place first"),
                         () -> FieldMirroringUtils.toCurrentAlliancePose(
                                 new Pose2d(5.27, 5.02, Rotation2d.fromDegrees(-120))),
-                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(11) : OptionalInt.of(20))
+                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(11) : OptionalInt.of(20),
+                        DriveControlLoops.REEF_ALIGNMENT_CONFIG)
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab second"))
                 .asProxy());
@@ -34,7 +36,8 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
                         PathPlannerPath.fromChoreoTrajectory("auto2 - place second"),
                         () -> FieldMirroringUtils.toCurrentAlliancePose(
                                 new Pose2d(5.00, 5.17, Rotation2d.fromDegrees(-120))),
-                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(11) : OptionalInt.of(20))
+                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(11) : OptionalInt.of(20),
+                        DriveControlLoops.REEF_ALIGNMENT_CONFIG)
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab third"))
                 .asProxy());
@@ -45,7 +48,8 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
                         PathPlannerPath.fromChoreoTrajectory("auto2 - place third"),
                         () -> FieldMirroringUtils.toCurrentAlliancePose(
                                 new Pose2d(3.99, 5.19, Rotation2d.fromDegrees(-60))),
-                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(6) : OptionalInt.of(19))
+                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(6) : OptionalInt.of(19),
+                        DriveControlLoops.REEF_ALIGNMENT_CONFIG)
                 .asProxy());
 
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab fourth"))
@@ -57,7 +61,8 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
                         PathPlannerPath.fromChoreoTrajectory("auto2 - place fourth"),
                         () -> FieldMirroringUtils.toCurrentAlliancePose(
                                 new Pose2d(3.73, 5.03, Rotation2d.fromDegrees(-60))),
-                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(6) : OptionalInt.of(19))
+                        () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(6) : OptionalInt.of(19),
+                        DriveControlLoops.REEF_ALIGNMENT_CONFIG)
                 .asProxy());
         return commandGroup;
     }

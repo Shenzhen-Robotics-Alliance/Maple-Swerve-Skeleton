@@ -1,10 +1,10 @@
 package frc.robot.constants;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
+import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
 public class DriveControlLoops {
@@ -20,4 +20,12 @@ public class DriveControlLoops {
     public static final double ROTATIONAL_LOOKAHEAD_TIME = 0.02, TRANSLATIONAL_LOOKAHEAD_TIME = 0.02;
 
     public static final boolean USE_TORQUE_FEEDFORWARD = true;
+
+    public static final AutoAlignment.AutoAlignmentConfigurations REEF_ALIGNMENT_CONFIG =
+            new AutoAlignment.AutoAlignmentConfigurations(
+                    0.6, MetersPerSecond.of(1.2), MetersPerSecond.of(1.2), MetersPerSecondPerSecond.of(1.2));
+
+    public static final AutoAlignment.AutoAlignmentConfigurations STATION_ALIGNMENT_CONFIG =
+            new AutoAlignment.AutoAlignmentConfigurations(
+                    0.75, MetersPerSecond.of(1.5), MetersPerSecond.of(2), MetersPerSecondPerSecond.of(2));
 }

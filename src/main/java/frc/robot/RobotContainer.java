@@ -69,6 +69,7 @@ public class RobotContainer {
 
     // Controller
     private final OperatorMap operator = new OperatorMap.LeftHandedPS5(0);
+    // private final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
 
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
@@ -272,10 +273,12 @@ public class RobotContainer {
         final Pose2d startingPose = FieldMirroringUtils.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
 
         if (driveSimulation != null) {
-            Transform2d placementError = new Transform2d(
-                    MapleCommonMath.generateRandomNormal(0, 0.2),
-                    MapleCommonMath.generateRandomNormal(0, 0.2),
-                    Rotation2d.fromDegrees(MapleCommonMath.generateRandomNormal(0, 1)));
+            Transform2d placementError = SIMULATE_AUTO_PLACEMENT_INACCURACY
+                    ? new Transform2d(
+                            MapleCommonMath.generateRandomNormal(0, 0.2),
+                            MapleCommonMath.generateRandomNormal(0, 0.2),
+                            Rotation2d.fromDegrees(MapleCommonMath.generateRandomNormal(0, 1)))
+                    : new Transform2d();
             driveSimulation.setSimulationWorldPose(startingPose.plus(placementError));
             SimulatedArena.getInstance().resetFieldForAuto();
         }
@@ -283,7 +286,7 @@ public class RobotContainer {
         aprilTagVision
                 .focusOnTarget(-1)
                 .withTimeout(0.1)
-                .andThen(Commands.runOnce(() -> drive.setPose(startingPose), drive))
+                .alongWith(Commands.runOnce(() -> drive.setPose(startingPose), drive))
                 .ignoringDisable(true)
                 .schedule();
     }
@@ -325,10 +328,10 @@ public class RobotContainer {
         Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.6, 4, Rotation2d.k180deg)),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.81, 3.86, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.8, 4, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.6, 3.82, Rotation2d.k180deg)),
                 () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
-                0.6);
+                DriveControlLoops.REEF_ALIGNMENT_CONFIG);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
     }
 

@@ -20,7 +20,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
-    private static final RobotMode JAVA_SIM_MODE = RobotMode.REPLAY;
+    private static final RobotMode JAVA_SIM_MODE = RobotMode.SIM;
     public static final RobotMode CURRENT_ROBOT_MODE = isReal() ? RobotMode.REAL : JAVA_SIM_MODE;
     private Command autonomousCommand;
     private RobotContainer robotContainer;
