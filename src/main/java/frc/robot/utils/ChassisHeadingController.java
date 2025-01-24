@@ -1,11 +1,17 @@
 package frc.robot.utils;
 
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static frc.robot.constants.DriveTrainConstants.CHASSIS_MAX_ANGULAR_ACCELERATION;
+import static frc.robot.constants.DriveTrainConstants.CHASSIS_MAX_ANGULAR_VELOCITY;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.Robot;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
@@ -151,6 +157,7 @@ public class ChassisHeadingController {
      * @param robotPose the current pose of the robot as measured by odometry
      * @param targetPosition the target position to aim at
      * @param shooterOptimization optional {@link MapleShooterOptimization} for shooting-on-the-move functions
+     * @return the calculated chassis angular velocity output, in radians/second
      */
     private double calculateFaceToTarget(
             ChassisSpeeds measuredSpeedsFieldRelative,
@@ -161,38 +168,23 @@ public class ChassisHeadingController {
         final Translation2d targetMovingSpeed = new Translation2d(
                 -measuredSpeedsFieldRelative.vxMetersPerSecond, -measuredSpeedsFieldRelative.vyMetersPerSecond);
 
-        final Rotation2d
-                targetedRotation =
-                        shooterOptimization == null
-                                ? targetPosition
-                                        .minus(robotPose.getTranslation())
-                                        .getAngle()
-                                : shooterOptimization.getShooterFacing(
-                                        targetPosition, robotPose.getTranslation(), measuredSpeedsFieldRelative),
-                targetMovingDirection =
-                        new Translation2d(
-                                        -measuredSpeedsFieldRelative.vxMetersPerSecond,
-                                        -measuredSpeedsFieldRelative.vyMetersPerSecond)
-                                .getAngle(),
-                positiveRotationTangentDirection =
-                        targetPosition
-                                .minus(robotPose.getTranslation())
-                                .getAngle()
-                                .rotateBy(Rotation2d.fromDegrees(90));
+        final Rotation2d targetedRotation = shooterOptimization == null
+                ? targetPosition.minus(robotPose.getTranslation()).getAngle()
+                : shooterOptimization.getShooterFacing(
+                        targetPosition, robotPose.getTranslation(), measuredSpeedsFieldRelative);
+        final Rotation2d targetMovingDirection = targetMovingSpeed.getAngle();
+        final Rotation2d positiveRotationTangentDirection =
+                targetPosition.minus(robotPose.getTranslation()).getAngle().rotateBy(Rotation2d.fromDegrees(90));
 
-        final double
-                tangentVelocity =
-                        targetMovingDirection
-                                        .minus(positiveRotationTangentDirection)
-                                        .getCos()
-                                * targetMovingSpeed.getNorm(),
-                angularVelocity =
-                        tangentVelocity
-                                / targetPosition
-                                        .minus(robotPose.getTranslation())
-                                        .getNorm();
+        final double tangentVelocity =
+                targetMovingDirection.minus(positiveRotationTangentDirection).getCos() * targetMovingSpeed.getNorm();
 
-        return calculateFaceToRotation(robotPose, targetedRotation, angularVelocity);
+        final double distanceToTarget =
+                targetPosition.minus(robotPose.getTranslation()).getNorm();
+
+        final double feedforwardAngularVelocity = tangentVelocity / distanceToTarget;
+
+        return calculateFaceToRotation(robotPose, targetedRotation, feedforwardAngularVelocity);
     }
 
     /**
@@ -251,5 +243,19 @@ public class ChassisHeadingController {
 
     public boolean atSetPoint() {
         return atSetPoint;
+    }
+
+    private static ChassisHeadingController instance = null;
+
+    public static ChassisHeadingController getInstance() {
+        if (instance == null)
+            instance = new ChassisHeadingController(
+                    new TrapezoidProfile.Constraints(
+                            CHASSIS_MAX_ANGULAR_VELOCITY.in(RadiansPerSecond),
+                            CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond)),
+                    DriveControlLoops.CHASSIS_ROTATION_CLOSE_LOOP,
+                    new Rotation2d());
+
+        return instance;
     }
 }

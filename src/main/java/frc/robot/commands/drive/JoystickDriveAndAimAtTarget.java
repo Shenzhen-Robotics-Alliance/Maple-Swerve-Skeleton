@@ -1,9 +1,10 @@
 package frc.robot.commands.drive;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
@@ -18,50 +19,48 @@ import java.util.function.Supplier;
  * The chassis will also adjust its facing in-advance, with respect to the flight time calculated from
  * {@link MapleShooterOptimization} (this is for shooting-on-the-move)
  */
-public class JoystickDriveAndAimAtTarget extends Command {
-    private final MapleJoystickDriveInput input;
-    private final Supplier<Translation2d> targetPositionSupplier;
-    private final MapleShooterOptimization shooterOptimization;
-    private final HolonomicDriveSubsystem driveSubsystem;
-
-    private final double pilotInputMultiplier;
-
-    public JoystickDriveAndAimAtTarget(
+public class JoystickDriveAndAimAtTarget {
+    public static Command driveAndAimAtTarget(
             MapleJoystickDriveInput input,
             HolonomicDriveSubsystem driveSubsystem,
             Supplier<Translation2d> targetPositionSupplier,
             MapleShooterOptimization shooterOptimization,
-            double pilotInputMultiplier) {
-        this.targetPositionSupplier = targetPositionSupplier;
-        this.shooterOptimization = shooterOptimization;
-        this.pilotInputMultiplier = pilotInputMultiplier;
-
-        this.driveSubsystem = driveSubsystem;
-        this.input = new MapleJoystickDriveInput(input.joystickXSupplier, input.joystickYSupplier, () -> 0);
-
-        super.addRequirements(driveSubsystem);
+            double pilotInputMultiplier,
+            boolean finishWhenComplete) {
+        return new FunctionalCommand(
+                () -> ChassisHeadingController.getInstance()
+                        .setHeadingRequest(new ChassisHeadingController.FaceToTargetRequest(
+                                targetPositionSupplier, shooterOptimization)),
+                () -> execute(driveSubsystem, input, pilotInputMultiplier),
+                (interrupted) -> ChassisHeadingController.getInstance()
+                        .setHeadingRequest(new ChassisHeadingController.NullRequest()),
+                () -> finishWhenComplete
+                        && ChassisHeadingController.getInstance().atSetPoint(),
+                driveSubsystem);
     }
 
-    @Override
-    public void initialize() {
-        SwerveDrive.swerveHeadingController.setHeadingRequest(
-                new ChassisHeadingController.FaceToTargetRequest(targetPositionSupplier, shooterOptimization));
+    public static Command driveAndAimAtDirection(
+            MapleJoystickDriveInput input,
+            HolonomicDriveSubsystem driveSubsystem,
+            Supplier<Rotation2d> rotationTarget,
+            double pilotInputMultiplier,
+            boolean finishWhenComplete) {
+        return new FunctionalCommand(
+                () -> ChassisHeadingController.getInstance()
+                        .setHeadingRequest(new ChassisHeadingController.FaceToRotationRequest(rotationTarget.get())),
+                () -> execute(driveSubsystem, input, pilotInputMultiplier),
+                (interrupted) -> ChassisHeadingController.getInstance()
+                        .setHeadingRequest(new ChassisHeadingController.NullRequest()),
+                () -> finishWhenComplete
+                        && ChassisHeadingController.getInstance().atSetPoint(),
+                driveSubsystem);
     }
 
-    @Override
-    public void execute() {
+    public static void execute(
+            HolonomicDriveSubsystem driveSubsystem, MapleJoystickDriveInput input, double pilotInputMultiplier) {
         driveSubsystem.runDriverStationCentricChassisSpeeds(
                 input.getJoystickChassisSpeeds(
                         driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * pilotInputMultiplier, 0),
                 true);
-    }
-
-    public boolean chassisRotationInPosition() {
-        return SwerveDrive.swerveHeadingController.atSetPoint();
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 }

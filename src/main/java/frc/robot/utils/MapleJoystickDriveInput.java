@@ -6,8 +6,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import java.util.function.DoubleSupplier;
 import org.ironmaple.utils.mathutils.MapleCommonMath;
 
@@ -83,25 +81,5 @@ public class MapleJoystickDriveInput {
         final double deadBand = MapleCommonMath.linearInterpretationWithBounding(
                 0, DEAD_BAND_WHEN_OTHER_AXIS_EMPTY, 1, DEAD_BAND_WHEN_OTHER_AXIS_FULL, Math.abs(otherAxisValue));
         return MathUtil.applyDeadband(axisValue, deadBand, 1);
-    }
-
-    public static MapleJoystickDriveInput leftHandedJoystick(CommandXboxController driverController) {
-        return new MapleJoystickDriveInput(
-                driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
-    }
-
-    public static MapleJoystickDriveInput leftHandedJoystick(XboxController driverController) {
-        return new MapleJoystickDriveInput(
-                driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
-    }
-
-    public static MapleJoystickDriveInput rightHandedJoystick(CommandXboxController driverController) {
-        return new MapleJoystickDriveInput(
-                driverController::getRightX, driverController::getRightY, driverController::getLeftX);
-    }
-
-    public static MapleJoystickDriveInput rightHandedJoystick(XboxController driverController) {
-        return new MapleJoystickDriveInput(
-                driverController::getRightX, driverController::getRightY, driverController::getLeftX);
     }
 }

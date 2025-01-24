@@ -7,7 +7,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.*;
+import frc.robot.generated.TunerConstants;
 import java.util.function.Supplier;
+import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
 /**
@@ -16,9 +18,9 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
  */
 public class DriveTrainConstants {
     /** numbers that needs to be changed to fit each robot TODO: change these numbers to match your robot */
-    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.05;
+    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.2;
 
-    public static final Mass ROBOT_MASS = Kilograms.of(45); // robot weight with bumpers
+    public static final Mass ROBOT_MASS = Kilograms.of(50); // robot weight with bumpers
 
     /** TODO: change motor type to match your robot */
     public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60(1);
@@ -26,29 +28,34 @@ public class DriveTrainConstants {
     public static final DCMotor STEER_MOTOR = DCMotor.getFalcon500(1);
 
     /** numbers imported from {@link TunerConstants} TODO: for REV chassis, replace them with actual numbers */
-    public static final Distance WHEEL_RADIUS = TunerConstants.kWheelRadius;
+    public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
 
-    public static final double DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio;
-    public static final double STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio;
+    public static final double DRIVE_GEAR_RATIO = TunerConstants.FrontLeft.DriveMotorGearRatio;
+    public static final double STEER_GEAR_RATIO = TunerConstants.FrontLeft.SteerMotorGearRatio;
 
-    public static final Voltage STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage;
-    public static final Voltage DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage;
+    public static final Voltage STEER_FRICTION_VOLTAGE = Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage);
+    public static final Voltage DRIVE_FRICTION_VOLTAGE = Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage);
     public static final MomentOfInertia STEER_INERTIA = KilogramSquareMeters.of(0.025);
 
     /* adjust current limit */
-    public static final Current DRIVE_CURRENT_LIMIT = Amps.of(80);
+    public static final Current DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT = Amps.of(80);
+    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(120);
+    public static final Time DRIVE_OVERHEAT_PROTECTION_TIME = Seconds.of(1.5);
+    public static final Current DRIVE_OVERHEAT_PROTECTION = Amps.of(80);
     public static final Current STEER_CURRENT_LIMIT = Amps.of(20);
 
     /** translations of the modules to the robot center, in FL, FR, BL, BR */
     public static final Translation2d[] MODULE_TRANSLATIONS = new Translation2d[] {
-        new Translation2d(TunerConstants.kFrontLeftXPos.in(Meters), TunerConstants.kFrontLeftYPos.in(Meters)),
-        new Translation2d(TunerConstants.kFrontRightXPos.in(Meters), TunerConstants.kFrontRightYPos.in(Meters)),
-        new Translation2d(TunerConstants.kBackLeftXPos.in(Meters), TunerConstants.kBackLeftYPos.in(Meters)),
-        new Translation2d(TunerConstants.kBackRightXPos.in(Meters), TunerConstants.kBackRightYPos.in(Meters))
+        new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+        new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+        new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+        new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
 
-    public static final Distance TRACK_LENGTH = TunerConstants.kFrontLeftXPos.minus(TunerConstants.kBackLeftXPos);
-    public static final Distance TRACK_WIDTH = TunerConstants.kFrontLeftYPos.minus(TunerConstants.kFrontRightYPos);
+    public static final Distance TRACK_LENGTH =
+            MODULE_TRANSLATIONS[0].minus(MODULE_TRANSLATIONS[3]).getMeasureX();
+    public static final Distance TRACK_WIDTH =
+            MODULE_TRANSLATIONS[0].minus(MODULE_TRANSLATIONS[3]).getMeasureY();
 
     /* equations that calculates some constants for the simulator (don't modify) */
     private static final double GRAVITY_CONSTANT = 9.8;
@@ -61,14 +68,17 @@ public class DriveTrainConstants {
 
     /* force = torque / distance */
     public static final Force MAX_PROPELLING_FORCE = NewtonMeters.of(
-                    DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT.in(Amps)) * DRIVE_GEAR_RATIO)
-            .divide(WHEEL_RADIUS);
+                    DRIVE_MOTOR.getTorque(DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT.in(Amps)) * DRIVE_GEAR_RATIO)
+            .div(WHEEL_RADIUS)
+            .times(4);
 
     /* floor_speed = wheel_angular_velocity * wheel_radius */
-    public static final LinearVelocity CHASSIS_MAX_VELOCITY =
-            MetersPerSecond.of(DRIVE_MOTOR.freeSpeedRadPerSec / DRIVE_GEAR_RATIO * WHEEL_RADIUS.in(Meters));
+    public static final LinearVelocity CHASSIS_MAX_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR.getSpeed(
+                    DRIVE_MOTOR.getTorque(DRIVE_MOTOR.getCurrent(0, TunerConstants.FrontLeft.DriveFrictionVoltage)), 12)
+            / DRIVE_GEAR_RATIO
+            * WHEEL_RADIUS.in(Meters));
     public static final LinearAcceleration CHASSIS_MAX_ACCELERATION =
-            (LinearAcceleration) Measure.min(MAX_FRICTION_ACCELERATION, MAX_PROPELLING_FORCE.divide(ROBOT_MASS));
+            (LinearAcceleration) Measure.min(MAX_FRICTION_ACCELERATION, MAX_PROPELLING_FORCE.div(ROBOT_MASS));
     public static final AngularVelocity CHASSIS_MAX_ANGULAR_VELOCITY =
             RadiansPerSecond.of(CHASSIS_MAX_VELOCITY.in(MetersPerSecond) / DRIVE_BASE_RADIUS.in(Meters));
     public static final AngularAcceleration CHASSIS_MAX_ANGULAR_ACCELERATION = RadiansPerSecondPerSecond.of(
@@ -84,7 +94,7 @@ public class DriveTrainConstants {
             * (BUMPER_WIDTH.in(Meters) * BUMPER_WIDTH.in(Meters) + BUMPER_LENGTH.in(Meters) * BUMPER_LENGTH.in(Meters))
             / 12.0);
 
-    public static final Supplier<GyroSimulation> gyroSimulationFactory = GyroSimulation.getPigeon2();
+    public static final Supplier<GyroSimulation> gyroSimulationFactory = COTS.ofPigeon2();
 
     /* dead configs, don't change them */
     public static final int ODOMETRY_CACHE_CAPACITY = 10;

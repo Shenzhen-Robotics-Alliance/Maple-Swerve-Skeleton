@@ -6,6 +6,8 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
@@ -24,7 +26,9 @@ public interface ModuleIO {
         public double[] odometryDriveWheelRevolutions = new double[] {};
         public Rotation2d[] odometrySteerPositions = new Rotation2d[] {};
 
-        public boolean hardwareConnected = false;
+        public boolean driveMotorConnected = false;
+        public boolean steerMotorConnected = false;
+        public boolean steerEncoderConnected = false;
     }
 
     /** Updates the inputs */
@@ -33,22 +37,52 @@ public interface ModuleIO {
     default void calibrate() {}
 
     /**
-     * Run the drive motor at the specified percent speed.
+     * Run the drive motor at a specified voltage open-loop control
      *
-     * @param speedPercent from -1 to 1, where 1 is the forward direction of the wheel
+     * @param output the desired voltage output, from -12v to 12v
      */
-    default void setDriveVoltage(double speedPercent) {}
+    default void requestDriveOpenLoop(Voltage output) {}
 
     /**
-     * Run the turn motor at the specified percent power.
+     * Run the drive motor at a specified current open-loop control
      *
-     * @param powerPercent from -1 to 1, where 1 is counter-clockwise
+     * @param output the desired current output
      */
-    default void setSteerPowerPercent(double powerPercent) {}
+    default void requestDriveOpenLoop(Current output) {}
+
+    /**
+     * Run the steer motor at a specified voltage open-loop control
+     *
+     * @param output the desired voltage output, from -12v to 12v
+     */
+    default void requestSteerOpenLoop(Voltage output) {}
+
+    /**
+     * Run the steer motor at a specified current open-loop control
+     *
+     * @param output the desired current output
+     */
+    default void requestSteerOpenLoop(Current output) {}
+
+    /**
+     * Runs a velocity close-loop control on the drive motor
+     *
+     * @param desiredWheelVelocityRadPerSec the desired angular velocity of the wheel, in radians / second
+     * @param additionalFeedforwardVoltage additional feedforward voltage for torque feedforward
+     */
+    default void requestDriveVelocityControl(
+            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {}
+
+    /**
+     * Runs a position close-loop control on the steer motor
+     *
+     * @param desiredSteerAbsoluteFacing the desired facing of the steer
+     */
+    default void requestSteerPositionControl(Rotation2d desiredSteerAbsoluteFacing) {}
 
     /** Enable or disable brake mode on the drive motor. */
-    default void setDriveBrake(boolean enable) {}
+    default void setDriveBrake(boolean enableDriveBrake) {}
 
     /** Enable or disable brake mode on the turn motor. */
-    default void setSteerBrake(boolean enable) {}
+    default void setSteerBrake(boolean enableSteerBrake) {}
 }

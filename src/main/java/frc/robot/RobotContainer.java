@@ -8,21 +8,27 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
+import frc.robot.commands.tmp.FaceCoralStation;
 import frc.robot.constants.*;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.subsystems.led.LEDAnimation;
+import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
@@ -30,14 +36,16 @@ import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.AIRobotInSimulation;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.ironmaple.utils.FieldMirroringUtils;
+import org.ironmaple.utils.mathutils.MapleCommonMath;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -46,24 +54,22 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * Instead, the structure of the robot (including subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+    public static final boolean SIMULATE_AUTO_PLACEMENT_INACCURACY = true;
+
     // pdp for akit logging
-    public final PowerDistribution powerDistribution;
+    public final LoggedPowerDistribution powerDistribution;
     // Subsystems
     public final SwerveDrive drive;
     public final AprilTagVision aprilTagVision;
+    public final LEDStatusLight ledStatusLight;
 
     /* an example shooter optimization */
     public final MapleShooterOptimization exampleShooterOptimization;
 
     // Controller
-    private final CommandXboxController driverXBox = new CommandXboxController(0);
+    private final OperatorMap operator = new OperatorMap.LeftHandedPS5(0);
+    // private final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
 
-    public enum JoystickMode {
-        LEFT_HANDED,
-        RIGHT_HANDED
-    }
-    // Dashboard Selections
-    private final LoggedDashboardChooser<JoystickMode> driverModeChooser;
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
 
@@ -83,16 +89,16 @@ public class RobotContainer {
                 // Real robot, instantiate hardware IO implementations
                 driveSimulation = null;
 
-                powerDistribution = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
+                powerDistribution = LoggedPowerDistribution.getInstance(0, PowerDistribution.ModuleType.kCTRE);
 
                 /* CTRE Chassis: */
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.CTRE_ON_CANIVORE,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontLeft, "FrontLeft"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.FrontRight, "FrontRight"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackLeft, "BackLeft"),
-                        new ModuleIOTalon(TunerConstants.DrivetrainConstants, TunerConstants.BackRight, "BackRight"));
+                        new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
+                        new ModuleIOTalon(TunerConstants.FrontRight, "FrontRight"),
+                        new ModuleIOTalon(TunerConstants.BackLeft, "BackLeft"),
+                        new ModuleIOTalon(TunerConstants.BackRight, "BackRight"));
 
                 /* REV Chassis */
                 //                drive = new SwerveDrive(
@@ -115,13 +121,11 @@ public class RobotContainer {
                                 .withBumperSize(DriveTrainConstants.BUMPER_LENGTH, DriveTrainConstants.BUMPER_WIDTH)
                                 .withTrackLengthTrackWidth(
                                         DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
-                                .withSwerveModule(() -> new SwerveModuleSimulation(
+                                .withSwerveModule(new SwerveModuleSimulationConfig(
                                         DriveTrainConstants.DRIVE_MOTOR,
                                         DriveTrainConstants.STEER_MOTOR,
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
-                                        DriveTrainConstants.DRIVE_CURRENT_LIMIT,
-                                        DriveTrainConstants.STEER_CURRENT_LIMIT,
                                         DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
                                         DriveTrainConstants.STEER_FRICTION_VOLTAGE,
                                         DriveTrainConstants.WHEEL_RADIUS,
@@ -131,7 +135,7 @@ public class RobotContainer {
                         new Pose2d(3, 3, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
-                powerDistribution = new PowerDistribution();
+                powerDistribution = LoggedPowerDistribution.getInstance();
                 // Sim robot, instantiate physics sim IO implementations
                 final ModuleIOSim frontLeft = new ModuleIOSim(driveSimulation.getModules()[0]),
                         frontRight = new ModuleIOSim(driveSimulation.getModules()[1]),
@@ -156,7 +160,7 @@ public class RobotContainer {
             default -> {
                 this.driveSimulation = null;
 
-                powerDistribution = new PowerDistribution();
+                powerDistribution = LoggedPowerDistribution.getInstance();
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.GENERIC,
@@ -170,14 +174,12 @@ public class RobotContainer {
             }
         }
 
+        this.ledStatusLight = new LEDStatusLight(0, 155);
+
         this.drive.configHolonomicPathPlannerAutoBuilder();
 
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
         autoChooser = buildAutoChooser();
-
-        driverModeChooser = new LoggedDashboardChooser<>("Driver Mode", new SendableChooser<>());
-        driverModeChooser.addDefaultOption(JoystickMode.LEFT_HANDED.name(), JoystickMode.LEFT_HANDED);
-        driverModeChooser.addOption(JoystickMode.RIGHT_HANDED.name(), JoystickMode.RIGHT_HANDED);
 
         /* you can tune the numbers on dashboard and copy-paste them to here */
         this.exampleShooterOptimization = new MapleShooterOptimization(
@@ -189,6 +191,7 @@ public class RobotContainer {
 
         configureButtonBindings();
         configureAutoNamedCommands();
+        configureLEDEffects();
     }
 
     private void configureAutoNamedCommands() {
@@ -209,70 +212,82 @@ public class RobotContainer {
                 "Example Custom Auto With PathPlanner Trajectories",
                 new ExampleCustomAutoWithPathPlannerTrajectories());
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories: Rush", new ExampleCustomAutoWithChoreoTrajectories());
+                "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories());
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories2());
-        autoSendableChooser.addOption("Example Pathplanner Auto", new PathPlannerAutoWrapper("Example Auto"));
+                "Example Custom Auto With Choreo Trajectories 2", new ExampleCustomAutoWithChoreoTrajectories2());
+        autoSendableChooser.addOption(
+                "Example Pathplanner GUI Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
+        autoSendableChooser.addOption("Example Auto Alignment", new ExampleCustomAutoWithAutoAlignment());
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
         return autoSendableChooser;
     }
 
-    private static SendableChooser<Supplier<Command>> buildTestsChooser() {
+    private SendableChooser<Supplier<Command>> buildTestsChooser() {
         final SendableChooser<Supplier<Command>> testsChooser = new SendableChooser<>();
         testsChooser.setDefaultOption("None", Commands::none);
+        testsChooser.addOption(
+                "Drive SysId- Quasistatic - Forward", () -> drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        testsChooser.addOption(
+                "Drive SysId- Quasistatic - Reverse", () -> drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        testsChooser.addOption(
+                "Drive SysId- Dynamic - Forward", () -> drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        testsChooser.addOption(
+                "Drive SysId- Dynamic - Reverse", () -> drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         // TODO add your tests here (system identification and etc.)
         return testsChooser;
     }
 
-    private boolean isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
-    private boolean isLeftHanded = true;
+    private boolean isDSPresentedAsRed = FieldMirroringUtils.isSidePresentedAsRed();
     private Command autonomousCommand = Commands.none();
     private Auto previouslySelectedAuto = null;
     /** reconfigures button bindings if alliance station has changed re-create autos if not yet created */
     public void checkForCommandChanges() {
-        final boolean isLeftHandedSelected = !JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get());
-        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || isLeftHanded != isLeftHandedSelected)
-            configureButtonBindings();
-        isLeftHanded = isLeftHandedSelected;
-
         final Auto selectedAuto = autoChooser.get();
-        if (FieldConstants.isSidePresentedAsRed() != isDSPresentedAsRed || selectedAuto != previouslySelectedAuto) {
-            try {
-                this.autonomousCommand =
-                        selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
-                configureAutoTriggers(
-                        new PathPlannerAuto(autonomousCommand, selectedAuto.getStartingPoseAtBlueAlliance()));
-            } catch (Exception e) {
-                this.autonomousCommand = Commands.none();
-                DriverStation.reportError(
-                        "Error Occurred while obtaining autonomous command: \n"
-                                + e.getMessage()
-                                + "\n"
-                                + Arrays.toString(e.getStackTrace()),
-                        false);
-                throw new RuntimeException(e);
-            }
-            resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
+        if (FieldMirroringUtils.isSidePresentedAsRed() == isDSPresentedAsRed & selectedAuto == previouslySelectedAuto)
+            return;
+
+        try {
+            this.autonomousCommand = selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
+            configureAutoTriggers(new PathPlannerAuto(autonomousCommand, selectedAuto.getStartingPoseAtBlueAlliance()));
+        } catch (Exception e) {
+            this.autonomousCommand = Commands.none();
+            DriverStation.reportError(
+                    "Error Occurred while obtaining autonomous command: \n"
+                            + e.getMessage()
+                            + "\n"
+                            + Arrays.toString(e.getStackTrace()),
+                    false);
+            throw new RuntimeException(e);
         }
+        resetFieldAndOdometryForAuto(selectedAuto.getStartingPoseAtBlueAlliance());
 
         previouslySelectedAuto = selectedAuto;
-        isDSPresentedAsRed = FieldConstants.isSidePresentedAsRed();
+        isDSPresentedAsRed = FieldMirroringUtils.isSidePresentedAsRed();
     }
 
     private void resetFieldAndOdometryForAuto(Pose2d robotStartingPoseAtBlueAlliance) {
-        final Pose2d startingPose = FieldConstants.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
+        final Pose2d startingPose = FieldMirroringUtils.toCurrentAlliancePose(robotStartingPoseAtBlueAlliance);
 
         if (driveSimulation != null) {
-            driveSimulation.setSimulationWorldPose(startingPose);
+            Transform2d placementError = SIMULATE_AUTO_PLACEMENT_INACCURACY
+                    ? new Transform2d(
+                            MapleCommonMath.generateRandomNormal(0, 0.2),
+                            MapleCommonMath.generateRandomNormal(0, 0.2),
+                            Rotation2d.fromDegrees(MapleCommonMath.generateRandomNormal(0, 1)))
+                    : new Transform2d();
+            driveSimulation.setSimulationWorldPose(startingPose.plus(placementError));
             SimulatedArena.getInstance().resetFieldForAuto();
-            updateFieldSimAndDisplay();
         }
 
-        drive.periodic();
-        drive.setPose(startingPose);
+        aprilTagVision
+                .focusOnTarget(-1)
+                .withTimeout(0.1)
+                .alongWith(Commands.runOnce(() -> drive.setPose(startingPose), drive))
+                .ignoringDisable(true)
+                .schedule();
     }
 
     /**
@@ -282,39 +297,51 @@ public class RobotContainer {
      */
     public void configureButtonBindings() {
         /* joystick drive command */
-        final MapleJoystickDriveInput driveInput = JoystickMode.RIGHT_HANDED.equals(driverModeChooser.get())
-                ? MapleJoystickDriveInput.rightHandedJoystick(driverXBox)
-                : MapleJoystickDriveInput.leftHandedJoystick(driverXBox);
-        final JoystickDrive joystickDrive =
-                new JoystickDrive(driveInput, () -> true, driverXBox.getHID()::getPOV, drive);
+        final MapleJoystickDriveInput driveInput = operator.getDriveInput();
+        final JoystickDrive joystickDrive = new JoystickDrive(
+                driveInput, () -> true, operator.getController().getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
-
-        /* lock chassis with x-formation */
-        driverXBox.x().whileTrue(Commands.run(drive::lockChassisWithXFormation, drive));
+        JoystickDrive.instance = Optional.of(joystickDrive);
 
         /* reset gyro heading manually (in case the vision does not work) */
-        driverXBox
-                .start()
+        operator.resetOdometryButton()
                 .onTrue(Commands.runOnce(
-                                () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                                () -> drive.setPose(new Pose2d(
+                                        drive.getPose().getTranslation(),
+                                        FieldMirroringUtils.getCurrentAllianceDriverStationFacing())),
                                 drive)
                         .ignoringDisable(true));
 
+        /* lock chassis with x-formation */
+        operator.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
+
         /* TODO: aim at target and drive example, delete it for your project */
-        final JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
-                driveInput, drive, FieldConstants.SPEAKER_POSITION_SUPPLIER, exampleShooterOptimization, 0.75);
-        driverXBox.rightTrigger(0.5).whileTrue(exampleFaceTargetWhileDriving);
+        Command exampleFaceTargetWhileDriving = JoystickDriveAndAimAtTarget.driveAndAimAtTarget(
+                driveInput,
+                drive,
+                () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
+                exampleShooterOptimization,
+                0.75,
+                false);
+        operator.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
 
         /* auto alignment example, delete it for your project */
-        final AutoAlignment exampleAutoAlignment = new AutoAlignment(
+        Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
-                /* (position of AMP) */
-                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.3, Rotation2d.fromDegrees(90))),
-                () -> FieldConstants.toCurrentAlliancePose(new Pose2d(1.85, 7.74, Rotation2d.fromDegrees(90))),
-                new Pose2d(0.04, 0.04, Rotation2d.fromDegrees(2)),
-                0.8,
-                2);
-        driverXBox.b().whileTrue(exampleAutoAlignment);
+                aprilTagVision,
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.6, 4.01, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.56, 3.88, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
+                DriveControlLoops.REEF_ALIGNMENT_CONFIG);
+        operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
+    }
+
+    public void configureLEDEffects() {
+        ledStatusLight.setDefaultCommand(ledStatusLight.showEnableDisableState());
+
+        operator.getController()
+                .button(1)
+                .onTrue(ledStatusLight.playAnimation(new LEDAnimation.Charging(Color.kOrange), 1));
     }
 
     /**
@@ -333,11 +360,12 @@ public class RobotContainer {
     public void updateFieldSimAndDisplay() {
         if (driveSimulation == null) return;
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput(
-                "FieldSimulation/Notes",
-                SimulatedArena.getInstance().getGamePiecesByType("Note").toArray(Pose3d[]::new));
         Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation.getOpponentRobotPoses());
         Logger.recordOutput(
                 "FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation.getAlliancePartnerRobotPoses());
+        Logger.recordOutput(
+                "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput(
+                "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 }
