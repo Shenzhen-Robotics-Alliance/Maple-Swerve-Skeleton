@@ -300,9 +300,9 @@ public class AIRobotInSimulation extends SubsystemBase {
                                 this.driveSimulation
                                         .getActualPoseInSimulationWorld()
                                         .getRotation(),
-                                0.5,
-                                10,
-                                Math.toRadians(60))
+                                Meters.of(0.5),
+                                MetersPerSecond.of(10),
+                                Degrees.of(60))
                         .asSpeakerShotNote(() -> {})));
     }
 
@@ -318,9 +318,9 @@ public class AIRobotInSimulation extends SubsystemBase {
                                 this.driveSimulation
                                         .getActualPoseInSimulationWorld()
                                         .getRotation(),
-                                0.5,
-                                10,
-                                Math.toRadians(20))
+                                Meters.of(0.5),
+                                MetersPerSecond.of(10),
+                                Degrees.of(20))
                         .enableBecomeNoteOnFieldAfterTouchGround()));
     }
 
@@ -336,9 +336,9 @@ public class AIRobotInSimulation extends SubsystemBase {
                                 this.driveSimulation
                                         .getActualPoseInSimulationWorld()
                                         .getRotation(),
-                                0.5,
-                                10,
-                                Math.toRadians(55))
+                                Meters.of(0.5),
+                                MetersPerSecond.of(10),
+                                Degrees.of(55))
                         .enableBecomeNoteOnFieldAfterTouchGround()));
     }
 }
