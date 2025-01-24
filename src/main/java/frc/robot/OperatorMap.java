@@ -50,12 +50,12 @@ public interface OperatorMap {
 
         @Override
         public Trigger autoAlignmentButton() {
-            return xboxController.rightTrigger(0.5);
+            return xboxController.rightBumper();
         }
 
         @Override
         public Trigger faceToTargetButton() {
-            return xboxController.rightBumper();
+            return xboxController.leftBumper();
         }
 
         @Override
@@ -140,7 +140,7 @@ public interface OperatorMap {
 
         @Override
         public Trigger faceToTargetButton() {
-            return ps5Controller.cross();
+            return ps5Controller.L1();
         }
 
         @Override

@@ -112,8 +112,9 @@ public class AutoAlignment {
                                 .finallyDo(() -> ChassisHeadingController.getInstance()
                                         .setHeadingRequest(new ChassisHeadingController.NullRequest())),
                         Set.of(driveSubsystem))
-                .finallyDo(() -> JoystickDrive.instance.ifPresent(joystickDrive ->
-                        joystickDrive.setRotationMaintenanceSetpoint(targetPose.get().getRotation())));
+                .finallyDo(() ->
+                        JoystickDrive.instance.ifPresent(joystickDrive -> joystickDrive.setRotationMaintenanceSetpoint(
+                                targetPose.get().getRotation())));
     }
 
     public static Command preciseAlignment(

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
+import frc.robot.commands.tmp.FaceCoralStation;
 import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.MapleSubsystem;
@@ -35,9 +36,7 @@ import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.AIRobotInSimulation;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
-import java.util.Arrays;
-import java.util.List;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -323,14 +322,14 @@ public class RobotContainer {
                 () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
                 exampleShooterOptimization,
                 0.75);
-        operator.faceToTargetButton().whileTrue(exampleFaceTargetWhileDriving);
+        operator.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation());
 
         /* auto alignment example, delete it for your project */
         Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.8, 4.03, Rotation2d.k180deg)),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.55, 3.86, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.4, 4.03, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.68, 3.86, Rotation2d.k180deg)),
                 () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
                 DriveControlLoops.REEF_ALIGNMENT_CONFIG);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
