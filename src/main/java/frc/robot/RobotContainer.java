@@ -316,20 +316,21 @@ public class RobotContainer {
         operator.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
 
         /* TODO: aim at target and drive example, delete it for your project */
-        JoystickDriveAndAimAtTarget exampleFaceTargetWhileDriving = new JoystickDriveAndAimAtTarget(
+        Command exampleFaceTargetWhileDriving = JoystickDriveAndAimAtTarget.driveAndAimAtTarget(
                 driveInput,
                 drive,
                 () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
                 exampleShooterOptimization,
-                0.75);
-        operator.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation());
+                0.75,
+                false);
+        operator.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
 
         /* auto alignment example, delete it for your project */
         Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.4, 4.03, Rotation2d.k180deg)),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.68, 3.86, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.6, 4.01, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.56, 3.88, Rotation2d.k180deg)),
                 () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
                 DriveControlLoops.REEF_ALIGNMENT_CONFIG);
         operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
