@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
@@ -67,8 +68,9 @@ public class RobotContainer {
     public final MapleShooterOptimization exampleShooterOptimization;
 
     // Controller
-    private final OperatorMap operator = new OperatorMap.LeftHandedPS5(0);
+    private final DriverMap driver = new DriverMap.LeftHandedPS5(0);
     // private final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
+    private final CommandXboxController operator = new CommandXboxController(1);
 
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
@@ -297,14 +299,14 @@ public class RobotContainer {
      */
     public void configureButtonBindings() {
         /* joystick drive command */
-        final MapleJoystickDriveInput driveInput = operator.getDriveInput();
-        final JoystickDrive joystickDrive = new JoystickDrive(
-                driveInput, () -> true, operator.getController().getHID()::getPOV, drive);
+        final MapleJoystickDriveInput driveInput = driver.getDriveInput();
+        final JoystickDrive joystickDrive =
+                new JoystickDrive(driveInput, () -> true, driver.getController().getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
         JoystickDrive.instance = Optional.of(joystickDrive);
 
         /* reset gyro heading manually (in case the vision does not work) */
-        operator.resetOdometryButton()
+        driver.resetOdometryButton()
                 .onTrue(Commands.runOnce(
                                 () -> drive.setPose(new Pose2d(
                                         drive.getPose().getTranslation(),
@@ -313,7 +315,7 @@ public class RobotContainer {
                         .ignoringDisable(true));
 
         /* lock chassis with x-formation */
-        operator.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
+        driver.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
 
         /* TODO: aim at target and drive example, delete it for your project */
         Command exampleFaceTargetWhileDriving = JoystickDriveAndAimAtTarget.driveAndAimAtTarget(
@@ -323,23 +325,23 @@ public class RobotContainer {
                 exampleShooterOptimization,
                 0.75,
                 false);
-        operator.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
+        driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
 
         /* auto alignment example, delete it for your project */
-        Command exampleAutoAlignment = AutoAlignment.pathFindAndAutoAlign(
+        Command exampleAutoAlignment = Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(6.6, 4.01, Rotation2d.k180deg)),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.56, 3.88, Rotation2d.k180deg)),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(FieldReefConstants.getReefAlignmentTargetPose()),
+                () -> FieldMirroringUtils.toCurrentAlliancePose(FieldReefConstants.getReefAlignmentTargetPose()),
                 () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
-                DriveControlLoops.REEF_ALIGNMENT_CONFIG);
-        operator.autoAlignmentButton().whileTrue(exampleAutoAlignment);
+                DriveControlLoops.REEF_ALIGNMENT_CONFIG));
+        driver.autoAlignmentButton().whileTrue(exampleAutoAlignment);
     }
 
     public void configureLEDEffects() {
         ledStatusLight.setDefaultCommand(ledStatusLight.showEnableDisableState());
 
-        operator.getController()
+        driver.getController()
                 .button(1)
                 .onTrue(ledStatusLight.playAnimation(new LEDAnimation.Charging(Color.kOrange), 1));
     }
