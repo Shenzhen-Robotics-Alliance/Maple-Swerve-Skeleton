@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
@@ -331,11 +332,14 @@ public class RobotContainer {
         Command exampleAutoAlignment = Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
                 drive,
                 aprilTagVision,
-                () -> FieldMirroringUtils.toCurrentAlliancePose(FieldReefConstants.getReefAlignmentTargetPose()),
-                () -> FieldMirroringUtils.toCurrentAlliancePose(FieldReefConstants.getReefAlignmentTargetPose()),
-                () -> FieldMirroringUtils.isSidePresentedAsRed() ? OptionalInt.of(10) : OptionalInt.of(21),
+                () -> FieldReefConstants.getReefAlignmentTarget().roughApproachPose(),
+                () -> FieldReefConstants.getReefAlignmentTarget().preciseAlignmentPose(),
+                () -> OptionalInt.of(FieldReefConstants.getReefAlignmentTarget().tagId()),
                 DriveControlLoops.REEF_ALIGNMENT_CONFIG));
         driver.autoAlignmentButton().whileTrue(exampleAutoAlignment);
+
+        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(FieldReefConstants.previousTargetButton(0.5));
+        new Trigger(() -> operator.getRightX() < 0.5).whileTrue(FieldReefConstants.nextTargetButton(0.5));
     }
 
     public void configureLEDEffects() {
