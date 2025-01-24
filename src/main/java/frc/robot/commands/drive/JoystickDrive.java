@@ -12,6 +12,8 @@ import frc.robot.Robot;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
+
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.utils.FieldMirroringUtils;
@@ -25,7 +27,7 @@ public class JoystickDrive extends Command {
 
     protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
     private ChassisSpeeds currentPilotInputSpeeds;
-    public static Rotation2d currentRotationMaintenanceSetpoint;
+    private Rotation2d currentRotationMaintenanceSetpoint;
 
     private double translationalSensitivity, rotationalSensitivity;
 
@@ -111,4 +113,10 @@ public class JoystickDrive extends Command {
     public void end(boolean interrupted) {
         ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
+
+    public void setRotationMaintenanceSetpoint(Rotation2d setpoint) {
+        this.currentRotationMaintenanceSetpoint = setpoint;
+    }
+
+    public static Optional<JoystickDrive> instance = Optional.empty();
 }

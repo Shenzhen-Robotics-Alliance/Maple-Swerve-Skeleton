@@ -302,6 +302,7 @@ public class RobotContainer {
         final JoystickDrive joystickDrive = new JoystickDrive(
                 driveInput, () -> true, operator.getController().getHID()::getPOV, drive);
         drive.setDefaultCommand(joystickDrive);
+        JoystickDrive.instance = Optional.of(joystickDrive);
 
         /* reset gyro heading manually (in case the vision does not work) */
         operator.resetOdometryButton()
