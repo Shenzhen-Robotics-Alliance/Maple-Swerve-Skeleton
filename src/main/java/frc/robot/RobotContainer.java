@@ -23,7 +23,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
-import frc.robot.commands.tmp.FaceCoralStation;
+import frc.robot.commands.reefscape.FaceCoralStation;
+import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.MapleSubsystem;
@@ -329,17 +330,12 @@ public class RobotContainer {
         driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
 
         /* auto alignment example, delete it for your project */
-        Command exampleAutoAlignment = Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
-                drive,
-                aprilTagVision,
-                () -> FieldReefConstants.getReefAlignmentTarget().roughApproachPose(),
-                () -> FieldReefConstants.getReefAlignmentTarget().preciseAlignmentPose(),
-                () -> OptionalInt.of(FieldReefConstants.getReefAlignmentTarget().tagId()),
-                DriveControlLoops.REEF_ALIGNMENT_CONFIG));
+        Command exampleAutoAlignment = Commands.deferredProxy(
+                () -> ReefAlignment.getReefAlignmentTarget().alignmentToBranch(drive, aprilTagVision));
         driver.autoAlignmentButton().whileTrue(exampleAutoAlignment);
 
-        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(FieldReefConstants.previousTargetButton(0.5));
-        new Trigger(() -> operator.getRightX() < 0.5).whileTrue(FieldReefConstants.nextTargetButton(0.5));
+        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
+        new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
     }
 
     public void configureLEDEffects() {
@@ -373,5 +369,7 @@ public class RobotContainer {
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+
+        Logger.recordOutput("Selected Branch", ReefAlignment.displayReefTarget());
     }
 }
