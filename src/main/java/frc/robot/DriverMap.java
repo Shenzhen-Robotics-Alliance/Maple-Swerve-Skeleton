@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.function.DoubleSupplier;
 
-public interface OperatorMap {
+public interface DriverMap {
     Trigger resetOdometryButton();
 
     Trigger lockChassisWithXFormatButton();
@@ -31,10 +31,10 @@ public interface OperatorMap {
                 this.translationalAxisX(), this.translationalAxisY(), this.rotationalAxisX());
     }
 
-    abstract class OperatorXbox implements OperatorMap {
+    abstract class DriverXbox implements DriverMap {
         protected final CommandXboxController xboxController;
 
-        protected OperatorXbox(int port) {
+        protected DriverXbox(int port) {
             this.xboxController = new CommandXboxController(port);
         }
 
@@ -64,7 +64,7 @@ public interface OperatorMap {
         }
     }
 
-    final class LeftHandedXbox extends OperatorXbox {
+    final class LeftHandedXbox extends DriverXbox {
         public LeftHandedXbox(int port) {
             super(port);
         }
@@ -90,7 +90,7 @@ public interface OperatorMap {
         }
     }
 
-    class RightHandedXbox extends OperatorXbox {
+    class RightHandedXbox extends DriverXbox {
         public RightHandedXbox(int port) {
             super(port);
         }
@@ -116,10 +116,10 @@ public interface OperatorMap {
         }
     }
 
-    abstract class OperatorPS5 implements OperatorMap {
+    abstract class DriverPS5 implements DriverMap {
         protected final CommandPS5Controller ps5Controller;
 
-        public OperatorPS5(int port) {
+        public DriverPS5(int port) {
             this.ps5Controller = new CommandPS5Controller(port);
         }
 
@@ -149,7 +149,7 @@ public interface OperatorMap {
         }
     }
 
-    final class LeftHandedPS5 extends OperatorPS5 {
+    final class LeftHandedPS5 extends DriverPS5 {
 
         public LeftHandedPS5(int port) {
             super(port);
@@ -176,7 +176,7 @@ public interface OperatorMap {
         }
     }
 
-    final class RightHandedPS5 extends OperatorPS5 {
+    final class RightHandedPS5 extends DriverPS5 {
 
         public RightHandedPS5(int port) {
             super(port);
