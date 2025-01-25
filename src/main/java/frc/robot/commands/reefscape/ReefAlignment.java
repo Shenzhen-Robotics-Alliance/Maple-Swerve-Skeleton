@@ -74,6 +74,14 @@ public class ReefAlignment {
         if (--selectedReefPartId < 0) selectedReefPartId = 5;
     }
 
+    public static void selectReefPart(int reefPartId) {
+        selectedReefPartId = reefPartId;
+    }
+
+    public static Command selectReefPartButton(int reefPartId) {
+        return Commands.runOnce(() -> selectReefPart(reefPartId), lock);
+    }
+
     public static Command nextTargetButton(double debugTime) {
         return Commands.runOnce(ReefAlignment::nextTarget, lock)
                 .andThen(Commands.waitSeconds(debugTime))
@@ -82,6 +90,28 @@ public class ReefAlignment {
 
     public static Command previousTargetButton(double debugTime) {
         return Commands.runOnce(ReefAlignment::previousTarget, lock)
+                .andThen(Commands.waitSeconds(debugTime))
+                .repeatedly();
+    }
+
+    public static void lefterTarget() {
+        if (selectedReefPartId == 0 || selectedReefPartId == 1 || selectedReefPartId == 5) previousTarget();
+        else nextTarget();
+    }
+
+    public static void righterTarget() {
+        if (selectedReefPartId == 0 || selectedReefPartId == 1 || selectedReefPartId == 5) nextTarget();
+        else previousTarget();
+    }
+
+    public static Command lefterTargetButton(double debugTime) {
+        return Commands.runOnce(ReefAlignment::lefterTarget, lock)
+                .andThen(Commands.waitSeconds(debugTime))
+                .repeatedly();
+    }
+
+    public static Command righterTargetButton(double debugTime) {
+        return Commands.runOnce(ReefAlignment::righterTarget, lock)
                 .andThen(Commands.waitSeconds(debugTime))
                 .repeatedly();
     }

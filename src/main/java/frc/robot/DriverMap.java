@@ -8,6 +8,14 @@ import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.function.DoubleSupplier;
 
 public interface DriverMap {
+    Trigger povUp();
+
+    Trigger povDown();
+
+    Trigger povLeft();
+
+    Trigger povRight();
+
     Trigger resetOdometryButton();
 
     Trigger lockChassisWithXFormatButton();
@@ -38,6 +46,26 @@ public interface DriverMap {
 
         protected DriverXbox(int port) {
             this.xboxController = new CommandXboxController(port);
+        }
+
+        @Override
+        public Trigger povUp() {
+            return xboxController.povUp();
+        }
+
+        @Override
+        public Trigger povDown() {
+            return xboxController.povDown();
+        }
+
+        @Override
+        public Trigger povLeft() {
+            return xboxController.povLeft();
+        }
+
+        @Override
+        public Trigger povRight() {
+            return xboxController.povRight();
         }
 
         @Override
@@ -128,6 +156,26 @@ public interface DriverMap {
 
         public DriverPS5(int port) {
             this.ps5Controller = new CommandPS5Controller(port);
+        }
+
+        @Override
+        public Trigger povUp() {
+            return ps5Controller.povUp();
+        }
+
+        @Override
+        public Trigger povDown() {
+            return ps5Controller.povDown();
+        }
+
+        @Override
+        public Trigger povLeft() {
+            return ps5Controller.povLeft();
+        }
+
+        @Override
+        public Trigger povRight() {
+            return ps5Controller.povRight();
         }
 
         @Override

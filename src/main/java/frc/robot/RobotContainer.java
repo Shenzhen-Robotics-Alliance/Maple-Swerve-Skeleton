@@ -39,6 +39,7 @@ import frc.robot.utils.AIRobotInSimulation;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import java.util.*;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -301,8 +302,10 @@ public class RobotContainer {
     public void configureButtonBindings() {
         /* joystick drive command */
         final MapleJoystickDriveInput driveInput = driver.getDriveInput();
-        final JoystickDrive joystickDrive =
-                new JoystickDrive(driveInput, () -> true, driver.getController().getHID()::getPOV, drive);
+        IntSupplier pov =
+                // driver.getController().getHID()::getPOV;
+                () -> -1;
+        final JoystickDrive joystickDrive = new JoystickDrive(driveInput, () -> true, pov, drive);
         drive.setDefaultCommand(joystickDrive);
         JoystickDrive.instance = Optional.of(joystickDrive);
 
@@ -334,6 +337,10 @@ public class RobotContainer {
 
         new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
         new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
+        driver.povUp().onTrue(ReefAlignment.selectReefPartButton(3));
+        driver.povDown().onTrue(ReefAlignment.selectReefPartButton(0));
+        driver.povLeft().whileTrue(ReefAlignment.lefterTargetButton(0.3));
+        driver.povRight().whileTrue(ReefAlignment.righterTargetButton(0.3));
     }
 
     public void configureLEDEffects() {
