@@ -8,6 +8,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.led.LEDAnimation;
@@ -82,6 +83,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
+        Logger.recordOutput("Selected Branch", ReefAlignment.displayReefTarget());
         if (robotContainer.drive.hardwareFaultsDetected.getAsBoolean())
             robotContainer
                     .ledStatusLight

@@ -34,28 +34,28 @@ public class ReefConstants {
 
     public static final ReefAlignment.BranchTarget[] REEF_ALIGNMENT_POSITIONS_RED = new ReefAlignment.BranchTarget[] {
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(180), new Translation2d(15.1, 4.09), new Translation2d(14.1, 3.9), 7),
+                Rotation2d.fromDegrees(180), new Translation2d(15.1, 4.09), new Translation2d(14.12, 3.81), 7),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(180), new Translation2d(15.1, 4.09), new Translation2d(14.1, 4.31), 7),
+                Rotation2d.fromDegrees(180), new Translation2d(15.1, 4.09), new Translation2d(14.12, 4.22), 7),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(-120), new Translation2d(14.1, 5.8), new Translation2d(13.73, 4.86), 8),
+                Rotation2d.fromDegrees(-120), new Translation2d(14.1, 5.8), new Translation2d(13.71, 4.86), 8),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(-120), new Translation2d(14.1, 5.8), new Translation2d(13.39, 5.05), 8),
+                Rotation2d.fromDegrees(-120), new Translation2d(14.1, 5.8), new Translation2d(13.36, 5.04), 8),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(-60), new Translation2d(12.1, 5.8), new Translation2d(12.69, 5.07), 9),
+                Rotation2d.fromDegrees(-60), new Translation2d(12.1, 5.8), new Translation2d(12.69, 5.04), 9),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(-60), new Translation2d(12.1, 5.8), new Translation2d(12.37, 4.89), 9),
+                Rotation2d.fromDegrees(-60), new Translation2d(12.1, 5.8), new Translation2d(12.37, 4.87), 9),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(0), new Translation2d(11.1, 4.1), new Translation2d(12.04, 4.17), 10),
+                Rotation2d.fromDegrees(0), new Translation2d(11.1, 4.1), new Translation2d(11.98, 4.26), 10),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(0), new Translation2d(11.1, 4.1), new Translation2d(12.04, 3.88), 10),
+                Rotation2d.fromDegrees(0), new Translation2d(11.1, 4.1), new Translation2d(11.98, 3.84), 10),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(60), new Translation2d(12.2, 2.3), new Translation2d(12.47, 3.20), 11),
+                Rotation2d.fromDegrees(60), new Translation2d(12.2, 2.3), new Translation2d(12.32, 3.14), 11),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(60), new Translation2d(12.2, 2.3), new Translation2d(12.62, 3.04), 11),
+                Rotation2d.fromDegrees(60), new Translation2d(12.2, 2.3), new Translation2d(12.66, 3.06), 11),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(120), new Translation2d(14.0, 2.3), new Translation2d(13.50, 3.01), 6),
+                Rotation2d.fromDegrees(120), new Translation2d(14.0, 2.3), new Translation2d(13.47, 3.08), 6),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(120), new Translation2d(14.0, 2.3), new Translation2d(13.82, 3.26), 6)
+                Rotation2d.fromDegrees(120), new Translation2d(14.0, 2.3), new Translation2d(13.71, 3.22), 6)
     };
 }

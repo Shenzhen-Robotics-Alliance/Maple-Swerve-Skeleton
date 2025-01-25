@@ -368,7 +368,5 @@ public class RobotContainer {
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-
-        Logger.recordOutput("Selected Branch", ReefAlignment.displayReefTarget());
     }
 }
