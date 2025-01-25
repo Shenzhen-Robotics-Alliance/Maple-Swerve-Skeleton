@@ -7,9 +7,9 @@ import frc.robot.commands.reefscape.ReefAlignment;
 public class ReefConstants {
     public static final ReefAlignment.BranchTarget[] REEF_ALIGNMENT_POSITIONS_BLUE = new ReefAlignment.BranchTarget[] {
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(0), new Translation2d(6.6, 4.01), new Translation2d(3.45, 4.15), 18),
+                Rotation2d.fromDegrees(0), new Translation2d(2.4, 4.01), new Translation2d(3.45, 4.15), 18),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(0), new Translation2d(6.6, 4.01), new Translation2d(3.45, 3.74), 18),
+                Rotation2d.fromDegrees(0), new Translation2d(2.4, 4.01), new Translation2d(3.45, 3.74), 18),
         new ReefAlignment.BranchTarget(
                 Rotation2d.fromDegrees(60), new Translation2d(3.5, 2.3), new Translation2d(3.82, 3.19), 17),
         new ReefAlignment.BranchTarget(
@@ -34,9 +34,9 @@ public class ReefConstants {
 
     public static final ReefAlignment.BranchTarget[] REEF_ALIGNMENT_POSITIONS_RED = new ReefAlignment.BranchTarget[] {
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(180), new Translation2d(11.0, 4.09), new Translation2d(14.1, 3.9), 7),
+                Rotation2d.fromDegrees(180), new Translation2d(15.1, 4.09), new Translation2d(14.1, 3.9), 7),
         new ReefAlignment.BranchTarget(
-                Rotation2d.fromDegrees(180), new Translation2d(11.0, 4.09), new Translation2d(14.1, 4.31), 7),
+                Rotation2d.fromDegrees(180), new Translation2d(15.1, 4.09), new Translation2d(14.1, 4.31), 7),
         new ReefAlignment.BranchTarget(
                 Rotation2d.fromDegrees(-120), new Translation2d(14.1, 5.8), new Translation2d(13.73, 4.86), 8),
         new ReefAlignment.BranchTarget(

@@ -9,11 +9,14 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.RobotContainer;
 import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
+import frc.robot.utils.PathUtils;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.OptionalInt;
 import org.ironmaple.utils.FieldMirroringUtils;
 
@@ -30,24 +33,14 @@ public class ReefAlignment {
         }
 
         public Command alignmentToBranch(HolonomicDriveSubsystem drive, AprilTagVision aprilTagVision) {
-            return AutoAlignment.pathFindAndAutoAlign(
+            return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
                     drive,
                     aprilTagVision,
-                    () -> ReefAlignment.getReefAlignmentTarget().roughApproachPose(),
-                    () -> ReefAlignment.getReefAlignmentTarget().preciseAlignmentPose(),
-                    () -> OptionalInt.of(ReefAlignment.getReefAlignmentTarget().tagId()),
-                    DriveControlLoops.REEF_ALIGNMENT_CONFIG);
-        }
-
-        public Command followPathAndAlignToBranch(
-                HolonomicDriveSubsystem drive, AprilTagVision aprilTagVision, PathPlannerPath path) {
-            return AutoAlignment.followPathAndAutoAlign(
-                    drive,
-                    aprilTagVision,
-                    path,
-                    () -> ReefAlignment.getReefAlignmentTarget().preciseAlignmentPose(),
-                    () -> OptionalInt.of(tagId),
-                    DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS);
+                    ReefAlignment.getReefAlignmentTarget().roughApproachPose(),
+                    ReefAlignment.getReefAlignmentTarget().preciseAlignmentPose(),
+                    OptionalInt.of(ReefAlignment.getReefAlignmentTarget().tagId()),
+                    Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(4.5, 4))),
+                    DriveControlLoops.REEF_ALIGNMENT_CONFIG));
         }
     }
 
@@ -75,6 +68,10 @@ public class ReefAlignment {
         if (--selectedId < 0) selectedId = 11;
     }
 
+    public static void setTarget(int targetId) {
+        selectedId = targetId;
+    }
+
     public static Command nextTargetButton(double debugTime) {
         return Commands.runOnce(ReefAlignment::nextTarget, lock)
                 .andThen(Commands.waitSeconds(debugTime))
@@ -85,5 +82,22 @@ public class ReefAlignment {
         return Commands.runOnce(ReefAlignment::previousTarget, lock)
                 .andThen(Commands.waitSeconds(debugTime))
                 .repeatedly();
+    }
+
+    public static Command followPathAndAlign(RobotContainer robot, PathPlannerPath path, int targetId) {
+        return Commands.deferredProxy(() -> {
+            BranchTarget branchTarget = (FieldMirroringUtils.isSidePresentedAsRed()
+                            ? REEF_ALIGNMENT_POSITIONS_RED
+                            : REEF_ALIGNMENT_POSITIONS_BLUE)
+                    [targetId];
+            return AutoAlignment.followPathAndAutoAlignStatic(
+                    robot.drive,
+                    robot.aprilTagVision,
+                    path,
+                    PathUtils.getEndingPose(path),
+                    branchTarget.preciseAlignmentPose(),
+                    OptionalInt.of(branchTarget.tagId()),
+                    DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS);
+        });
     }
 }

@@ -84,9 +84,9 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     default PathConstraints getChassisConstrains(double speedMultiplier) {
         return new PathConstraints(
                 getChassisMaxLinearVelocityMetersPerSec() * speedMultiplier,
-                getChassisMaxAccelerationMetersPerSecSq() * speedMultiplier,
+                getChassisMaxAccelerationMetersPerSecSq() * speedMultiplier * speedMultiplier,
                 getChassisMaxAngularVelocity() * speedMultiplier,
-                getChassisMaxAngularAccelerationRadPerSecSq() * speedMultiplier);
+                getChassisMaxAngularAccelerationRadPerSecSq() * speedMultiplier * speedMultiplier);
     }
 
     /**
