@@ -88,8 +88,12 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 timeStampIndex++) feedSingleOdometryDataToPositionEstimator(timeStampIndex);
 
         RobotState.getInstance().updateAlerts();
-        Logger.recordOutput("RobotState/OdometryPose", RobotState.getInstance().getOdometryPose());
-        Logger.recordOutput("RobotState/EstimatedPose", RobotState.getInstance().getEstimatedPose());
+        Logger.recordOutput(
+                "RobotState/SensorLessOdometryPose", RobotState.getInstance().getSensorLessOdometryPose());
+        Logger.recordOutput(
+                "RobotState/PrimaryEstimatorPose", RobotState.getInstance().getEstimatorPose());
+        Logger.recordOutput(
+                "RobotState/VisionSensitivePose", RobotState.getInstance().getVisionPose());
     }
 
     private void fetchOdometryInputs() {
@@ -208,7 +212,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public Pose2d getPose() {
-        return RobotState.getInstance().getEstimatedPose();
+        return RobotState.getInstance().getEstimatorPose();
     }
 
     @Override
