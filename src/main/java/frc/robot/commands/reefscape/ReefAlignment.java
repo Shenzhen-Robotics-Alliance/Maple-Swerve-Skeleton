@@ -19,8 +19,11 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.ironmaple.utils.FieldMirroringUtils;
+import org.littletonrobotics.junction.Logger;
 
 public class ReefAlignment {
+    private static final Translation2d REEF_CENTER_BLUE = new Translation2d(4.5, 4);
+
     public record BranchTarget(
             Rotation2d facing, Translation2d roughApproachPosition, Translation2d preciseAlignmentPosition, int tagId) {
 
@@ -31,45 +34,44 @@ public class ReefAlignment {
         public Pose2d preciseAlignmentPose() {
             return new Pose2d(preciseAlignmentPosition, facing);
         }
-
-        public Command alignmentToBranch(HolonomicDriveSubsystem drive, AprilTagVision aprilTagVision) {
-            return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
-                    drive,
-                    aprilTagVision,
-                    ReefAlignment.getReefAlignmentTarget().roughApproachPose(),
-                    ReefAlignment.getReefAlignmentTarget().preciseAlignmentPose(),
-                    OptionalInt.of(ReefAlignment.getReefAlignmentTarget().tagId()),
-                    Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(4.5, 4))),
-                    DriveControlLoops.REEF_ALIGNMENT_CONFIG));
-        }
     }
 
-    private static int selectedId = 0;
+    // 0 to 5
+    private static int selectedReefPartId = 0;
     private static final Subsystem lock = new Subsystem() {};
 
-    public static BranchTarget getReefAlignmentTarget() {
+    public static BranchTarget getReefAlignmentTarget(boolean rightSide) {
+        int branchIndex = getBranchIndexFromReefPartId(rightSide);
         return FieldMirroringUtils.isSidePresentedAsRed()
-                ? REEF_ALIGNMENT_POSITIONS_RED[selectedId]
-                : REEF_ALIGNMENT_POSITIONS_BLUE[selectedId];
+                ? REEF_ALIGNMENT_POSITIONS_RED[branchIndex]
+                : REEF_ALIGNMENT_POSITIONS_BLUE[branchIndex];
     }
 
-    public static boolean[] displayReefTarget() {
+    private static int getBranchIndexFromReefPartId(boolean rightSide) {
+        int branchIndex = selectedReefPartId * 2;
+        boolean isUpperSide = selectedReefPartId == 2 || selectedReefPartId == 3 || selectedReefPartId == 4;
+        if (rightSide ^ isUpperSide) branchIndex++;
+        return branchIndex;
+    }
+
+    public static boolean[] displaySelectedBranch() {
         boolean[] reef = new boolean[12];
         Arrays.fill(reef, false);
-        reef[selectedId] = true;
+        switch (selectedSide) {
+            case LEFT -> reef[getBranchIndexFromReefPartId(false)] = true;
+            case RIGHT -> reef[getBranchIndexFromReefPartId(true)] = true;
+            case NOT_SELECTED -> reef[getBranchIndexFromReefPartId(false)] =
+                    reef[getBranchIndexFromReefPartId(true)] = true;
+        }
         return reef;
     }
 
     public static void nextTarget() {
-        if (++selectedId >= 12) selectedId = 0;
+        if (++selectedReefPartId >= 6) selectedReefPartId = 0;
     }
 
     public static void previousTarget() {
-        if (--selectedId < 0) selectedId = 11;
-    }
-
-    public static void setTarget(int targetId) {
-        selectedId = targetId;
+        if (--selectedReefPartId < 0) selectedReefPartId = 5;
     }
 
     public static Command nextTargetButton(double debugTime) {
@@ -91,13 +93,45 @@ public class ReefAlignment {
                             : REEF_ALIGNMENT_POSITIONS_BLUE)
                     [targetId];
             return AutoAlignment.followPathAndAutoAlignStatic(
-                    robot.drive,
-                    robot.aprilTagVision,
-                    path,
-                    PathUtils.getEndingPose(path),
-                    branchTarget.preciseAlignmentPose(),
-                    OptionalInt.of(branchTarget.tagId()),
-                    DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS);
+                            robot.drive,
+                            robot.aprilTagVision,
+                            path,
+                            PathUtils.getEndingPose(path),
+                            branchTarget.preciseAlignmentPose(),
+                            OptionalInt.of(branchTarget.tagId()),
+                            DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
+                    .beforeStarting(() -> {
+                        selectedReefPartId = targetId / 2;
+                        selectedSide = targetId % 2 == 0 ? SelectedSide.LEFT : SelectedSide.RIGHT;
+                    })
+                    .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED);
         });
+    }
+
+    public static Command alignmentToBranch(
+            HolonomicDriveSubsystem drive, AprilTagVision aprilTagVision, boolean rightSide) {
+        return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
+                        drive,
+                        aprilTagVision,
+                        ReefAlignment.getReefAlignmentTarget(rightSide).roughApproachPose(),
+                        ReefAlignment.getReefAlignmentTarget(rightSide).preciseAlignmentPose(),
+                        OptionalInt.of(
+                                ReefAlignment.getReefAlignmentTarget(rightSide).tagId()),
+                        Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),
+                        DriveControlLoops.REEF_ALIGNMENT_CONFIG))
+                .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
+                .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED);
+    }
+
+    private enum SelectedSide {
+        LEFT,
+        RIGHT,
+        NOT_SELECTED
+    }
+
+    private static SelectedSide selectedSide = SelectedSide.NOT_SELECTED;
+
+    public static void periodic() {
+        Logger.recordOutput("Reef/SelectedBranch", ReefAlignment.displaySelectedBranch());
     }
 }

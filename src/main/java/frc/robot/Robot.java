@@ -83,7 +83,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
-        Logger.recordOutput("Selected Branch", ReefAlignment.displayReefTarget());
+        ReefAlignment.periodic();
         if (robotContainer.drive.hardwareFaultsDetected.getAsBoolean())
             robotContainer
                     .ledStatusLight

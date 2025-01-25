@@ -12,7 +12,9 @@ public interface DriverMap {
 
     Trigger lockChassisWithXFormatButton();
 
-    Trigger autoAlignmentButton();
+    Trigger autoAlignmentButtonLeft();
+
+    Trigger autoAlignmentButtonRight();
 
     Trigger faceToTargetButton();
 
@@ -49,7 +51,12 @@ public interface DriverMap {
         }
 
         @Override
-        public Trigger autoAlignmentButton() {
+        public Trigger autoAlignmentButtonLeft() {
+            return xboxController.leftBumper();
+        }
+
+        @Override
+        public Trigger autoAlignmentButtonRight() {
             return xboxController.rightBumper();
         }
 
@@ -134,7 +141,12 @@ public interface DriverMap {
         }
 
         @Override
-        public Trigger autoAlignmentButton() {
+        public Trigger autoAlignmentButtonLeft() {
+            return ps5Controller.L1();
+        }
+
+        @Override
+        public Trigger autoAlignmentButtonRight() {
             return ps5Controller.R1();
         }
 

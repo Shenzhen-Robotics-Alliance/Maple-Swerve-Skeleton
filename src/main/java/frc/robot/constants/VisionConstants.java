@@ -15,8 +15,8 @@ public class VisionConstants {
     public static final Time POSE_BUFFER_DURATION = Seconds.of(2.5);
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 2,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(45),
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 1.5,
+            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(30),
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.5,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(8),
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG = 0.5,
