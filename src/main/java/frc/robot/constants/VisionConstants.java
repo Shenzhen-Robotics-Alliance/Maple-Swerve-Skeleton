@@ -15,7 +15,7 @@ public class VisionConstants {
     public static final Time POSE_BUFFER_DURATION = Seconds.of(2.5);
     public static final double
             /* default standard error for vision observation, if only one apriltag observed */
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 1,
+            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = 2,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Math.toRadians(30),
             TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = 0.5,
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Math.toRadians(8),
@@ -23,12 +23,12 @@ public class VisionConstants {
             ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG = Math.toRadians(8),
 
             /* standard deviations for the primary pose estimator */
-            PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.04,
-            PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.2),
+            PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.01,
+            PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(0.1),
 
             /* standard deviation for the secondary (vision-sensitive) pose estimator */
-            VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.4,
-            VISION_SENSITIVE_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(2);
+            VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS = 0.5,
+            VISION_SENSITIVE_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS = Math.toRadians(8);
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             //            new PhotonCameraProperties(
