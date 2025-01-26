@@ -23,6 +23,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         robot.aprilTagVision,
                         PathPlannerPath.fromChoreoTrajectory("place first"),
                         FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.27, 5.02, Rotation2d.fromDegrees(-120))),
+                        Rotation2d.fromDegrees(-120),
                         OptionalInt.of(20),
                         OptionalInt.of(11),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
@@ -34,6 +35,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         robot.aprilTagVision,
                         PathPlannerPath.fromChoreoTrajectory("place second"),
                         FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(5.00, 5.17, Rotation2d.fromDegrees(-120))),
+                        Rotation2d.fromDegrees(-120),
                         OptionalInt.of(20),
                         OptionalInt.of(11),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
@@ -46,6 +48,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         robot.aprilTagVision,
                         PathPlannerPath.fromChoreoTrajectory("place third"),
                         FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(3.99, 5.19, Rotation2d.fromDegrees(-60))),
+                        Rotation2d.fromDegrees(-60),
                         OptionalInt.of(19),
                         OptionalInt.of(6),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
@@ -68,6 +71,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         robot.aprilTagVision,
                         PathPlannerPath.fromChoreoTrajectory("place fourth"),
                         FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(3.73, 5.03, Rotation2d.fromDegrees(-60))),
+                        Rotation2d.fromDegrees(-60),
                         OptionalInt.of(19),
                         OptionalInt.of(6),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)

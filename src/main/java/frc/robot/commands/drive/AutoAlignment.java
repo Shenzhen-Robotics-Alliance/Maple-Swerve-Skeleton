@@ -6,9 +6,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,14 +18,12 @@ import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.PathUtils;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
-    private static final Pose2d ROUGH_APPROACH_TOLERANCE = new Pose2d(0.4, 0.4, Rotation2d.fromDegrees(15));
+    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.4);
+    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.2);
 
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
@@ -36,17 +34,13 @@ public class AutoAlignment {
             AprilTagVision vision,
             Pose2d roughTarget,
             Pose2d preciseTarget,
+            Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocus,
             Optional<Translation2d> faceToVisionTarget,
             AutoAlignmentConfigurations config) {
-        Command pathFindToRoughTarget = pathFindToPose(
-                        driveSubsystem,
-                        roughTarget,
-                        config.roughApproachSpeedFactor,
-                        config.transitionSpeed,
-                        faceToVisionTarget)
-                .until(() -> isPoseErrorInBound(driveSubsystem.getPose(), roughTarget, ROUGH_APPROACH_TOLERANCE));
-        Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget, config)
+        Command pathFindToRoughTarget = pathFindToPose(driveSubsystem, roughTarget, faceToVisionTarget, config);
+        Command preciseAlignment = preciseAlignment(
+                        driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
                 .deadlineFor(vision.focusOnTarget(tagIdToFocus));
 
         return pathFindToRoughTarget.andThen(preciseAlignment);
@@ -57,6 +51,7 @@ public class AutoAlignment {
             AprilTagVision vision,
             PathPlannerPath path,
             Pose2d preciseTargetAtBlue,
+            Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocusAtBlue,
             OptionalInt tagIdToFocusAtRed,
             AutoAlignmentConfigurations config) {
@@ -66,6 +61,7 @@ public class AutoAlignment {
                 path,
                 PathUtils.getEndingPose(path),
                 FieldMirroringUtils.toCurrentAlliancePose(preciseTargetAtBlue),
+                preciseTargetApproachDirection,
                 FieldMirroringUtils.isSidePresentedAsRed() ? tagIdToFocusAtRed : tagIdToFocusAtBlue,
                 config));
     }
@@ -76,12 +72,19 @@ public class AutoAlignment {
             PathPlannerPath path,
             Pose2d roughTarget,
             Pose2d preciseTarget,
+            Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocus,
             AutoAlignmentConfigurations config) {
         Command followPath = AutoBuilder.followPath(path)
-                .until(() -> isPoseErrorInBound(driveSubsystem.getPose(), roughTarget, ROUGH_APPROACH_TOLERANCE));
+                .until(() -> RobotState.getInstance()
+                                .getVisionPose()
+                                .getTranslation()
+                                .minus(roughTarget.getTranslation())
+                                .getNorm()
+                        < ROUGH_APPROACH_TOLERANCE.in(Meters));
 
-        Command preciseAlignment = preciseAlignment(driveSubsystem, roughTarget, preciseTarget, config)
+        Command preciseAlignment = preciseAlignment(
+                        driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
                 .deadlineFor(vision.focusOnTarget(tagIdToFocus));
 
         return followPath.andThen(preciseAlignment);
@@ -90,9 +93,8 @@ public class AutoAlignment {
     public static Command pathFindToPose(
             HolonomicDriveSubsystem driveSubsystem,
             Pose2d targetPose,
-            double speedMultiplier,
-            LinearVelocity goalEndVelocity,
-            Optional<Translation2d> faceToVisionTarget) {
+            Optional<Translation2d> faceToVisionTarget,
+            AutoAlignmentConfigurations config) {
         ChassisHeadingController.ChassisHeadingRequest chassisHeadingRequest = faceToVisionTarget.isPresent()
                 ? new ChassisHeadingController.FaceToTargetRequest(faceToVisionTarget::get, null)
                 : new ChassisHeadingController.NullRequest();
@@ -103,22 +105,30 @@ public class AutoAlignment {
         Runnable resetDriveCommandRotationMaintenance = () -> JoystickDrive.instance.ifPresent(
                 joystickDrive -> joystickDrive.setRotationMaintenanceSetpoint(targetPose.getRotation()));
         return AutoBuilder.pathfindToPose(
-                        targetPose, driveSubsystem.getChassisConstrains(speedMultiplier), goalEndVelocity)
+                        targetPose,
+                        driveSubsystem.getChassisConstrains(config.roughApproachSpeedFactor),
+                        config.transitionSpeed)
                 .beforeStarting(activateChassisHeadingController)
+                .until(() -> RobotState.getInstance()
+                                .getVisionPose()
+                                .getTranslation()
+                                .minus(targetPose.getTranslation())
+                                .getNorm()
+                        < ROUGH_APPROACH_TOLERANCE.in(Meters))
                 .finallyDo(deactivateChassisHeadingController)
                 .finallyDo(resetDriveCommandRotationMaintenance);
     }
 
     public static Command preciseAlignment(
             HolonomicDriveSubsystem driveSubsystem,
-            Pose2d roughTarget,
             Pose2d preciseTarget,
+            Rotation2d preciseTargetApproachDirection,
             AutoAlignmentConfigurations config) {
         return Commands.defer(
                         () -> AutoBuilder.followPath(getPreciseAlignmentPath(
                                 driveSubsystem.getPose(),
-                                roughTarget,
                                 preciseTarget,
+                                preciseTargetApproachDirection,
                                 driveSubsystem.getMeasuredChassisSpeedsFieldRelative(),
                                 config)),
                         Set.of(driveSubsystem))
@@ -127,39 +137,50 @@ public class AutoAlignment {
 
     private static PathPlannerPath getPreciseAlignmentPath(
             Pose2d currentRobotPose,
-            Pose2d roughTarget,
             Pose2d preciseTarget,
+            Rotation2d preciseTargetApproachDirection,
             ChassisSpeeds currentSpeedsFieldRelative,
             AutoAlignmentConfigurations config) {
         Translation2d currentTranslationalSpeedsMPS = new Translation2d(
                 currentSpeedsFieldRelative.vxMetersPerSecond, currentSpeedsFieldRelative.vyMetersPerSecond);
-        Translation2d deltaPosition = preciseTarget.getTranslation().minus(roughTarget.getTranslation());
+        Translation2d interiorWaypoint = preciseTarget
+                .getTranslation()
+                .plus(new Translation2d(
+                        -PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE.in(Meters), preciseTargetApproachDirection));
+
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
                 new Pose2d(currentRobotPose.getTranslation(), currentTranslationalSpeedsMPS.getAngle()),
-                new Pose2d(preciseTarget.getTranslation(), deltaPosition.getAngle()));
+                new Pose2d(interiorWaypoint, preciseTargetApproachDirection),
+                new Pose2d(preciseTarget.getTranslation(), preciseTargetApproachDirection));
 
-        PathConstraints constraints = new PathConstraints(
+        PathConstraints globalConstrains = new PathConstraints(
                 config.preciseAlignmentSpeed,
                 config.preciseAlignmentMaxAcceleration,
                 DegreesPerSecond.of(180),
                 DegreesPerSecondPerSecond.of(360));
 
+        PathConstraints slowDownConstrains = new PathConstraints(
+                config.preciseAlignmentSpeed.times(0.4),
+                config.preciseAlignmentMaxAcceleration,
+                DegreesPerSecond.of(90),
+                DegreesPerSecondPerSecond.of(360));
+
+        List<RotationTarget> rotationTargets = List.of(new RotationTarget(1.0, preciseTarget.getRotation()));
+        List<ConstraintsZone> constraintsZones = List.of(new ConstraintsZone(1.0, 2.0, slowDownConstrains));
+
         PathPlannerPath path = new PathPlannerPath(
                 waypoints,
-                constraints,
+                rotationTargets,
+                List.of(),
+                constraintsZones,
+                List.of(),
+                globalConstrains,
                 new IdealStartingState(config.transitionSpeed, currentRobotPose.getRotation()),
-                new GoalEndState(0.0, preciseTarget.getRotation()));
+                new GoalEndState(0.0, preciseTarget.getRotation()),
+                false);
         path.preventFlipping = true;
 
         return path;
-    }
-
-    public static boolean isPoseErrorInBound(Pose2d currentPose, Pose2d desiredPose, Pose2d tolerance) {
-        Transform2d difference = desiredPose.minus(currentPose);
-        return Math.abs(difference.getX()) < tolerance.getX()
-                && Math.abs(difference.getY()) < tolerance.getY()
-                && Math.abs(difference.getRotation().getRadians())
-                        < tolerance.getRotation().getRadians();
     }
 
     public record AutoAlignmentConfigurations(
