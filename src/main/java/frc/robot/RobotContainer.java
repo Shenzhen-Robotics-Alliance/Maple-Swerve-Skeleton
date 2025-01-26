@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
-import frc.robot.commands.reefscape.FaceCoralStation;
 import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
@@ -40,6 +39,7 @@ import frc.robot.utils.AIRobotInSimulation;
 import frc.robot.utils.MapleJoystickDriveInput;
 import frc.robot.utils.MapleShooterOptimization;
 import java.util.*;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -70,9 +70,9 @@ public class RobotContainer {
     public final MapleShooterOptimization exampleShooterOptimization;
 
     // Controller
-    private final DriverMap driver = new DriverMap.LeftHandedPS5(0);
-    // private final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
-    private final CommandXboxController operator = new CommandXboxController(1);
+    public final DriverMap driver = new DriverMap.LeftHandedPS5(0);
+    // public final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
+    public final CommandXboxController operator = new CommandXboxController(1);
 
     private final LoggedDashboardChooser<Auto> autoChooser;
     private final SendableChooser<Supplier<Command>> testChooser;
@@ -302,8 +302,10 @@ public class RobotContainer {
     public void configureButtonBindings() {
         /* joystick drive command */
         final MapleJoystickDriveInput driveInput = driver.getDriveInput();
-        final JoystickDrive joystickDrive =
-                new JoystickDrive(driveInput, () -> true, driver.getController().getHID()::getPOV, drive);
+        IntSupplier pov =
+                // driver.getController().getHID()::getPOV;
+                () -> -1;
+        final JoystickDrive joystickDrive = new JoystickDrive(driveInput, () -> true, pov, drive);
         drive.setDefaultCommand(joystickDrive);
         JoystickDrive.instance = Optional.of(joystickDrive);
 
@@ -327,14 +329,18 @@ public class RobotContainer {
                 exampleShooterOptimization,
                 0.75,
                 false);
-        driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
+        // driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
 
         /* auto alignment example, delete it for your project */
-        Command exampleAutoAlignment = ReefAlignment.getReefAlignmentTarget().alignmentToBranch(drive, aprilTagVision);
-        driver.autoAlignmentButton().whileTrue(exampleAutoAlignment);
+        driver.autoAlignmentButtonLeft().whileTrue(ReefAlignment.alignmentToBranch(drive, aprilTagVision, false));
+        driver.autoAlignmentButtonRight().whileTrue(ReefAlignment.alignmentToBranch(drive, aprilTagVision, true));
 
         new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
         new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
+        driver.povUp().onTrue(ReefAlignment.selectReefPartButton(3));
+        driver.povDown().onTrue(ReefAlignment.selectReefPartButton(0));
+        driver.povLeft().whileTrue(ReefAlignment.lefterTargetButton(0.3));
+        driver.povRight().whileTrue(ReefAlignment.righterTargetButton(0.3));
     }
 
     public void configureLEDEffects() {
@@ -368,7 +374,5 @@ public class RobotContainer {
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-
-        Logger.recordOutput("Selected Branch", ReefAlignment.displayReefTarget());
     }
 }

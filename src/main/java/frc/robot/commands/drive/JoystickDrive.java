@@ -14,14 +14,14 @@ import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.function.IntSupplier;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
 public class JoystickDrive extends Command {
     protected final MapleJoystickDriveInput input;
     private final BooleanSupplier useDriverStationCentricSwitch;
-    private final Supplier<Integer> povButtonSupplier;
+    private final IntSupplier povButtonSupplier;
     private final HolonomicDriveSubsystem driveSubsystem;
 
     protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
@@ -33,7 +33,7 @@ public class JoystickDrive extends Command {
     public JoystickDrive(
             MapleJoystickDriveInput input,
             BooleanSupplier useDriverStationCentricSwitch,
-            Supplier<Integer> povButtonSupplier,
+            IntSupplier povButtonSupplier,
             HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
@@ -68,9 +68,9 @@ public class JoystickDrive extends Command {
 
         if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
 
-        if (povButtonSupplier.get() != -1)
+        if (povButtonSupplier.getAsInt() != -1)
             this.currentRotationMaintenanceSetpoint = FieldMirroringUtils.getCurrentAllianceDriverStationFacing()
-                    .minus(Rotation2d.fromDegrees(povButtonSupplier.get()));
+                    .minus(Rotation2d.fromDegrees(povButtonSupplier.getAsInt()));
 
         if (previousRotationalInputTimer.hasElapsed(
                 TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS))
