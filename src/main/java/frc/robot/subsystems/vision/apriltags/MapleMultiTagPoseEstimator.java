@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision.apriltags;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.LogPaths.APRIL_TAGS_VISION_PATH;
 import static frc.robot.constants.VisionConstants.*;
 
@@ -9,6 +10,8 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import frc.robot.utils.CustomMaths.Statistics;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +76,7 @@ public class MapleMultiTagPoseEstimator {
         /* add multi-solvepnp result if present */
         Optional<Pose3d> multiSolvePNPPoseEstimation = calculateRobotPose3dFromMultiSolvePNPResult(
                 cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
-        multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
+        // multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
 
         for (int i = 0; i < cameraInput.currentTargetsCount; i++)
             if (tagToFocus.isEmpty() || tagToFocus.getAsInt() == cameraInput.fiducialMarksID[i])
@@ -91,6 +94,9 @@ public class MapleMultiTagPoseEstimator {
 
     private Optional<Pose3d> calculateRobotPose3dFromSingleObservation(
             Transform3d robotToCamera, Transform3d cameraToTarget, int tagID) {
+        // Ignore result if too far
+        if (cameraToTarget.getTranslation().getNorm() > MAX_TAG_DISTANCE.in(Meters)) return Optional.empty();
+
         return fieldLayout.getTagPose(tagID).map(tagPose -> tagPose.transformBy(cameraToTarget.inverse())
                 .transformBy(robotToCamera.inverse()));
     }
@@ -175,28 +181,28 @@ public class MapleMultiTagPoseEstimator {
         final List<Statistics.RotationEstimation> robotPoseEstimationsTheta = new ArrayList<>();
 
         for (Pose3d robotPoseEstimationSingleTag : validRobotPoseEstimationsSingleTag) {
-            double translationalStandardError = tagToFocus.isPresent()
+            Distance translationalStandardError = tagToFocus.isPresent()
                     ? TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG
                     : TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION;
-            double rotationalStandardError = tagToFocus.isPresent()
+            Angle rotationalStandardError = tagToFocus.isPresent()
                     ? ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG
                     : ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION;
-            robotPoseEstimationsXMeters.add(
-                    new Statistics.Estimation(robotPoseEstimationSingleTag.getX(), translationalStandardError));
-            robotPoseEstimationsYMeters.add(
-                    new Statistics.Estimation(robotPoseEstimationSingleTag.getY(), translationalStandardError));
+            robotPoseEstimationsXMeters.add(new Statistics.Estimation(
+                    robotPoseEstimationSingleTag.getX(), translationalStandardError.in(Meters)));
+            robotPoseEstimationsYMeters.add(new Statistics.Estimation(
+                    robotPoseEstimationSingleTag.getY(), translationalStandardError.in(Meters)));
             robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
-                    robotPoseEstimationSingleTag.getRotation().toRotation2d(), rotationalStandardError));
+                    robotPoseEstimationSingleTag.getRotation().toRotation2d(), rotationalStandardError.in(Radians)));
         }
 
         for (Pose3d robotPoseEstimationMultiTag : validRobotPoseEstimationsMultiTag) {
             robotPoseEstimationsXMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
+                    robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG.in(Meters)));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
+                    robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG.in(Meters)));
             robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
                     robotPoseEstimationMultiTag.getRotation().toRotation2d(),
-                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
+                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG.in(Radians)));
         }
 
         final Statistics.Estimation

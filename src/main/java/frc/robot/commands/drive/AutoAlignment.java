@@ -187,8 +187,13 @@ public class AutoAlignment {
             double roughApproachSpeedFactor,
             LinearVelocity transitionSpeed,
             LinearVelocity preciseAlignmentSpeed,
+            LinearVelocity hitTargetSpeed,
             LinearAcceleration preciseAlignmentMaxAcceleration) {
         public static final AutoAlignmentConfigurations DEFAULT_CONFIG = new AutoAlignmentConfigurations(
-                0.6, MetersPerSecond.of(2), MetersPerSecond.of(2), MetersPerSecondPerSecond.of(4));
+                0.6,
+                MetersPerSecond.of(2),
+                MetersPerSecond.of(2),
+                MetersPerSecond.of(0.5),
+                MetersPerSecondPerSecond.of(4));
     }
 }

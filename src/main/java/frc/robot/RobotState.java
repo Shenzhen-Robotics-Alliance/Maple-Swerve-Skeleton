@@ -47,17 +47,17 @@ public class RobotState {
         this.poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_DURATION.in(Seconds));
 
         this.primaryEstimatorOdometryStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
-        primaryEstimatorOdometryStdDevs.set(0, 0, PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS);
-        primaryEstimatorOdometryStdDevs.set(1, 0, PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS);
-        primaryEstimatorOdometryStdDevs.set(2, 0, PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS);
+        primaryEstimatorOdometryStdDevs.set(0, 0, PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR.in(Meters));
+        primaryEstimatorOdometryStdDevs.set(1, 0, PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR.in(Meters));
+        primaryEstimatorOdometryStdDevs.set(2, 0, PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR.in(Radians));
 
         this.visionSensitiveEstimatorOdometryStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
         visionSensitiveEstimatorOdometryStdDevs.set(
-                0, 0, VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS);
+                0, 0, VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR.in(Meters));
         visionSensitiveEstimatorOdometryStdDevs.set(
-                1, 0, VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS);
+                1, 0, VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR.in(Meters));
         visionSensitiveEstimatorOdometryStdDevs.set(
-                2, 0, VISION_SENSITIVE_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS);
+                2, 0, VISION_SENSITIVE_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR.in(Radians));
     }
 
     public void resetPose(Pose2d pose) {
