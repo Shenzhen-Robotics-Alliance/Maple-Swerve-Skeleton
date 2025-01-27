@@ -128,6 +128,7 @@ public class ReefAlignment {
                             path,
                             PathUtils.getEndingPose(path),
                             branchTarget.preciseAlignmentPose(),
+                            branchTarget.facing(),
                             OptionalInt.of(branchTarget.tagId()),
                             DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                     .beforeStarting(() -> {
@@ -145,6 +146,7 @@ public class ReefAlignment {
                         aprilTagVision,
                         ReefAlignment.getReefAlignmentTarget(rightSide).roughApproachPose(),
                         ReefAlignment.getReefAlignmentTarget(rightSide).preciseAlignmentPose(),
+                        ReefAlignment.getReefAlignmentTarget(rightSide).facing(),
                         OptionalInt.of(
                                 ReefAlignment.getReefAlignmentTarget(rightSide).tagId()),
                         Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),

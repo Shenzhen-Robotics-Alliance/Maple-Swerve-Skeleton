@@ -22,6 +22,7 @@ public class ExampleCustomAutoWithAutoAlignment implements Auto {
                         robot.aprilTagVision,
                         PathPlannerPath.fromPathFile("Test Auto Alignment"),
                         FieldMirroringUtils.toCurrentAlliancePose(new Pose2d(4.98, 5.18, Rotation2d.fromDegrees(-120))),
+                        Rotation2d.fromDegrees(-120),
                         OptionalInt.of(20),
                         OptionalInt.of(11),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
