@@ -49,7 +49,8 @@ public class ReefAlignment {
 
     private static int getBranchIndexFromReefPartId(boolean rightSide) {
         int branchIndex = selectedReefPartId * 2;
-        boolean isUpperSide = selectedReefPartId == 2 || selectedReefPartId == 3 || selectedReefPartId == 4;
+        boolean isUpperSide = // selectedReefPartId == 2 || selectedReefPartId == 3 || selectedReefPartId == 4;
+                false;
         if (rightSide ^ isUpperSide) branchIndex++;
         return branchIndex;
     }

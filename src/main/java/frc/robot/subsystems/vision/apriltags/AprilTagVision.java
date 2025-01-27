@@ -63,7 +63,7 @@ public class AprilTagVision extends MapleSubsystem {
 
         for (int i = 0; i < inputs.camerasInputs.length; i++) {
             this.camerasDisconnectedAlerts[i].set(!inputs.camerasInputs[i].cameraConnected);
-            this.camerasNoResultAlerts[i].set(camerasDisconnectedAlerts[i].get()
+            this.camerasNoResultAlerts[i].set((!camerasDisconnectedAlerts[i].get())
                     && camerasNoResultDebouncer[i].calculate(!inputs.camerasInputs[i].newPipeLineResultAvailable));
         }
 
