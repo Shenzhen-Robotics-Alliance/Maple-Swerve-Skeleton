@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
 import frc.robot.commands.drive.*;
@@ -335,12 +334,16 @@ public class RobotContainer {
         driver.autoAlignmentButtonLeft().whileTrue(ReefAlignment.alignmentToBranch(drive, aprilTagVision, false));
         driver.autoAlignmentButtonRight().whileTrue(ReefAlignment.alignmentToBranch(drive, aprilTagVision, true));
 
-        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
-        new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
-        driver.povUp().onTrue(ReefAlignment.selectReefPartButton(3));
-        driver.povDown().onTrue(ReefAlignment.selectReefPartButton(0));
-        driver.povLeft().whileTrue(ReefAlignment.lefterTargetButton(0.3));
-        driver.povRight().whileTrue(ReefAlignment.righterTargetButton(0.3));
+        //        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
+        //        new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
+        //        driver.povUp().onTrue(ReefAlignment.selectReefPartButton(3));
+        //        driver.povDown().onTrue(ReefAlignment.selectReefPartButton(0));
+        //        driver.povLeft().whileTrue(ReefAlignment.lefterTargetButton(0.3));
+        //        driver.povRight().whileTrue(ReefAlignment.righterTargetButton(0.3));
+        operator.y().onTrue(ReefAlignment.selectReefPartButton(3));
+        operator.a().onTrue(ReefAlignment.selectReefPartButton(0));
+        operator.x().whileTrue(ReefAlignment.lefterTargetButton(0.3));
+        operator.b().whileTrue(ReefAlignment.righterTargetButton(0.3));
     }
 
     public void configureLEDEffects() {
