@@ -76,15 +76,16 @@ public class MapleMultiTagPoseEstimator {
         /* add multi-solvepnp result if present */
         Optional<Pose3d> multiSolvePNPPoseEstimation = calculateRobotPose3dFromMultiSolvePNPResult(
                 cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
-        // multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
+        multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
 
         for (int i = 0; i < cameraInput.currentTargetsCount; i++)
-            if (tagToFocus.isEmpty() || tagToFocus.getAsInt() == cameraInput.fiducialMarksID[i])
-                calculateRobotPose3dFromSingleObservation(
-                                cameraProperty.robotToCamera,
-                                cameraInput.bestCameraToTargets[i],
-                                cameraInput.fiducialMarksID[i])
-                        .ifPresent(robotPose3dObservationsSingleTag::add);
+            calculateRobotPose3dFromSingleObservation(
+                            cameraInput.cameraID,
+                            cameraInput.fiducialMarksID[i],
+                            cameraProperty.robotToCamera,
+                            cameraInput.bestCameraToTargets[i],
+                            cameraInput.tagAmbiguities[i])
+                    .ifPresent(robotPose3dObservationsSingleTag::add);
     }
 
     private Pose3d calculateObservedAprilTagTargetPose(
@@ -93,9 +94,10 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private Optional<Pose3d> calculateRobotPose3dFromSingleObservation(
-            Transform3d robotToCamera, Transform3d cameraToTarget, int tagID) {
+            int cameraID, int tagID, Transform3d robotToCamera, Transform3d cameraToTarget, double tagAmbiguity) {
         // Ignore result if too far
-        if (cameraToTarget.getTranslation().getNorm() > MAX_TAG_DISTANCE.in(Meters)) return Optional.empty();
+        if (shouldDiscardTagObservation(cameraID, tagID, robotToCamera, cameraToTarget, tagAmbiguity))
+            return Optional.empty();
 
         return fieldLayout.getTagPose(tagID).map(tagPose -> tagPose.transformBy(cameraToTarget.inverse())
                 .transformBy(robotToCamera.inverse()));
@@ -107,13 +109,48 @@ public class MapleMultiTagPoseEstimator {
                 fieldToCamera -> new Pose3d().transformBy(fieldToCamera).transformBy(robotToCamera.inverse()));
     }
 
+    private boolean shouldDiscardTagObservation(
+            int cameraID, int tagID, Transform3d robotToCamera, Transform3d cameraToTarget, double tagAmbiguity) {
+        boolean invalidTag = tagID == -1;
+        boolean notTheRightTag = tagToFocus.isPresent() && tagToFocus.getAsInt() != tagID;
+        boolean tooFar = cameraToTarget.getTranslation().getNorm() > MAX_TAG_DISTANCE.in(Meters);
+        boolean tooMuchAmbiguity = tagAmbiguity > MAX_TAG_AMBIGUITY;
+
+        Transform3d correctlyOrientedCameraToTarget3d = cameraToTarget.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(
+                        robotToCamera.getRotation().getX(),
+                        robotToCamera.getRotation().getY(),
+                        0)));
+        Transform2d cameraToTagBack = new Transform2d(
+                correctlyOrientedCameraToTarget3d.getTranslation().toTranslation2d(),
+                correctlyOrientedCameraToTarget3d.getRotation().toRotation2d().plus(Rotation2d.k180deg));
+        Rotation2d cameraToTargetTranslationDirection =
+                cameraToTagBack.getTranslation().getAngle();
+        Rotation2d cameraToTagBackRotation = cameraToTagBack.getRotation();
+        Angle tagAngle = cameraToTagBackRotation
+                .minus(cameraToTargetTranslationDirection)
+                .getMeasure();
+        boolean angleTooBig = tagAngle.abs(Radians) > MAX_TAG_ANGLE.in(Radians);
+        String logPath = APRIL_TAGS_VISION_PATH + "Filtering/TagObservations/Camera-" + cameraID + "/Tag-" + tagID;
+        Logger.recordOutput(logPath + "/Ambiguity", tagAmbiguity);
+        Logger.recordOutput(logPath + "/TagAngle (Deg)", tagAngle.abs(Degrees));
+
+        return invalidTag || notTheRightTag || tooFar || tooMuchAmbiguity || angleTooBig;
+    }
+
     private void calculateVisibleTagsPosesForLog(
             AprilTagVisionIO.CameraInputs cameraInput,
             PhotonCameraProperties cameraProperty,
             Pose2d currentOdometryPose) {
         if (!LOG_DETAILED_FILTERING_DATA) return;
         for (int i = 0; i < cameraInput.fiducialMarksID.length; i++) {
-            if (cameraInput.fiducialMarksID[i] == -1) continue;
+            if (shouldDiscardTagObservation(
+                    cameraInput.cameraID,
+                    cameraInput.fiducialMarksID[i],
+                    cameraProperty.robotToCamera,
+                    cameraInput.bestCameraToTargets[i],
+                    cameraInput.tagAmbiguities[i])) continue;
 
             fieldLayout
                     .getTagPose(cameraInput.fiducialMarksID[i])

@@ -21,9 +21,11 @@ public class VisionConstants {
     public static final Angle ROBOT_PITCH_TOLERANCE = Degrees.of(10);
     public static final Angle ROBOT_ROLL_TOLERANCE = Degrees.of(10);
     public static final Distance MAX_TAG_DISTANCE = Meters.of(4);
+    public static final double MAX_TAG_AMBIGUITY = 0.3;
+    public static final Angle MAX_TAG_ANGLE = Degrees.of(65);
 
     /** Standard errors for single tag vision observations. */
-    public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = Meters.of(1.5);
+    public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = Meters.of(2);
 
     public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Degrees.of(60);
 
