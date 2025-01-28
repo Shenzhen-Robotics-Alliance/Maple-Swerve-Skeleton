@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotState;
 import frc.robot.subsystems.MapleSubsystem;
-import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -23,15 +22,11 @@ public class AprilTagVision extends MapleSubsystem {
     private final AprilTagVisionIO.VisionInputs inputs;
 
     private final MapleMultiTagPoseEstimator multiTagPoseEstimator;
-    private final HolonomicDriveSubsystem driveSubsystem;
     private final Alert[] camerasDisconnectedAlerts;
     private final Alert[] camerasNoResultAlerts;
     private final Debouncer[] camerasNoResultDebouncer;
 
-    public AprilTagVision(
-            AprilTagVisionIO io,
-            List<PhotonCameraProperties> camerasProperties,
-            HolonomicDriveSubsystem driveSubsystem) {
+    public AprilTagVision(AprilTagVisionIO io, List<PhotonCameraProperties> camerasProperties) {
         super("Vision");
         this.io = io;
         this.inputs = new AprilTagVisionIO.VisionInputs(camerasProperties.size());
@@ -51,7 +46,6 @@ public class AprilTagVision extends MapleSubsystem {
 
         this.multiTagPoseEstimator = new MapleMultiTagPoseEstimator(
                 fieldLayout, new CameraHeightAndPitchRollAngleFilter(), camerasProperties);
-        this.driveSubsystem = driveSubsystem;
     }
 
     private Optional<MapleMultiTagPoseEstimator.VisionObservation> result = Optional.empty();
@@ -68,7 +62,7 @@ public class AprilTagVision extends MapleSubsystem {
         }
 
         result = multiTagPoseEstimator.estimateRobotPose(
-                inputs.camerasInputs, driveSubsystem.getPose(), getResultsTimeStamp());
+                inputs.camerasInputs, RobotState.getInstance().getEstimatorPose(), getResultsTimeStamp());
         result.ifPresent(RobotState.getInstance()::addVisionObservation);
 
         Logger.recordOutput(

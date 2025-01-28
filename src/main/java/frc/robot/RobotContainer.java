@@ -113,8 +113,7 @@ public class RobotContainer {
                 //                        new ModuleIOSpark(3)
                 //                );
 
-                aprilTagVision =
-                        new AprilTagVision(new AprilTagVisionIOReal(camerasProperties), camerasProperties, drive);
+                aprilTagVision = new AprilTagVision(new AprilTagVisionIOReal(camerasProperties), camerasProperties);
             }
 
             case SIM -> {
@@ -153,8 +152,7 @@ public class RobotContainer {
                                 camerasProperties,
                                 VisionConstants.fieldLayout,
                                 driveSimulation::getSimulatedDriveTrainPose),
-                        camerasProperties,
-                        drive);
+                        camerasProperties);
 
                 SimulatedArena.getInstance().resetFieldForAuto();
                 AIRobotInSimulation.startOpponentRobotSimulations();
@@ -173,7 +171,7 @@ public class RobotContainer {
                         (inputs) -> {},
                         (inputs) -> {});
 
-                aprilTagVision = new AprilTagVision((inputs) -> {}, camerasProperties, drive);
+                aprilTagVision = new AprilTagVision((inputs) -> {}, camerasProperties);
             }
         }
 
