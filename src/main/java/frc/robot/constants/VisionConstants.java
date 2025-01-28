@@ -25,11 +25,13 @@ public class VisionConstants {
     /** Standard errors for single tag vision observations. */
     public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = Meters.of(1.5);
 
-    public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Degrees.of(30);
+    public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Degrees.of(60);
+
     /** Standard errors for multiple-solvePNP observations. */
     public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG = Meters.of(0.5);
 
     public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG = Degrees.of(8);
+
     /** Standard errors for focused tag observations. */
     public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG = Meters.of(0.5);
 
@@ -67,7 +69,7 @@ public class VisionConstants {
                     Milliseconds.of(60),
                     Milliseconds.of(5),
                     Degrees.of(60),
-                    0.6,
+                    0.9,
                     0.2,
                     1280,
                     800,
@@ -82,7 +84,7 @@ public class VisionConstants {
                     Milliseconds.of(60),
                     Milliseconds.of(5),
                     Degrees.of(60),
-                    0.6,
+                    0.9,
                     0.2,
                     1280,
                     800,

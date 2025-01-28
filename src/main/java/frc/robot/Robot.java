@@ -8,6 +8,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
@@ -116,22 +117,27 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousPeriodic() {}
 
-    /** This function is called once when teleop is enabled. */
     @Override
-    public void teleopInit() {
+    public void autonomousExit() {
         if (autonomousCommand != null) autonomousCommand.cancel();
     }
+
+    /** This function is called once when teleop is enabled. */
+    @Override
+    public void teleopInit() {}
 
     /** This function is called periodically during operator control. */
     @Override
     public void teleopPeriodic() {}
 
     /** This function is called once when test mode is enabled. */
+    private Command testCommand = Commands.none();
+
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-        CommandScheduler.getInstance().schedule(robotContainer.getTestCommand());
+        CommandScheduler.getInstance().schedule(testCommand = robotContainer.getTestCommand());
     }
 
     /** This function is called periodically during test mode. */
@@ -140,6 +146,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testExit() {
+        testCommand.cancel();
         robotContainer.configureButtonBindings();
     }
 

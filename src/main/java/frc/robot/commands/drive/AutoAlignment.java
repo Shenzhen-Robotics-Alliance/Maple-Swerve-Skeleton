@@ -7,7 +7,6 @@ import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -22,7 +21,7 @@ import java.util.*;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
-    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.4);
+    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.6);
     private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.2);
 
     /**
@@ -38,7 +37,14 @@ public class AutoAlignment {
             OptionalInt tagIdToFocus,
             Optional<Translation2d> faceToVisionTarget,
             AutoAlignmentConfigurations config) {
-        Command pathFindToRoughTarget = pathFindToPose(driveSubsystem, roughTarget, faceToVisionTarget, config);
+        Command pathFindToRoughTarget = pathFindToPose(driveSubsystem, roughTarget, faceToVisionTarget, config)
+                .onlyIf(() -> RobotState.getInstance()
+                                .getVisionPose()
+                                .minus(preciseTarget)
+                                .getTranslation()
+                                .getNorm()
+                        > ROUGH_APPROACH_TOLERANCE.in(Meters))
+                .deadlineFor(Commands.print("rough approach...").repeatedly());
         Command preciseAlignment = preciseAlignment(
                         driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
                 .deadlineFor(vision.focusOnTarget(tagIdToFocus));
@@ -126,30 +132,28 @@ public class AutoAlignment {
             AutoAlignmentConfigurations config) {
         return Commands.defer(
                         () -> AutoBuilder.followPath(getPreciseAlignmentPath(
-                                driveSubsystem.getPose(),
-                                preciseTarget,
-                                preciseTargetApproachDirection,
-                                driveSubsystem.getMeasuredChassisSpeedsFieldRelative(),
-                                config)),
+                                driveSubsystem.getPose(), preciseTarget, preciseTargetApproachDirection, config)),
                         Set.of(driveSubsystem))
-                .beforeStarting(Commands.runOnce(RobotState.getInstance()::mergeVisionOdometryToPrimaryOdometry));
+                .beforeStarting(Commands.runOnce(RobotState.getInstance()::mergeVisionOdometryToPrimaryOdometry))
+                .deadlineFor(Commands.print("precise align...").repeatedly());
     }
 
     private static PathPlannerPath getPreciseAlignmentPath(
             Pose2d currentRobotPose,
             Pose2d preciseTarget,
             Rotation2d preciseTargetApproachDirection,
-            ChassisSpeeds currentSpeedsFieldRelative,
             AutoAlignmentConfigurations config) {
-        Translation2d currentTranslationalSpeedsMPS = new Translation2d(
-                currentSpeedsFieldRelative.vxMetersPerSecond, currentSpeedsFieldRelative.vyMetersPerSecond);
         Translation2d interiorWaypoint = preciseTarget
                 .getTranslation()
                 .plus(new Translation2d(
                         -PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE.in(Meters), preciseTargetApproachDirection));
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                new Pose2d(currentRobotPose.getTranslation(), currentTranslationalSpeedsMPS.getAngle()),
+                new Pose2d(
+                        currentRobotPose.getTranslation(),
+                        interiorWaypoint
+                                .minus(currentRobotPose.getTranslation())
+                                .getAngle()),
                 new Pose2d(interiorWaypoint, preciseTargetApproachDirection),
                 new Pose2d(preciseTarget.getTranslation(), preciseTargetApproachDirection));
 
