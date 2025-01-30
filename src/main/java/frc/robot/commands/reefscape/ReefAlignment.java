@@ -131,6 +131,7 @@ public class ReefAlignment {
                             branchTarget.preciseAlignmentPose(),
                             branchTarget.facing(),
                             OptionalInt.of(branchTarget.tagId()),
+                            OptionalInt.of(targetId % 2),
                             DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                     .beforeStarting(() -> {
                         selectedReefPartId = targetId / 2;
@@ -150,6 +151,7 @@ public class ReefAlignment {
                         ReefAlignment.getReefAlignmentTarget(rightSide).facing(),
                         OptionalInt.of(
                                 ReefAlignment.getReefAlignmentTarget(rightSide).tagId()),
+                        OptionalInt.of(rightSide ? 1 : 0),
                         Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG))
                 .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)

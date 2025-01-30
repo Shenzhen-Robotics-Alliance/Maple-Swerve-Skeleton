@@ -22,7 +22,7 @@ import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
     private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.6);
-    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.2);
+    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.4);
 
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
@@ -35,6 +35,7 @@ public class AutoAlignment {
             Pose2d preciseTarget,
             Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocus,
+            OptionalInt cameraToFocus,
             Optional<Translation2d> faceToVisionTarget,
             AutoAlignmentConfigurations config) {
         Command pathFindToRoughTarget = pathFindToPose(driveSubsystem, roughTarget, faceToVisionTarget, config)
@@ -47,7 +48,7 @@ public class AutoAlignment {
                 .deadlineFor(Commands.print("rough approach...").repeatedly());
         Command preciseAlignment = preciseAlignment(
                         driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
-                .deadlineFor(vision.focusOnTarget(tagIdToFocus));
+                .deadlineFor(vision.focusOnTarget(tagIdToFocus, cameraToFocus));
 
         return pathFindToRoughTarget.andThen(preciseAlignment);
     }
@@ -60,6 +61,7 @@ public class AutoAlignment {
             Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocusAtBlue,
             OptionalInt tagIdToFocusAtRed,
+            OptionalInt cameraIdToFocus,
             AutoAlignmentConfigurations config) {
         return Commands.deferredProxy(() -> followPathAndAutoAlignStatic(
                 driveSubsystem,
@@ -69,6 +71,7 @@ public class AutoAlignment {
                 FieldMirroringUtils.toCurrentAlliancePose(preciseTargetAtBlue),
                 preciseTargetApproachDirection,
                 FieldMirroringUtils.isSidePresentedAsRed() ? tagIdToFocusAtRed : tagIdToFocusAtBlue,
+                cameraIdToFocus,
                 config));
     }
 
@@ -80,6 +83,7 @@ public class AutoAlignment {
             Pose2d preciseTarget,
             Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocus,
+            OptionalInt cameraToFocus,
             AutoAlignmentConfigurations config) {
         Command followPath = AutoBuilder.followPath(path)
                 .until(() -> RobotState.getInstance()
@@ -91,7 +95,7 @@ public class AutoAlignment {
 
         Command preciseAlignment = preciseAlignment(
                         driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
-                .deadlineFor(vision.focusOnTarget(tagIdToFocus));
+                .deadlineFor(vision.focusOnTarget(tagIdToFocus, cameraToFocus));
 
         return followPath.andThen(preciseAlignment);
     }

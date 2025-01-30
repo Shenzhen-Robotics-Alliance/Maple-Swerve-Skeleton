@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class MapleMultiTagPoseEstimator {
     private OptionalInt tagToFocus;
+    private OptionalInt cameraToFocus;
     public static final boolean LOG_DETAILED_FILTERING_DATA = true;
     // Robot.CURRENT_ROBOT_MODE != RobotMode.REAL;
 
@@ -36,14 +37,21 @@ public class MapleMultiTagPoseEstimator {
         this.filter = filter;
         this.camerasProperties = camerasProperties;
         tagToFocus = OptionalInt.empty();
+        cameraToFocus = OptionalInt.empty();
     }
 
-    public void enableFocusMode(int tagIdToFocusOn) {
-        this.tagToFocus = OptionalInt.of(tagIdToFocusOn);
+    public void setFocusMode(OptionalInt tagToFocus, OptionalInt cameraToFocus) {
+        this.tagToFocus = tagToFocus;
+        this.cameraToFocus = cameraToFocus;
+    }
+
+    public void enableFocusMode(int tagIdToFocus, int cameraToFocus) {
+        setFocusMode(OptionalInt.of(tagIdToFocus), OptionalInt.of(cameraToFocus));
     }
 
     public void disableFocusMode() {
         this.tagToFocus = OptionalInt.empty();
+        this.cameraToFocus = OptionalInt.empty();
     }
 
     final List<Pose3d> robotPose3dObservationsMultiTag = new ArrayList<>(),
@@ -113,7 +121,8 @@ public class MapleMultiTagPoseEstimator {
             int cameraID, int tagID, Transform3d robotToCamera, Transform3d cameraToTarget, double tagAmbiguity) {
         boolean invalidTag = tagID == -1;
         boolean notTheRightTag = tagToFocus.isPresent() && tagToFocus.getAsInt() != tagID;
-        if (invalidTag || notTheRightTag) return true;
+        boolean notTheRightCamera = cameraToFocus.isPresent() && cameraToFocus.getAsInt() != cameraID;
+        if (invalidTag || notTheRightTag || notTheRightCamera) return true;
 
         boolean tooFar = cameraToTarget.getTranslation().getNorm() > MAX_TAG_DISTANCE.in(Meters);
         boolean tooMuchAmbiguity = tagAmbiguity > MAX_TAG_AMBIGUITY;

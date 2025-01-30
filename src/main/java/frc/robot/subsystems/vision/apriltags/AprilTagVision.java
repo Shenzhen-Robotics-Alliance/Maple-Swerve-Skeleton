@@ -62,7 +62,7 @@ public class AprilTagVision extends MapleSubsystem {
         }
 
         result = multiTagPoseEstimator.estimateRobotPose(
-                inputs.camerasInputs, RobotState.getInstance().getEstimatorPose(), getResultsTimeStamp());
+                inputs.camerasInputs, RobotState.getInstance().getPrimaryEstimatorPose(), getResultsTimeStamp());
         result.ifPresent(RobotState.getInstance()::addVisionObservation);
 
         Logger.recordOutput(
@@ -99,13 +99,15 @@ public class AprilTagVision extends MapleSubsystem {
         return totalTimeStampSeconds / camerasUsed;
     }
 
-    public Command focusOnTarget(int tagId) {
-        return startEnd(() -> multiTagPoseEstimator.enableFocusMode(tagId), multiTagPoseEstimator::disableFocusMode);
+    public Command focusOnTarget(int tagId, int cameraToFocusId) {
+        return startEnd(
+                () -> multiTagPoseEstimator.enableFocusMode(tagId, cameraToFocusId),
+                multiTagPoseEstimator::disableFocusMode);
     }
 
-    public Command focusOnTarget(OptionalInt tagIdSupplier) {
+    public Command focusOnTarget(OptionalInt tagId, OptionalInt cameraToFocusId) {
         return startEnd(
-                () -> tagIdSupplier.ifPresent(multiTagPoseEstimator::enableFocusMode),
+                () -> multiTagPoseEstimator.setFocusMode(tagId, cameraToFocusId),
                 multiTagPoseEstimator::disableFocusMode);
     }
 }

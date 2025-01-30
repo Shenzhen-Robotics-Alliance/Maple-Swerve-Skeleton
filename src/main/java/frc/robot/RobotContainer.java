@@ -284,7 +284,7 @@ public class RobotContainer {
         }
 
         aprilTagVision
-                .focusOnTarget(-1)
+                .focusOnTarget(-1, -1)
                 .withTimeout(0.1)
                 .alongWith(Commands.runOnce(() -> drive.setPose(startingPose), drive))
                 .ignoringDisable(true)
