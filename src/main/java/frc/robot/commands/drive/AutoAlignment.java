@@ -21,8 +21,8 @@ import java.util.*;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
-    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.65);
-    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.3);
+    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.7);
+    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.5);
 
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
