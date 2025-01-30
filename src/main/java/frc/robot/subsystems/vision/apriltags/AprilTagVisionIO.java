@@ -51,6 +51,7 @@ public interface AprilTagVisionIO {
             this.currentTargetsCount = Math.min(pipelineResult.getTargets().size(), MAX_TARGET_PER_CAMERA);
             Arrays.fill(fiducialMarksID, -1);
             Arrays.fill(bestCameraToTargets, new Transform3d());
+            Arrays.fill(tagAmbiguities, 0.0);
             for (int i = 0; i < currentTargetsCount && i < MAX_TARGET_PER_CAMERA; i++) {
                 PhotonTrackedTarget target = pipelineResult.getTargets().get(i);
                 this.fiducialMarksID[i] = target.getFiducialId();
@@ -92,7 +93,7 @@ public interface AprilTagVisionIO {
             table.put(cameraKey + "CurrentTargetsCount", currentTargetsCount);
             table.put(cameraKey + "FiducialMarksID", fiducialMarksID);
             table.put(cameraKey + "BestCameraToTargets", bestCameraToTargets);
-            table.put(cameraKey + "BestCameraToTargets", tagAmbiguities);
+            table.put(cameraKey + "TagAmbiguities", tagAmbiguities);
             table.put(cameraKey + "BestCameraToFieldPresents", bestFieldToCamera.isPresent());
             table.put(cameraKey + "BestCameraToField", bestFieldToCamera.orElse(new Transform3d()));
         }

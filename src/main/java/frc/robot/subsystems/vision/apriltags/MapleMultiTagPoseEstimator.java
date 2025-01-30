@@ -113,6 +113,8 @@ public class MapleMultiTagPoseEstimator {
             int cameraID, int tagID, Transform3d robotToCamera, Transform3d cameraToTarget, double tagAmbiguity) {
         boolean invalidTag = tagID == -1;
         boolean notTheRightTag = tagToFocus.isPresent() && tagToFocus.getAsInt() != tagID;
+        if (invalidTag || notTheRightTag) return true;
+
         boolean tooFar = cameraToTarget.getTranslation().getNorm() > MAX_TAG_DISTANCE.in(Meters);
         boolean tooMuchAmbiguity = tagAmbiguity > MAX_TAG_AMBIGUITY;
 
@@ -136,7 +138,7 @@ public class MapleMultiTagPoseEstimator {
         Logger.recordOutput(logPath + "/Ambiguity", tagAmbiguity);
         Logger.recordOutput(logPath + "/TagAngle (Deg)", tagAngle.abs(Degrees));
 
-        return invalidTag || notTheRightTag || tooFar || tooMuchAmbiguity || angleTooBig;
+        return tooFar || tooMuchAmbiguity || angleTooBig;
     }
 
     private void calculateVisibleTagsPosesForLog(
