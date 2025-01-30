@@ -34,6 +34,12 @@ public class ReefAlignment {
         public Pose2d preciseAlignmentPose() {
             return new Pose2d(preciseAlignmentPosition, facing);
         }
+
+        public int cameraToFocus() {
+            return tagId % 2 == 0
+                    ? 1 // lefter targets uses righter camera
+                    : 0; // righter targets uses lefter camera
+        }
     }
 
     // 0 to 5
@@ -131,7 +137,7 @@ public class ReefAlignment {
                             branchTarget.preciseAlignmentPose(),
                             branchTarget.facing(),
                             OptionalInt.of(branchTarget.tagId()),
-                            OptionalInt.of(targetId % 2),
+                            OptionalInt.of(branchTarget.cameraToFocus()),
                             DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                     .beforeStarting(() -> {
                         selectedReefPartId = targetId / 2;
@@ -151,7 +157,7 @@ public class ReefAlignment {
                         ReefAlignment.getReefAlignmentTarget(rightSide).facing(),
                         OptionalInt.of(
                                 ReefAlignment.getReefAlignmentTarget(rightSide).tagId()),
-                        OptionalInt.of(rightSide ? 1 : 0),
+                        OptionalInt.of(rightSide ? 0 : 1), // right side uses lefter cam
                         Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG))
                 .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
