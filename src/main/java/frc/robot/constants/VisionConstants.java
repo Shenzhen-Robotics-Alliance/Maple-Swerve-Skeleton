@@ -40,9 +40,9 @@ public class VisionConstants {
     public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG = Degrees.of(8);
 
     /** Odometry standard errors for the primary pose estimator */
-    public static final Distance PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.01);
+    public static final Distance PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.05);
 
-    public static final Angle PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR = Degrees.of(0.1);
+    public static final Angle PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR = Degrees.of(0.2);
 
     /** Odometry standard errors for the secondary (vision-sensitive) pose estimator */
     public static final Distance VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.5);
@@ -67,9 +67,9 @@ public class VisionConstants {
             //                    Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontLeftCam",
-                    Hertz.of(30),
-                    Milliseconds.of(60),
-                    Milliseconds.of(5),
+                    Hertz.of(15),
+                    Milliseconds.of(80),
+                    Milliseconds.of(10),
                     Degrees.of(58),
                     0.9,
                     0.2,
@@ -83,8 +83,8 @@ public class VisionConstants {
             new PhotonCameraProperties(
                     "FrontRightCam",
                     Hertz.of(30),
-                    Milliseconds.of(60),
-                    Milliseconds.of(5),
+                    Milliseconds.of(80),
+                    Milliseconds.of(10),
                     Degrees.of(58),
                     0.9,
                     0.2,

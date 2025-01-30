@@ -7,6 +7,7 @@ import com.pathplanner.lib.path.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -21,9 +22,7 @@ import java.util.*;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
-    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.7);
-    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.5);
-
+    private static final LinearVelocity CHASSIS_MOVING_THRESHOLD = MetersPerSecond.of(0.6);
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
      * path-find to the target pose, roughly 2. accurate auto alignment
@@ -44,7 +43,7 @@ public class AutoAlignment {
                                 .minus(preciseTarget)
                                 .getTranslation()
                                 .getNorm()
-                        > ROUGH_APPROACH_TOLERANCE.in(Meters));
+                        > config.distanceStartPreciseApproach.in(Meters));
         Command preciseAlignment = preciseAlignment(
                         driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
                 .deadlineFor(vision.focusOnTarget(tagIdToFocus, cameraToFocus));
@@ -90,7 +89,7 @@ public class AutoAlignment {
                                 .getTranslation()
                                 .minus(roughTarget.getTranslation())
                                 .getNorm()
-                        < ROUGH_APPROACH_TOLERANCE.in(Meters));
+                        < config.distanceStartPreciseApproach.in(Meters));
 
         Command preciseAlignment = preciseAlignment(
                         driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
@@ -123,7 +122,7 @@ public class AutoAlignment {
                                 .getTranslation()
                                 .minus(targetPose.getTranslation())
                                 .getNorm()
-                        < ROUGH_APPROACH_TOLERANCE.in(Meters))
+                        < config.distanceStartPreciseApproach.in(Meters))
                 .finallyDo(deactivateChassisHeadingController)
                 .finallyDo(resetDriveCommandRotationMaintenance);
     }
@@ -135,7 +134,11 @@ public class AutoAlignment {
             AutoAlignmentConfigurations config) {
         return Commands.defer(
                         () -> AutoBuilder.followPath(getPreciseAlignmentPath(
-                                driveSubsystem.getPose(), preciseTarget, preciseTargetApproachDirection, config)),
+                                driveSubsystem.getMeasuredChassisSpeedsFieldRelative(),
+                                driveSubsystem.getPose(),
+                                preciseTarget,
+                                preciseTargetApproachDirection,
+                                config)),
                         Set.of(driveSubsystem))
                 .beforeStarting(Commands.runOnce(RobotState.getInstance()::mergeVisionOdometryToPrimaryOdometry))
                 .deadlineFor(Commands.startEnd(
@@ -144,6 +147,7 @@ public class AutoAlignment {
     }
 
     private static PathPlannerPath getPreciseAlignmentPath(
+            ChassisSpeeds measuredSpeedsFieldRelative,
             Pose2d currentRobotPose,
             Pose2d preciseTarget,
             Rotation2d preciseTargetApproachDirection,
@@ -151,14 +155,16 @@ public class AutoAlignment {
         Translation2d interiorWaypoint = preciseTarget
                 .getTranslation()
                 .plus(new Translation2d(
-                        -PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE.in(Meters), preciseTargetApproachDirection));
+                        -config.finalApproachStraightTrajectoryLength.in(Meters), preciseTargetApproachDirection));
+        Translation2d fieldRelativeSpeedsMPS = new Translation2d(
+                measuredSpeedsFieldRelative.vxMetersPerSecond, measuredSpeedsFieldRelative.vyMetersPerSecond);
+        Rotation2d startingPathDirection = fieldRelativeSpeedsMPS.getNorm()
+                        > CHASSIS_MOVING_THRESHOLD.in(MetersPerSecond)
+                ? fieldRelativeSpeedsMPS.getAngle()
+                : interiorWaypoint.minus(currentRobotPose.getTranslation()).getAngle();
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-                new Pose2d(
-                        currentRobotPose.getTranslation(),
-                        interiorWaypoint
-                                .minus(currentRobotPose.getTranslation())
-                                .getAngle()),
+                new Pose2d(currentRobotPose.getTranslation(), startingPathDirection),
                 new Pose2d(interiorWaypoint, preciseTargetApproachDirection),
                 new Pose2d(preciseTarget.getTranslation(), preciseTargetApproachDirection));
 
@@ -194,14 +200,18 @@ public class AutoAlignment {
 
     public record AutoAlignmentConfigurations(
             double roughApproachSpeedFactor,
+            Distance distanceStartPreciseApproach,
             LinearVelocity transitionSpeed,
             LinearVelocity preciseAlignmentSpeed,
+            Distance finalApproachStraightTrajectoryLength,
             LinearVelocity hitTargetSpeed,
             LinearAcceleration preciseAlignmentMaxAcceleration) {
         public static final AutoAlignmentConfigurations DEFAULT_CONFIG = new AutoAlignmentConfigurations(
                 0.6,
+                Meters.of(0.5),
                 MetersPerSecond.of(2),
                 MetersPerSecond.of(2),
+                Meters.of(0.4),
                 MetersPerSecond.of(0.5),
                 MetersPerSecondPerSecond.of(4));
     }
