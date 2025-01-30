@@ -21,8 +21,8 @@ import java.util.*;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
-    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.6);
-    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.4);
+    private static final Distance ROUGH_APPROACH_TOLERANCE = Meters.of(0.65);
+    private static final Distance PRECISE_APPROACH_STRAIGHT_FORWARD_DISTANCE = Meters.of(0.3);
 
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
@@ -44,8 +44,7 @@ public class AutoAlignment {
                                 .minus(preciseTarget)
                                 .getTranslation()
                                 .getNorm()
-                        > ROUGH_APPROACH_TOLERANCE.in(Meters))
-                .deadlineFor(Commands.print("rough approach...").repeatedly());
+                        > ROUGH_APPROACH_TOLERANCE.in(Meters));
         Command preciseAlignment = preciseAlignment(
                         driveSubsystem, preciseTarget, preciseTargetApproachDirection, config)
                 .deadlineFor(vision.focusOnTarget(tagIdToFocus, cameraToFocus));
@@ -139,7 +138,9 @@ public class AutoAlignment {
                                 driveSubsystem.getPose(), preciseTarget, preciseTargetApproachDirection, config)),
                         Set.of(driveSubsystem))
                 .beforeStarting(Commands.runOnce(RobotState.getInstance()::mergeVisionOdometryToPrimaryOdometry))
-                .deadlineFor(Commands.print("precise align...").repeatedly());
+                .deadlineFor(Commands.startEnd(
+                        () -> RobotState.getInstance().setVisionSensitiveMode(true),
+                        () -> RobotState.getInstance().setVisionSensitiveMode(false)));
     }
 
     private static PathPlannerPath getPreciseAlignmentPath(

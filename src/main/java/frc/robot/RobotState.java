@@ -43,6 +43,8 @@ public class RobotState {
     private Pose2d primaryEstimatorPose = new Pose2d();
     private Pose2d visionSensitivePose = new Pose2d();
 
+    private boolean visionSensitiveModeOn = false;
+
     private RobotState() {
         this.poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_DURATION.in(Seconds));
 
@@ -155,16 +157,24 @@ public class RobotState {
         return this.odometryPoseSensorLess;
     }
 
-    public Pose2d getEstimatorPose() {
-        return this.primaryEstimatorPose;
+    public Pose2d getPrimaryEstimatorPose() {
+        return primaryEstimatorPose;
     }
 
     public Pose2d getVisionPose() {
         return this.visionSensitivePose;
     }
 
+    public Pose2d getPose() {
+        return visionSensitiveModeOn ? getVisionPose() : getPrimaryEstimatorPose();
+    }
+
     public void mergeVisionOdometryToPrimaryOdometry() {
         this.primaryEstimatorPose = this.visionSensitivePose;
+    }
+
+    public void setVisionSensitiveMode(boolean visionSensitiveModeOn) {
+        this.visionSensitiveModeOn = visionSensitiveModeOn;
     }
 
     public void updateAlerts() {
