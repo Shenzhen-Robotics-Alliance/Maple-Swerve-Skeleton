@@ -22,7 +22,6 @@ import java.util.*;
 import org.ironmaple.utils.FieldMirroringUtils;
 
 public class AutoAlignment {
-    private static final LinearVelocity CHASSIS_MOVING_THRESHOLD = MetersPerSecond.of(0.6);
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
      * path-find to the target pose, roughly 2. accurate auto alignment
@@ -115,7 +114,7 @@ public class AutoAlignment {
         return AutoBuilder.pathfindToPose(
                         targetPose,
                         driveSubsystem.getChassisConstrains(config.roughApproachSpeedFactor),
-                        config.transitionSpeed)
+                        config.transitionSpeed.times(0.6))
                 .beforeStarting(activateChassisHeadingController)
                 .until(() -> RobotState.getInstance()
                                 .getVisionPose()
@@ -158,10 +157,10 @@ public class AutoAlignment {
                         -config.finalApproachStraightTrajectoryLength.in(Meters), preciseTargetApproachDirection));
         Translation2d fieldRelativeSpeedsMPS = new Translation2d(
                 measuredSpeedsFieldRelative.vxMetersPerSecond, measuredSpeedsFieldRelative.vyMetersPerSecond);
-        Rotation2d startingPathDirection = fieldRelativeSpeedsMPS.getNorm()
-                        > CHASSIS_MOVING_THRESHOLD.in(MetersPerSecond)
-                ? fieldRelativeSpeedsMPS.getAngle()
-                : interiorWaypoint.minus(currentRobotPose.getTranslation()).getAngle();
+        Rotation2d startingPathDirection = interiorWaypoint
+                .minus(currentRobotPose.getTranslation())
+                .plus(fieldRelativeSpeedsMPS.times(0.5))
+                .getAngle();
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
                 new Pose2d(currentRobotPose.getTranslation(), startingPathDirection),
@@ -175,7 +174,7 @@ public class AutoAlignment {
                 DegreesPerSecondPerSecond.of(360));
 
         PathConstraints slowDownConstrains = new PathConstraints(
-                config.preciseAlignmentSpeed.times(0.4),
+                config.finalApproachSpeed(),
                 config.preciseAlignmentMaxAcceleration,
                 DegreesPerSecond.of(90),
                 DegreesPerSecondPerSecond.of(360));
@@ -191,7 +190,7 @@ public class AutoAlignment {
                 List.of(),
                 globalConstrains,
                 new IdealStartingState(config.transitionSpeed, currentRobotPose.getRotation()),
-                new GoalEndState(0.0, preciseTarget.getRotation()),
+                new GoalEndState(config.hitTargetSpeed, preciseTarget.getRotation()),
                 false);
         path.preventFlipping = true;
 
@@ -204,6 +203,7 @@ public class AutoAlignment {
             LinearVelocity transitionSpeed,
             LinearVelocity preciseAlignmentSpeed,
             Distance finalApproachStraightTrajectoryLength,
+            LinearVelocity finalApproachSpeed,
             LinearVelocity hitTargetSpeed,
             LinearAcceleration preciseAlignmentMaxAcceleration) {
         public static final AutoAlignmentConfigurations DEFAULT_CONFIG = new AutoAlignmentConfigurations(
@@ -212,6 +212,7 @@ public class AutoAlignment {
                 MetersPerSecond.of(2),
                 MetersPerSecond.of(2),
                 Meters.of(0.4),
+                MetersPerSecond.of(1),
                 MetersPerSecond.of(0.5),
                 MetersPerSecondPerSecond.of(4));
     }

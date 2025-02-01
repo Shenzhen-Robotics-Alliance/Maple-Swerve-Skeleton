@@ -76,9 +76,9 @@ public class VisionConstants {
                     1280,
                     800,
                     new Translation2d(0.04, 0.2),
-                    Meters.of(0.4),
+                    Meters.of(0.44),
                     Rotation2d.fromDegrees(0),
-                    Degrees.of(-14),
+                    Degrees.of(-18),
                     Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontRightCam",
@@ -91,9 +91,9 @@ public class VisionConstants {
                     1280,
                     800,
                     new Translation2d(0.04, -0.2),
-                    Meters.of(0.4),
+                    Meters.of(0.44),
                     Rotation2d.fromDegrees(0),
-                    Degrees.of(-14),
+                    Degrees.of(-18),
                     Degrees.zero())
             //            new PhotonCameraProperties(
             //                    "BackCam",
