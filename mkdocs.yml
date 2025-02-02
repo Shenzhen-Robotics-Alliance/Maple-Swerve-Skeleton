@@ -75,6 +75,10 @@ markdown_extensions:
           case: lower
   - pymdownx.details
 
+extra_javascript:
+  - javascripts/mathjax.js
+  - javascripts/tex-mml-chtml.js
+
 
 # sidebar settings
 nav:
