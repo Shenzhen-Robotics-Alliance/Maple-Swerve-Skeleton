@@ -100,6 +100,6 @@ nav:
         - 3 Running Drive Characterizations: "./usage/3 - running drivetrain characterizations.md"
         - 4 Setting Up Vision: "./usage/4 - setting up vision.md"
         - 5 Using Drive Commands: "./usage/5 - using drivetrain commands.md"
-        - 6 Testing Code in Simulation: "./usage/6 - running code in simulator"
+        - 6 Testing Code in Simulation: "./usage/6 - running code in simulator.md"
         - 7 Debugging with Log-Replay Technology: "./usage/7 - debugging with log-replay.md"
         - Help & Support: "./usage/help and support.md"
