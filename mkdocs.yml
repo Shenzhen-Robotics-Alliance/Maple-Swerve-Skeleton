@@ -79,3 +79,25 @@ markdown_extensions:
 # sidebar settings
 nav:
     - Home: index.md
+    - Technical Specification: 
+        - 1 Robot Localization: 
+            - 1.1 Odometry: "./technical specification/1 - robot localization/1.1 - odometry.md"
+            - 1.2 Vision: "./technical specification/1 - robot localization/1.2 - vision.md"
+            - 1.3 Combining Vision and Odometry : "./technical specification/1 - robot localization/1.3 - combining vision and odometry observations.md"
+        - 2 Drivetrain Control: 
+            - 2.1 Running Drivetrain Characterization: "./technical specification/2 - drivetrain control/2.1 running drivetrain characterizations.md"
+            - 2.2 Fine-tuning the Gains: "./technical specification/2 - drivetrain control/2.2 fine-tuning the gains.md"
+            - 2.3 Implementing Module Forces Feedforwards: "./technical specification/2 - drivetrain control/2.3 implementing module forces feedforward.md"
+        - 3 Rotation Control: 
+            - 3.1 Face to rotation: "./technical specification/3 - rotation control/3.1 - face to rotation.md"
+            - 3.2 Aim at target: "./technical specification/3 - rotation control/3.2 - aiming at target.md"
+        - Auto Alignment: 
+            - 4.1 Path Finding: "./technical specification/4 - Auto Alignment/4.1 - path finding.md"
+            - 4.2 Precise Alignment: "./technical specification/4 - Auto Alignment/4.2 - precise alginment.md"
+    - Usages:
+        - 1 Getting Started: "./usage/1 - getting started.md"
+        - 2 Calibrating your Drivetrain: "./usage/2 - generating constants using phoenix tuner.md"
+        - 3 Running Drive Characterizations: "./usage/3 - running drivetrain characterizations.md"
+        - 4 Setting Up Vision: "./usage/4 - setting up vision.md"
+        - 5 Using Auto-Alignment Command: "./usage/5 - drivetrain commands.md"
+        - Help & Support: "./usage/help and support.md"
