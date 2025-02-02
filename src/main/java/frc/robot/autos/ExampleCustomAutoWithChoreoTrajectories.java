@@ -26,6 +26,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         Rotation2d.fromDegrees(-120),
                         OptionalInt.of(20),
                         OptionalInt.of(11),
+                        OptionalInt.of(1),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab second"))
@@ -38,6 +39,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         Rotation2d.fromDegrees(-120),
                         OptionalInt.of(20),
                         OptionalInt.of(11),
+                        OptionalInt.of(0),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab third"))
@@ -51,6 +53,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         Rotation2d.fromDegrees(-60),
                         OptionalInt.of(19),
                         OptionalInt.of(6),
+                        OptionalInt.of(1),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
 
@@ -74,6 +77,7 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         Rotation2d.fromDegrees(-60),
                         OptionalInt.of(19),
                         OptionalInt.of(6),
+                        OptionalInt.of(0),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         return commandGroup;

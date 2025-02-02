@@ -18,12 +18,14 @@ public class VisionConstants {
 
     // for filtering
     public static final Distance ROBOT_HEIGHT_TOLERANCE = Meters.of(0.15);
-    public static final Angle ROBOT_PITCH_TOLERANCE = Degrees.of(5);
-    public static final Angle ROBOT_ROLL_TOLERANCE = Degrees.of(5);
-    public static final Distance MAX_TAG_DISTANCE = Meters.of(5);
+    public static final Angle ROBOT_PITCH_TOLERANCE = Degrees.of(10);
+    public static final Angle ROBOT_ROLL_TOLERANCE = Degrees.of(10);
+    public static final Distance MAX_TAG_DISTANCE = Meters.of(4);
+    public static final double MAX_TAG_AMBIGUITY = 0.3;
+    public static final Angle MAX_TAG_ANGLE = Degrees.of(65);
 
     /** Standard errors for single tag vision observations. */
-    public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = Meters.of(1.5);
+    public static final Distance TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION = Meters.of(2);
 
     public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION = Degrees.of(60);
 
@@ -38,9 +40,9 @@ public class VisionConstants {
     public static final Angle ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG = Degrees.of(8);
 
     /** Odometry standard errors for the primary pose estimator */
-    public static final Distance PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.01);
+    public static final Distance PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.05);
 
-    public static final Angle PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR = Degrees.of(0.1);
+    public static final Angle PRIMARY_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR = Degrees.of(0.2);
 
     /** Odometry standard errors for the secondary (vision-sensitive) pose estimator */
     public static final Distance VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.5);
@@ -65,33 +67,33 @@ public class VisionConstants {
             //                    Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontLeftCam",
-                    Hertz.of(30),
-                    Milliseconds.of(60),
-                    Milliseconds.of(5),
-                    Degrees.of(60),
+                    Hertz.of(15),
+                    Milliseconds.of(80),
+                    Milliseconds.of(10),
+                    Degrees.of(58),
                     0.9,
                     0.2,
                     1280,
                     800,
-                    new Translation2d(0.09, 0.18),
-                    Meters.of(0.5),
-                    Rotation2d.fromDegrees(-30),
-                    Degrees.of(-20),
+                    new Translation2d(0.04, 0.2),
+                    Meters.of(0.44),
+                    Rotation2d.fromDegrees(0),
+                    Degrees.of(-18),
                     Degrees.zero()),
             new PhotonCameraProperties(
                     "FrontRightCam",
                     Hertz.of(30),
-                    Milliseconds.of(60),
-                    Milliseconds.of(5),
-                    Degrees.of(60),
+                    Milliseconds.of(80),
+                    Milliseconds.of(10),
+                    Degrees.of(58),
                     0.9,
                     0.2,
                     1280,
                     800,
-                    new Translation2d(0.09, -0.18),
-                    Meters.of(0.5),
-                    Rotation2d.fromDegrees(30),
-                    Degrees.of(-20),
+                    new Translation2d(0.04, -0.2),
+                    Meters.of(0.44),
+                    Rotation2d.fromDegrees(0),
+                    Degrees.of(-18),
                     Degrees.zero())
             //            new PhotonCameraProperties(
             //                    "BackCam",

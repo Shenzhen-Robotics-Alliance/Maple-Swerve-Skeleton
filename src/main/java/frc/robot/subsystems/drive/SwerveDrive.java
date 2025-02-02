@@ -91,7 +91,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         Logger.recordOutput(
                 "RobotState/SensorLessOdometryPose", RobotState.getInstance().getSensorLessOdometryPose());
         Logger.recordOutput(
-                "RobotState/PrimaryEstimatorPose", RobotState.getInstance().getEstimatorPose());
+                "RobotState/PrimaryEstimatorPose", RobotState.getInstance().getPrimaryEstimatorPose());
         Logger.recordOutput(
                 "RobotState/VisionSensitivePose", RobotState.getInstance().getVisionPose());
     }
@@ -212,7 +212,7 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public Pose2d getPose() {
-        return RobotState.getInstance().getEstimatorPose();
+        return RobotState.getInstance().getPose();
     }
 
     @Override
