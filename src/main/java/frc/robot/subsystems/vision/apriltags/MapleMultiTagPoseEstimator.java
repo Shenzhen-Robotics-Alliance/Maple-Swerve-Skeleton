@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision.apriltags;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.LogPaths.APRIL_TAGS_VISION_PATH;
 import static frc.robot.constants.VisionConstants.*;
 
@@ -9,38 +10,18 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import frc.robot.utils.CustomMaths.Statistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.littletonrobotics.junction.Logger;
 
 public class MapleMultiTagPoseEstimator {
-    public static final class RobotPoseEstimationResult {
-        public Pose2d pointEstimation;
-        public double translationXStandardDeviationMeters,
-                translationYStandardDeviationMeters,
-                rotationalStandardDeviationRadians;
-
-        public RobotPoseEstimationResult(
-                Pose2d pointEstimation,
-                double translationXStandardDeviationMeters,
-                double translationYStandardDeviationMeters,
-                double rotationalStandardDeviationRadians) {
-            this.pointEstimation = pointEstimation;
-            this.translationXStandardDeviationMeters = translationXStandardDeviationMeters;
-            this.translationYStandardDeviationMeters = translationYStandardDeviationMeters;
-            this.rotationalStandardDeviationRadians = rotationalStandardDeviationRadians;
-        }
-
-        public Matrix<N3, N1> getEstimationStandardError() {
-            return VecBuilder.fill(
-                    translationXStandardDeviationMeters,
-                    translationYStandardDeviationMeters,
-                    rotationalStandardDeviationRadians);
-        }
-    }
-
+    private OptionalInt tagToFocus;
+    private OptionalInt cameraToFocus;
     public static final boolean LOG_DETAILED_FILTERING_DATA = true;
     // Robot.CURRENT_ROBOT_MODE != RobotMode.REAL;
 
@@ -55,6 +36,22 @@ public class MapleMultiTagPoseEstimator {
         this.fieldLayout = aprilTagFieldLayout;
         this.filter = filter;
         this.camerasProperties = camerasProperties;
+        tagToFocus = OptionalInt.empty();
+        cameraToFocus = OptionalInt.empty();
+    }
+
+    public void setFocusMode(OptionalInt tagToFocus, OptionalInt cameraToFocus) {
+        this.tagToFocus = tagToFocus;
+        this.cameraToFocus = cameraToFocus;
+    }
+
+    public void enableFocusMode(int tagIdToFocus, int cameraToFocus) {
+        setFocusMode(OptionalInt.of(tagIdToFocus), OptionalInt.of(cameraToFocus));
+    }
+
+    public void disableFocusMode() {
+        this.tagToFocus = OptionalInt.empty();
+        this.cameraToFocus = OptionalInt.empty();
     }
 
     final List<Pose3d> robotPose3dObservationsMultiTag = new ArrayList<>(),
@@ -70,34 +67,32 @@ public class MapleMultiTagPoseEstimator {
         observedVisionTargetPoseInFieldLayout.clear();
 
         if (cameraInputs.length != camerasProperties.size())
-            throw new IllegalArgumentException("camera inputs length "
-                    + cameraInputs.length
-                    + " does not match camera properties size "
-                    + camerasProperties.size());
+            throw new CameraInputsLengthNotMatchException(cameraInputs.length, camerasProperties.size());
 
         for (int i = 0; i < cameraInputs.length; i++)
-            fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i), currentOdometryPose);
+            if (cameraInputs[i].newPipeLineResultAvailable)
+                fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i), currentOdometryPose);
     }
 
     private void fetchSingleCameraInputs(
             AprilTagVisionIO.CameraInputs cameraInput,
             PhotonCameraProperties cameraProperty,
             Pose2d currentOdometryPose) {
+
         calculateVisibleTagsPosesForLog(cameraInput, cameraProperty, currentOdometryPose);
 
-        /* if there is multi-solvepnp result, we only trust that */
+        /* add multi-solvepnp result if present */
         Optional<Pose3d> multiSolvePNPPoseEstimation = calculateRobotPose3dFromMultiSolvePNPResult(
                 cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
-        if (multiSolvePNPPoseEstimation.isPresent()) {
-            robotPose3dObservationsMultiTag.add(multiSolvePNPPoseEstimation.get());
-            return;
-        }
+        multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
 
         for (int i = 0; i < cameraInput.currentTargetsCount; i++)
             calculateRobotPose3dFromSingleObservation(
+                            cameraInput.cameraID,
+                            cameraInput.fiducialMarksID[i],
                             cameraProperty.robotToCamera,
                             cameraInput.bestCameraToTargets[i],
-                            cameraInput.fiducialMarksID[i])
+                            cameraInput.tagAmbiguities[i])
                     .ifPresent(robotPose3dObservationsSingleTag::add);
     }
 
@@ -107,7 +102,11 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private Optional<Pose3d> calculateRobotPose3dFromSingleObservation(
-            Transform3d robotToCamera, Transform3d cameraToTarget, int tagID) {
+            int cameraID, int tagID, Transform3d robotToCamera, Transform3d cameraToTarget, double tagAmbiguity) {
+        // Ignore result if too far
+        if (shouldDiscardTagObservation(cameraID, tagID, robotToCamera, cameraToTarget, tagAmbiguity))
+            return Optional.empty();
+
         return fieldLayout.getTagPose(tagID).map(tagPose -> tagPose.transformBy(cameraToTarget.inverse())
                 .transformBy(robotToCamera.inverse()));
     }
@@ -118,13 +117,51 @@ public class MapleMultiTagPoseEstimator {
                 fieldToCamera -> new Pose3d().transformBy(fieldToCamera).transformBy(robotToCamera.inverse()));
     }
 
+    private boolean shouldDiscardTagObservation(
+            int cameraID, int tagID, Transform3d robotToCamera, Transform3d cameraToTarget, double tagAmbiguity) {
+        boolean invalidTag = tagID == -1;
+        boolean notTheRightTag = tagToFocus.isPresent() && tagToFocus.getAsInt() != tagID;
+        boolean notTheRightCamera = cameraToFocus.isPresent() && cameraToFocus.getAsInt() != cameraID;
+        if (invalidTag || notTheRightTag || notTheRightCamera) return true;
+
+        boolean tooFar = cameraToTarget.getTranslation().getNorm() > MAX_TAG_DISTANCE.in(Meters);
+        boolean tooMuchAmbiguity = tagAmbiguity > MAX_TAG_AMBIGUITY;
+
+        Transform3d correctlyOrientedCameraToTarget3d = cameraToTarget.plus(new Transform3d(
+                new Translation3d(),
+                new Rotation3d(
+                        robotToCamera.getRotation().getX(),
+                        robotToCamera.getRotation().getY(),
+                        0)));
+        Transform2d cameraToTagBack = new Transform2d(
+                correctlyOrientedCameraToTarget3d.getTranslation().toTranslation2d(),
+                correctlyOrientedCameraToTarget3d.getRotation().toRotation2d().plus(Rotation2d.k180deg));
+        Rotation2d cameraToTargetTranslationDirection =
+                cameraToTagBack.getTranslation().getAngle();
+        Rotation2d cameraToTagBackRotation = cameraToTagBack.getRotation();
+        Angle tagAngle = cameraToTagBackRotation
+                .minus(cameraToTargetTranslationDirection)
+                .getMeasure();
+        boolean angleTooBig = tagAngle.abs(Radians) > MAX_TAG_ANGLE.in(Radians);
+        String logPath = APRIL_TAGS_VISION_PATH + "Filtering/TagObservations/Camera-" + cameraID + "/Tag-" + tagID;
+        Logger.recordOutput(logPath + "/Ambiguity", tagAmbiguity);
+        Logger.recordOutput(logPath + "/TagAngle (Deg)", tagAngle.abs(Degrees));
+
+        return tooFar || tooMuchAmbiguity || angleTooBig;
+    }
+
     private void calculateVisibleTagsPosesForLog(
             AprilTagVisionIO.CameraInputs cameraInput,
             PhotonCameraProperties cameraProperty,
             Pose2d currentOdometryPose) {
         if (!LOG_DETAILED_FILTERING_DATA) return;
         for (int i = 0; i < cameraInput.fiducialMarksID.length; i++) {
-            if (cameraInput.fiducialMarksID[i] == -1) continue;
+            if (shouldDiscardTagObservation(
+                    cameraInput.cameraID,
+                    cameraInput.fiducialMarksID[i],
+                    cameraProperty.robotToCamera,
+                    cameraInput.bestCameraToTargets[i],
+                    cameraInput.tagAmbiguities[i])) continue;
 
             fieldLayout
                     .getTagPose(cameraInput.fiducialMarksID[i])
@@ -157,8 +194,8 @@ public class MapleMultiTagPoseEstimator {
      * @param cameraInputs the inputs of the cameras
      * @return (optionally) the best guess of the robot pose and the standard error, if there are valid targets
      */
-    public Optional<RobotPoseEstimationResult> estimateRobotPose(
-            AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose) {
+    public Optional<VisionObservation> estimateRobotPose(
+            AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose, double timeStampSeconds) {
         if (cameraInputs.length != camerasProperties.size())
             throw new IllegalStateException("camera inputs length"
                     + cameraInputs.length
@@ -171,71 +208,76 @@ public class MapleMultiTagPoseEstimator {
 
         if (LOG_DETAILED_FILTERING_DATA) logFilteringData();
 
-        return getEstimationResultFromValidObservations();
+        return getEstimationResultFromValidObservations(timeStampSeconds);
     }
 
-    private Optional<RobotPoseEstimationResult> getEstimationResultFromValidObservations() {
-        final boolean resultsCountSufficient =
-                validRobotPoseEstimationsSingleTag.size() >= 2 || (!validRobotPoseEstimationsMultiTag.isEmpty());
+    private Optional<VisionObservation> getEstimationResultFromValidObservations(double timeStampSeconds) {
+        //        boolean singleTagEstimationsMoreThan1 = validRobotPoseEstimationsSingleTag.size() >= 2;
+        //        boolean multiTagEstimationPresent = !validRobotPoseEstimationsMultiTag.isEmpty();
+        //        boolean focusModeEnabledAndSingleTagResultPresent =
+        //                tagToFocus.isPresent() && (!validRobotPoseEstimationsSingleTag.isEmpty());
+        //        boolean resultsCountSufficient =
+        //                singleTagEstimationsMoreThan1 || multiTagEstimationPresent ||
+        // focusModeEnabledAndSingleTagResultPresent;
+        boolean resultsCountSufficient =
+                validRobotPoseEstimationsSingleTag.size() + validRobotPoseEstimationsMultiTag.size() > 0;
 
         if (!resultsCountSufficient) return Optional.empty();
 
         final List<Statistics.Estimation> robotPoseEstimationsXMeters = new ArrayList<>(),
-                robotPoseEstimationsYMeters = new ArrayList<>(),
-                robotPoseEstimationsThetaRadians = new ArrayList<>();
+                robotPoseEstimationsYMeters = new ArrayList<>();
+        final List<Statistics.RotationEstimation> robotPoseEstimationsTheta = new ArrayList<>();
 
         for (Pose3d robotPoseEstimationSingleTag : validRobotPoseEstimationsSingleTag) {
+            Distance translationalStandardError = tagToFocus.isPresent()
+                    ? TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_FOCUSED_TAG
+                    : TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION;
+            Angle rotationalStandardError = tagToFocus.isPresent()
+                    ? ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_FOCUSED_TAG
+                    : ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION;
             robotPoseEstimationsXMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
+                    robotPoseEstimationSingleTag.getX(), translationalStandardError.in(Meters)));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION));
-            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
-                    robotPoseEstimationSingleTag.getRotation().getZ(),
-                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION));
+                    robotPoseEstimationSingleTag.getY(), translationalStandardError.in(Meters)));
+            robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
+                    robotPoseEstimationSingleTag.getRotation().toRotation2d(), rotationalStandardError.in(Radians)));
         }
 
         for (Pose3d robotPoseEstimationMultiTag : validRobotPoseEstimationsMultiTag) {
             robotPoseEstimationsXMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
+                    robotPoseEstimationMultiTag.getX(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG.in(Meters)));
             robotPoseEstimationsYMeters.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG));
-            robotPoseEstimationsThetaRadians.add(new Statistics.Estimation(
-                    robotPoseEstimationMultiTag.getRotation().getZ(), ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG));
+                    robotPoseEstimationMultiTag.getY(), TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_MULTITAG.in(Meters)));
+            robotPoseEstimationsTheta.add(new Statistics.RotationEstimation(
+                    robotPoseEstimationMultiTag.getRotation().toRotation2d(),
+                    ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_MULTITAG.in(Radians)));
         }
 
         final Statistics.Estimation
                 robotPoseFinalEstimationXMeters = Statistics.linearFilter(robotPoseEstimationsXMeters),
-                robotPoseFinalEstimationYMeters = Statistics.linearFilter(robotPoseEstimationsYMeters),
-                robotPoseFinalEstimationThetaRadians = Statistics.linearFilter(robotPoseEstimationsThetaRadians);
+                robotPoseFinalEstimationYMeters = Statistics.linearFilter(robotPoseEstimationsYMeters);
+        final Statistics.RotationEstimation robotPoseFinalEstimationTheta =
+                Statistics.rotationFilter(robotPoseEstimationsTheta);
 
         final Translation2d translationPointEstimate =
                 new Translation2d(robotPoseFinalEstimationXMeters.center(), robotPoseFinalEstimationYMeters.center());
-        final Rotation2d rotationPointEstimate = Rotation2d.fromRadians(robotPoseFinalEstimationThetaRadians.center());
+        final Rotation2d rotationPointEstimate = robotPoseFinalEstimationTheta.center();
 
-        final double estimationStandardErrorX = robotPoseFinalEstimationXMeters.standardDeviation(),
-                estimationStandardErrorY = robotPoseFinalEstimationYMeters.standardDeviation(),
-                estimationStandardErrorTheta = robotPoseFinalEstimationThetaRadians.standardDeviation();
+        final double estimationStandardDevsX = robotPoseFinalEstimationXMeters.standardDeviation(),
+                estimationStandardDevsY = robotPoseFinalEstimationYMeters.standardDeviation(),
+                estimationStandardErrorTheta = robotPoseFinalEstimationTheta.standardDeviationRad();
 
         Logger.recordOutput(
-                "Vision/MeasurementErrors/translationalStandardError",
-                Math.hypot(estimationStandardErrorX, estimationStandardErrorY));
+                "Vision/MeasurementErrors/translationalStandardDevs",
+                Math.hypot(estimationStandardDevsX, estimationStandardDevsY));
         Logger.recordOutput(
-                "Vision/MeasurementErrors/rotationalStandardError", Math.toDegrees(estimationStandardErrorTheta));
+                "Vision/MeasurementErrors/rotationalStandardDevs", Math.toDegrees(estimationStandardErrorTheta));
 
-        final double translationStdDev = Math.hypot(
-                Statistics.getStandardDeviation(robotPoseEstimationsXMeters),
-                Statistics.getStandardDeviation(robotPoseEstimationsYMeters));
-        final double rotationStdDev = Statistics.getStandardDeviation(robotPoseEstimationsThetaRadians);
-        Logger.recordOutput("Vision/MeasurementErrors/translationalStdDev", translationStdDev);
-        Logger.recordOutput("Vision/MeasurementErrors/rotationalStdDev", Math.toDegrees(rotationStdDev));
-        if (translationStdDev > TRANSLATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT
-                || rotationStdDev > ROTATIONAL_STANDARD_DEVS_THRESHOLD_DISCARD_RESULT) return Optional.empty();
-
-        return Optional.of(new RobotPoseEstimationResult(
+        return Optional.of(VisionObservation.create(
                 new Pose2d(translationPointEstimate, rotationPointEstimate),
-                estimationStandardErrorX,
-                estimationStandardErrorY,
-                estimationStandardErrorTheta));
+                Math.hypot(estimationStandardDevsX, estimationStandardDevsY),
+                estimationStandardErrorTheta,
+                timeStampSeconds));
     }
 
     /** Log the filtering data */
@@ -260,5 +302,30 @@ public class MapleMultiTagPoseEstimator {
         Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/",
                 observedAprilTagsPoses.toArray(Pose3d[]::new));
+    }
+
+    public record VisionObservation(Pose2d visionPose, Matrix<N3, N1> stdDevs, double timestamp) {
+        public static VisionObservation create(
+                Pose2d visionPose,
+                double translationalStandardDeviation,
+                double rotationalStandardDeviation,
+                double timestamp) {
+            return new VisionObservation(
+                    visionPose,
+                    VecBuilder.fill(
+                            translationalStandardDeviation,
+                            translationalStandardDeviation,
+                            rotationalStandardDeviation),
+                    timestamp);
+        }
+    }
+
+    public static final class CameraInputsLengthNotMatchException extends IllegalStateException {
+        public CameraInputsLengthNotMatchException(int cameraInputsLength, int cameraPropertiesLength) {
+            super("camera inputs length"
+                    + cameraInputsLength
+                    + " does not match cameras properties length: "
+                    + cameraPropertiesLength);
+        }
     }
 }

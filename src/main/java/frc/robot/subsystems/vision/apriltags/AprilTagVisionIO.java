@@ -1,104 +1,118 @@
 package frc.robot.subsystems.vision.apriltags;
 
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.DriverStation;
 import java.util.Arrays;
 import java.util.Optional;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public interface AprilTagVisionIO {
     class CameraInputs {
         public static final int MAX_TARGET_PER_CAMERA = 5;
+        public final int cameraID;
         public boolean cameraConnected;
-        public double resultsDelaySeconds;
+        public boolean newPipeLineResultAvailable;
+        public double timeStampSeconds;
         public int currentTargetsCount;
         public final int[] fiducialMarksID;
+        public final double[] tagAmbiguities;
         public final Transform3d[] bestCameraToTargets;
         public Optional<Transform3d> bestFieldToCamera = Optional.empty();
 
-        public CameraInputs() {
+        public CameraInputs(int id) {
+            this.cameraID = id;
             this.fiducialMarksID = new int[MAX_TARGET_PER_CAMERA];
             this.bestCameraToTargets = new Transform3d[MAX_TARGET_PER_CAMERA];
-            clear();
+            this.tagAmbiguities = new double[MAX_TARGET_PER_CAMERA];
+            markAsDisconnected();
         }
 
-        public void clear() {
-            this.cameraConnected = false;
-            this.resultsDelaySeconds = 0;
+        public void markAsConnectedButNoResult() {
+            this.newPipeLineResultAvailable = false;
+            this.cameraConnected = true;
+            this.timeStampSeconds = 0;
             this.currentTargetsCount = 0;
             Arrays.fill(fiducialMarksID, -1);
             Arrays.fill(bestCameraToTargets, new Transform3d());
+            Arrays.fill(tagAmbiguities, 0.0);
         }
 
-        public void fromPhotonPipeLine(PhotonPipelineResult pipelineResult, boolean cameraConnected) {
-            this.cameraConnected = cameraConnected;
-            this.resultsDelaySeconds = pipelineResult.getLatencyMillis() / 1000.0;
+        public void markAsDisconnected() {
+            markAsConnectedButNoResult();
+            this.cameraConnected = false;
+        }
+
+        public void readFromPhotonPipeLine(PhotonPipelineResult pipelineResult) {
+            this.newPipeLineResultAvailable = true;
+            this.cameraConnected = true;
+            this.timeStampSeconds = pipelineResult.getTimestampSeconds();
             this.currentTargetsCount = Math.min(pipelineResult.getTargets().size(), MAX_TARGET_PER_CAMERA);
             Arrays.fill(fiducialMarksID, -1);
             Arrays.fill(bestCameraToTargets, new Transform3d());
+            Arrays.fill(tagAmbiguities, 0.0);
             for (int i = 0; i < currentTargetsCount && i < MAX_TARGET_PER_CAMERA; i++) {
-                this.fiducialMarksID[i] = pipelineResult.getTargets().get(i).getFiducialId();
-                this.bestCameraToTargets[i] = pipelineResult.getTargets().get(i).getBestCameraToTarget();
+                PhotonTrackedTarget target = pipelineResult.getTargets().get(i);
+                this.fiducialMarksID[i] = target.getFiducialId();
+                this.bestCameraToTargets[i] = target.getBestCameraToTarget();
+                this.tagAmbiguities[i] = target.getPoseAmbiguity();
             }
-            this.bestFieldToCamera = pipelineResult.getMultiTagResult().estimatedPose.isPresent
-                    ? Optional.of(pipelineResult.getMultiTagResult().estimatedPose.best)
+            this.bestFieldToCamera = pipelineResult.getMultiTagResult().isPresent()
+                    ? Optional.of(pipelineResult.getMultiTagResult().get().estimatedPose.best)
                     : Optional.empty();
         }
 
-        private static final Transform3d NULL_TRANSFORM = new Transform3d(-114514, -114514, -114514, new Rotation3d());
-
-        public void fromLog(LogTable table, int cameraID) {
-            final String cameraKey = "camera" + cameraID;
+        public void readFromLog(LogTable table) {
+            final String cameraKey = "Camera" + cameraID;
             this.cameraConnected = table.get(cameraKey + "Connected", false);
-            this.resultsDelaySeconds = table.get(cameraKey + "ResultsDelaySeconds", 0.0);
+            this.newPipeLineResultAvailable = table.get(cameraKey + "NewPipeLineResultAvailable", false);
+            this.timeStampSeconds = table.get(cameraKey + "TimeStampSeconds", 0.0);
             this.currentTargetsCount = table.get(cameraKey + "CurrentTargetsCount", 0);
             final int[] fiducialMarkIDLogged = table.get(cameraKey + "FiducialMarksID", new int[MAX_TARGET_PER_CAMERA]);
             final Transform3d[] bestCameraToTargetsLogged =
-                    table.get(cameraKey + "bestCameraToTargets", new Transform3d[MAX_TARGET_PER_CAMERA]);
-            if (fiducialMarkIDLogged.length != MAX_TARGET_PER_CAMERA
-                    || bestCameraToTargetsLogged.length != MAX_TARGET_PER_CAMERA)
-                DriverStation.reportError("vision log length not match", false);
+                    table.get(cameraKey + "BestCameraToTargets", new Transform3d[MAX_TARGET_PER_CAMERA]);
+            final double[] tagAmbiguitiesLogged =
+                    table.get(cameraKey + "TagAmbiguities", new double[MAX_TARGET_PER_CAMERA]);
             for (int i = 0; i < MAX_TARGET_PER_CAMERA; i++) {
                 fiducialMarksID[i] = fiducialMarkIDLogged[i];
                 bestCameraToTargets[i] = bestCameraToTargetsLogged[i];
+                tagAmbiguities[i] = tagAmbiguitiesLogged[i];
             }
 
-            if (table.get(cameraKey + "bestCameraToFieldPresents", false))
-                this.bestFieldToCamera = Optional.of(table.get(cameraKey + "bestCameraToField", new Transform3d()));
+            if (table.get(cameraKey + "BestCameraToFieldPresents", false))
+                this.bestFieldToCamera = Optional.of(table.get(cameraKey + "BestCameraToField", new Transform3d()));
             else this.bestFieldToCamera = Optional.empty();
         }
 
-        public void writeToLog(LogTable table, int cameraID) {
-            final String cameraKey = "camera" + cameraID;
+        public void writeToLog(LogTable table) {
+            final String cameraKey = "Camera" + cameraID;
             table.put(cameraKey + "Connected", cameraConnected);
-            table.put(cameraKey + "ResultsDelaySeconds", resultsDelaySeconds);
+            table.put(cameraKey + "NewPipeLineResultAvailable", this.newPipeLineResultAvailable);
+            table.put(cameraKey + "TimeStampSeconds", timeStampSeconds);
             table.put(cameraKey + "CurrentTargetsCount", currentTargetsCount);
             table.put(cameraKey + "FiducialMarksID", fiducialMarksID);
-            table.put(cameraKey + "bestCameraToTargets", bestCameraToTargets);
-            table.put(cameraKey + "bestCameraToFieldPresents", bestFieldToCamera.isPresent());
-            table.put(cameraKey + "bestCameraToField", bestFieldToCamera.orElse(new Transform3d()));
+            table.put(cameraKey + "BestCameraToTargets", bestCameraToTargets);
+            table.put(cameraKey + "TagAmbiguities", tagAmbiguities);
+            table.put(cameraKey + "BestCameraToFieldPresents", bestFieldToCamera.isPresent());
+            table.put(cameraKey + "BestCameraToField", bestFieldToCamera.orElse(new Transform3d()));
         }
     }
 
     class VisionInputs implements LoggableInputs {
         public final int camerasAmount;
         public final CameraInputs[] camerasInputs;
-        public double inputsFetchedRealTimeStampSeconds = 0;
 
         public VisionInputs(int camerasAmount) {
             this.camerasAmount = camerasAmount;
             this.camerasInputs = new CameraInputs[camerasAmount];
-            for (int i = 0; i < camerasAmount; i++) camerasInputs[i] = new CameraInputs();
+            for (int i = 0; i < camerasAmount; i++) camerasInputs[i] = new CameraInputs(i);
         }
 
         @Override
         public void toLog(LogTable table) {
             table.put("camerasAmount", camerasAmount);
-            table.put("inputsFetchedTimeStamp", inputsFetchedRealTimeStampSeconds);
-            for (int i = 0; i < camerasAmount; i++) camerasInputs[i].writeToLog(table, i);
+            Arrays.stream(camerasInputs).forEach(cameraInputs -> cameraInputs.writeToLog(table));
         }
 
         @Override
@@ -110,8 +124,7 @@ public interface AprilTagVisionIO {
                         + ") does not match the settings in replay"
                         + "\n check if the code have changed");
 
-            inputsFetchedRealTimeStampSeconds = table.get("inputsFetchedTimeStamp", 0.0);
-            for (int i = 0; i < camerasAmount; i++) camerasInputs[i].fromLog(table, i);
+            Arrays.stream(camerasInputs).forEach(cameraInputs -> cameraInputs.readFromLog(table));
         }
     }
 

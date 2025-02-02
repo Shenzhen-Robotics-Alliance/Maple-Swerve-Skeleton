@@ -1,9 +1,8 @@
 package frc.robot.subsystems.vision.apriltags;
 
-import edu.wpi.first.net.PortForwarder;
-import frc.robot.utils.MapleTimeUtils;
 import java.util.List;
 import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class AprilTagVisionIOReal implements AprilTagVisionIO {
     protected final PhotonCamera[] cameras;
@@ -13,8 +12,6 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         cameras = new PhotonCamera[cameraProperties.size()];
 
         for (int i = 0; i < cameraProperties.size(); i++) cameras[i] = new PhotonCamera(cameraProperties.get(i).name);
-
-        PortForwarder.add(5800, "photonvision", 5800);
     }
 
     @Override
@@ -23,11 +20,18 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
             throw new IllegalStateException(
                     "inputs camera amount (" + inputs.camerasAmount + ") does not match actual cameras amount");
 
-        for (int i = 0; i < cameras.length; i++)
-            if (cameras[i].isConnected())
-                inputs.camerasInputs[i].fromPhotonPipeLine(cameras[i].getLatestResult(), cameras[i].isConnected());
-            else inputs.camerasInputs[i].clear();
-        inputs.inputsFetchedRealTimeStampSeconds = MapleTimeUtils.getRealTimeSeconds();
+        for (int i = 0; i < cameras.length; i++) updateCameraInput(cameras[i], inputs.camerasInputs[i]);
+    }
+
+    private void updateCameraInput(PhotonCamera camera, CameraInputs cameraInput) {
+        if (!camera.isConnected()) {
+            cameraInput.markAsDisconnected();
+            return;
+        }
+
+        List<PhotonPipelineResult> results = camera.getAllUnreadResults();
+        if (results.isEmpty()) cameraInput.markAsConnectedButNoResult();
+        else cameraInput.readFromPhotonPipeLine(results.get(results.size() - 1));
     }
 
     @Override

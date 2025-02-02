@@ -1,0 +1,55 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "place first"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "grab second"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "place second"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "grab third"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "place third"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "grab fourth"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "score fourth"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

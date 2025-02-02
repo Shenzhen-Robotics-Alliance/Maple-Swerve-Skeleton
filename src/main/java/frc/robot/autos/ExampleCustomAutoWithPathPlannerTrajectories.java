@@ -15,16 +15,26 @@ public class ExampleCustomAutoWithPathPlannerTrajectories implements Auto {
     public Command getAutoCommand(RobotContainer robot) throws IOException, ParseException {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
 
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush first pp")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush second pp")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush third pp")));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("rush fourth and shoot pp")));
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place first"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab second"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place second"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab third"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("place third"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("grab fourth"))
+                .asProxy());
+        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromPathFile("score fourth"))
+                .asProxy());
 
         return commandGroup;
     }
 
     @Override
     public Pose2d getStartingPoseAtBlueAlliance() {
-        return new Pose2d(1.49, 7.65, Rotation2d.fromDegrees(180));
+        return new Pose2d(7.85, 6.17, Rotation2d.fromDegrees(180));
     }
 }

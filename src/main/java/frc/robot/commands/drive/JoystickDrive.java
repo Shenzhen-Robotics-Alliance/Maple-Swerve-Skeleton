@@ -9,31 +9,31 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Robot;
-import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
+import java.util.function.IntSupplier;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
 public class JoystickDrive extends Command {
-    protected MapleJoystickDriveInput input;
+    protected final MapleJoystickDriveInput input;
     private final BooleanSupplier useDriverStationCentricSwitch;
-    private final Supplier<Integer> povButtonSupplier;
+    private final IntSupplier povButtonSupplier;
     private final HolonomicDriveSubsystem driveSubsystem;
 
     protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
     private ChassisSpeeds currentPilotInputSpeeds;
-    protected Rotation2d currentRotationMaintenanceSetpoint;
+    private Rotation2d currentRotationMaintenanceSetpoint;
 
     private double translationalSensitivity, rotationalSensitivity;
 
     public JoystickDrive(
             MapleJoystickDriveInput input,
             BooleanSupplier useDriverStationCentricSwitch,
-            Supplier<Integer> povButtonSupplier,
+            IntSupplier povButtonSupplier,
             HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
@@ -47,6 +47,7 @@ public class JoystickDrive extends Command {
 
         super.addRequirements(driveSubsystem);
         resetSensitivity();
+        ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
     }
 
     @Override
@@ -59,8 +60,6 @@ public class JoystickDrive extends Command {
 
     @Override
     public void execute() {
-        if (input == null) return;
-
         final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
                 driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
@@ -69,16 +68,17 @@ public class JoystickDrive extends Command {
 
         if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
 
-        if (povButtonSupplier.get() != -1)
-            this.currentRotationMaintenanceSetpoint =
-                    FieldConstants.getDriverStationFacing().minus(Rotation2d.fromDegrees(povButtonSupplier.get()));
+        if (povButtonSupplier.getAsInt() != -1)
+            this.currentRotationMaintenanceSetpoint = FieldMirroringUtils.getCurrentAllianceDriverStationFacing()
+                    .minus(Rotation2d.fromDegrees(povButtonSupplier.getAsInt()));
 
         if (previousRotationalInputTimer.hasElapsed(
                 TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS))
-            SwerveDrive.swerveHeadingController.setHeadingRequest(
-                    new ChassisHeadingController.FaceToRotationRequest(currentRotationMaintenanceSetpoint));
+            ChassisHeadingController.getInstance()
+                    .setHeadingRequest(
+                            new ChassisHeadingController.FaceToRotationRequest(currentRotationMaintenanceSetpoint));
         else {
-            SwerveDrive.swerveHeadingController.setHeadingRequest(new ChassisHeadingController.NullRequest());
+            ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
             currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
         }
 
@@ -91,7 +91,7 @@ public class JoystickDrive extends Command {
 
         if (useDriverStationCentricSwitch.getAsBoolean())
             driveSubsystem.runDriverStationCentricChassisSpeeds(currentPilotInputSpeeds, true);
-        else driveSubsystem.runRobotCentricChassisSpeeds(currentPilotInputSpeeds, true);
+        else driveSubsystem.runRobotCentricChassisSpeeds(currentPilotInputSpeeds);
 
         Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
         Logger.recordOutput(
@@ -107,4 +107,15 @@ public class JoystickDrive extends Command {
     public void resetSensitivity() {
         setSensitivity(DEFAULT_TRANSLATIONAL_SENSITIVITY, DEFAULT_ROTATIONAL_SENSITIVITY);
     }
+
+    @Override
+    public void end(boolean interrupted) {
+        ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
+    }
+
+    public void setRotationMaintenanceSetpoint(Rotation2d setpoint) {
+        this.currentRotationMaintenanceSetpoint = setpoint;
+    }
+
+    public static Optional<JoystickDrive> instance = Optional.empty();
 }

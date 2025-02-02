@@ -5,10 +5,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
+import frc.robot.subsystems.led.LEDAnimation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -61,7 +65,9 @@ public class Robot extends LoggedRobot {
                 setUseTiming(false); // Run as fast as possible
                 String logPath = LogFileUtil.findReplayLog();
                 Logger.setReplaySource(new WPILOGReader(logPath));
-                Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replayed")));
+                Logger.addDataReceiver(new WPILOGWriter(
+                        LogFileUtil.addPathSuffix(logPath, "_replayed"),
+                        WPILOGWriter.AdvantageScopeOpenBehavior.ALWAYS));
             }
         }
 
@@ -78,6 +84,14 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
+        ReefAlignment.periodic();
+        if (robotContainer.drive.hardwareFaultsDetected.getAsBoolean())
+            robotContainer
+                    .ledStatusLight
+                    .playAnimationPeriodically(new LEDAnimation.Breathe(new Color(255, 0, 0)), 2)
+                    .until(robotContainer.drive.hardwareFaultsDetected.negate())
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+                    .schedule();
     }
 
     /** This function is called once when the robot is disabled. */
@@ -103,22 +117,27 @@ public class Robot extends LoggedRobot {
     @Override
     public void autonomousPeriodic() {}
 
-    /** This function is called once when teleop is enabled. */
     @Override
-    public void teleopInit() {
+    public void autonomousExit() {
         if (autonomousCommand != null) autonomousCommand.cancel();
     }
+
+    /** This function is called once when teleop is enabled. */
+    @Override
+    public void teleopInit() {}
 
     /** This function is called periodically during operator control. */
     @Override
     public void teleopPeriodic() {}
 
     /** This function is called once when test mode is enabled. */
+    private Command testCommand = Commands.none();
+
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-        CommandScheduler.getInstance().schedule(robotContainer.getTestCommand());
+        CommandScheduler.getInstance().schedule(testCommand = robotContainer.getTestCommand());
     }
 
     /** This function is called periodically during test mode. */
@@ -127,6 +146,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testExit() {
+        testCommand.cancel();
         robotContainer.configureButtonBindings();
     }
 
