@@ -89,11 +89,11 @@ nav:
             - 2.2 Fine-tuning the Gains: "./technical specification/2 - drivetrain control/2.2 fine-tuning the gains.md"
             - 2.3 Implementing Module Forces Feedforwards: "./technical specification/2 - drivetrain control/2.3 implementing module forces feedforward.md"
         - 3 Rotation Control: 
-            - 3.1 Face to rotation: "./technical specification/3 - rotation control/3.1 - face to rotation.md"
-            - 3.2 Aim at target: "./technical specification/3 - rotation control/3.2 - aiming at target.md"
-        - Auto Alignment: 
-            - 4.1 Path Finding: "./technical specification/4 - Auto Alignment/4.1 - path finding.md"
-            - 4.2 Precise Alignment: "./technical specification/4 - Auto Alignment/4.2 - precise alginment.md"
+            - 3.1 Face to Rotation: "./technical specification/3 - rotation control/3.1 - face to rotation.md"
+            - 3.2 Aim at Target: "./technical specification/3 - rotation control/3.2 - aiming at target.md"
+        - 4 Auto Alignment: 
+            - 4.1 Path Finding: "./technical specification/4 - auto alignment/4.1 - path finding.md"
+            - 4.2 Precise Alignment: "./technical specification/4 - auto alignment/4.2 - precise alginment.md"
     - Usages:
         - 1 Getting Started: "./usage/1 - getting started.md"
         - 2 Calibrating your Drivetrain: "./usage/2 - generating constants using phoenix tuner.md"
