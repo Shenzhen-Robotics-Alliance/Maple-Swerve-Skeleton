@@ -1,4 +1,4 @@
-site_name: MapleSwerveSkeleton
+site_name: Maple Swerve Skeleton
 site_url: https://shenzhen-robotics-alliance.github.io/Maple-Swerve-Skeleton/
 
 theme:
@@ -91,7 +91,7 @@ nav:
         - 3 Heading Control: 
             - 3.1 Face to Rotation: "./technical specification/3 - heading control/3.1 - face to rotation.md"
             - 3.2 Aim at Target: "./technical specification/3 - heading control/3.2 - aiming at target.md"
-        - 4 Auto Alignment: 
+        - 4 Apriltag Auto Alignment: 
             - 4.1 Path Finding: "./technical specification/4 - apriltag auto alignment/4.1 - path finding.md"
             - 4.2 Precise Alignment: "./technical specification/4 - apriltag auto alignment/4.2 - precise alginment.md"
     - Usages:
@@ -99,5 +99,7 @@ nav:
         - 2 Calibrating your Drivetrain: "./usage/2 - generating constants using phoenix tuner.md"
         - 3 Running Drive Characterizations: "./usage/3 - running drivetrain characterizations.md"
         - 4 Setting Up Vision: "./usage/4 - setting up vision.md"
-        - 5 Using Auto-Alignment Command: "./usage/5 - drivetrain commands.md"
+        - 5 Using Drive Commands: "./usage/5 - using drivetrain commands.md"
+        - 6 Testing Code in Simulation: "./usage/6 - running code in simulator"
+        - 7 Debugging with Log-Replay Technology: "./usage/7 - debugging with log-replay.md"
         - Help & Support: "./usage/help and support.md"
