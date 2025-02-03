@@ -1,0 +1,284 @@
+{
+  "hubs": [
+    {
+      "x": 0,
+      "y": -760,
+      "width": 1101,
+      "height": 651,
+      "state": {
+        "sidebar": {
+          "width": 300,
+          "expanded": [
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags",
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/Drive",
+            "/AdvantageKit/RealOutputs/RobotState",
+            "/AdvantageKit/RealOutputs/SwerveStates",
+            "/AdvantageKit/RealOutputs/ModuleFeedforwards",
+            "/AdvantageKit/RealOutputs/Vision"
+          ]
+        },
+        "tabs": {
+          "selected": 4,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "01wbjncl66mp8lxeyqij0y4ndhroq3ph",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "stepped",
+                    "logKey": "NT:/AdvantageKit/SystemStats/BatteryVoltage",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "1b84oybzga7a84rknj8mftush1lrcx7h",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 6,
+              "title": "Statistics",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "independent",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
+                  },
+                  {
+                    "type": "independent",
+                    "logKey": "NT:/AdvantageKit/Drive/OdometryThread/MeasurementTimeStamps/length",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  }
+                ],
+                "timeRange": "live-10",
+                "rangeMin": 0,
+                "rangeMax": 10,
+                "stepSize": 1
+              },
+              "controllerUUID": "thbympkubtoqiv53bm3yp29p8ip23w1f",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/PrimaryEstimatorPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/VisionSensitivePose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot",
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/InvalidPoseEstimations",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot",
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "aprilTag",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions/",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "family": "36h11"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "origin": "blue"
+              },
+              "controllerUUID": "60uyqpz2z7r8o9lcejaywbmbil8vbkh4",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  -13.84957922324157,
+                  5.863965105092772,
+                  0.7462581041218433
+                ],
+                "cameraTarget": [
+                  -0.8677060157037558,
+                  -0.7828111422142031,
+                  0.8402121750499534
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/PrimaryEstimatorPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/VisionSensitivePose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "bumpers": "auto",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 30
+              },
+              "controllerUUID": "kungcz9vmur12e93xux9i0whtebjiqu7",
+              "renderer": null,
+              "controlsHeight": 200
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.2"
+}

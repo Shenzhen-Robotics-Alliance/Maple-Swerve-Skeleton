@@ -1,0 +1,368 @@
+{
+  "hubs": [
+    {
+      "x": -350,
+      "y": -873,
+      "width": 2066,
+      "height": 834,
+      "state": {
+        "sidebar": {
+          "width": 300,
+          "expanded": [
+            "/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering",
+            "/AdvantageKit/RealOutputs/Vision/AprilTags",
+            "/AdvantageKit",
+            "/AdvantageKit/RealOutputs",
+            "/AdvantageKit/Drive",
+            "/AdvantageKit/RealOutputs/RobotState",
+            "/AdvantageKit/RealOutputs/SwerveStates",
+            "/AdvantageKit/RealOutputs/ModuleFeedforwards",
+            "/AdvantageKit/RealOutputs/Vision",
+            "/ReplayOutputs/Vision/AprilTags",
+            "/ReplayOutputs/Vision/AprilTags/Filtering",
+            "/RealOutputs/Vision/AprilTags/Filtering",
+            "/Drive/Module-FrontRight",
+            "/ReplayOutputs/Alerts/errors",
+            "/ReplayOutputs/Alerts/infos",
+            "/ReplayOutputs/Alerts/warnings",
+            "/SystemStats",
+            "/Drive"
+          ]
+        },
+        "tabs": {
+          "selected": 1,
+          "tabs": [
+            {
+              "type": 0,
+              "title": "",
+              "controller": null,
+              "controllerUUID": "01wbjncl66mp8lxeyqij0y4ndhroq3ph",
+              "renderer": "#/",
+              "controlsHeight": 0
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/RobotState/VisionSensitivePose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/ReplayOutputs/RobotState/VisionSensitivePose",
+                    "logType": "Pose2d",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/RobotState/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/ReplayOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "bumpers": "auto",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 27
+              },
+              "controllerUUID": "fjrkc7vdm4tx5nzznoe3fdcx7wwk59ew",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "3D Field",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/RobotState/PrimaryEstimatorPose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/ReplayOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/RobotState/VisionSensitivePose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot",
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/ReplayOutputs/RobotState/VisionSensitivePose",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Crab Bot",
+                      "color": "#ff8c00"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/RobotState/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "aprilTag",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions/",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "family": "36h11"
+                    }
+                  }
+                ],
+                "game": "2025 Field",
+                "origin": "blue"
+              },
+              "controllerUUID": "h13qzjioih915spx6e6q3m9sk45n07de",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  -10.797248460339148,
+                  7.674236680405923,
+                  2.3299508882068
+                ],
+                "cameraTarget": [
+                  -4.575061247358405,
+                  0.12226159640355527,
+                  2.1468269351258993
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Line Graph",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/SystemStats/BatteryVoltage",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "bold"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/PowerDistribution/TotalCurrent",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "bold"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-FrontLeft/DriveMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-FrontRight/DriveMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-BackLeft/DriveMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-BackRight/DriveMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-FrontLeft/SteerMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-FrontRight/SteerMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-BackLeft/SteerMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Drive/Module-BackRight/SteerMotorCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "a64r1likaiync2ugtx6ei1wr1pemxwkv",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 8,
+              "title": "Joysticks",
+              "controller": [
+                "PS4 Controller",
+                "Xbox Controller (Blue)",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "q1bb2d90ndei3xd82dlpg69as5pax5rq",
+              "renderer": null,
+              "controlsHeight": 85
+            },
+            {
+              "type": 4,
+              "title": "Table",
+              "controller": [
+                "/ReplayOutputs/Alerts/infos",
+                "/ReplayOutputs/Alerts/warnings",
+                "/ReplayOutputs/Alerts/errors"
+              ],
+              "controllerUUID": "dmzbyvz6qhl0gzudwn1iru9qhwpzsyh2",
+              "renderer": null,
+              "controlsHeight": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "satellites": [],
+  "version": "4.1.2"
+}
