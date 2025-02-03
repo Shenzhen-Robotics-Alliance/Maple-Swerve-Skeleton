@@ -95,8 +95,11 @@ public class RobotContainer {
 
                 /* CTRE Chassis: */
                 drive = new SwerveDrive(
-                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
+                        Objects.equals(TunerConstants.kCANBus.getName(), "rio")
+                                ? SwerveDrive.DriveType.CTRE_ON_CANIVORE
+                                : SwerveDrive.DriveType.CTRE_ON_RIO,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
+                        new CanBusIOReal(TunerConstants.kCANBus),
                         new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
                         new ModuleIOTalon(TunerConstants.FrontRight, "FrontRight"),
                         new ModuleIOTalon(TunerConstants.BackLeft, "BackLeft"),
@@ -144,7 +147,13 @@ public class RobotContainer {
                         backRight = new ModuleIOSim(driveSimulation.getModules()[3]);
                 final GyroIOSim gyroIOSim = new GyroIOSim(driveSimulation.getGyroSimulation());
                 drive = new SwerveDrive(
-                        SwerveDrive.DriveType.GENERIC, gyroIOSim, frontLeft, frontRight, backLeft, backRight);
+                        SwerveDrive.DriveType.GENERIC,
+                        gyroIOSim,
+                        (canBusInputs) -> {},
+                        frontLeft,
+                        frontRight,
+                        backLeft,
+                        backRight);
 
                 aprilTagVision = new AprilTagVision(
                         new ApriltagVisionIOSim(
@@ -164,6 +173,7 @@ public class RobotContainer {
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.GENERIC,
+                        (canBusInputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
