@@ -222,7 +222,11 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
     @Override
     public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
-        return DRIVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+        ChassisSpeeds wheelSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+        double angularVelocityRadPerSec =
+                gyroInputs.connected ? gyroInputs.yawVelocityRadPerSec : wheelSpeeds.omegaRadiansPerSecond;
+        return new ChassisSpeeds(
+                wheelSpeeds.vxMetersPerSecond, wheelSpeeds.vyMetersPerSecond, angularVelocityRadPerSec);
     }
 
     @Override

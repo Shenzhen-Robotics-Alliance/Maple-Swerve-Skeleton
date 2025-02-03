@@ -107,7 +107,7 @@ public class RobotState {
         visionSensitivePose = addVisionObservationToEstimator(
                 observation, sample.get(), visionSensitivePose, visionSensitiveEstimatorOdometryStdDevs);
 
-        previousVisionResultTimeStamp = MapleTimeUtils.getLogTimeSeconds();
+        previousVisionResultTimeStamp = observation.timestamp();
     }
 
     private Pose2d addVisionObservationToEstimator(
