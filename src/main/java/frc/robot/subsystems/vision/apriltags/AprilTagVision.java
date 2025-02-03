@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotState;
 import frc.robot.subsystems.MapleSubsystem;
 import java.util.List;
@@ -111,4 +112,11 @@ public class AprilTagVision extends MapleSubsystem {
                 () -> multiTagPoseEstimator.setFocusMode(tagId, cameraToFocusId),
                 multiTagPoseEstimator::disableFocusMode);
     }
+
+    private boolean hasCameraDisconnection() {
+        for (int i = 0; i < inputs.camerasAmount; i++) if (!inputs.camerasInputs[i].cameraConnected) return true;
+        return false;
+    }
+
+    public final Trigger cameraDisconnected = new Trigger(this::hasCameraDisconnection);
 }

@@ -5,13 +5,11 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
-import frc.robot.subsystems.led.LEDAnimation;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -82,14 +80,6 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
-        if (robotContainer.drive.hardwareFaultsDetected.getAsBoolean())
-            robotContainer
-                    .ledStatusLight
-                    .playAnimationPeriodically(new LEDAnimation.Breathe(new Color(255, 0, 0)), 2)
-                    .until(robotContainer.drive.hardwareFaultsDetected.negate())
-                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
-                    .schedule();
-
         robotContainer.updateDashboardDisplay();
     }
 

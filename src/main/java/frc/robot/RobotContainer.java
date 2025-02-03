@@ -391,5 +391,13 @@ public class RobotContainer {
             field.getObject("Odometry").setPose(drive.getPose());
 
         ReefAlignment.updateDashboard();
+
+        if (drive.hardwareFaultsDetected.getAsBoolean() || aprilTagVision.cameraDisconnected.getAsBoolean())
+            ledStatusLight
+                    .playAnimationPeriodically(new LEDAnimation.Breathe(new Color(255, 0, 0)), 2)
+                    .until(drive.hardwareFaultsDetected.negate().and(aprilTagVision.cameraDisconnected.negate()))
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+                    .ignoringDisable(true)
+                    .schedule();
     }
 }

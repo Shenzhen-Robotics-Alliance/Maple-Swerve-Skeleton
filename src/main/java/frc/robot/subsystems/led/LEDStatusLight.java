@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import frc.robot.Robot;
 import frc.robot.subsystems.MapleSubsystem;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
@@ -41,10 +40,8 @@ public class LEDStatusLight extends MapleSubsystem {
         }
 
         led.setData(buffer);
-        if (!Robot.isReal())
-            Logger.recordOutput(
-                    "Status Light",
-                    Arrays.stream(ledColors).map(Color::toHexString).toArray(String[]::new));
+        Logger.recordOutput(
+                "Status Light", Arrays.stream(ledColors).map(Color::toHexString).toArray(String[]::new));
     }
 
     public Command playAnimation(LEDAnimation animation, double timeSeconds) {
