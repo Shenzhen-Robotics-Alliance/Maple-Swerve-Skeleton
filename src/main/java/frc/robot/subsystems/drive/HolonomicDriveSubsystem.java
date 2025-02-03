@@ -12,10 +12,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -46,13 +43,13 @@ public interface HolonomicDriveSubsystem extends Subsystem {
 
     default Pose2d getPoseWithLookAhead(double translationalLookAheadTime, double rotationalLookAheadTime) {
         Pose2d currentPose = getPose();
-        ChassisSpeeds speeds = getMeasuredChassisSpeedsFieldRelative();
-        Transform2d lookAhead = new Transform2d(
+        ChassisSpeeds speeds = getMeasuredChassisSpeedsRobotRelative();
+        Twist2d lookAhead = new Twist2d(
                 speeds.vxMetersPerSecond * translationalLookAheadTime,
                 speeds.vyMetersPerSecond * translationalLookAheadTime,
-                Rotation2d.fromRadians(speeds.omegaRadiansPerSecond * rotationalLookAheadTime));
+                speeds.omegaRadiansPerSecond * rotationalLookAheadTime);
 
-        return currentPose.plus(lookAhead);
+        return currentPose.exp(lookAhead);
     }
 
     default Pose2d getPoseWithLookAhead() {

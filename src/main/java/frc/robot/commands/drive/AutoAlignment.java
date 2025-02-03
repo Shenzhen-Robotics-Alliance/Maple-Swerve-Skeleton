@@ -114,7 +114,7 @@ public class AutoAlignment {
         return AutoBuilder.pathfindToPose(
                         targetPose,
                         driveSubsystem.getChassisConstrains(config.roughApproachSpeedFactor),
-                        config.transitionSpeed.times(0.6))
+                        config.preciseApproachStartingSpeed())
                 .beforeStarting(activateChassisHeadingController)
                 .until(() -> RobotState.getInstance()
                                 .getVisionPose()
@@ -133,6 +133,7 @@ public class AutoAlignment {
             AutoAlignmentConfigurations config) {
         return Commands.defer(
                         () -> AutoBuilder.followPath(getPreciseAlignmentPath(
+                                driveSubsystem.getChassisConstrains(config.roughApproachSpeedFactor),
                                 driveSubsystem.getMeasuredChassisSpeedsFieldRelative(),
                                 driveSubsystem.getPose(),
                                 preciseTarget,
@@ -146,6 +147,7 @@ public class AutoAlignment {
     }
 
     private static PathPlannerPath getPreciseAlignmentPath(
+            PathConstraints constraints,
             ChassisSpeeds measuredSpeedsFieldRelative,
             Pose2d currentRobotPose,
             Pose2d preciseTarget,
@@ -157,9 +159,9 @@ public class AutoAlignment {
                         -config.finalApproachStraightTrajectoryLength.in(Meters), preciseTargetApproachDirection));
         Translation2d fieldRelativeSpeedsMPS = new Translation2d(
                 measuredSpeedsFieldRelative.vxMetersPerSecond, measuredSpeedsFieldRelative.vyMetersPerSecond);
-        Rotation2d startingPathDirection = interiorWaypoint
-                .minus(currentRobotPose.getTranslation())
-                .plus(fieldRelativeSpeedsMPS.times(0.5))
+        Rotation2d startingPathDirection = fieldRelativeSpeedsMPS
+                .times(0.8)
+                .plus(interiorWaypoint.minus(currentRobotPose.getTranslation()))
                 .getAngle();
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
@@ -167,14 +169,8 @@ public class AutoAlignment {
                 new Pose2d(interiorWaypoint, preciseTargetApproachDirection),
                 new Pose2d(preciseTarget.getTranslation(), preciseTargetApproachDirection));
 
-        PathConstraints globalConstrains = new PathConstraints(
-                config.preciseAlignmentSpeed,
-                config.preciseAlignmentMaxAcceleration,
-                DegreesPerSecond.of(180),
-                DegreesPerSecondPerSecond.of(360));
-
         PathConstraints slowDownConstrains = new PathConstraints(
-                config.finalApproachSpeed(),
+                config.finalAlignmentSpeed(),
                 config.preciseAlignmentMaxAcceleration,
                 DegreesPerSecond.of(90),
                 DegreesPerSecondPerSecond.of(360));
@@ -188,8 +184,8 @@ public class AutoAlignment {
                 List.of(),
                 constraintsZones,
                 List.of(),
-                globalConstrains,
-                new IdealStartingState(config.transitionSpeed, currentRobotPose.getRotation()),
+                constraints,
+                new IdealStartingState(fieldRelativeSpeedsMPS.getNorm(), currentRobotPose.getRotation()),
                 new GoalEndState(config.hitTargetSpeed, preciseTarget.getRotation()),
                 false);
         path.preventFlipping = true;
@@ -200,19 +196,17 @@ public class AutoAlignment {
     public record AutoAlignmentConfigurations(
             double roughApproachSpeedFactor,
             Distance distanceStartPreciseApproach,
-            LinearVelocity transitionSpeed,
-            LinearVelocity preciseAlignmentSpeed,
+            LinearVelocity preciseApproachStartingSpeed,
+            LinearVelocity finalAlignmentSpeed,
             Distance finalApproachStraightTrajectoryLength,
-            LinearVelocity finalApproachSpeed,
             LinearVelocity hitTargetSpeed,
             LinearAcceleration preciseAlignmentMaxAcceleration) {
         public static final AutoAlignmentConfigurations DEFAULT_CONFIG = new AutoAlignmentConfigurations(
                 0.6,
                 Meters.of(0.5),
-                MetersPerSecond.of(2),
+                MetersPerSecond.of(3),
                 MetersPerSecond.of(2),
                 Meters.of(0.4),
-                MetersPerSecond.of(1),
                 MetersPerSecond.of(0.5),
                 MetersPerSecondPerSecond.of(4));
     }

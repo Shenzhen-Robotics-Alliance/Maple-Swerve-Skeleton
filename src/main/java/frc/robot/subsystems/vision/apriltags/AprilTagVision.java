@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision.apriltags;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.constants.LogPaths.*;
 import static frc.robot.constants.VisionConstants.*;
 
@@ -96,7 +97,7 @@ public class AprilTagVision extends MapleSubsystem {
                 camerasUsed++;
             }
         }
-        return totalTimeStampSeconds / camerasUsed;
+        return totalTimeStampSeconds / camerasUsed - ADDITIONAL_LATENCY_COMPENSATION.in(Seconds);
     }
 
     public Command focusOnTarget(int tagId, int cameraToFocusId) {
