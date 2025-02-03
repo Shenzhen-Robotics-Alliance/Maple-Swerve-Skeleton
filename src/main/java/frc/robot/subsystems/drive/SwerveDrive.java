@@ -44,20 +44,26 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs;
     private final OdometryThreadInputsAutoLogged odometryThreadInputs;
+    private final CanBusIO canBusIO;
+    private final CanBusIO.CanBusInputs canBusInputs;
     private final SwerveModule[] swerveModules;
 
     private final OdometryThread odometryThread;
     private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.kError);
+    private final Alert canBusHighUtilization = new Alert("Can Bus Utilization High", Alert.AlertType.kWarning);
 
     public SwerveDrive(
             DriveType type,
             GyroIO gyroIO,
+            CanBusIO canBusIO,
             ModuleIO frontLeftModuleIO,
             ModuleIO frontRightModuleIO,
             ModuleIO backLeftModuleIO,
             ModuleIO backRightModuleIO) {
         super("Drive");
         this.gyroIO = gyroIO;
+        this.canBusIO = canBusIO;
+        this.canBusInputs = new CanBusIO.CanBusInputs();
         this.gyroInputs = new GyroIOInputsAutoLogged();
         this.swerveModules = new SwerveModule[] {
             new SwerveModule(frontLeftModuleIO, "FrontLeft"),
@@ -88,6 +94,9 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
                 timeStampIndex++) feedSingleOdometryDataToPositionEstimator(timeStampIndex);
 
         RobotState.getInstance().updateAlerts();
+        gyroDisconnectedAlert.set(!gyroInputs.connected);
+        canBusHighUtilization.setText("Can Bus Utilization High: " + (int) (canBusInputs.utilization * 100) + "%");
+        canBusHighUtilization.set(canBusInputs.utilization > 0.8);
         Logger.recordOutput(
                 "RobotState/SensorLessOdometryPose", RobotState.getInstance().getSensorLessOdometryPose());
         Logger.recordOutput(
@@ -105,7 +114,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
 
         gyroIO.updateInputs(gyroInputs);
         Logger.processInputs("Drive/Gyro", gyroInputs);
-        gyroDisconnectedAlert.set(!gyroInputs.connected);
+        canBusIO.updateInputs(canBusInputs);
+        Logger.processInputs("Drive/CANBus", canBusInputs);
 
         odometryThread.unlockOdometry();
     }
@@ -289,6 +299,10 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     public final Trigger hardwareFaultsDetected = new Trigger(this::hasHardwareFaults);
+
+    public double getCanBusUtilization() {
+        return canBusInputs.utilization;
+    }
 
     private void runCharacterization(Voltage voltage) {
         SwerveModuleState[] moduleStates = DRIVE_KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 1));

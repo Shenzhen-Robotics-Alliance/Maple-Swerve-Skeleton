@@ -172,7 +172,7 @@ public class ReefAlignment {
 
     private static SelectedSide selectedSide = SelectedSide.NOT_SELECTED;
 
-    public static void periodic() {
+    public static void updateDashboard() {
         Logger.recordOutput("Reef/SelectedBranch", ReefAlignment.displaySelectedBranch());
     }
 }

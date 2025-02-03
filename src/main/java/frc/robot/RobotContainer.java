@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -36,7 +37,6 @@ import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.AIRobotInSimulation;
 import frc.robot.utils.MapleJoystickDriveInput;
-import frc.robot.utils.MapleShooterOptimization;
 import java.util.*;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
@@ -65,9 +65,6 @@ public class RobotContainer {
     public final AprilTagVision aprilTagVision;
     public final LEDStatusLight ledStatusLight;
 
-    /* an example shooter optimization */
-    public final MapleShooterOptimization exampleShooterOptimization;
-
     // Controller
     public final DriverMap driver = new DriverMap.LeftHandedPS5(0);
     // public final OperatorMap operator = new OperatorMap.LeftHandedXbox(0);
@@ -78,6 +75,8 @@ public class RobotContainer {
 
     // Simulated drive
     private final SwerveDriveSimulation driveSimulation;
+
+    private final Field2d field = new Field2d();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -177,22 +176,16 @@ public class RobotContainer {
 
         this.ledStatusLight = new LEDStatusLight(0, 155);
 
-        this.drive.configHolonomicPathPlannerAutoBuilder();
+        this.drive.configHolonomicPathPlannerAutoBuilder(field);
 
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
         autoChooser = buildAutoChooser();
 
-        /* you can tune the numbers on dashboard and copy-paste them to here */
-        this.exampleShooterOptimization = new MapleShooterOptimization(
-                "ExampleShooter",
-                new double[] {1.4, 2, 3, 3.5, 4, 4.5, 4.8},
-                new double[] {54, 49, 37, 33.5, 30.5, 25, 25},
-                new double[] {3000, 3000, 3500, 3700, 4000, 4300, 4500},
-                new double[] {0.1, 0.1, 0.1, 0.12, 0.12, 0.15, 0.15});
-
         configureButtonBindings();
         configureAutoNamedCommands();
         configureLEDEffects();
+
+        SmartDashboard.putData("Field", field);
     }
 
     private void configureAutoNamedCommands() {
@@ -323,7 +316,7 @@ public class RobotContainer {
                 driveInput,
                 drive,
                 () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
-                exampleShooterOptimization,
+                null,
                 0.75,
                 false);
         // driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
@@ -367,6 +360,8 @@ public class RobotContainer {
 
     public void updateFieldSimAndDisplay() {
         if (driveSimulation == null) return;
+
+        SimulatedArena.getInstance().simulationPeriodic();
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation.getOpponentRobotPoses());
         Logger.recordOutput(
@@ -375,5 +370,16 @@ public class RobotContainer {
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    }
+
+    public void updateDashboardDisplay() {
+        field.setRobotPose(
+                Robot.CURRENT_ROBOT_MODE == RobotMode.SIM
+                        ? driveSimulation.getSimulatedDriveTrainPose()
+                        : drive.getPose());
+        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
+            field.getObject("Odometry").setPose(drive.getPose());
+
+        ReefAlignment.updateDashboard();
     }
 }

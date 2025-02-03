@@ -9,11 +9,9 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.RobotMode;
 import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.led.LEDAnimation;
-import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -84,7 +82,6 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         MapleSubsystem.checkForOnDisableAndEnable();
         CommandScheduler.getInstance().run();
-        ReefAlignment.periodic();
         if (robotContainer.drive.hardwareFaultsDetected.getAsBoolean())
             robotContainer
                     .ledStatusLight
@@ -92,6 +89,8 @@ public class Robot extends LoggedRobot {
                     .until(robotContainer.drive.hardwareFaultsDetected.negate())
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
                     .schedule();
+
+        robotContainer.updateDashboardDisplay();
     }
 
     /** This function is called once when the robot is disabled. */
@@ -157,7 +156,6 @@ public class Robot extends LoggedRobot {
     /** This function is called periodically whilst in simulation. */
     @Override
     public void simulationPeriodic() {
-        SimulatedArena.getInstance().simulationPeriodic();
         robotContainer.updateFieldSimAndDisplay();
     }
 }

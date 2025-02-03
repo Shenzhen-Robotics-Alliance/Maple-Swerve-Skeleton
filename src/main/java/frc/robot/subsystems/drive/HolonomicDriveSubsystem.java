@@ -15,6 +15,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.LocalADStarAK;
@@ -115,7 +116,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         runRobotCentricChassisSpeeds(new ChassisSpeeds());
     }
 
-    default void configHolonomicPathPlannerAutoBuilder() {
+    default void configHolonomicPathPlannerAutoBuilder(Field2d field) {
         RobotConfig robotConfig = new RobotConfig(
                 DriveTrainConstants.ROBOT_MASS,
                 DriveTrainConstants.ROBOT_MOI,
@@ -151,6 +152,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         PathPlannerLogging.setLogActivePathCallback((activePath) -> {
             final Pose2d[] trajectory = activePath.toArray(new Pose2d[0]);
             Logger.recordOutput("RobotState/Trajectory", trajectory);
+            field.getObject("ActivateTrajectory").setPoses(trajectory);
         });
         PathPlannerLogging.setLogTargetPoseCallback(
                 (targetPose) -> Logger.recordOutput("RobotState/TrajectorySetpoint", targetPose));
