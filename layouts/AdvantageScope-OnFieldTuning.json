@@ -1,10 +1,10 @@
 {
   "hubs": [
     {
-      "x": 0,
-      "y": -760,
+      "x": 303,
+      "y": 184,
       "width": 1101,
-      "height": 651,
+      "height": 650,
       "state": {
         "sidebar": {
           "width": 300,
@@ -21,7 +21,7 @@
           ]
         },
         "tabs": {
-          "selected": 4,
+          "selected": 3,
           "tabs": [
             {
               "type": 0,
@@ -191,9 +191,9 @@
                 "cameraIndex": -1,
                 "orbitFov": 50,
                 "cameraPosition": [
-                  -13.84957922324157,
-                  5.863965105092772,
-                  0.7462581041218433
+                  -10.625847468439025,
+                  14.156259517370202,
+                  -1.2707399465102145
                 ],
                 "cameraTarget": [
                   -0.8677060157037558,
@@ -273,6 +273,16 @@
               "controllerUUID": "kungcz9vmur12e93xux9i0whtebjiqu7",
               "renderer": null,
               "controlsHeight": 200
+            },
+            {
+              "type": 5,
+              "title": "Console",
+              "controller": "NT:/AdvantageKit/RealOutputs/Console",
+              "controllerUUID": "ict1tk2ym1lrdxvjkgoq6obac69hyjqd",
+              "renderer": {
+                "highlight": false
+              },
+              "controlsHeight": 0
             }
           ]
         }
