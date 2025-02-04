@@ -14,7 +14,6 @@ import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
-import frc.robot.utils.PathUtils;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -25,7 +24,11 @@ public class ReefAlignment {
     private static final Translation2d REEF_CENTER_BLUE = new Translation2d(4.5, 4);
 
     public record BranchTarget(
-            Rotation2d facing, Translation2d roughApproachPosition, Translation2d preciseAlignmentPosition, int tagId) {
+            Rotation2d facing,
+            Translation2d roughApproachPosition,
+            Translation2d preciseAlignmentPosition,
+            int tagId,
+            boolean rightSide) {
 
         public Pose2d roughApproachPose() {
             return new Pose2d(roughApproachPosition, facing);
@@ -35,10 +38,14 @@ public class ReefAlignment {
             return new Pose2d(preciseAlignmentPosition, facing);
         }
 
-        public int cameraToFocus() {
-            return tagId % 2 == 0
-                    ? 1 // lefter targets uses righter camera
-                    : 0; // righter targets uses lefter camera
+        public AutoAlignment.AutoAlignmentTarget autoAlignmentTarget() {
+            return new AutoAlignment.AutoAlignmentTarget(
+                    roughApproachPose(),
+                    preciseAlignmentPose(),
+                    facing(),
+                    OptionalInt.of(tagId),
+                    OptionalInt.of(rightSide ? 0 : 1), // right side uses lefter cam
+                    Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)));
         }
     }
 
@@ -133,11 +140,7 @@ public class ReefAlignment {
                             robot.drive,
                             robot.aprilTagVision,
                             path,
-                            PathUtils.getEndingPose(path),
-                            branchTarget.preciseAlignmentPose(),
-                            branchTarget.facing(),
-                            OptionalInt.of(branchTarget.tagId()),
-                            OptionalInt.of(branchTarget.cameraToFocus()),
+                            branchTarget.autoAlignmentTarget(),
                             DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                     .beforeStarting(() -> {
                         selectedReefPartId = targetId / 2;
@@ -152,13 +155,7 @@ public class ReefAlignment {
         return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
                         drive,
                         aprilTagVision,
-                        ReefAlignment.getReefAlignmentTarget(rightSide).roughApproachPose(),
-                        ReefAlignment.getReefAlignmentTarget(rightSide).preciseAlignmentPose(),
-                        ReefAlignment.getReefAlignmentTarget(rightSide).facing(),
-                        OptionalInt.of(
-                                ReefAlignment.getReefAlignmentTarget(rightSide).tagId()),
-                        OptionalInt.of(rightSide ? 0 : 1), // right side uses lefter cam
-                        Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),
+                        ReefAlignment.getReefAlignmentTarget(rightSide).autoAlignmentTarget(),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG))
                 .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
                 .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED);
