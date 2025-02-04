@@ -6,20 +6,27 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveControlLoops.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
@@ -52,6 +59,9 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.kError);
     private final Alert canBusHighUtilization = new Alert("Can Bus Utilization High", Alert.AlertType.kWarning);
 
+    private final SwerveSetpointGenerator setpointGenerator;
+    private SwerveSetpoint setpoint;
+
     public SwerveDrive(
             DriveType type,
             GyroIO gyroIO,
@@ -77,6 +87,9 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         this.odometryThread.start();
 
         gyroDisconnectedAlert.set(false);
+
+        setpointGenerator = new SwerveSetpointGenerator(defaultPathPlannerRobotConfig(), RPM.of(300));
+        this.setpoint = new SwerveSetpoint(new ChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
 
         startDashboardDisplay();
     }
@@ -143,15 +156,35 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         return swerveModulePositions;
     }
 
+    private LinearAcceleration accelerationConstrain = ACCELERATION_CONSTRAIN_NORMAL;
+
     @Override
     public void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
-        runRobotCentricSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
+        if (!USE_SETPOINT_GENERATOR) {
+            runRobotCentricSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
+            return;
+        }
+        PathConstraints constraints = new PathConstraints(
+                CHASSIS_MAX_VELOCITY,
+                accelerationConstrain,
+                CHASSIS_MAX_ANGULAR_VELOCITY,
+                CHASSIS_MAX_ANGULAR_ACCELERATION);
+        this.setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, constraints, Robot.defaultPeriodSecs, 13);
+
+        executeSetpoint();
     }
 
     @Override
     public void runRobotCentricSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        this.setpoint = new SwerveSetpoint(speeds, getModuleStates(), feedforwards);
+        executeSetpoint();
+    }
+
+    private void executeSetpoint() {
         OptionalDouble angularVelocityOverride =
                 ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
+        ChassisSpeeds speeds = setpoint.robotRelativeSpeeds();
+
         if (angularVelocityOverride.isPresent()) {
             speeds = new ChassisSpeeds(
                     speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, angularVelocityOverride.getAsDouble());
@@ -166,8 +199,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         for (int i = 0; i < 4; i++)
             optimizedSetpointStates[i] = swerveModules[i].runSetPoint(
                     setPointStates[i],
-                    feedforwards.robotRelativeForcesX()[i],
-                    feedforwards.robotRelativeForcesY()[i]);
+                    setpoint.feedforwards().robotRelativeForcesX()[i],
+                    setpoint.feedforwards().robotRelativeForcesY()[i]);
 
         Logger.recordOutput("SwerveStates/Setpoints", setPointStates);
         Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
@@ -257,6 +290,15 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     @Override
     public double getChassisMaxAngularAccelerationRadPerSecSq() {
         return CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond);
+    }
+
+    private Subsystem accelerationConstrainLock = new Subsystem() {};
+
+    public Command withAccelerationConstrain(LinearAcceleration accelerationConstrain) {
+        return Commands.startEnd(
+                () -> this.accelerationConstrain = accelerationConstrain,
+                () -> this.accelerationConstrain = ACCELERATION_CONSTRAIN_NORMAL,
+                accelerationConstrainLock);
     }
 
     private void startDashboardDisplay() {

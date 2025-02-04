@@ -10,6 +10,13 @@
      "exp":"3.5 m / s",
      "val":3.5
     }
+   },
+   "maxacc":{
+    "dimension":"LinAcc",
+    "var":{
+     "exp":"6 m / s ^ 2",
+     "val":6.0
+    }
    }
   },
   "poses":{

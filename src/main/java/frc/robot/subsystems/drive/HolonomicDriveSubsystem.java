@@ -24,7 +24,6 @@ import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.LocalADStarAK;
 import frc.robot.utils.PPRobotConfigPrinter;
 import org.ironmaple.utils.FieldMirroringUtils;
-import org.ironmaple.utils.mathutils.MapleCommonMath;
 import org.littletonrobotics.junction.Logger;
 
 public interface HolonomicDriveSubsystem extends Subsystem {
@@ -119,8 +118,8 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         runRobotCentricChassisSpeeds(new ChassisSpeeds());
     }
 
-    default void configHolonomicPathPlannerAutoBuilder(Field2d field) {
-        RobotConfig robotConfig = new RobotConfig(
+    default RobotConfig defaultPathPlannerRobotConfig() {
+        return new RobotConfig(
                 DriveTrainConstants.ROBOT_MASS,
                 DriveTrainConstants.ROBOT_MOI,
                 new ModuleConfig(
@@ -131,6 +130,10 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                         DriveTrainConstants.DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT,
                         1),
                 DriveTrainConstants.MODULE_TRANSLATIONS);
+    }
+
+    default void configHolonomicPathPlannerAutoBuilder(Field2d field) {
+        RobotConfig robotConfig = defaultPathPlannerRobotConfig();
         System.out.println("Generated pathplanner robot config with drive constants: ");
         PPRobotConfigPrinter.printConfig(robotConfig);
         try {
@@ -173,44 +176,5 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         return Math.abs(chassisSpeeds.omegaRadiansPerSecond) < Math.toRadians(5)
                 && Math.abs(chassisSpeeds.vxMetersPerSecond) < 0.05
                 && Math.abs(chassisSpeeds.vyMetersPerSecond) < 0.05;
-    }
-
-    default ChassisSpeeds constrainAcceleration(
-            ChassisSpeeds currentSpeeds, ChassisSpeeds desiredSpeeds, double dtSecs) {
-        final double
-                MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ =
-                        getChassisMaxLinearVelocityMetersPerSec() / LINEAR_ACCELERATION_SMOOTH_OUT_SECONDS,
-                MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ =
-                        getChassisMaxAngularVelocity() / ANGULAR_ACCELERATION_SMOOTH_OUT_SECONDS;
-
-        Translation2d
-                currentLinearVelocityMetersPerSec =
-                        new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
-                desiredLinearVelocityMetersPerSec =
-                        new Translation2d(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond),
-                linearVelocityDifference = desiredLinearVelocityMetersPerSec.minus(currentLinearVelocityMetersPerSec);
-
-        final double maxLinearVelocityChangeIn1Period = MAX_LINEAR_ACCELERATION_METERS_PER_SEC_SQ * dtSecs;
-        final boolean desiredLinearVelocityReachableWithin1Period =
-                linearVelocityDifference.getNorm() <= maxLinearVelocityChangeIn1Period;
-        final Translation2d
-                linearVelocityChangeVector =
-                        new Translation2d(
-                                maxLinearVelocityChangeIn1Period, MapleCommonMath.getAngle(linearVelocityDifference)),
-                newLinearVelocity =
-                        desiredLinearVelocityReachableWithin1Period
-                                ? desiredLinearVelocityMetersPerSec
-                                : currentLinearVelocityMetersPerSec.plus(linearVelocityChangeVector);
-
-        final double
-                angularVelocityDifference = desiredSpeeds.omegaRadiansPerSecond - currentSpeeds.omegaRadiansPerSecond,
-                maxAngularVelocityChangeIn1Period = MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ * dtSecs,
-                angularVelocityChange = Math.copySign(maxAngularVelocityChangeIn1Period, angularVelocityDifference);
-        final boolean desiredAngularVelocityReachableWithin1Period =
-                Math.abs(angularVelocityDifference) <= maxAngularVelocityChangeIn1Period;
-        final double newAngularVelocity = desiredAngularVelocityReachableWithin1Period
-                ? desiredSpeeds.omegaRadiansPerSecond
-                : currentSpeeds.omegaRadiansPerSecond + angularVelocityChange;
-        return new ChassisSpeeds(newLinearVelocity.getX(), newLinearVelocity.getY(), newAngularVelocity);
     }
 }
