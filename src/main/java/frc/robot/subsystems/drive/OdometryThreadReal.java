@@ -54,7 +54,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
             case GENERIC -> MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
             case CTRE_ON_RIO -> {
                 MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
-                BaseStatusSignal.refreshAll();
+                BaseStatusSignal.refreshAll(statusSignals);
             }
             case CTRE_ON_CANIVORE -> BaseStatusSignal.waitForAll(ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
         }

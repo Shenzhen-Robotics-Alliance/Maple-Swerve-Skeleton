@@ -96,8 +96,8 @@ public class RobotContainer {
                 /* CTRE Chassis: */
                 drive = new SwerveDrive(
                         Objects.equals(TunerConstants.kCANBus.getName(), "rio")
-                                ? SwerveDrive.DriveType.CTRE_ON_CANIVORE
-                                : SwerveDrive.DriveType.CTRE_ON_RIO,
+                                ? SwerveDrive.DriveType.CTRE_ON_RIO
+                                : SwerveDrive.DriveType.CTRE_ON_CANIVORE,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
                         new CanBusIOReal(TunerConstants.kCANBus),
                         new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
@@ -205,7 +205,6 @@ public class RobotContainer {
     }
 
     private void configureAutoTriggers(PathPlannerAuto pathPlannerAuto) {
-
         pathPlannerAuto.event("hello world").onTrue(Commands.runOnce(() -> System.out.println("hello world!!!")));
     }
 
@@ -332,8 +331,12 @@ public class RobotContainer {
         // driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
 
         /* auto alignment example, delete it for your project */
-        driver.autoAlignmentButtonLeft().whileTrue(ReefAlignment.alignmentToBranch(drive, aprilTagVision, false));
-        driver.autoAlignmentButtonRight().whileTrue(ReefAlignment.alignmentToBranch(drive, aprilTagVision, true));
+        driver.autoAlignmentButtonLeft()
+                .whileTrue(ReefAlignment.alignmentToBranch(
+                        drive, aprilTagVision, ledStatusLight, driver, false, Commands::none));
+        driver.autoAlignmentButtonRight()
+                .whileTrue(ReefAlignment.alignmentToBranch(
+                        drive, aprilTagVision, ledStatusLight, driver, true, Commands::none));
 
         //        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
         //        new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
@@ -349,10 +352,6 @@ public class RobotContainer {
 
     public void configureLEDEffects() {
         ledStatusLight.setDefaultCommand(ledStatusLight.showEnableDisableState());
-
-        driver.getController()
-                .button(1)
-                .onTrue(ledStatusLight.playAnimation(new LEDAnimation.Charging(Color.kOrange), 1));
     }
 
     /**

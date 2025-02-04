@@ -5,6 +5,7 @@ import static frc.robot.constants.DriveControlLoops.*;
 import static frc.robot.constants.JoystickConfigs.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -14,8 +15,10 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.LocalADStarAK;
@@ -156,6 +159,14 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         });
         PathPlannerLogging.setLogTargetPoseCallback(
                 (targetPose) -> Logger.recordOutput("RobotState/TrajectorySetpoint", targetPose));
+
+        Alert pathPlannerWarmUpInProgressAlert = new Alert("PathPlanner Warm-Up in progress", Alert.AlertType.kWarning);
+        pathPlannerWarmUpInProgressAlert.set(true);
+        PathfindingCommand.warmupCommand()
+                .deadlineFor(Commands.print("PathPlanner Warm-Up in progress").repeatedly())
+                .finallyDo(() -> pathPlannerWarmUpInProgressAlert.set(false))
+                .until(DriverStation::isEnabled)
+                .schedule();
     }
 
     static boolean isZero(ChassisSpeeds chassisSpeeds) {

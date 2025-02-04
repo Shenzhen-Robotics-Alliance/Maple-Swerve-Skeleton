@@ -1,5 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -7,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.function.DoubleSupplier;
 
-public interface DriverMap {
+public interface DriverMap extends Subsystem {
     Trigger povUp();
 
     Trigger povDown();
@@ -39,6 +43,24 @@ public interface DriverMap {
     default MapleJoystickDriveInput getDriveInput() {
         return new MapleJoystickDriveInput(
                 this.translationalAxisX(), this.translationalAxisY(), this.rotationalAxisX());
+    }
+
+    default Command rumble(double seconds) {
+        return runEnd(() -> getController().setRumble(GenericHID.RumbleType.kBothRumble, 1), () -> getController()
+                        .setRumble(GenericHID.RumbleType.kBothRumble, 0))
+                .withTimeout(seconds);
+    }
+
+    default Command rumbleLeftRight(double seconds) {
+        return Commands.sequence(
+                runOnce(() -> getController().setRumble(GenericHID.RumbleType.kLeftRumble, 1)),
+                Commands.waitSeconds(seconds),
+                runOnce(() -> {
+                    getController().setRumble(GenericHID.RumbleType.kLeftRumble, 0);
+                    getController().setRumble(GenericHID.RumbleType.kRightRumble, 1);
+                }),
+                Commands.waitSeconds(seconds),
+                runOnce(() -> getController().setRumble(GenericHID.RumbleType.kBothRumble, 0)));
     }
 
     abstract class DriverXbox implements DriverMap {

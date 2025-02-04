@@ -5,6 +5,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
 import frc.robot.commands.drive.AutoAlignment;
@@ -27,6 +28,8 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         OptionalInt.of(20),
                         OptionalInt.of(11),
                         OptionalInt.of(1),
+                        Commands.none(),
+                        Commands.none(),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab second"))
@@ -40,6 +43,8 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         OptionalInt.of(20),
                         OptionalInt.of(11),
                         OptionalInt.of(0),
+                        Commands.none(),
+                        Commands.none(),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("grab third"))
@@ -54,6 +59,8 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         OptionalInt.of(19),
                         OptionalInt.of(6),
                         OptionalInt.of(1),
+                        Commands.none(),
+                        Commands.none(),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
 
@@ -78,6 +85,8 @@ public class ExampleCustomAutoWithChoreoTrajectories implements Auto {
                         OptionalInt.of(19),
                         OptionalInt.of(6),
                         OptionalInt.of(0),
+                        Commands.none(),
+                        Commands.none(),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         return commandGroup;
