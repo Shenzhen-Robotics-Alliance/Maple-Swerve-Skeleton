@@ -65,7 +65,8 @@ public class RobotState {
     public void resetPose(Pose2d pose) {
         // Gyro offset is the rotation that maps the old gyro rotation (estimated - offset) to the new
         // frame of rotation
-        gyroOffset = pose.getRotation().minus(primaryEstimatorPose.getRotation().minus(gyroOffset));
+        gyroOffset =
+                pose.getRotation().minus(odometryPoseSensorLess.getRotation().minus(gyroOffset));
         primaryEstimatorPose = visionSensitivePose = odometryPoseSensorLess = pose;
         poseBuffer.clear();
     }
