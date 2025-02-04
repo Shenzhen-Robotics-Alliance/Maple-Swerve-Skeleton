@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.DriverMap;
 import frc.robot.RobotContainer;
 import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.constants.DriveControlLoops;
@@ -154,7 +155,8 @@ public class ReefAlignment {
                         selectedSide = targetId % 2 == 0 ? SelectedSide.LEFT : SelectedSide.RIGHT;
                     })
                     .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
-                    .finallyDo(() -> alignmentComplete(robot.ledStatusLight).schedule());
+                    .finallyDo(() -> alignmentComplete(robot.ledStatusLight, robot.driver)
+                            .schedule());
         });
     }
 
@@ -162,6 +164,7 @@ public class ReefAlignment {
             HolonomicDriveSubsystem drive,
             AprilTagVision aprilTagVision,
             LEDStatusLight statusLight,
+            DriverMap driver,
             boolean rightSide,
             Supplier<Command> toRunAtPreciseAlignment) {
         return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
@@ -173,7 +176,7 @@ public class ReefAlignment {
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG))
                 .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
                 .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
-                .finallyDo(() -> alignmentComplete(statusLight).schedule());
+                .finallyDo(() -> alignmentComplete(statusLight, driver).schedule());
     }
 
     private enum SelectedSide {
@@ -198,7 +201,9 @@ public class ReefAlignment {
                 .repeatedly();
     }
 
-    private static Command alignmentComplete(LEDStatusLight statusLight) {
-        return statusLight.playAnimation(new LEDAnimation.ShowColor(Color.kLightGreen), 0.5);
+    private static Command alignmentComplete(LEDStatusLight statusLight, DriverMap driver) {
+        return statusLight
+                .playAnimation(new LEDAnimation.ShowColor(Color.kLightGreen), 0.5)
+                .alongWith(driver.rumbleLeftRight(0.25));
     }
 }

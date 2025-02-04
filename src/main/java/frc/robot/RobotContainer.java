@@ -332,11 +332,11 @@ public class RobotContainer {
 
         /* auto alignment example, delete it for your project */
         driver.autoAlignmentButtonLeft()
-                .whileTrue(
-                        ReefAlignment.alignmentToBranch(drive, aprilTagVision, ledStatusLight, false, Commands::none));
+                .whileTrue(ReefAlignment.alignmentToBranch(
+                        drive, aprilTagVision, ledStatusLight, driver, false, Commands::none));
         driver.autoAlignmentButtonRight()
-                .whileTrue(
-                        ReefAlignment.alignmentToBranch(drive, aprilTagVision, ledStatusLight, true, Commands::none));
+                .whileTrue(ReefAlignment.alignmentToBranch(
+                        drive, aprilTagVision, ledStatusLight, driver, true, Commands::none));
 
         //        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
         //        new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
