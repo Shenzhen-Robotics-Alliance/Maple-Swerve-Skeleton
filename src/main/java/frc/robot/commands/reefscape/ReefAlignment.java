@@ -6,6 +6,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -13,10 +14,13 @@ import frc.robot.RobotContainer;
 import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
+import frc.robot.subsystems.led.LEDAnimation;
+import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Supplier;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
@@ -130,7 +134,8 @@ public class ReefAlignment {
                 .repeatedly();
     }
 
-    public static Command followPathAndAlign(RobotContainer robot, PathPlannerPath path, int targetId) {
+    public static Command followPathAndAlign(
+            RobotContainer robot, PathPlannerPath path, int targetId, Supplier<Command> toRunAtPreciseAlignment) {
         return Commands.deferredProxy(() -> {
             BranchTarget branchTarget = (FieldMirroringUtils.isSidePresentedAsRed()
                             ? REEF_ALIGNMENT_POSITIONS_RED
@@ -141,24 +146,34 @@ public class ReefAlignment {
                             robot.aprilTagVision,
                             path,
                             branchTarget.autoAlignmentTarget(),
+                            Commands.none(),
+                            preciseAlignmentLight(robot.ledStatusLight).alongWith(toRunAtPreciseAlignment.get()),
                             DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                     .beforeStarting(() -> {
                         selectedReefPartId = targetId / 2;
                         selectedSide = targetId % 2 == 0 ? SelectedSide.LEFT : SelectedSide.RIGHT;
                     })
-                    .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED);
+                    .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
+                    .finallyDo(() -> alignmentComplete(robot.ledStatusLight).schedule());
         });
     }
 
     public static Command alignmentToBranch(
-            HolonomicDriveSubsystem drive, AprilTagVision aprilTagVision, boolean rightSide) {
+            HolonomicDriveSubsystem drive,
+            AprilTagVision aprilTagVision,
+            LEDStatusLight statusLight,
+            boolean rightSide,
+            Supplier<Command> toRunAtPreciseAlignment) {
         return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
                         drive,
                         aprilTagVision,
                         ReefAlignment.getReefAlignmentTarget(rightSide).autoAlignmentTarget(),
+                        roughAlignmentLight(statusLight),
+                        preciseAlignmentLight(statusLight).alongWith(toRunAtPreciseAlignment.get()),
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG))
                 .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
-                .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED);
+                .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
+                .finallyDo(() -> alignmentComplete(statusLight).schedule());
     }
 
     private enum SelectedSide {
@@ -171,5 +186,19 @@ public class ReefAlignment {
 
     public static void updateDashboard() {
         Logger.recordOutput("Reef/SelectedBranch", ReefAlignment.displaySelectedBranch());
+    }
+
+    private static Command roughAlignmentLight(LEDStatusLight statusLight) {
+        return statusLight.playAnimation(new LEDAnimation.Rainbow(), 1).repeatedly();
+    }
+
+    private static Command preciseAlignmentLight(LEDStatusLight statusLight) {
+        return statusLight
+                .playAnimation(new LEDAnimation.Charging(Color.kOrange), 0.5)
+                .repeatedly();
+    }
+
+    private static Command alignmentComplete(LEDStatusLight statusLight) {
+        return statusLight.playAnimation(new LEDAnimation.ShowColor(Color.kLightGreen), 0.5);
     }
 }

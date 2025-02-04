@@ -37,6 +37,8 @@ public class AutoAlignment {
             HolonomicDriveSubsystem driveSubsystem,
             AprilTagVision vision,
             AutoAlignmentTarget target,
+            Command toRunDuringRoughApproach,
+            Command toRunDuringPreciseAlignment,
             AutoAlignmentConfigurations config) {
         Command pathFindToRoughTarget = pathFindToPose(
                         driveSubsystem, target.roughTarget(), target.faceToTargetDuringRoughApproach(), config)
@@ -50,7 +52,9 @@ public class AutoAlignment {
                         driveSubsystem, target.preciseTarget(), target.preciseApproachDirection(), config)
                 .deadlineFor(vision.focusOnTarget(target.tagIdToFocus(), target.cameraToFocus()));
 
-        return pathFindToRoughTarget.andThen(preciseAlignment);
+        return pathFindToRoughTarget
+                .deadlineFor(toRunDuringRoughApproach.asProxy())
+                .andThen(preciseAlignment.deadlineFor(toRunDuringPreciseAlignment.asProxy()));
     }
 
     public static Command followPathAndAutoAlign(
@@ -62,6 +66,8 @@ public class AutoAlignment {
             OptionalInt tagIdToFocusAtBlue,
             OptionalInt tagIdToFocusAtRed,
             OptionalInt cameraIdToFocus,
+            Command toRunAtFollowPath,
+            Command toRunAtPreciseAlignment,
             AutoAlignmentConfigurations config) {
         return Commands.deferredProxy(() -> followPathAndAutoAlignStatic(
                 driveSubsystem,
@@ -74,6 +80,8 @@ public class AutoAlignment {
                         FieldMirroringUtils.isSidePresentedAsRed() ? tagIdToFocusAtRed : tagIdToFocusAtBlue,
                         cameraIdToFocus,
                         Optional.empty()),
+                toRunAtFollowPath,
+                toRunAtPreciseAlignment,
                 config));
     }
 
@@ -82,6 +90,8 @@ public class AutoAlignment {
             AprilTagVision vision,
             PathPlannerPath path,
             AutoAlignmentTarget target,
+            Command toRunAtFollowPath,
+            Command toRunAtPreciseAlignment,
             AutoAlignmentConfigurations config) {
         Command followPath = AutoBuilder.followPath(path)
                 .until(() -> RobotState.getInstance()
@@ -95,7 +105,9 @@ public class AutoAlignment {
                         driveSubsystem, target.preciseTarget(), target.preciseApproachDirection(), config)
                 .deadlineFor(vision.focusOnTarget(target.tagIdToFocus(), target.cameraToFocus()));
 
-        return followPath.andThen(preciseAlignment);
+        return followPath
+                .deadlineFor(toRunAtFollowPath.asProxy())
+                .andThen(preciseAlignment.deadlineFor(toRunAtPreciseAlignment.asProxy()));
     }
 
     public static Command pathFindToPose(
