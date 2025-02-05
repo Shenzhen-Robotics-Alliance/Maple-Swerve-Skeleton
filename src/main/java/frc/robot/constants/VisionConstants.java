@@ -48,7 +48,7 @@ public class VisionConstants {
     /** Odometry standard errors for the secondary (vision-sensitive) pose estimator */
     public static final Distance VISION_SENSITIVE_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Meters.of(0.8);
 
-    public static final Angle VISION_SENSITIVE_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR = Degrees.of(5);
+    public static final Angle VISION_SENSITIVE_ESTIMATOR_GYRO_ROTATIONAL_STANDARD_ERROR = Degrees.of(1.5);
 
     public static final List<PhotonCameraProperties> photonVisionCameras = List.of(
             //            new PhotonCameraProperties(

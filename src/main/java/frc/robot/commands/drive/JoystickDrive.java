@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Robot;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
@@ -25,7 +24,6 @@ public class JoystickDrive extends Command {
     private final HolonomicDriveSubsystem driveSubsystem;
 
     protected final Timer previousChassisUsageTimer, previousRotationalInputTimer;
-    private ChassisSpeeds currentPilotInputSpeeds;
     private Rotation2d currentRotationMaintenanceSetpoint;
 
     private double translationalSensitivity, rotationalSensitivity;
@@ -54,19 +52,16 @@ public class JoystickDrive extends Command {
     public void initialize() {
         this.previousChassisUsageTimer.reset();
         this.previousRotationalInputTimer.reset();
-        this.currentPilotInputSpeeds = new ChassisSpeeds();
         this.currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
     }
 
     @Override
     public void execute() {
-        final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
+        final ChassisSpeeds pilotInputSpeeds = input.getJoystickChassisSpeeds(
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
                 driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
-        currentPilotInputSpeeds = driveSubsystem.constrainAcceleration(
-                currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
 
-        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
+        if (Math.abs(pilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
 
         if (povButtonSupplier.getAsInt() != -1)
             this.currentRotationMaintenanceSetpoint = FieldMirroringUtils.getCurrentAllianceDriverStationFacing()
@@ -82,7 +77,7 @@ public class JoystickDrive extends Command {
             currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
         }
 
-        if (!isZero(currentPilotInputSpeeds)) previousChassisUsageTimer.reset();
+        if (!isZero(pilotInputSpeeds)) previousChassisUsageTimer.reset();
 
         if (previousChassisUsageTimer.hasElapsed(NON_USAGE_TIME_RESET_WHEELS)) {
             driveSubsystem.stop();
@@ -90,8 +85,8 @@ public class JoystickDrive extends Command {
         }
 
         if (useDriverStationCentricSwitch.getAsBoolean())
-            driveSubsystem.runDriverStationCentricChassisSpeeds(currentPilotInputSpeeds, true);
-        else driveSubsystem.runRobotCentricChassisSpeeds(currentPilotInputSpeeds);
+            driveSubsystem.runDriverStationCentricChassisSpeeds(pilotInputSpeeds, true);
+        else driveSubsystem.runRobotCentricChassisSpeeds(pilotInputSpeeds);
 
         Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
         Logger.recordOutput(

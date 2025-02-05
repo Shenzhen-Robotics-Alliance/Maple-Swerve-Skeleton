@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Robot;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.ChassisHeadingController;
 import frc.robot.utils.MapleJoystickDriveInput;
@@ -18,7 +17,6 @@ public class ClockDrive extends Command {
     private final MapleJoystickDriveInput input;
     private final DoubleSupplier rotationXSupplier, rotationYSupplier;
 
-    private ChassisSpeeds currentPilotInputSpeeds;
     private Rotation2d currentDesiredFacing;
 
     public ClockDrive(
@@ -36,17 +34,14 @@ public class ClockDrive extends Command {
 
     @Override
     public void initialize() {
-        currentPilotInputSpeeds = new ChassisSpeeds();
         currentDesiredFacing = driveSubsystem.getFacing();
     }
 
     @Override
     public void execute() {
-        final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
+        final ChassisSpeeds pilotInputSpeed = input.getJoystickChassisSpeeds(
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec(),
                 driveSubsystem.getChassisMaxAngularVelocity());
-        currentPilotInputSpeeds = driveSubsystem.constrainAcceleration(
-                currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
 
         Translation2d headingVector =
                 new Translation2d(rotationXSupplier.getAsDouble(), rotationYSupplier.getAsDouble());
@@ -57,7 +52,7 @@ public class ClockDrive extends Command {
         ChassisHeadingController.getInstance()
                 .setHeadingRequest(new ChassisHeadingController.FaceToRotationRequest(this.currentDesiredFacing));
 
-        driveSubsystem.runDriverStationCentricChassisSpeeds(currentPilotInputSpeeds, true);
+        driveSubsystem.runDriverStationCentricChassisSpeeds(pilotInputSpeed, true);
     }
 
     @Override

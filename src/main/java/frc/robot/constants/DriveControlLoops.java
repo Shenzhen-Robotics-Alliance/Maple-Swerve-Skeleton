@@ -2,12 +2,17 @@ package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
 public class DriveControlLoops {
+    public static final boolean USE_SETPOINT_GENERATOR = true;
+    public static final LinearAcceleration ACCELERATION_CONSTRAIN_NORMAL = MetersPerSecondPerSecond.of(10);
+    public static final LinearAcceleration ACCELERATION_CONSTRAIN_ELEVATOR_RAISED = MetersPerSecondPerSecond.of(6.5);
+
     public static final Time DISCRETIZE_TIME = Seconds.of(0.03);
     public static final LinearVelocity SWERVE_VELOCITY_DEADBAND = MetersPerSecond.of(0.03);
     public static final MaplePIDController.MaplePIDConfig CHASSIS_ROTATION_CLOSE_LOOP =
