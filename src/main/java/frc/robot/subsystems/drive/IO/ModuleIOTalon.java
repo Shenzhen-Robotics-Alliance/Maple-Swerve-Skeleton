@@ -135,7 +135,7 @@ public class ModuleIOTalon implements ModuleIO {
         // Configure periodic frames
         BaseStatusSignal.setUpdateFrequencyForAll(ODOMETRY_FREQUENCY, driveRotterPosition, steerAbsolutePosition);
         BaseStatusSignal.setUpdateFrequencyForAll(
-                1 / Robot.defaultPeriodSecs,
+                100.0,
                 driveRotterVelocity,
                 driveAppliedVoltage,
                 driveMotorCurrentDrawn,

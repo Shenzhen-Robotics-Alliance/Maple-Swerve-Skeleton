@@ -34,7 +34,6 @@ public interface OdometryThread {
     List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
 
     static <T> Queue<T> registerSignalSignal(StatusSignal<T> signal) {
-        signal.setUpdateFrequency(ODOMETRY_FREQUENCY, ODOMETRY_WAIT_TIMEOUT_SECONDS);
         registeredStatusSignals.add(signal);
         return registerInput(signal.asSupplier());
     }
