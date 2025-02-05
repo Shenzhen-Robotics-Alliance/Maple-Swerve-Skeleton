@@ -203,7 +203,7 @@ public class ReefAlignment {
 
     private static Command alignmentComplete(LEDStatusLight statusLight, DriverMap driver) {
         return statusLight
-                .playAnimation(new LEDAnimation.ShowColor(Color.kLightGreen), 0.5)
+                .playAnimation(new LEDAnimation.ShowColor(Color.kGreen), 0.5)
                 .alongWith(driver.rumbleLeftRight(0.25))
                 .ignoringDisable(true);
     }
