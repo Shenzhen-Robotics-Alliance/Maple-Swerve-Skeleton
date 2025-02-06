@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
+import frc.robot.utils.AlertsManager;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
@@ -38,11 +39,11 @@ public class SwerveModule {
         this.io = io;
         this.name = name;
         this.driveMotorHardwareFault =
-                new Alert("Module-" + name + " Drive Motor Hardware Fault Detected", Alert.AlertType.kError);
+                AlertsManager.create("Module-" + name + " Drive Motor Hardware Fault Detected", Alert.AlertType.kError);
         this.steerMotorHardwareFault =
-                new Alert("Module-" + name + " Steer Motor Hardware Fault Detected", Alert.AlertType.kError);
-        this.steerEncoderHardwareFault =
-                new Alert("Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.kError);
+                AlertsManager.create("Module-" + name + " Steer Motor Hardware Fault Detected", Alert.AlertType.kError);
+        this.steerEncoderHardwareFault = AlertsManager.create(
+                "Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.kError);
         this.driveMotorHardwareFault.set(false);
         this.steerMotorHardwareFault.set(false);
         this.steerEncoderHardwareFault.set(false);

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.RobotState;
+import frc.robot.utils.AlertsManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -35,10 +36,10 @@ public class AprilTagVision extends SubsystemBase {
         this.camerasNoResultAlerts = new Alert[camerasProperties.size()];
         this.camerasNoResultDebouncer = new Debouncer[camerasProperties.size()];
         for (int i = 0; i < camerasProperties.size(); i++) {
-            this.camerasDisconnectedAlerts[i] = new Alert(
+            this.camerasDisconnectedAlerts[i] = AlertsManager.create(
                     "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' disconnected",
                     Alert.AlertType.kError);
-            this.camerasNoResultAlerts[i] = new Alert(
+            this.camerasNoResultAlerts[i] = AlertsManager.create(
                     "Photon Camera " + i + " '" + camerasProperties.get(i).name + "' no result",
                     Alert.AlertType.kWarning);
             this.camerasNoResultDebouncer[i] = new Debouncer(0.5);

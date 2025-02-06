@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -28,13 +27,13 @@ import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
-import frc.robot.subsystems.led.LEDAnimation;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import frc.robot.utils.AIRobotInSimulation2024;
+import frc.robot.utils.AlertsManager;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.*;
 import java.util.function.IntSupplier;
@@ -373,14 +372,15 @@ public class RobotContainer {
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
         Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation2024.getOpponentRobotPoses());
         Logger.recordOutput(
-                "FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation2024.getAlliancePartnerRobotPoses());
+                "FieldSimulation/AlliancePartnerRobotPositions",
+                AIRobotInSimulation2024.getAlliancePartnerRobotPoses());
         Logger.recordOutput(
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
-    public void updateDashboardDisplay() {
+    public void updateTelemetryAndLED() {
         field.setRobotPose(
                 Robot.CURRENT_ROBOT_MODE == RobotMode.SIM
                         ? driveSimulation.getSimulatedDriveTrainPose()
@@ -390,12 +390,6 @@ public class RobotContainer {
 
         ReefAlignment.updateDashboard();
 
-        if (drive.hardwareFaultsDetected.getAsBoolean() || aprilTagVision.cameraDisconnected.getAsBoolean())
-            ledStatusLight
-                    .playAnimationPeriodically(new LEDAnimation.Breathe(new Color(255, 0, 0)), 2)
-                    .until(drive.hardwareFaultsDetected.negate().and(aprilTagVision.cameraDisconnected.negate()))
-                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
-                    .ignoringDisable(true)
-                    .schedule();
+        AlertsManager.updateLEDAndLog(ledStatusLight);
     }
 }

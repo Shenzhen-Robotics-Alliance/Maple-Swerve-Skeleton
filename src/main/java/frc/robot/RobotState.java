@@ -22,11 +22,12 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
+import frc.robot.utils.AlertsManager;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class RobotState {
-    private final Alert visionNoResultAlert = new Alert("Vision No Result", Alert.AlertType.kInfo);
+    private final Alert visionNoResultAlert = AlertsManager.create("Vision No Result", Alert.AlertType.kInfo);
     private double previousVisionResultTimeStamp = 0;
 
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer;

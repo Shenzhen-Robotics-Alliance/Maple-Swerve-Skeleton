@@ -24,11 +24,11 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.utils.AlertsManager;
 import frc.robot.utils.ChassisHeadingController;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -51,8 +51,9 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     private final SwerveModule[] swerveModules;
 
     private final OdometryThread odometryThread;
-    private final Alert gyroDisconnectedAlert = new Alert("Gyro Hardware Fault", Alert.AlertType.kError);
-    private final Alert canBusHighUtilization = new Alert("Can Bus Utilization High", Alert.AlertType.kWarning);
+    private final Alert gyroDisconnectedAlert = AlertsManager.create("Gyro Hardware Fault", Alert.AlertType.kError);
+    private final Alert canBusHighUtilization =
+            AlertsManager.create("Can Bus Utilization High", Alert.AlertType.kWarning);
 
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint setpoint;
@@ -325,14 +326,6 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
                     null);
         });
     }
-
-    private boolean hasHardwareFaults() {
-        if (!gyroInputs.connected) return true;
-        for (SwerveModule module : swerveModules) if (module.hasHardwareFaults()) return true;
-        return false;
-    }
-
-    public final Trigger hardwareFaultsDetected = new Trigger(this::hasHardwareFaults);
 
     public double getCanBusUtilization() {
         return canBusInputs.utilization;

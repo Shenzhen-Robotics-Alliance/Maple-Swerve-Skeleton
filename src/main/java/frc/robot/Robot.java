@@ -78,7 +78,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        robotContainer.updateDashboardDisplay();
+        robotContainer.updateTelemetryAndLED();
     }
 
     /** This function is called once when the robot is disabled. */
