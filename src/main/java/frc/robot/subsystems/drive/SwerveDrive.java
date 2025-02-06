@@ -13,6 +13,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -22,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -30,6 +32,8 @@ import frc.robot.RobotState;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.ChassisHeadingController;
+import frc.robot.utils.MapleTimeUtils;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import org.ironmaple.utils.FieldMirroringUtils;
@@ -51,9 +55,16 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     private final SwerveModule[] swerveModules;
 
     private final OdometryThread odometryThread;
-    private final Alert gyroDisconnectedAlert = AlertsManager.create("Gyro Hardware Fault", Alert.AlertType.kError);
+    private final Alert gyroDisconnectedAlert =
+            AlertsManager.create("Gyro hardware fault detected!", Alert.AlertType.kError);
     private final Alert canBusHighUtilization =
-            AlertsManager.create("Can Bus Utilization High", Alert.AlertType.kWarning);
+            AlertsManager.create("Drivetrain CanBus high utilization!", Alert.AlertType.kError);
+    private final Debouncer batteryBrownoutDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
+    private final Alert batteryBrownoutAlert =
+            AlertsManager.create("Battery brownout detected!", Alert.AlertType.kError);
+    private final Debouncer drivetrainOverCurrentDebouncer = new Debouncer(0.2, Debouncer.DebounceType.kBoth);
+    private final Alert drivetrainOverCurrentAlert =
+            AlertsManager.create("Drivetrain over current detected! Current: ", Alert.AlertType.kError);
 
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint setpoint;
@@ -83,6 +94,10 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         this.odometryThread.start();
 
         gyroDisconnectedAlert.set(false);
+        batteryBrownoutAlert.set(false);
+        drivetrainOverCurrentAlert.set(false);
+        // Prevents fake alerts to show up dues to falling type debounce
+        MapleTimeUtils.delay(0.5);
 
         setpointGenerator = new SwerveSetpointGenerator(defaultPathPlannerRobotConfig(), RPM.of(300));
         this.setpoint = new SwerveSetpoint(new ChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
@@ -101,8 +116,13 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
 
         RobotState.getInstance().updateAlerts();
         gyroDisconnectedAlert.set(!gyroInputs.connected);
-        canBusHighUtilization.setText("Can Bus Utilization High: " + (int) (canBusInputs.utilization * 100) + "%");
+        canBusHighUtilization.setText(
+                "Drivetrain CanBus high utilization: " + (int) (canBusInputs.utilization * 100) + "%");
         canBusHighUtilization.set(canBusInputs.utilization > 0.8);
+        batteryBrownoutAlert.set(batteryBrownoutDebouncer.calculate(RobotController.isBrownedOut()));
+        drivetrainOverCurrentAlert.set(drivetrainOverCurrentDebouncer.calculate(
+                getDriveTrainTotalCurrentAmps() > OVER_CURRENT_WARNING.in(Amps)));
+
         Logger.recordOutput(
                 "RobotState/SensorLessOdometryPose", RobotState.getInstance().getSensorLessOdometryPose());
         Logger.recordOutput(
@@ -329,6 +349,13 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
 
     public double getCanBusUtilization() {
         return canBusInputs.utilization;
+    }
+
+    @AutoLogOutput(key = "DrivetrainTotalCurrentAmps")
+    public double getDriveTrainTotalCurrentAmps() {
+        return Arrays.stream(swerveModules)
+                .mapToDouble(SwerveModule::getTotalSupplyCurrentAmps)
+                .sum();
     }
 
     private void runCharacterization(Voltage voltage) {

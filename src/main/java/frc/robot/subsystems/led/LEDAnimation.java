@@ -25,7 +25,7 @@ public sealed interface LEDAnimation {
 
         @Override
         public void play(Color[] colors, double t) {
-            final double brightness = oscillate(t);
+            final double brightness = oscillate(t + 0.25);
             for (int i = 0; i < colors.length; i++)
                 colors[i] = new Color(color.red * brightness, color.green * brightness, color.blue * brightness);
         }

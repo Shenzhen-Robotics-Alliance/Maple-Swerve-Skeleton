@@ -20,6 +20,7 @@ import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.AlertsManager;
@@ -162,6 +163,18 @@ public class SwerveModule {
 
     public boolean hasHardwareFaults() {
         return !(inputs.driveMotorConnected && inputs.steerMotorConnected && inputs.steerEncoderConnected);
+    }
+
+    public double getTotalSupplyCurrentAmps() {
+        // From the Conservation of Energy, we know:
+        // supply current * battery voltage = stator current * applied volts
+        // So:
+        // supply current = stator current * applied volts / battery voltage
+        double driveMotorSupplyCurrentAmps =
+                inputs.driveMotorCurrentAmps * inputs.driveMotorAppliedVolts / RobotController.getBatteryVoltage();
+        double steerMotorSupplyCurrentAmps =
+                inputs.steerMotorCurrentAmps * inputs.steerMotorAppliedVolts / RobotController.getBatteryVoltage();
+        return driveMotorSupplyCurrentAmps + steerMotorSupplyCurrentAmps;
     }
 
     public void runVoltageCharacterization(Rotation2d steerFacing, Voltage driveVoltageOut) {
