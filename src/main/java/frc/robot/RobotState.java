@@ -20,8 +20,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
-import frc.robot.utils.MapleTimeUtils;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -179,7 +179,7 @@ public class RobotState {
     }
 
     public void updateAlerts() {
-        double timeNotVisionResultSeconds = MapleTimeUtils.getLogTimeSeconds() - previousVisionResultTimeStamp;
+        double timeNotVisionResultSeconds = Timer.getTimestamp() - previousVisionResultTimeStamp;
         visionNoResultAlert.set(timeNotVisionResultSeconds > 10);
         if (visionNoResultAlert.get())
             visionNoResultAlert.setText(

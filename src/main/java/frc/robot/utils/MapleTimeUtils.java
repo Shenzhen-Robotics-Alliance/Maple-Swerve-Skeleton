@@ -1,7 +1,5 @@
 package frc.robot.utils;
 
-import org.littletonrobotics.junction.Logger;
-
 public class MapleTimeUtils {
     public static void delay(double seconds) {
         try {
@@ -19,13 +17,5 @@ public class MapleTimeUtils {
             // Optionally, handle the interruption, e.g. logging or throwing a runtime exception
             System.err.println("The sleep was interrupted");
         }
-    }
-
-    public static double getLogTimeSeconds() {
-        return Logger.getTimestamp() / 1_000_000.0;
-    }
-
-    public static double getRealTimeSeconds() {
-        return Logger.getRealTimestamp() / 1_000_000.0;
     }
 }

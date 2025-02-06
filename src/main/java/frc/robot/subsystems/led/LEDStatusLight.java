@@ -4,18 +4,17 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import frc.robot.subsystems.MapleSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 
-public class LEDStatusLight extends MapleSubsystem {
+public class LEDStatusLight extends SubsystemBase {
     private static AddressableLED led = null;
     private final Color[] ledColors;
     private final AddressableLEDBuffer buffer;
     private final AddressableLEDBufferView view1, view2;
 
     public LEDStatusLight(int port, int length) {
-        super("LED");
         // make sure length is even
         length = length / 2 * 2;
         this.ledColors = new Color[length / 2 - 1];
@@ -33,7 +32,7 @@ public class LEDStatusLight extends MapleSubsystem {
     }
 
     @Override
-    public void periodic(double dt, boolean enabled) {
+    public void periodic() {
         for (int i = 0; i < ledColors.length; i++) {
             view1.setLED(i, ledColors[i]);
             view2.setLED(i, ledColors[i]);

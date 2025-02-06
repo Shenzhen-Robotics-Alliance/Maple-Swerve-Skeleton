@@ -4,6 +4,7 @@ package frc.robot.subsystems.drive;
 import static frc.robot.constants.DriveTrainConstants.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.MapleTimeUtils;
 import java.util.Queue;
@@ -61,7 +62,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     }
 
     private double estimateAverageTimeStamps() {
-        double currentTime = MapleTimeUtils.getRealTimeSeconds(), totalLatency = 0;
+        double currentTime = Timer.getFPGATimestamp(), totalLatency = 0;
         for (BaseStatusSignal signal : statusSignals)
             totalLatency += signal.getTimestamp().getLatency();
 

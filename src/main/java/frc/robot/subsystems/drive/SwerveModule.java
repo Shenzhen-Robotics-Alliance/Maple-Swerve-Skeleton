@@ -19,13 +19,12 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.MapleSubsystem;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
-public class SwerveModule extends MapleSubsystem {
+public class SwerveModule {
     private final ModuleIO io;
     private final String name;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
@@ -36,7 +35,6 @@ public class SwerveModule extends MapleSubsystem {
     private final Alert driveMotorHardwareFault, steerMotorHardwareFault, steerEncoderHardwareFault;
 
     public SwerveModule(ModuleIO io, String name) {
-        super("Module-" + name);
         this.io = io;
         this.name = name;
         this.driveMotorHardwareFault =
@@ -49,8 +47,6 @@ public class SwerveModule extends MapleSubsystem {
         this.steerMotorHardwareFault.set(false);
         this.steerEncoderHardwareFault.set(false);
 
-        CommandScheduler.getInstance().unregisterSubsystem(this);
-
         setPoint = new SwerveModuleState();
         io.setDriveBrake(true);
         io.setSteerBrake(true);
@@ -61,9 +57,9 @@ public class SwerveModule extends MapleSubsystem {
         Logger.processInputs("Drive/Module-" + name, inputs);
     }
 
-    @Override
-    public void periodic(double dt, boolean enabled) {
+    public void modulePeriodic() {
         updateOdometryPositions();
+        if (DriverStation.isDisabled()) stop();
 
         this.driveMotorHardwareFault.set(!inputs.driveMotorConnected);
         this.steerMotorHardwareFault.set(!inputs.steerMotorConnected);
@@ -109,11 +105,6 @@ public class SwerveModule extends MapleSubsystem {
         io.requestSteerPositionControl(newSetpoint.angle);
 
         return this.setPoint = newSetpoint;
-    }
-
-    @Override
-    public void onDisable() {
-        stop();
     }
 
     public void stop() {

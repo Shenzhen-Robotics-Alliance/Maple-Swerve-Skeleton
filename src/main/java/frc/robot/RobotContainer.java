@@ -26,7 +26,6 @@ import frc.robot.commands.drive.*;
 import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.subsystems.led.LEDAnimation;
@@ -35,7 +34,7 @@ import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
 import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
 import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
-import frc.robot.utils.AIRobotInSimulation;
+import frc.robot.utils.AIRobotInSimulation2024;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.*;
 import java.util.function.IntSupplier;
@@ -163,7 +162,7 @@ public class RobotContainer {
                         camerasProperties);
 
                 SimulatedArena.getInstance().resetFieldForAuto();
-                AIRobotInSimulation.startOpponentRobotSimulations();
+                AIRobotInSimulation2024.startOpponentRobotSimulations();
             }
 
             default -> {
@@ -253,7 +252,7 @@ public class RobotContainer {
             return;
 
         try {
-            this.autonomousCommand = selectedAuto.getAutoCommand(this).finallyDo(MapleSubsystem::disableAllSubsystems);
+            this.autonomousCommand = selectedAuto.getAutoCommand(this);
             configureAutoTriggers(new PathPlannerAuto(autonomousCommand, selectedAuto.getStartingPoseAtBlueAlliance()));
         } catch (Exception e) {
             this.autonomousCommand = Commands.none();
@@ -372,9 +371,9 @@ public class RobotContainer {
 
         SimulatedArena.getInstance().simulationPeriodic();
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation.getOpponentRobotPoses());
+        Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation2024.getOpponentRobotPoses());
         Logger.recordOutput(
-                "FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation.getAlliancePartnerRobotPoses());
+                "FieldSimulation/AlliancePartnerRobotPositions", AIRobotInSimulation2024.getAlliancePartnerRobotPoses());
         Logger.recordOutput(
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(

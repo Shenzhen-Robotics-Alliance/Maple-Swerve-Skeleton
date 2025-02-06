@@ -44,7 +44,7 @@ import org.ironmaple.utils.FieldMirroringUtils;
  *   <li>Driving via joystick control to simulate defense and counter-defense scenarios.
  * </ul>
  */
-public class AIRobotInSimulation extends SubsystemBase {
+public class AIRobotInSimulation2024 extends SubsystemBase {
     /* If an opponent robot is not requested to be on the field, it is placed ("queens") outside the field at predefined positions. */
     public static final Pose2d[] ROBOT_QUEENING_POSITIONS = new Pose2d[] {
         new Pose2d(-6, 0, new Rotation2d()),
@@ -62,7 +62,7 @@ public class AIRobotInSimulation extends SubsystemBase {
         new Pose2d(1.6, 4, new Rotation2d())
     };
     /* Store instances of AI robots in a static array. */
-    public static final AIRobotInSimulation[] instances = new AIRobotInSimulation[5];
+    public static final AIRobotInSimulation2024[] instances = new AIRobotInSimulation2024[5];
 
     /* The drivetrain configuration for the opponent robots in the maple-sim simulation. */
     private static final DriveTrainSimulationConfig DRIVETRAIN_CONFIG =
@@ -92,7 +92,7 @@ public class AIRobotInSimulation extends SubsystemBase {
     public static void startOpponentRobotSimulations() {
         try {
             // Creates an instance of the first AI robot
-            instances[0] = new AIRobotInSimulation(0);
+            instances[0] = new AIRobotInSimulation2024(0);
             // Builds the behavior chooser for the first AI robot
             instances[0].buildBehaviorChooser(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 0"),
@@ -103,7 +103,7 @@ public class AIRobotInSimulation extends SubsystemBase {
 
             // Same of the following:
 
-            instances[1] = new AIRobotInSimulation(1);
+            instances[1] = new AIRobotInSimulation2024(1);
             instances[1].buildBehaviorChooser(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 1"),
                     instances[1].shootAtSpeaker(),
@@ -111,7 +111,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     new XboxController(3));
 
-            instances[2] = new AIRobotInSimulation(2);
+            instances[2] = new AIRobotInSimulation2024(2);
             instances[2].buildBehaviorChooser(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 2"),
                     instances[2].shootAtSpeaker(),
@@ -119,7 +119,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     new XboxController(4));
 
-            instances[3] = new AIRobotInSimulation(3);
+            instances[3] = new AIRobotInSimulation2024(3);
             instances[3].buildBehaviorChooser(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 3"),
                     instances[3].feedShotLow(),
@@ -127,7 +127,7 @@ public class AIRobotInSimulation extends SubsystemBase {
                     Commands.none(),
                     new XboxController(5));
 
-            instances[4] = new AIRobotInSimulation(4);
+            instances[4] = new AIRobotInSimulation2024(4);
             instances[4].buildBehaviorChooser(
                     PathPlannerPath.fromPathFile("opponent robot cycle path 4"),
                     instances[4].feedShotHigh(),
@@ -143,7 +143,7 @@ public class AIRobotInSimulation extends SubsystemBase {
     private final Pose2d queeningPose;
     private final int id;
 
-    public AIRobotInSimulation(int id) {
+    public AIRobotInSimulation2024(int id) {
         this.id = id;
         this.queeningPose = ROBOT_QUEENING_POSITIONS[id];
         this.driveSimulation =
@@ -275,14 +275,14 @@ public class AIRobotInSimulation extends SubsystemBase {
     }
 
     public static Pose2d[] getOpponentRobotPoses() {
-        return getRobotPoses(new AIRobotInSimulation[] {instances[0], instances[1], instances[2]});
+        return getRobotPoses(new AIRobotInSimulation2024[] {instances[0], instances[1], instances[2]});
     }
 
     public static Pose2d[] getAlliancePartnerRobotPoses() {
-        return getRobotPoses(new AIRobotInSimulation[] {instances[3], instances[4]});
+        return getRobotPoses(new AIRobotInSimulation2024[] {instances[3], instances[4]});
     }
 
-    private static Pose2d[] getRobotPoses(AIRobotInSimulation[] instances) {
+    private static Pose2d[] getRobotPoses(AIRobotInSimulation2024[] instances) {
         return Arrays.stream(instances)
                 .map(instance -> instance.driveSimulation.getActualPoseInSimulationWorld())
                 .toArray(Pose2d[]::new);

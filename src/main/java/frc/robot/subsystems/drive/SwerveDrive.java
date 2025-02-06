@@ -23,25 +23,20 @@ import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.RobotState;
-import frc.robot.subsystems.MapleSubsystem;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.ChassisHeadingController;
-import frc.robot.utils.MapleTimeUtils;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsystem {
+public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsystem {
     public enum DriveType {
         GENERIC,
         CTRE_ON_RIO,
@@ -95,12 +90,9 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
     }
 
     @Override
-    public void periodic(double dt, boolean enabled) {
-        final double t0 = MapleTimeUtils.getRealTimeSeconds();
+    public void periodic() {
         fetchOdometryInputs();
-        Logger.recordOutput(
-                "SystemPerformance/OdometryFetchingTimeMS", (MapleTimeUtils.getRealTimeSeconds() - t0) * 1000);
-        modulesPeriodic(dt, enabled);
+        modulesPeriodic();
 
         for (int timeStampIndex = 0;
                 timeStampIndex < odometryThreadInputs.measurementTimeStamps.length;
@@ -133,8 +125,8 @@ public class SwerveDrive extends MapleSubsystem implements HolonomicDriveSubsyst
         odometryThread.unlockOdometry();
     }
 
-    private void modulesPeriodic(double dt, boolean enabled) {
-        for (var module : swerveModules) module.periodic(dt, enabled);
+    private void modulesPeriodic() {
+        for (var module : swerveModules) module.modulePeriodic();
     }
 
     private void feedSingleOdometryDataToPositionEstimator(int timeStampIndex) {
