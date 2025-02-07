@@ -9,8 +9,11 @@ import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 
 public class LEDStatusLight extends SubsystemBase {
+    private static final int DASHBOARD_DISPLAY_LENGTH = 20;
     private static AddressableLED led = null;
     private final Color[] ledColors;
+    private final Color[] dashboardColors;
+    private final String[] dashboardColorsHex;
     private final AddressableLEDBuffer buffer;
     private final AddressableLEDBufferView view1, view2;
 
@@ -18,7 +21,10 @@ public class LEDStatusLight extends SubsystemBase {
         // make sure length is even
         length = length / 2 * 2;
         this.ledColors = new Color[length / 2 - 1];
+        this.dashboardColors = new Color[DASHBOARD_DISPLAY_LENGTH];
+        this.dashboardColorsHex = new String[DASHBOARD_DISPLAY_LENGTH];
         Arrays.fill(ledColors, new Color());
+        Arrays.fill(dashboardColors, new Color());
         this.buffer = new AddressableLEDBuffer(length);
 
         view1 = buffer.createView(0, length / 2).reversed();
@@ -39,14 +45,17 @@ public class LEDStatusLight extends SubsystemBase {
         }
 
         led.setData(buffer);
-        Logger.recordOutput(
-                "Status Light", Arrays.stream(ledColors).map(Color::toHexString).toArray(String[]::new));
+        for (int i = 0; i < DASHBOARD_DISPLAY_LENGTH; i++) dashboardColorsHex[i] = dashboardColors[i].toHexString();
+        Logger.recordOutput("Status Light", dashboardColorsHex);
     }
 
     public Command playAnimation(LEDAnimation animation, double timeSeconds) {
         Timer timer = new Timer();
         timer.start();
-        return this.run(() -> animation.play(ledColors, timer.get() / timeSeconds))
+        return this.run(() -> {
+                    animation.play(ledColors, timer.get() / timeSeconds);
+                    animation.play(dashboardColors, timer.get() / timeSeconds);
+                })
                 .beforeStarting(timer::reset)
                 .withTimeout(timeSeconds)
                 .ignoringDisable(true);
@@ -63,11 +72,11 @@ public class LEDStatusLight extends SubsystemBase {
 
     public Command showEnableDisableState() {
         return new ConditionalCommand(
-                        playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
-                                .until(RobotState::isDisabled),
-                        playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
-                                .until(RobotState::isEnabled),
-                        RobotState::isEnabled)
+                playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
+                        .until(RobotState::isDisabled),
+                playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
+                        .until(RobotState::isEnabled),
+                RobotState::isEnabled)
                 .repeatedly()
                 .ignoringDisable(true);
     }
