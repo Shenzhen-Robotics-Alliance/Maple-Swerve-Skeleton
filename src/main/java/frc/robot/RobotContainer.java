@@ -129,7 +129,7 @@ public class RobotContainer {
                                         DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
                                 .withSwerveModule(new SwerveModuleSimulationConfig(
                                         DriveTrainConstants.DRIVE_MOTOR_MODEL,
-                                        DriveTrainConstants.STEER_MOTOR,
+                                        DriveTrainConstants.STEER_MOTOR_MODEL,
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
                                         DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,

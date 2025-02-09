@@ -147,6 +147,6 @@ public final class PhoenixUtil {
                 .withDriveFrictionVoltage(Volts.of(0.1))
                 .withSteerFrictionVoltage(Volts.of(0.15))
                 // Adjust steer inertia
-                .withSteerInertia(KilogramSquareMeters.of(0.05));
+                .withSteerInertia(KilogramSquareMeters.of(0.02));
     }
 }

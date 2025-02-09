@@ -60,13 +60,6 @@ public interface ModuleIO {
     default void requestSteerOpenLoop(Voltage output) {}
 
     /**
-     * Run the steer motor at a specified current open-loop control
-     *
-     * @param output the desired current output
-     */
-    default void requestSteerOpenLoop(Current output) {}
-
-    /**
      * Runs a velocity close-loop control on the drive motor
      *
      * @param desiredWheelVelocity the desired angular velocity of the wheel, in radians / second

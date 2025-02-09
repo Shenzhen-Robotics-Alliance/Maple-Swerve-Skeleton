@@ -25,7 +25,7 @@ public class DriveTrainConstants {
     /** TODO: change motor type to match your robot */
     public static final DCMotor DRIVE_MOTOR_MODEL = DCMotor.getKrakenX60(1);
 
-    public static final DCMotor STEER_MOTOR = DCMotor.getFalcon500(1);
+    public static final DCMotor STEER_MOTOR_MODEL = DCMotor.getFalcon500(1);
 
     /** numbers imported from {@link TunerConstants} TODO: for REV chassis, replace them with actual numbers */
     public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
