@@ -2,7 +2,6 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.constants.DriveControlLoops.*;
-import static frc.robot.constants.JoystickConfigs.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -126,7 +125,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                         DriveTrainConstants.WHEEL_RADIUS,
                         DriveTrainConstants.CHASSIS_MAX_VELOCITY,
                         DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION,
-                        DriveTrainConstants.DRIVE_MOTOR.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
+                        DriveTrainConstants.DRIVE_MOTOR_MODEL.withReduction(DriveTrainConstants.DRIVE_GEAR_RATIO),
                         DriveTrainConstants.DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT,
                         1),
                 DriveTrainConstants.MODULE_TRANSLATIONS);

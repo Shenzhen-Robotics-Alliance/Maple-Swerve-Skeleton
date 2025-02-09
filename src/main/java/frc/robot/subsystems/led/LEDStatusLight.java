@@ -72,11 +72,11 @@ public class LEDStatusLight extends SubsystemBase {
 
     public Command showEnableDisableState() {
         return new ConditionalCommand(
-                playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
-                        .until(RobotState::isDisabled),
-                playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
-                        .until(RobotState::isEnabled),
-                RobotState::isEnabled)
+                        playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
+                                .until(RobotState::isDisabled),
+                        playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
+                                .until(RobotState::isEnabled),
+                        RobotState::isEnabled)
                 .repeatedly()
                 .ignoringDisable(true);
     }

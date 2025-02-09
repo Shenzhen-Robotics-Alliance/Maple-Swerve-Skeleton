@@ -6,7 +6,9 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -67,11 +69,10 @@ public interface ModuleIO {
     /**
      * Runs a velocity close-loop control on the drive motor
      *
-     * @param desiredWheelVelocityRadPerSec the desired angular velocity of the wheel, in radians / second
-     * @param additionalFeedforwardVoltage additional feedforward voltage for torque feedforward
+     * @param desiredWheelVelocity the desired angular velocity of the wheel, in radians / second
+     * @param additionalWheelTorque additional torque feedforward
      */
-    default void requestDriveVelocityControl(
-            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {}
+    default void requestDriveVelocityControl(AngularVelocity desiredWheelVelocity, Torque additionalWheelTorque) {}
 
     /**
      * Runs a position close-loop control on the steer motor

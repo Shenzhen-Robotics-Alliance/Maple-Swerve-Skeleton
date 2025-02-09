@@ -5,6 +5,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -98,10 +100,10 @@ public class RobotContainer {
                                 : SwerveDrive.DriveType.CTRE_ON_CANIVORE,
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
                         new CanBusIOReal(TunerConstants.kCANBus),
-                        new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
-                        new ModuleIOTalon(TunerConstants.FrontRight, "FrontRight"),
-                        new ModuleIOTalon(TunerConstants.BackLeft, "BackLeft"),
-                        new ModuleIOTalon(TunerConstants.BackRight, "BackRight"));
+                        new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFXReal(TunerConstants.FrontRight),
+                        new ModuleIOTalonFXReal(TunerConstants.BackLeft),
+                        new ModuleIOTalonFXReal(TunerConstants.BackRight));
 
                 /* REV Chassis */
                 //                drive = new SwerveDrive(
@@ -117,6 +119,8 @@ public class RobotContainer {
             }
 
             case SIM -> {
+                SimulatedArena.overrideSimulationTimings(
+                        Seconds.of(Robot.defaultPeriodSecs), DriveTrainConstants.SIMULATION_TICKS_IN_1_PERIOD);
                 this.driveSimulation = new SwerveDriveSimulation(
                         DriveTrainSimulationConfig.Default()
                                 .withRobotMass(DriveTrainConstants.ROBOT_MASS)
@@ -124,7 +128,7 @@ public class RobotContainer {
                                 .withTrackLengthTrackWidth(
                                         DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
                                 .withSwerveModule(new SwerveModuleSimulationConfig(
-                                        DriveTrainConstants.DRIVE_MOTOR,
+                                        DriveTrainConstants.DRIVE_MOTOR_MODEL,
                                         DriveTrainConstants.STEER_MOTOR,
                                         DriveTrainConstants.DRIVE_GEAR_RATIO,
                                         DriveTrainConstants.STEER_GEAR_RATIO,
@@ -139,10 +143,14 @@ public class RobotContainer {
 
                 powerDistribution = LoggedPowerDistribution.getInstance();
                 // Sim robot, instantiate physics sim IO implementations
-                final ModuleIOSim frontLeft = new ModuleIOSim(driveSimulation.getModules()[0]),
-                        frontRight = new ModuleIOSim(driveSimulation.getModules()[1]),
-                        backLeft = new ModuleIOSim(driveSimulation.getModules()[2]),
-                        backRight = new ModuleIOSim(driveSimulation.getModules()[3]);
+                ModuleIOTalonFXSim frontLeft = new ModuleIOTalonFXSim(
+                        TunerConstants.FrontLeft, driveSimulation.getModules()[0]);
+                ModuleIOTalonFXSim frontRight = new ModuleIOTalonFXSim(
+                        TunerConstants.FrontRight, driveSimulation.getModules()[1]);
+                ModuleIOTalonFXSim backLeft = new ModuleIOTalonFXSim(
+                        TunerConstants.BackLeft, driveSimulation.getModules()[2]);
+                ModuleIOTalonFXSim backRight = new ModuleIOTalonFXSim(
+                        TunerConstants.BackRight, driveSimulation.getModules()[3]);
                 final GyroIOSim gyroIOSim = new GyroIOSim(driveSimulation.getGyroSimulation());
                 drive = new SwerveDrive(
                         SwerveDrive.DriveType.GENERIC,

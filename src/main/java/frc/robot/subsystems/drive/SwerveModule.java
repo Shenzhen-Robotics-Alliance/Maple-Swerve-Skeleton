@@ -90,7 +90,7 @@ public class SwerveModule {
     /** Runs the module with the specified setpoint state. Returns the optimized state. */
     public SwerveModuleState forceRunSetPoint(
             SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
-        newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
+        // newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
         double desiredWheelVelocityRadPerSec = newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters);
         Translation2d force2d = new Translation2d(
@@ -98,12 +98,11 @@ public class SwerveModule {
         // project force to swerve heading
         double moduleFeedforwardForceNewtons =
                 force2d.getNorm() * force2d.getAngle().minus(getSteerFacing()).getCos();
-        double wheelFeedforwardTorque = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
-        double motorFeedforwardTorque = wheelFeedforwardTorque / DRIVE_GEAR_RATIO;
-        Voltage motorFeedforwardVoltage = Volts.of(DRIVE_MOTOR.getVoltage(motorFeedforwardTorque, 0));
-        if (!USE_TORQUE_FEEDFORWARD) motorFeedforwardVoltage = Volts.zero();
-        io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec, motorFeedforwardVoltage);
-        Logger.recordOutput("ModuleFeedforwards/" + name + "/Voltage", motorFeedforwardVoltage.in(Volts));
+        double wheelFeedforwardTorqueNM = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
+        if (!USE_TORQUE_FEEDFORWARD) wheelFeedforwardTorqueNM = 0;
+        io.requestDriveVelocityControl(
+                RadiansPerSecond.of(desiredWheelVelocityRadPerSec), NewtonMeters.of(wheelFeedforwardTorqueNM));
+        Logger.recordOutput("ModuleFeedforwards/" + name + "/Wheel Torque (N * M)", wheelFeedforwardTorqueNM);
         io.requestSteerPositionControl(newSetpoint.angle);
 
         return this.setPoint = newSetpoint;
