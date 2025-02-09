@@ -15,9 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Force;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -92,7 +90,8 @@ public class SwerveModule {
             SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
         newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
-        double desiredWheelVelocityRadPerSec = newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters);
+        double desiredMotorVelocityRadPerSec =
+                newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters) * DRIVE_GEAR_RATIO;
         Translation2d force2d = new Translation2d(
                 robotRelativeFeedforwardForceX.in(Newtons), robotRelativeFeedforwardForceY.in(Newtons));
         // project force to swerve heading
@@ -100,10 +99,10 @@ public class SwerveModule {
                 force2d.getNorm() * force2d.getAngle().minus(getSteerFacing()).getCos();
         double wheelFeedforwardTorque = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
         double motorFeedforwardTorque = wheelFeedforwardTorque / DRIVE_GEAR_RATIO;
-        Voltage motorFeedforwardVoltage = Volts.of(DRIVE_MOTOR.getVoltage(motorFeedforwardTorque, 0));
-        if (!USE_TORQUE_FEEDFORWARD) motorFeedforwardVoltage = Volts.zero();
-        io.requestDriveVelocityControl(desiredWheelVelocityRadPerSec, motorFeedforwardVoltage);
-        Logger.recordOutput("ModuleFeedforwards/" + name + "/Voltage", motorFeedforwardVoltage.in(Volts));
+        if (!USE_TORQUE_FEEDFORWARD) motorFeedforwardTorque = 0;
+        io.requestDriveVelocityControl(
+                RadiansPerSecond.of(desiredMotorVelocityRadPerSec), NewtonMeters.of(motorFeedforwardTorque));
+        Logger.recordOutput("ModuleFeedforwards/" + name + "/Wheel FF Torque (N*M)", wheelFeedforwardTorque);
         io.requestSteerPositionControl(newSetpoint.angle);
 
         return this.setPoint = newSetpoint;
@@ -187,5 +186,13 @@ public class SwerveModule {
         setMotorBrake(true);
         io.requestSteerPositionControl(steerFacing);
         io.requestDriveOpenLoop(driveCurrentOut);
+    }
+
+    public static Voltage calculateFeedforwardVoltage(Torque feedforwardTorque) {
+        return Volts.of(DRIVE_MOTOR_MODEL.getVoltage(feedforwardTorque.in(NewtonMeters), 0));
+    }
+
+    public static Current calculateFeedforwardCurrent(Torque feedforwardTorque) {
+        return Amps.of(DRIVE_MOTOR_MODEL.getCurrent(feedforwardTorque.in(NewtonMeters)));
     }
 }

@@ -23,9 +23,9 @@ public class DriveTrainConstants {
     public static final Mass ROBOT_MASS = Kilograms.of(50); // robot weight with bumpers
 
     /** TODO: change motor type to match your robot */
-    public static final DCMotor DRIVE_MOTOR = DCMotor.getKrakenX60(1);
+    public static final DCMotor DRIVE_MOTOR_MODEL = DCMotor.getKrakenX60(1);
 
-    public static final DCMotor STEER_MOTOR = DCMotor.getFalcon500(1);
+    public static final DCMotor STEER_MOTOR_MODEL = DCMotor.getFalcon500(1);
 
     /** numbers imported from {@link TunerConstants} TODO: for REV chassis, replace them with actual numbers */
     public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
@@ -39,10 +39,10 @@ public class DriveTrainConstants {
 
     /* adjust current limit */
     public static final Current DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT = Amps.of(80);
-    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(100);
-    public static final Time DRIVE_OVERHEAT_PROTECTION_TIME = Seconds.of(0.5);
-    public static final Current DRIVE_OVERHEAT_PROTECTION = Amps.of(80);
-    public static final Current STEER_CURRENT_LIMIT = Amps.of(20);
+    public static final Current DRIVE_OVER_CURRENT_PROTECTION = Amps.of(65);
+    public static final Time DRIVE_OVERHEAT_PROTECTION_TIME = Seconds.of(1);
+    public static final Current DRIVE_OVERHEAT_PROTECTION_CURRENT = Amps.of(45);
+    public static final Current STEER_CURRENT_LIMIT = Amps.of(15);
 
     public static final Current OVER_CURRENT_WARNING = Amps.of(240);
 
@@ -70,13 +70,15 @@ public class DriveTrainConstants {
 
     /* force = torque / distance */
     public static final Force MAX_PROPELLING_FORCE = NewtonMeters.of(
-                    DRIVE_MOTOR.getTorque(DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT.in(Amps)) * DRIVE_GEAR_RATIO)
+                    DRIVE_MOTOR_MODEL.getTorque(DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT.in(Amps)) * DRIVE_GEAR_RATIO)
             .div(WHEEL_RADIUS)
             .times(4);
 
     /* floor_speed = wheel_angular_velocity * wheel_radius */
-    public static final LinearVelocity CHASSIS_MAX_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR.getSpeed(
-                    DRIVE_MOTOR.getTorque(DRIVE_MOTOR.getCurrent(0, TunerConstants.FrontLeft.DriveFrictionVoltage)), 12)
+    public static final LinearVelocity CHASSIS_MAX_VELOCITY = MetersPerSecond.of(DRIVE_MOTOR_MODEL.getSpeed(
+                    DRIVE_MOTOR_MODEL.getTorque(
+                            DRIVE_MOTOR_MODEL.getCurrent(0, TunerConstants.FrontLeft.DriveFrictionVoltage)),
+                    12)
             / DRIVE_GEAR_RATIO
             * WHEEL_RADIUS.in(Meters));
     public static final LinearAcceleration CHASSIS_MAX_ACCELERATION =

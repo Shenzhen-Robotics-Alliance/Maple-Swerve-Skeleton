@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.RobotState;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.ChassisHeadingController;
@@ -361,7 +362,11 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     private void runCharacterization(Voltage voltage) {
         SwerveModuleState[] moduleStates = DRIVE_KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 1));
         for (int i = 0; i < swerveModules.length; i++)
-            swerveModules[i].runVoltageCharacterization(moduleStates[i].angle, voltage);
+            switch (TunerConstants.FrontLeft.DriveMotorClosedLoopOutput) {
+                case Voltage -> swerveModules[i].runVoltageCharacterization(moduleStates[i].angle, voltage);
+                case TorqueCurrentFOC -> swerveModules[i].runCurrentCharacterization(
+                        moduleStates[i].angle, Amps.of(voltage.in(Volts)));
+            }
     }
 
     private final SysIdRoutine sysId = new SysIdRoutine(

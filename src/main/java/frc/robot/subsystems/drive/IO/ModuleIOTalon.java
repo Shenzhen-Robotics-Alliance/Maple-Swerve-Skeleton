@@ -24,12 +24,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.*;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.SwerveModule;
 import java.util.Queue;
 
 public class ModuleIOTalon implements ModuleIO {
@@ -77,11 +74,14 @@ public class ModuleIOTalon implements ModuleIO {
         driveConfig.Slot0 = moduleConstants.DriveMotorGains;
         driveConfig.TorqueCurrent.PeakForwardTorqueCurrent = moduleConstants.SlipCurrent;
         driveConfig.TorqueCurrent.PeakReverseTorqueCurrent = -moduleConstants.SlipCurrent;
-        driveConfig.CurrentLimits.StatorCurrentLimit = moduleConstants.SlipCurrent;
-        driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-        driveConfig.CurrentLimits.SupplyCurrentLimit = DRIVE_OVER_CURRENT_PROTECTION.in(Amps);
-        driveConfig.CurrentLimits.SupplyCurrentLowerTime = DRIVE_OVERHEAT_PROTECTION_TIME.in(Seconds);
-        driveConfig.CurrentLimits.SupplyCurrentLowerLimit = DRIVE_OVERHEAT_PROTECTION.in(Amps);
+        driveConfig
+                .CurrentLimits
+                .withStatorCurrentLimitEnable(true)
+                .withStatorCurrentLimit(DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT)
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(DRIVE_OVER_CURRENT_PROTECTION)
+                .withSupplyCurrentLowerTime(DRIVE_OVERHEAT_PROTECTION_TIME)
+                .withSupplyCurrentLowerLimit(DRIVE_OVERHEAT_PROTECTION_CURRENT);
 
         driveConfig.MotorOutput.Inverted = moduleConstants.DriveMotorInverted
                 ? InvertedValue.Clockwise_Positive
@@ -90,24 +90,21 @@ public class ModuleIOTalon implements ModuleIO {
         tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));
 
         // Configure turn motor
-        var turnConfig = new TalonFXConfiguration();
-        turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        turnConfig.Slot0 = moduleConstants.SteerMotorGains;
-        turnConfig.Feedback.FeedbackRemoteSensorID = moduleConstants.EncoderId;
-        turnConfig.Feedback.FeedbackSensorSource = switch (moduleConstants.FeedbackSource) {
+        var steerConfig = new TalonFXConfiguration();
+        steerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        steerConfig.Slot0 = moduleConstants.SteerMotorGains;
+        steerConfig.Feedback.FeedbackRemoteSensorID = moduleConstants.EncoderId;
+        steerConfig.Feedback.FeedbackSensorSource = switch (moduleConstants.FeedbackSource) {
             case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
             case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
             case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;};
-        turnConfig.Feedback.RotorToSensorRatio = moduleConstants.SteerMotorGearRatio;
-        turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / moduleConstants.SteerMotorGearRatio;
-        turnConfig.MotionMagic.MotionMagicAcceleration = turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
-        turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * moduleConstants.SteerMotorGearRatio;
-        turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
-        turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
-        turnConfig.MotorOutput.Inverted = moduleConstants.SteerMotorInverted
+        steerConfig.Feedback.RotorToSensorRatio = moduleConstants.SteerMotorGearRatio;
+        steerConfig.CurrentLimits.withStatorCurrentLimitEnable(true).withStatorCurrentLimit(STEER_CURRENT_LIMIT);
+        steerConfig.ClosedLoopGeneral.ContinuousWrap = true;
+        steerConfig.MotorOutput.Inverted = moduleConstants.SteerMotorInverted
                 ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
-        tryUntilOk(5, () -> steerTalon.getConfigurator().apply(turnConfig, 0.25));
+        tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerConfig, 0.25));
 
         // Configure CANCoder
         var cancoderConfig = moduleConstants.EncoderInitialConfigs;
@@ -220,15 +217,13 @@ public class ModuleIOTalon implements ModuleIO {
     }
 
     @Override
-    public void requestDriveVelocityControl(
-            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {
-        double motorVelocityRotPerSec =
-                Units.radiansToRotations(desiredWheelVelocityRadPerSec) * moduleConstants.DriveMotorGearRatio;
+    public void requestDriveVelocityControl(AngularVelocity desiredMotorVelocity, Torque feedforwardMotorTorque) {
         driveTalon.setControl(
                 switch (moduleConstants.DriveMotorClosedLoopOutput) {
-                    case Voltage -> new VelocityVoltage(motorVelocityRotPerSec)
-                            .withFeedForward(additionalFeedforwardVoltage);
-                    case TorqueCurrentFOC -> new VelocityTorqueCurrentFOC(motorVelocityRotPerSec);
+                    case Voltage -> new VelocityVoltage(desiredMotorVelocity)
+                            .withFeedForward(SwerveModule.calculateFeedforwardVoltage(feedforwardMotorTorque));
+                    case TorqueCurrentFOC -> new VelocityTorqueCurrentFOC(desiredMotorVelocity)
+                            .withFeedForward(SwerveModule.calculateFeedforwardCurrent(feedforwardMotorTorque));
                 });
     }
 

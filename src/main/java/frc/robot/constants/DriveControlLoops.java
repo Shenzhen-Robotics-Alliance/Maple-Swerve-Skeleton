@@ -13,7 +13,7 @@ public class DriveControlLoops {
     public static final LinearAcceleration ACCELERATION_CONSTRAIN_NORMAL = MetersPerSecondPerSecond.of(10);
     public static final LinearAcceleration ACCELERATION_CONSTRAIN_ELEVATOR_RAISED = MetersPerSecondPerSecond.of(6.5);
 
-    public static final Time DISCRETIZE_TIME = Seconds.of(0.03);
+    public static final Time DISCRETIZE_TIME = Seconds.of(0.04);
     public static final LinearVelocity SWERVE_VELOCITY_DEADBAND = MetersPerSecond.of(0.03);
     public static final MaplePIDController.MaplePIDConfig CHASSIS_ROTATION_CLOSE_LOOP =
             new MaplePIDController.MaplePIDConfig(

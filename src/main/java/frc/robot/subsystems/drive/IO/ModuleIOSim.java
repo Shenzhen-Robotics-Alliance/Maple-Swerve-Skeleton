@@ -6,14 +6,18 @@
 package frc.robot.subsystems.drive.IO;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveTrainConstants.DRIVE_GEAR_RATIO;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.SwerveModule;
 import java.util.Arrays;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -39,7 +43,7 @@ public class ModuleIOSim implements ModuleIO {
     private final PIDController steerController;
     private double driveAppliedVolts = 0.0;
     private double steerAppliedVolts = 0.0;
-    private double desiredWheelVelocityRadPerSec = 0.0;
+    private double desiredMotorVelocityRadPerSec = 0.0;
     private double torqueFeedforwardVolts = 0.0;
     private Rotation2d desiredSteerFacing = new Rotation2d();
 
@@ -105,12 +109,12 @@ public class ModuleIOSim implements ModuleIO {
         DCMotor motorModel = moduleSimulation.config.driveMotorConfigs.motor;
         double frictionTorque =
                 motorModel.getTorque(motorModel.getCurrent(0, TunerConstants.FrontLeft.DriveFrictionVoltage))
-                        * Math.signum(desiredWheelVelocityRadPerSec);
-        double velocityFeedforwardVolts = motorModel.getVoltage(
-                frictionTorque, desiredWheelVelocityRadPerSec * moduleSimulation.config.DRIVE_GEAR_RATIO);
+                        * Math.signum(desiredMotorVelocityRadPerSec);
+        double velocityFeedforwardVolts = motorModel.getVoltage(frictionTorque, desiredMotorVelocityRadPerSec);
         double feedforwardVolts = velocityFeedforwardVolts + torqueFeedforwardVolts;
         double feedBackVolts = driveController.calculate(
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond), desiredWheelVelocityRadPerSec);
+                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond),
+                desiredMotorVelocityRadPerSec / DRIVE_GEAR_RATIO);
         driveAppliedVolts = feedforwardVolts + feedBackVolts;
     }
 
@@ -152,11 +156,11 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     @Override
-    public void requestDriveVelocityControl(
-            double desiredWheelVelocityRadPerSec, Voltage additionalFeedforwardVoltage) {
-        this.desiredWheelVelocityRadPerSec = desiredWheelVelocityRadPerSec;
+    public void requestDriveVelocityControl(AngularVelocity desiredMotorVelocity, Torque feedforwardMotorTorque) {
+        this.desiredMotorVelocityRadPerSec = desiredMotorVelocity.in(RadiansPerSecond);
         this.driveClosedLoopActivated = true;
-        this.torqueFeedforwardVolts = additionalFeedforwardVoltage.in(Volts);
+        this.torqueFeedforwardVolts =
+                SwerveModule.calculateFeedforwardVoltage(feedforwardMotorTorque).in(Volts);
     }
 
     @Override
