@@ -16,6 +16,7 @@ import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -67,7 +68,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
             AlertsManager.create("Drivetrain over current detected! Current: ", Alert.AlertType.kError);
 
     private final SwerveSetpointGenerator setpointGenerator;
-    private SwerveSetpoint setpoint;
+    private SwerveSetpoint setpointFieldRelative;
 
     public SwerveDrive(
             DriveType type,
@@ -100,7 +101,8 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         MapleTimeUtils.delay(0.5);
 
         setpointGenerator = new SwerveSetpointGenerator(defaultPathPlannerRobotConfig(), RPM.of(300));
-        this.setpoint = new SwerveSetpoint(new ChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        this.setpointFieldRelative =
+                new SwerveSetpoint(new ChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
 
         startDashboardDisplay();
     }
@@ -182,21 +184,25 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
                 accelerationConstrain,
                 CHASSIS_MAX_ANGULAR_VELOCITY,
                 CHASSIS_MAX_ANGULAR_ACCELERATION);
-        this.setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, constraints, Robot.defaultPeriodSecs, 13);
+        ChassisSpeeds speedsFieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getFacing());
+        this.setpointFieldRelative = setpointGenerator.generateSetpoint(
+                setpointFieldRelative, speedsFieldRelative, constraints, Robot.defaultPeriodSecs, 13);
 
         executeSetpoint();
     }
 
     @Override
     public void runRobotCentricSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-        this.setpoint = new SwerveSetpoint(speeds, getModuleStates(), feedforwards);
+        ChassisSpeeds speedsFieldRelative = ChassisSpeeds.fromRobotRelativeSpeeds(speeds, getFacing());
+        this.setpointFieldRelative = new SwerveSetpoint(speedsFieldRelative, getModuleStates(), feedforwards);
         executeSetpoint();
     }
 
     private void executeSetpoint() {
         OptionalDouble angularVelocityOverride =
                 ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
-        ChassisSpeeds speeds = setpoint.robotRelativeSpeeds();
+        ChassisSpeeds speeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(setpointFieldRelative.robotRelativeSpeeds(), getFacing());
 
         if (angularVelocityOverride.isPresent()) {
             speeds = new ChassisSpeeds(
@@ -209,11 +215,19 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
 
         // Send setpoints to modules
         SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-        for (int i = 0; i < 4; i++)
-            optimizedSetpointStates[i] = swerveModules[i].runSetPoint(
-                    setPointStates[i],
-                    setpoint.feedforwards().robotRelativeForcesX()[i],
-                    setpoint.feedforwards().robotRelativeForcesY()[i]);
+        for (int i = 0; i < 4; i++) {
+            Translation2d forceRobotRelative = new Translation2d(
+                            setpointFieldRelative
+                                    .feedforwards()
+                                    .robotRelativeForcesX()[i]
+                                    .in(Newtons),
+                            setpointFieldRelative
+                                    .feedforwards()
+                                    .robotRelativeForcesY()[i]
+                                    .in(Newtons))
+                    .rotateBy(getFacing());
+            optimizedSetpointStates[i] = swerveModules[i].runSetPoint(setPointStates[i], forceRobotRelative);
+        }
 
         Logger.recordOutput("SwerveStates/Setpoints", setPointStates);
         Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
@@ -239,7 +253,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
                 () -> {
                     for (int i = 0; i < swerveModules.length; i++)
                         swerveModules[i].forceRunSetPoint(
-                                new SwerveModuleState(0, swerveHeadings[i]), Newtons.zero(), Newtons.zero());
+                                new SwerveModuleState(0, swerveHeadings[i]), new Translation2d());
                 },
                 (interrupted) -> {},
                 () -> false,

@@ -9,7 +9,7 @@ import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
 public class DriveControlLoops {
-    public static final boolean USE_SETPOINT_GENERATOR = true;
+    public static final boolean USE_SETPOINT_GENERATOR = false;
     public static final LinearAcceleration ACCELERATION_CONSTRAIN_NORMAL = MetersPerSecondPerSecond.of(10);
     public static final LinearAcceleration ACCELERATION_CONSTRAIN_ELEVATOR_RAISED = MetersPerSecondPerSecond.of(6.5);
 

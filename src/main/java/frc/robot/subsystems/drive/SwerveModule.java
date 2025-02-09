@@ -16,7 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Force;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -77,27 +76,23 @@ public class SwerveModule {
         }
     }
 
-    public SwerveModuleState runSetPoint(
-            SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
+    public SwerveModuleState runSetPoint(SwerveModuleState newSetpoint, Translation2d forceNewtons) {
         if (Math.abs(newSetpoint.speedMetersPerSecond) < SWERVE_VELOCITY_DEADBAND.in(MetersPerSecond)) {
             stop();
             return this.setPoint = new SwerveModuleState(0, setPoint.angle);
         }
 
-        return forceRunSetPoint(newSetpoint, robotRelativeFeedforwardForceX, robotRelativeFeedforwardForceY);
+        return forceRunSetPoint(newSetpoint, forceNewtons);
     }
 
     /** Runs the module with the specified setpoint state. Returns the optimized state. */
-    public SwerveModuleState forceRunSetPoint(
-            SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
-        // newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
+    public SwerveModuleState forceRunSetPoint(SwerveModuleState newSetpoint, Translation2d forceNewtons) {
+        newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
         double desiredWheelVelocityRadPerSec = newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters);
-        Translation2d force2d = new Translation2d(
-                robotRelativeFeedforwardForceX.in(Newtons), robotRelativeFeedforwardForceY.in(Newtons));
         // project force to swerve heading
-        double moduleFeedforwardForceNewtons =
-                force2d.getNorm() * force2d.getAngle().minus(getSteerFacing()).getCos();
+        double moduleFeedforwardForceNewtons = forceNewtons.getNorm()
+                * forceNewtons.getAngle().minus(getSteerFacing()).getCos();
         double wheelFeedforwardTorqueNM = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
         if (!USE_TORQUE_FEEDFORWARD) wheelFeedforwardTorqueNM = 0;
         io.requestDriveVelocityControl(

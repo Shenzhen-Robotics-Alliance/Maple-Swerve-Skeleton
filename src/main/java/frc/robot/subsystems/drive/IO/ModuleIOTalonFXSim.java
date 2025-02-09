@@ -38,7 +38,7 @@ public class ModuleIOTalonFXSim extends ModuleIOTalonFX implements SimulatedAren
         steerMotor = simulation.useSteerMotorController(
                 new SimulatedMotorController.GenericMotorController(STEER_MOTOR_MODEL)
                         .withCurrentLimit(STEER_CURRENT_LIMIT));
-        this.steerController = new PIDController(10.0, 0, 0.5);
+        this.steerController = new PIDController(5.0, 0, 0);
         steerController.enableContinuousInput(-Math.PI, Math.PI);
 
         SimulatedArena.getInstance().addCustomSimulation(this);
