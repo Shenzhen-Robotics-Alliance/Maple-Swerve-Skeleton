@@ -17,7 +17,7 @@ public class LEDStatusLight extends SubsystemBase {
     private final AddressableLEDBuffer buffer;
     private final AddressableLEDBufferView view1, view2;
 
-    public LEDStatusLight(int port, int length) {
+    public LEDStatusLight(int port, int length, boolean reverseView1, boolean reverseView2) {
         // make sure length is even
         length = length / 2 * 2;
         this.ledColors = new Color[length / 2 - 1];
@@ -27,8 +27,12 @@ public class LEDStatusLight extends SubsystemBase {
         Arrays.fill(dashboardColors, new Color());
         this.buffer = new AddressableLEDBuffer(length);
 
-        view1 = buffer.createView(0, length / 2).reversed();
-        view2 = buffer.createView(length / 2 + 1, length - 1);
+        AddressableLEDBufferView view1 = buffer.createView(0, length / 2);
+        AddressableLEDBufferView view2 = buffer.createView(length / 2 + 1, length - 1);
+        if (reverseView1) view1 = view1.reversed();
+        if (reverseView2) view2 = view2.reversed();
+        this.view1 = view1;
+        this.view2 = view2;
 
         if (led != null) led.close();
         led = new AddressableLED(port);
@@ -72,11 +76,11 @@ public class LEDStatusLight extends SubsystemBase {
 
     public Command showEnableDisableState() {
         return new ConditionalCommand(
-                        playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
-                                .until(RobotState::isDisabled),
-                        playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
-                                .until(RobotState::isEnabled),
-                        RobotState::isEnabled)
+                playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
+                        .until(RobotState::isDisabled),
+                playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
+                        .until(RobotState::isEnabled),
+                RobotState::isEnabled)
                 .repeatedly()
                 .ignoringDisable(true);
     }

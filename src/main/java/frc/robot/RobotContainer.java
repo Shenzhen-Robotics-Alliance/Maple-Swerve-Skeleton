@@ -186,7 +186,7 @@ public class RobotContainer {
             }
         }
 
-        this.ledStatusLight = new LEDStatusLight(0, 155);
+        this.ledStatusLight = new LEDStatusLight(0, 155, true, false);
 
         this.drive.configHolonomicPathPlannerAutoBuilder(field);
 
