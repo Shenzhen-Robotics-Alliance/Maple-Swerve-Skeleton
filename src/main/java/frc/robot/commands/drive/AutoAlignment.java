@@ -1,6 +1,7 @@
 package frc.robot.commands.drive;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveControlLoops.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.*;
@@ -124,10 +125,13 @@ public class AutoAlignment {
                 ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
         Runnable resetDriveCommandRotationMaintenance = () -> JoystickDrive.instance.ifPresent(
                 joystickDrive -> joystickDrive.setRotationMaintenanceSetpoint(targetPose.getRotation()));
-        return AutoBuilder.pathfindToPose(
-                        targetPose,
-                        driveSubsystem.getChassisConstrains(config.roughApproachSpeedFactor),
-                        config.preciseApproachStartingSpeed())
+
+        PathConstraints constraints = new PathConstraints(
+                MOVEMENT_VELOCITY_SOFT_CONSTRAIN.times(config.roughApproachSpeedFactor),
+                ACCELERATION_SOFT_CONSTRAIN.times(config.roughApproachSpeedFactor * config.roughApproachSpeedFactor),
+                ANGULAR_VELOCITY_SOFT_CONSTRAIN,
+                ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
+        return AutoBuilder.pathfindToPose(targetPose, constraints, config.preciseApproachStartingSpeed())
                 .beforeStarting(activateChassisHeadingController)
                 .until(() -> RobotState.getInstance()
                                 .getVisionPose()
@@ -144,9 +148,14 @@ public class AutoAlignment {
             Pose2d preciseTarget,
             Rotation2d preciseTargetApproachDirection,
             AutoAlignmentConfigurations config) {
+        PathConstraints constraints = new PathConstraints(
+                MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW,
+                ACCELERATION_SOFT_CONSTRAIN_LOW,
+                ANGULAR_VELOCITY_SOFT_CONSTRAIN,
+                ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
         return Commands.defer(
                         () -> AutoBuilder.followPath(getPreciseAlignmentPath(
-                                driveSubsystem.getChassisConstrains(config.roughApproachSpeedFactor),
+                                constraints,
                                 driveSubsystem.getMeasuredChassisSpeedsFieldRelative(),
                                 driveSubsystem.getPose(),
                                 preciseTarget,
@@ -185,8 +194,8 @@ public class AutoAlignment {
         PathConstraints slowDownConstrains = new PathConstraints(
                 config.finalAlignmentSpeed(),
                 config.preciseAlignmentMaxAcceleration,
-                DegreesPerSecond.of(90),
-                DegreesPerSecondPerSecond.of(360));
+                RotationsPerSecond.of(0.5),
+                RotationsPerSecondPerSecond.of(1));
 
         List<RotationTarget> rotationTargets = List.of(new RotationTarget(1.0, preciseTarget.getRotation()));
         List<ConstraintsZone> constraintsZones = List.of(new ConstraintsZone(1.0, 2.0, slowDownConstrains));

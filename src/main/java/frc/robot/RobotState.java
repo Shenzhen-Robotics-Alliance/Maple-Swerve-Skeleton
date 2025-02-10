@@ -45,6 +45,7 @@ public class RobotState {
     private Pose2d visionSensitivePose = new Pose2d();
 
     private boolean visionSensitiveModeOn = false;
+    private boolean lowSpeedModeEnabled = false;
 
     private RobotState() {
         this.poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_DURATION.in(Seconds));
@@ -177,6 +178,14 @@ public class RobotState {
 
     public void setVisionSensitiveMode(boolean visionSensitiveModeOn) {
         this.visionSensitiveModeOn = visionSensitiveModeOn;
+    }
+
+    public void setLowSpeedMode(boolean lowSpeedModeEnabled) {
+        this.lowSpeedModeEnabled = lowSpeedModeEnabled;
+    }
+
+    public boolean lowSpeedModeEnabled() {
+        return lowSpeedModeEnabled;
     }
 
     public void updateAlerts() {

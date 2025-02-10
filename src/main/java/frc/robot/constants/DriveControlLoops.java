@@ -2,16 +2,18 @@ package frc.robot.constants;
 
 import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.*;
 import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 
 public class DriveControlLoops {
-    public static final boolean USE_SETPOINT_GENERATOR = true;
-    public static final LinearAcceleration ACCELERATION_CONSTRAIN_NORMAL = MetersPerSecondPerSecond.of(10);
-    public static final LinearAcceleration ACCELERATION_CONSTRAIN_ELEVATOR_RAISED = MetersPerSecondPerSecond.of(6.5);
+    public static final boolean ENABLE_SOFTWARE_CONSTRAIN = true;
+    public static final AngularVelocity ANGULAR_VELOCITY_SOFT_CONSTRAIN = RotationsPerSecond.of(0.75);
+    public static final AngularAcceleration ANGULAR_ACCELERATION_SOFT_CONSTRAIN = RotationsPerSecondPerSecond.of(1);
+    public static final LinearVelocity MOVEMENT_VELOCITY_SOFT_CONSTRAIN = DriveTrainConstants.CHASSIS_MAX_VELOCITY;
+    public static final LinearAcceleration ACCELERATION_SOFT_CONSTRAIN = MetersPerSecondPerSecond.of(6);
+    public static final LinearVelocity MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW = MetersPerSecond.of(2);
+    public static final LinearAcceleration ACCELERATION_SOFT_CONSTRAIN_LOW = MetersPerSecondPerSecond.of(3);
 
     public static final Time DISCRETIZE_TIME = Seconds.of(0.04);
     public static final LinearVelocity SWERVE_VELOCITY_DEADBAND = MetersPerSecond.of(0.03);

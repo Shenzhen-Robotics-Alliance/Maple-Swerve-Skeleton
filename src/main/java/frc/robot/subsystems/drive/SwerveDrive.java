@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.RobotController;
@@ -170,19 +171,23 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         return swerveModulePositions;
     }
 
-    private LinearAcceleration accelerationConstrain = ACCELERATION_CONSTRAIN_NORMAL;
-
     @Override
     public void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
-        if (!USE_SETPOINT_GENERATOR) {
+        if (!ENABLE_SOFTWARE_CONSTRAIN) {
             runRobotCentricSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
             return;
         }
+
+        boolean lowSpeedMode = RobotState.getInstance().lowSpeedModeEnabled();
+        LinearAcceleration accelerationConstrain =
+                lowSpeedMode ? ACCELERATION_SOFT_CONSTRAIN_LOW : ACCELERATION_SOFT_CONSTRAIN;
+        LinearVelocity velocityConstrain =
+                lowSpeedMode ? MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW : MOVEMENT_VELOCITY_SOFT_CONSTRAIN;
         PathConstraints constraints = new PathConstraints(
-                CHASSIS_MAX_VELOCITY,
+                velocityConstrain,
                 accelerationConstrain,
-                CHASSIS_MAX_ANGULAR_VELOCITY,
-                CHASSIS_MAX_ANGULAR_ACCELERATION);
+                ANGULAR_VELOCITY_SOFT_CONSTRAIN,
+                ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
         this.setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, constraints, Robot.defaultPeriodSecs, 13);
 
         executeSetpoint();
@@ -304,15 +309,6 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     @Override
     public double getChassisMaxAngularAccelerationRadPerSecSq() {
         return CHASSIS_MAX_ANGULAR_ACCELERATION.in(RadiansPerSecondPerSecond);
-    }
-
-    private Subsystem accelerationConstrainLock = new Subsystem() {};
-
-    public Command withAccelerationConstrain(LinearAcceleration accelerationConstrain) {
-        return Commands.startEnd(
-                () -> this.accelerationConstrain = accelerationConstrain,
-                () -> this.accelerationConstrain = ACCELERATION_CONSTRAIN_NORMAL,
-                accelerationConstrainLock);
     }
 
     private void startDashboardDisplay() {
