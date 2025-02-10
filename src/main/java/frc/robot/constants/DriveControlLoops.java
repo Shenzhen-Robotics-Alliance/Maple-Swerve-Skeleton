@@ -30,7 +30,6 @@ public class DriveControlLoops {
 
     public static final AutoAlignment.AutoAlignmentConfigurations REEF_ALIGNMENT_CONFIG_AUTONOMOUS =
             new AutoAlignment.AutoAlignmentConfigurations(
-                    0.8,
                     Meters.of(1),
                     MetersPerSecond.of(2),
                     MetersPerSecond.of(1),
@@ -40,7 +39,6 @@ public class DriveControlLoops {
 
     public static final AutoAlignment.AutoAlignmentConfigurations REEF_ALIGNMENT_CONFIG =
             new AutoAlignment.AutoAlignmentConfigurations(
-                    0.7,
                     Meters.of(1.1),
                     MetersPerSecond.of(2),
                     MetersPerSecond.of(1),
@@ -50,7 +48,6 @@ public class DriveControlLoops {
 
     public static final AutoAlignment.AutoAlignmentConfigurations STATION_ALIGNMENT_CONFIG =
             new AutoAlignment.AutoAlignmentConfigurations(
-                    0.75,
                     Meters.of(0.6),
                     MetersPerSecond.of(5),
                     MetersPerSecond.of(2),

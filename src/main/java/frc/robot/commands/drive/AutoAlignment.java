@@ -42,7 +42,7 @@ public class AutoAlignment {
             Command toRunDuringPreciseAlignment,
             AutoAlignmentConfigurations config) {
         Command pathFindToRoughTarget = pathFindToPose(
-                        driveSubsystem, target.roughTarget(), target.faceToTargetDuringRoughApproach(), config)
+                        target.roughTarget(), target.faceToTargetDuringRoughApproach(), config)
                 .onlyIf(() -> RobotState.getInstance()
                                 .getVisionPose()
                                 .minus(target.preciseTarget())
@@ -112,10 +112,7 @@ public class AutoAlignment {
     }
 
     public static Command pathFindToPose(
-            HolonomicDriveSubsystem driveSubsystem,
-            Pose2d targetPose,
-            Optional<Translation2d> faceToVisionTarget,
-            AutoAlignmentConfigurations config) {
+            Pose2d targetPose, Optional<Translation2d> faceToVisionTarget, AutoAlignmentConfigurations config) {
         ChassisHeadingController.ChassisHeadingRequest chassisHeadingRequest = faceToVisionTarget.isPresent()
                 ? new ChassisHeadingController.FaceToTargetRequest(faceToVisionTarget::get, null)
                 : new ChassisHeadingController.NullRequest();
@@ -126,12 +123,25 @@ public class AutoAlignment {
         Runnable resetDriveCommandRotationMaintenance = () -> JoystickDrive.instance.ifPresent(
                 joystickDrive -> joystickDrive.setRotationMaintenanceSetpoint(targetPose.getRotation()));
 
-        PathConstraints constraints = new PathConstraints(
-                MOVEMENT_VELOCITY_SOFT_CONSTRAIN.times(config.roughApproachSpeedFactor),
-                ACCELERATION_SOFT_CONSTRAIN.times(config.roughApproachSpeedFactor * config.roughApproachSpeedFactor),
+        PathConstraints normalConstraints = new PathConstraints(
+                MOVEMENT_VELOCITY_SOFT_CONSTRAIN,
+                ACCELERATION_SOFT_CONSTRAIN,
                 ANGULAR_VELOCITY_SOFT_CONSTRAIN,
                 ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
-        return AutoBuilder.pathfindToPose(targetPose, constraints, config.preciseApproachStartingSpeed())
+        PathConstraints lowSpeedConstrain = new PathConstraints(
+                MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW,
+                ACCELERATION_SOFT_CONSTRAIN_LOW,
+                ANGULAR_VELOCITY_SOFT_CONSTRAIN,
+                ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
+        Command pathFindToPoseNormalConstrains = AutoBuilder.pathfindToPose(
+                        targetPose, normalConstraints, config.preciseApproachStartingSpeed())
+                .onlyIf(() -> !RobotState.getInstance().lowSpeedModeEnabled())
+                .until(RobotState.getInstance()::lowSpeedModeEnabled);
+        Command pathFindToPoseLowConstrains = AutoBuilder.pathfindToPose(
+                        targetPose, lowSpeedConstrain, config.preciseApproachStartingSpeed())
+                .onlyIf(RobotState.getInstance()::lowSpeedModeEnabled);
+        Command pathFindToPose = pathFindToPoseNormalConstrains.andThen(pathFindToPoseLowConstrains);
+        return pathFindToPose
                 .beforeStarting(activateChassisHeadingController)
                 .until(() -> RobotState.getInstance()
                                 .getVisionPose()
@@ -216,7 +226,6 @@ public class AutoAlignment {
     }
 
     public record AutoAlignmentConfigurations(
-            double roughApproachSpeedFactor,
             Distance distanceStartPreciseApproach,
             LinearVelocity preciseApproachStartingSpeed,
             LinearVelocity finalAlignmentSpeed,
@@ -224,7 +233,6 @@ public class AutoAlignment {
             LinearVelocity hitTargetSpeed,
             LinearAcceleration preciseAlignmentMaxAcceleration) {
         public static final AutoAlignmentConfigurations DEFAULT_CONFIG = new AutoAlignmentConfigurations(
-                0.6,
                 Meters.of(0.5),
                 MetersPerSecond.of(3),
                 MetersPerSecond.of(2),
