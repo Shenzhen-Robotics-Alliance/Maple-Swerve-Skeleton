@@ -16,15 +16,19 @@ import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.constants.DriveControlLoops;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.AlertsManager;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 public class RobotState {
     private final Alert visionNoResultAlert = AlertsManager.create("Vision No Result", Alert.AlertType.kInfo);
@@ -36,13 +40,14 @@ public class RobotState {
 
     // Odometry
     private SwerveModulePosition[] lastWheelPositions = new SwerveModulePosition[] {
-        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+            new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
     };
     // Assume gyro starts at zero
     private Rotation2d gyroOffset = new Rotation2d();
     private Pose2d odometryPoseSensorLess = new Pose2d();
     private Pose2d primaryEstimatorPose = new Pose2d();
     private Pose2d visionSensitivePose = new Pose2d();
+    private ChassisSpeeds measuredSpeedsRobotRelative = new ChassisSpeeds();
 
     private boolean visionSensitiveModeOn = false;
     private boolean lowSpeedModeEnabled = false;
@@ -71,6 +76,13 @@ public class RobotState {
                 pose.getRotation().minus(odometryPoseSensorLess.getRotation().minus(gyroOffset));
         primaryEstimatorPose = visionSensitivePose = odometryPoseSensorLess = pose;
         poseBuffer.clear();
+    }
+
+    public void addChassisSpeedsObservation(SwerveModuleState[] measuredModuleStates, OptionalDouble gyroYawVelocityRadPerSec) {
+        ChassisSpeeds wheelSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(measuredModuleStates);
+        double angularVelocityRadPerSec = gyroYawVelocityRadPerSec.orElse(wheelSpeeds.omegaRadiansPerSecond);
+        this.measuredSpeedsRobotRelative = new ChassisSpeeds(
+                wheelSpeeds.vxMetersPerSecond, wheelSpeeds.vyMetersPerSecond, angularVelocityRadPerSec);
     }
 
     public void addOdometryObservation(OdometryObservation observation) {
@@ -170,6 +182,25 @@ public class RobotState {
 
     public Pose2d getPose() {
         return visionSensitiveModeOn ? getVisionPose() : getPrimaryEstimatorPose();
+    }
+
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return measuredSpeedsRobotRelative;
+    }
+
+    public ChassisSpeeds getFieldRelativeSpeeds() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), primaryEstimatorPose.getRotation());
+    }
+
+    public Pose2d getPoseWithLookAhead() {
+        Pose2d currentPose = getPose();
+        ChassisSpeeds speeds = getRobotRelativeSpeeds();
+        Twist2d lookAhead = new Twist2d(
+                speeds.vxMetersPerSecond * DriveControlLoops.TRANSLATIONAL_LOOKAHEAD_TIME,
+                speeds.vyMetersPerSecond * DriveControlLoops.TRANSLATIONAL_LOOKAHEAD_TIME,
+                speeds.omegaRadiansPerSecond * DriveControlLoops.ROTATIONAL_LOOKAHEAD_TIME);
+
+        return currentPose.exp(lookAhead);
     }
 
     public void mergeVisionOdometryToPrimaryOdometry() {

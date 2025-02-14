@@ -120,8 +120,6 @@ public class AutoAlignment {
                 Commands.runOnce(() -> ChassisHeadingController.getInstance().setHeadingRequest(chassisHeadingRequest));
         Runnable deactivateChassisHeadingController = () ->
                 ChassisHeadingController.getInstance().setHeadingRequest(new ChassisHeadingController.NullRequest());
-        Runnable resetDriveCommandRotationMaintenance = () -> JoystickDrive.instance.ifPresent(
-                joystickDrive -> joystickDrive.setRotationMaintenanceSetpoint(targetPose.getRotation()));
 
         PathConstraints normalConstraints = new PathConstraints(
                 MOVEMENT_VELOCITY_SOFT_CONSTRAIN,
@@ -141,6 +139,11 @@ public class AutoAlignment {
                         targetPose, lowSpeedConstrain, config.preciseApproachStartingSpeed())
                 .onlyIf(RobotState.getInstance()::lowSpeedModeEnabled);
         Command pathFindToPose = pathFindToPoseNormalConstrains.andThen(pathFindToPoseLowConstrains);
+
+        Runnable resetDriveCommandRotationMaintenance =
+                () -> JoystickDrive.instance.ifPresent(joystickDrive -> joystickDrive.setRotationMaintenanceSetpoint(
+                        RobotState.getInstance().getRotation()));
+
         return pathFindToPose
                 .beforeStarting(activateChassisHeadingController)
                 .until(() -> RobotState.getInstance()

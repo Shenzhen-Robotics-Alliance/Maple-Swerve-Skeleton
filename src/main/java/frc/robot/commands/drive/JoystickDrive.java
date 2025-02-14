@@ -50,9 +50,9 @@ public class JoystickDrive extends Command {
 
     @Override
     public void initialize() {
+        this.currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
         this.previousChassisUsageTimer.reset();
         this.previousRotationalInputTimer.reset();
-        this.currentRotationMaintenanceSetpoint = driveSubsystem.getFacing();
     }
 
     @Override

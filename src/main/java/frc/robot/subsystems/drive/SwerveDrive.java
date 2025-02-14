@@ -85,10 +85,10 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         this.canBusInputs = new CanBusIO.CanBusInputs();
         this.gyroInputs = new GyroIOInputsAutoLogged();
         this.swerveModules = new SwerveModule[] {
-            new SwerveModule(frontLeftModuleIO, "FrontLeft"),
-            new SwerveModule(frontRightModuleIO, "FrontRight"),
-            new SwerveModule(backLeftModuleIO, "BackLeft"),
-            new SwerveModule(backRightModuleIO, "BackRight"),
+                new SwerveModule(frontLeftModuleIO, "FrontLeft"),
+                new SwerveModule(frontRightModuleIO, "FrontRight"),
+                new SwerveModule(backLeftModuleIO, "BackLeft"),
+                new SwerveModule(backRightModuleIO, "BackRight"),
         };
 
         this.odometryThread = OdometryThread.createInstance(type);
@@ -113,8 +113,12 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         modulesPeriodic();
 
         for (int timeStampIndex = 0;
-                timeStampIndex < odometryThreadInputs.measurementTimeStamps.length;
-                timeStampIndex++) feedSingleOdometryDataToPositionEstimator(timeStampIndex);
+             timeStampIndex < odometryThreadInputs.measurementTimeStamps.length;
+             timeStampIndex++) feedSingleOdometryDataToPositionEstimator(timeStampIndex);
+
+        RobotState.getInstance().addChassisSpeedsObservation(
+                getModuleStates(),
+                gyroInputs.connected ? OptionalDouble.of(gyroInputs.yawVelocityRadPerSec) : OptionalDouble.empty());
 
         RobotState.getInstance().updateAlerts();
         gyroDisconnectedAlert.set(!gyroInputs.connected);
@@ -273,8 +277,9 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     }
 
     @Override
+    // Pose is for PID control
     public Pose2d getPose() {
-        return RobotState.getInstance().getPose();
+        return RobotState.getInstance().getPoseWithLookAhead();
     }
 
     @Override
@@ -284,11 +289,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
 
     @Override
     public ChassisSpeeds getMeasuredChassisSpeedsRobotRelative() {
-        ChassisSpeeds wheelSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(getModuleStates());
-        double angularVelocityRadPerSec =
-                gyroInputs.connected ? gyroInputs.yawVelocityRadPerSec : wheelSpeeds.omegaRadiansPerSecond;
-        return new ChassisSpeeds(
-                wheelSpeeds.vxMetersPerSecond, wheelSpeeds.vyMetersPerSecond, angularVelocityRadPerSec);
+        return RobotState.getInstance().getRobotRelativeSpeeds();
     }
 
     @Override

@@ -43,21 +43,6 @@ public interface HolonomicDriveSubsystem extends Subsystem {
     /** Returns the current odometry Pose. */
     Pose2d getPose();
 
-    default Pose2d getPoseWithLookAhead(double translationalLookAheadTime, double rotationalLookAheadTime) {
-        Pose2d currentPose = getPose();
-        ChassisSpeeds speeds = getMeasuredChassisSpeedsRobotRelative();
-        Twist2d lookAhead = new Twist2d(
-                speeds.vxMetersPerSecond * translationalLookAheadTime,
-                speeds.vyMetersPerSecond * translationalLookAheadTime,
-                speeds.omegaRadiansPerSecond * rotationalLookAheadTime);
-
-        return currentPose.exp(lookAhead);
-    }
-
-    default Pose2d getPoseWithLookAhead() {
-        return getPoseWithLookAhead(TRANSLATIONAL_LOOKAHEAD_TIME, ROTATIONAL_LOOKAHEAD_TIME);
-    }
-
     default Rotation2d getFacing() {
         return getPose().getRotation();
     }
@@ -143,7 +128,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
             DriverStation.reportError(e.getMessage(), false);
         }
         AutoBuilder.configure(
-                this::getPoseWithLookAhead,
+                this::getPose,
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricSpeedsWithFeedforwards,
