@@ -32,15 +32,17 @@ public class SwerveModule {
     private SwerveModuleState setPoint;
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
+    private final Alert configurationFailed;
     private final Alert driveMotorHardwareFault, steerMotorHardwareFault, steerEncoderHardwareFault;
 
     public SwerveModule(ModuleIO io, String name) {
         this.io = io;
         this.name = name;
+        this.configurationFailed = AlertsManager.create("Module-" + name + " configuration failed. Reboot robot after fixing connection.", Alert.AlertType.kError);
         this.driveMotorHardwareFault =
-                AlertsManager.create("Module-" + name + " Drive Motor Hardware Fault Detected", Alert.AlertType.kError);
+                AlertsManager.create("Module-" + name + " drive motor hardware fault detected", Alert.AlertType.kError);
         this.steerMotorHardwareFault =
-                AlertsManager.create("Module-" + name + " Steer Motor Hardware Fault Detected", Alert.AlertType.kError);
+                AlertsManager.create("Module-" + name + " steer motor hardware fault detected", Alert.AlertType.kError);
         this.steerEncoderHardwareFault = AlertsManager.create(
                 "Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.kError);
         this.driveMotorHardwareFault.set(false);
@@ -61,6 +63,8 @@ public class SwerveModule {
         updateOdometryPositions();
         if (DriverStation.isDisabled()) stop();
 
+        configurationFailed.set(inputs.configurationFailed);
+        if (inputs.configurationFailed) return;
         this.driveMotorHardwareFault.set(!inputs.driveMotorConnected);
         this.steerMotorHardwareFault.set(!inputs.steerMotorConnected);
         this.steerEncoderHardwareFault.set(!inputs.steerEncoderConnected);

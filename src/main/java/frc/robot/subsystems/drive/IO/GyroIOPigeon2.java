@@ -6,6 +6,7 @@ package frc.robot.subsystems.drive.IO;
 
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.constants.DriveTrainConstants.*;
+import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -25,13 +26,16 @@ public class GyroIOPigeon2 implements GyroIO {
     private final Queue<Angle> yawPositionInput;
     private final StatusSignal<AngularVelocity> yawVelocity;
 
+    private final boolean configurationOK;
+
     public GyroIOPigeon2(SwerveDrivetrainConstants drivetrainConstants) {
         this(drivetrainConstants.Pigeon2Id, drivetrainConstants.CANBusName, drivetrainConstants.Pigeon2Configs);
     }
 
     public GyroIOPigeon2(int Pigeon2Id, String CANbusName, Pigeon2Configuration Pigeon2Configs) {
         pigeon = new Pigeon2(Pigeon2Id, CANbusName);
-        pigeon.getConfigurator().apply(Objects.requireNonNullElseGet(Pigeon2Configs, Pigeon2Configuration::new));
+        final Pigeon2Configuration configs = Objects.requireNonNullElseGet(Pigeon2Configs, Pigeon2Configuration::new);
+        configurationOK = tryUntilOk(5, () -> pigeon.getConfigurator().apply(configs, 0.2));
         pigeon.getConfigurator().setYaw(0.0);
 
         yaw = pigeon.getYaw();
@@ -45,6 +49,7 @@ public class GyroIOPigeon2 implements GyroIO {
 
     @Override
     public void updateInputs(GyroIOInputs inputs) {
+        inputs.configurationFailed = !configurationOK;
         inputs.connected = BaseStatusSignal.refreshAll(yawVelocity).isOK();
         inputs.yawVelocityRadPerSec = yawVelocity.getValue().in(RadiansPerSecond);
 

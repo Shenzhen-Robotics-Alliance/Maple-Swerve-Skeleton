@@ -15,6 +15,11 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ModuleIO {
     @AutoLog
     class ModuleIOInputs {
+        public boolean configurationFailed = false;
+        public boolean driveMotorConnected = false;
+        public boolean steerMotorConnected = false;
+        public boolean steerEncoderConnected = false;
+
         public double driveWheelFinalRevolutions = 0.0;
         public double driveWheelFinalVelocityRevolutionsPerSec = 0.0;
         public double driveMotorAppliedVolts = 0.0;
@@ -27,10 +32,6 @@ public interface ModuleIO {
 
         public double[] odometryDriveWheelRevolutions = new double[] {};
         public Rotation2d[] odometrySteerPositions = new Rotation2d[] {};
-
-        public boolean driveMotorConnected = false;
-        public boolean steerMotorConnected = false;
-        public boolean steerEncoderConnected = false;
     }
 
     /** Updates the inputs */
