@@ -136,7 +136,7 @@ public class ReefAlignment {
     }
 
     public static Command followPathAndAlign(
-            RobotContainer robot, PathPlannerPath path, int targetId, Supplier<Command> toRunAtPreciseAlignment) {
+            RobotContainer robot, PathPlannerPath path, int targetId, Command toRunAtPreciseAlignment) {
         return Commands.deferredProxy(() -> {
             BranchTarget branchTarget = (FieldMirroringUtils.isSidePresentedAsRed()
                             ? REEF_ALIGNMENT_POSITIONS_RED
@@ -147,9 +147,9 @@ public class ReefAlignment {
                             robot.aprilTagVision,
                             path,
                             branchTarget.autoAlignmentTarget(),
-                            Commands.none(),
-                            preciseAlignmentLight(robot.ledStatusLight).alongWith(toRunAtPreciseAlignment.get()),
-                            DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
+                            DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS,
+                            preciseAlignmentLight(robot.ledStatusLight),
+                            toRunAtPreciseAlignment)
                     .beforeStarting(() -> {
                         selectedReefPartId = targetId / 2;
                         selectedSide = targetId % 2 == 0 ? SelectedSide.LEFT : SelectedSide.RIGHT;
@@ -176,7 +176,9 @@ public class ReefAlignment {
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG))
                 .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
                 .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
-                .finallyDo(() -> alignmentComplete(statusLight, driver).schedule());
+                .finallyDo((interrupted) -> {
+                    if (!interrupted) alignmentComplete(statusLight, driver).schedule();
+                });
     }
 
     private enum SelectedSide {
@@ -196,15 +198,13 @@ public class ReefAlignment {
     }
 
     private static Command preciseAlignmentLight(LEDStatusLight statusLight) {
-        return statusLight
-                .playAnimation(new LEDAnimation.Charging(Color.kOrange), 0.5)
-                .repeatedly();
+        return statusLight.playAnimationPeriodically(new LEDAnimation.Charging(Color.kHotPink), 3);
     }
 
     private static Command alignmentComplete(LEDStatusLight statusLight, DriverMap driver) {
         return statusLight
                 .playAnimation(new LEDAnimation.ShowColor(Color.kGreen), 0.5)
-                .alongWith(driver.rumbleLeftRight(0.25))
+                // .alongWith(driver.rumbleLeftRight(0.25))
                 .ignoringDisable(true);
     }
 }

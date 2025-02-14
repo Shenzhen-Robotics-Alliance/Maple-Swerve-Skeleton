@@ -91,6 +91,11 @@ public class Robot extends LoggedRobot {
         robotContainer.checkForCommandChanges();
     }
 
+    @Override
+    public void disabledExit() {
+        robotContainer.setMotorBrake(true);
+    }
+
     /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
     @Override
     public void autonomousInit() {

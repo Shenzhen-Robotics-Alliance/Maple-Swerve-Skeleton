@@ -38,7 +38,9 @@ public class SwerveModule {
     public SwerveModule(ModuleIO io, String name) {
         this.io = io;
         this.name = name;
-        this.configurationFailed = AlertsManager.create("Module-" + name + " configuration failed. Reboot robot after fixing connection.", Alert.AlertType.kError);
+        this.configurationFailed = AlertsManager.create(
+                "Module-" + name + " configuration failed. Reboot robot after fixing connection.",
+                Alert.AlertType.kError);
         this.driveMotorHardwareFault =
                 AlertsManager.create("Module-" + name + " drive motor hardware fault detected", Alert.AlertType.kError);
         this.steerMotorHardwareFault =

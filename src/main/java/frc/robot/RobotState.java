@@ -40,7 +40,7 @@ public class RobotState {
 
     // Odometry
     private SwerveModulePosition[] lastWheelPositions = new SwerveModulePosition[] {
-            new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
+        new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition(), new SwerveModulePosition()
     };
     // Assume gyro starts at zero
     private Rotation2d gyroOffset = new Rotation2d();
@@ -78,7 +78,8 @@ public class RobotState {
         poseBuffer.clear();
     }
 
-    public void addChassisSpeedsObservation(SwerveModuleState[] measuredModuleStates, OptionalDouble gyroYawVelocityRadPerSec) {
+    public void addChassisSpeedsObservation(
+            SwerveModuleState[] measuredModuleStates, OptionalDouble gyroYawVelocityRadPerSec) {
         ChassisSpeeds wheelSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(measuredModuleStates);
         double angularVelocityRadPerSec = gyroYawVelocityRadPerSec.orElse(wheelSpeeds.omegaRadiansPerSecond);
         this.measuredSpeedsRobotRelative = new ChassisSpeeds(

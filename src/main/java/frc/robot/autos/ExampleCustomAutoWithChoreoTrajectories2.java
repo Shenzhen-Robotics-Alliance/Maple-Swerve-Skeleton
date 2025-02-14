@@ -17,23 +17,23 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
     public Command getAutoCommand(RobotContainer robot) throws IOException, ParseException {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place first"), 8, Commands::none));
+                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place first"), 8, Commands.none()));
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab second"))
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place second"), 9, Commands::none));
+                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place second"), 9, Commands.none()));
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab third"))
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place third"), 10, Commands::none));
+                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place third"), 10, Commands.none()));
 
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab fourth"))
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place fourth"), 11, Commands::none));
+                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place fourth"), 11, Commands.none()));
         return commandGroup;
     }
 

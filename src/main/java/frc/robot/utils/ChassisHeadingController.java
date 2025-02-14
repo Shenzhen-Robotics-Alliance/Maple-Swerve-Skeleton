@@ -171,7 +171,7 @@ public class ChassisHeadingController {
         final Rotation2d targetedRotation = shooterOptimization == null
                 ? targetPosition.minus(robotPose.getTranslation()).getAngle()
                 : shooterOptimization.getShooterFacing(
-                targetPosition, robotPose.getTranslation(), measuredSpeedsFieldRelative);
+                        targetPosition, robotPose.getTranslation(), measuredSpeedsFieldRelative);
         final Rotation2d targetMovingDirection = targetMovingSpeed.getAngle();
         final Rotation2d positiveRotationTangentDirection =
                 targetPosition.minus(robotPose.getTranslation()).getAngle().rotateBy(Rotation2d.fromDegrees(90));
