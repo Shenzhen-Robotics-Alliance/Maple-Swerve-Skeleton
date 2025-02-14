@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -29,6 +30,7 @@ import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.subsystems.led.LEDAnimation;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
@@ -198,6 +200,8 @@ public class RobotContainer {
         configureLEDEffects();
 
         SmartDashboard.putData("Field", field);
+
+        setMotorBrake(true);
     }
 
     private void configureAutoNamedCommands() {
@@ -301,6 +305,13 @@ public class RobotContainer {
      * a {@link JoystickButton}.
      */
     public void configureButtonBindings() {
+        SmartDashboard.putData(
+                "Enable Motor Brake",
+                Commands.runOnce(() -> setMotorBrake(true)).ignoringDisable(true));
+        SmartDashboard.putData(
+                "Disable Motor Brake",
+                Commands.runOnce(() -> setMotorBrake(true)).ignoringDisable(false));
+
         /* joystick drive command */
         final MapleJoystickDriveInput driveInput = driver.getDriveInput();
         IntSupplier pov =
@@ -395,5 +406,23 @@ public class RobotContainer {
         ReefAlignment.updateDashboard();
 
         AlertsManager.updateLEDAndLog(ledStatusLight);
+    }
+
+    private boolean motorBrakeEnabled = false;
+
+    public void setMotorBrake(boolean brakeModeEnabled) {
+        if (DriverStation.isEnabled()) return;
+        if (this.motorBrakeEnabled == brakeModeEnabled) return;
+
+        drive.setMotorBrake(brakeModeEnabled);
+        // TODO: set motor brake mode for other subsystems
+        if (brakeModeEnabled)
+            ledStatusLight
+                    .playAnimationPeriodically(new LEDAnimation.Breathe(Color.kWhite), 0.5)
+                    .ignoringDisable(true)
+                    .schedule();
+        else ledStatusLight.showEnableDisableState().schedule();
+
+        this.motorBrakeEnabled = brakeModeEnabled;
     }
 }
