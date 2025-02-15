@@ -221,9 +221,9 @@ public class RobotContainer {
                 "Example Custom Auto With PathPlanner Trajectories",
                 new ExampleCustomAutoWithPathPlannerTrajectories());
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories", new ExampleCustomAutoWithChoreoTrajectories());
+                "Example Custom Auto With Choreo Trajectories (Left)", new ExampleCustomAutoWithChoreoTrajectories2(false));
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories 2", new ExampleCustomAutoWithChoreoTrajectories2());
+                "Example Custom Auto With Choreo Trajectories (Right)", new ExampleCustomAutoWithChoreoTrajectories2(true));
         autoSendableChooser.addOption(
                 "Example Pathplanner GUI Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());

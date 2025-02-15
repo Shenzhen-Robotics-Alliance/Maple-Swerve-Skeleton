@@ -13,32 +13,39 @@ import java.io.IOException;
 import org.json.simple.parser.ParseException;
 
 public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
+    private final boolean isRightSide;
+
+    public ExampleCustomAutoWithChoreoTrajectories2(boolean isRightSide) {
+        this.isRightSide = isRightSide;
+    }
+
     @Override
     public Command getAutoCommand(RobotContainer robot) throws IOException, ParseException {
         final SequentialCommandGroup commandGroup = new SequentialCommandGroup();
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place first"), 8, Commands.none()));
+                robot, Auto.getChoreoPath("auto2 - place first", isRightSide), isRightSide ? 5 : 8, Commands.none()));
         commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab second"))
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place second"), 9, Commands.none()));
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab third"))
+                robot, Auto.getChoreoPath("auto2 - place second", isRightSide), isRightSide ? 4:9, Commands.none()));
+        commandGroup.addCommands(AutoBuilder.followPath(Auto.getChoreoPath("auto2 - grab third", isRightSide))
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place third"), 10, Commands.none()));
+                robot, Auto.getChoreoPath("auto2 - place third", isRightSide), isRightSide ? 3 : 10, Commands.none()));
 
-        commandGroup.addCommands(AutoBuilder.followPath(PathPlannerPath.fromChoreoTrajectory("auto2 - grab fourth"))
+        commandGroup.addCommands(AutoBuilder.followPath(Auto.getChoreoPath("auto2 - grab fourth", isRightSide))
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, PathPlannerPath.fromChoreoTrajectory("auto2 - place fourth"), 11, Commands.none()));
+                robot,Auto.getChoreoPath("auto2 - place fourth", isRightSide), 11, Commands.none()));
         return commandGroup;
     }
 
     @Override
     public Pose2d getStartingPoseAtBlueAlliance() {
-        return new Pose2d(7.843, 6.16, Rotation2d.fromDegrees(180));
+        Pose2d startingPoseAtLeft = new Pose2d(7.843, 6.16, Rotation2d.fromDegrees(180));
+        return isRightSide ? Auto.flipLeftRight(startingPoseAtLeft) : startingPoseAtLeft;
     }
 }
