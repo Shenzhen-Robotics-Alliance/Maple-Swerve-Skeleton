@@ -28,7 +28,7 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot, Auto.getChoreoPath("auto2 - place second", isRightSide), isRightSide ? 4:9, Commands.none()));
+                robot, Auto.getChoreoPath("auto2 - place second", isRightSide), isRightSide ? 4 : 9, Commands.none()));
         commandGroup.addCommands(AutoBuilder.followPath(Auto.getChoreoPath("auto2 - grab third", isRightSide))
                 .asProxy());
 
@@ -39,7 +39,7 @@ public class ExampleCustomAutoWithChoreoTrajectories2 implements Auto {
                 .asProxy());
 
         commandGroup.addCommands(ReefAlignment.followPathAndAlign(
-                robot,Auto.getChoreoPath("auto2 - place fourth", isRightSide), 11, Commands.none()));
+                robot, Auto.getChoreoPath("auto2 - place fourth", isRightSide), 11, Commands.none()));
         return commandGroup;
     }
 

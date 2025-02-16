@@ -221,9 +221,11 @@ public class RobotContainer {
                 "Example Custom Auto With PathPlanner Trajectories",
                 new ExampleCustomAutoWithPathPlannerTrajectories());
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories (Left)", new ExampleCustomAutoWithChoreoTrajectories2(false));
+                "Example Custom Auto With Choreo Trajectories (Left)",
+                new ExampleCustomAutoWithChoreoTrajectories2(false));
         autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories (Right)", new ExampleCustomAutoWithChoreoTrajectories2(true));
+                "Example Custom Auto With Choreo Trajectories (Right)",
+                new ExampleCustomAutoWithChoreoTrajectories2(true));
         autoSendableChooser.addOption(
                 "Example Pathplanner GUI Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
@@ -395,6 +397,12 @@ public class RobotContainer {
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
+    private final Alert autoPlacementIncorrect = AlertsManager.create(
+            "Expected Autonomous robot placement position does not match reality, IS THE SELECTED AUTO CORRECT?",
+            Alert.AlertType.kWarning);
+    private static final double AUTO_PLACEMENT_TOLERANCE_METERS = 0.25;
+    private static final double AUTO_PLACEMENT_TOLERANCE_DEGREES = 5;
+
     public void updateTelemetryAndLED() {
         field.setRobotPose(
                 Robot.CURRENT_ROBOT_MODE == RobotMode.SIM
@@ -404,6 +412,14 @@ public class RobotContainer {
             field.getObject("Odometry").setPose(drive.getPose());
 
         ReefAlignment.updateDashboard();
+
+        Pose2d autoStartingPose =
+                FieldMirroringUtils.toCurrentAlliancePose(previouslySelectedAuto.getStartingPoseAtBlueAlliance());
+        Pose2d currentPose = RobotState.getInstance().getVisionPose();
+        Transform2d difference = autoStartingPose.minus(currentPose);
+        boolean autoPlacementIncorrectDetected = difference.getTranslation().getNorm() > AUTO_PLACEMENT_TOLERANCE_METERS
+                || Math.abs(difference.getRotation().getDegrees()) > AUTO_PLACEMENT_TOLERANCE_DEGREES;
+        autoPlacementIncorrect.set(autoPlacementIncorrectDetected && DriverStation.isDisabled());
 
         AlertsManager.updateLEDAndLog(ledStatusLight);
     }

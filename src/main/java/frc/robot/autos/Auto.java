@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import java.io.IOException;
-
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.json.simple.parser.ParseException;
 
@@ -34,7 +33,6 @@ public interface Auto {
         PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory(name);
         return mirror ? path.mirrorPath() : path;
     }
-
 
     static Pose2d flipLeftRight(Pose2d pose) {
         return new Pose2d(

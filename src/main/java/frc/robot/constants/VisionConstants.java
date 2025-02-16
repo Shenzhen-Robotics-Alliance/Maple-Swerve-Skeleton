@@ -13,7 +13,8 @@ import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
 import java.util.List;
 
 public class VisionConstants {
-    public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout fieldLayout =
+            AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     public static final Time POSE_BUFFER_DURATION = Seconds.of(2.5);
     public static final Time ADDITIONAL_LATENCY_COMPENSATION = Milliseconds.of(30);
 
