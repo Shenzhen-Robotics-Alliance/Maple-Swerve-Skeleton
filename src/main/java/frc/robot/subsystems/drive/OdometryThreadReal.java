@@ -7,6 +7,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.drive.IO.OdometryThread;
 import frc.robot.utils.MapleTimeUtils;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.Lock;
@@ -72,9 +73,9 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
 
     @Override
     public void updateInputs(OdometryThreadInputs inputs) {
-        inputs.measurementTimeStamps = new double[timeStampsQueue.size()];
-        for (int i = 0; i < inputs.measurementTimeStamps.length && !timeStampsQueue.isEmpty(); i++)
-            inputs.measurementTimeStamps[i] = timeStampsQueue.poll();
+        inputs.odometryTicksCountInPreviousRobotPeriod = timeStampsQueue.size();
+        for (int i = 0; i < ODOMETRY_CACHE_CAPACITY; i++)
+            inputs.measurementTimeStamps[i] = Objects.requireNonNullElse(timeStampsQueue.poll(), 0.0);
     }
 
     @Override

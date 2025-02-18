@@ -4,8 +4,7 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.constants.DriveTrainConstants.*;
+import static frc.robot.constants.DriveTrainConstants.ODOMETRY_FREQUENCY;
 import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -17,13 +16,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import java.util.Objects;
-import java.util.Queue;
 
 /** IO implementation for Pigeon2 */
 public class GyroIOPigeon2 implements GyroIO {
     private final Pigeon2 pigeon;
     private final StatusSignal<Angle> yaw;
-    private final Queue<Angle> yawPositionInput;
+    private final OdometryThread.OdometryInput yawPositionInput;
     private final StatusSignal<AngularVelocity> yawVelocity;
 
     private final boolean configurationOK;
@@ -51,14 +49,10 @@ public class GyroIOPigeon2 implements GyroIO {
     public void updateInputs(GyroIOInputs inputs) {
         inputs.configurationFailed = !configurationOK;
         inputs.connected = BaseStatusSignal.refreshAll(yawVelocity).isOK();
-        inputs.yawVelocityRadPerSec = yawVelocity.getValue().in(RadiansPerSecond);
+        inputs.yawVelocityRadPerSec = Math.toRadians(yawVelocity.getValueAsDouble());
 
-        inputs.odometryYawPositions =
-                yawPositionInput.stream().map(Rotation2d::new).toArray(Rotation2d[]::new);
+        yawPositionInput.writeToInput(inputs.odometryYawPositions, Rotation2d::fromDegrees);
 
-        yawPositionInput.clear();
-
-        if (inputs.odometryYawPositions.length > 0)
-            inputs.yawPosition = inputs.odometryYawPositions[inputs.odometryYawPositions.length - 1];
+        inputs.yawPosition = Rotation2d.fromDegrees(yaw.getValueAsDouble());
     }
 }

@@ -10,12 +10,15 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.constants.DriveTrainConstants;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ModuleIO {
     @AutoLog
     class ModuleIOInputs {
-        public boolean configurationFailed = false;
+        public boolean driveMotorConfigurationFailed = false;
+        public boolean steerMotorConfigurationFailed = false;
+        public boolean steerEncoderConfigurationFailed = false;
         public boolean driveMotorConnected = false;
         public boolean steerMotorConnected = false;
         public boolean steerEncoderConnected = false;
@@ -30,8 +33,8 @@ public interface ModuleIO {
         public double steerMotorAppliedVolts = 0.0;
         public double steerMotorCurrentAmps = 0.0;
 
-        public double[] odometryDriveWheelRevolutions = new double[] {};
-        public Rotation2d[] odometrySteerPositions = new Rotation2d[] {};
+        public double[] odometryDriveWheelRevolutions = new double[DriveTrainConstants.ODOMETRY_CACHE_CAPACITY];
+        public Rotation2d[] odometrySteerPositions = new Rotation2d[DriveTrainConstants.ODOMETRY_CACHE_CAPACITY];
     }
 
     /** Updates the inputs */

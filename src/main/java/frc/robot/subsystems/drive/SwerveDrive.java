@@ -26,7 +26,9 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.RobotState;
@@ -117,8 +119,15 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         modulesPeriodic();
 
         for (int timeStampIndex = 0;
-                timeStampIndex < odometryThreadInputs.measurementTimeStamps.length;
+                timeStampIndex < odometryThreadInputs.odometryTicksCountInPreviousRobotPeriod;
                 timeStampIndex++) feedSingleOdometryDataToPositionEstimator(timeStampIndex);
+
+        RobotState.getInstance()
+                .addChassisSpeedsObservation(
+                        getModuleStates(),
+                        gyroInputs.connected
+                                ? OptionalDouble.of(gyroInputs.yawVelocityRadPerSec)
+                                : OptionalDouble.empty());
 
         RobotState.getInstance()
                 .addChassisSpeedsObservation(
@@ -143,6 +152,11 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
                 "RobotState/PrimaryEstimatorPose", RobotState.getInstance().getPrimaryEstimatorPose());
         Logger.recordOutput(
                 "RobotState/VisionSensitivePose", RobotState.getInstance().getVisionPose());
+        Logger.recordOutput(
+                "RobotState/ControlLoopPose", RobotState.getInstance().getPose());
+        Logger.recordOutput(
+                "RobotState/ControlLoopPoseWithLookAhead",
+                RobotState.getInstance().getPoseWithLookAhead());
     }
 
     private void fetchOdometryInputs() {
@@ -190,19 +204,23 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
             return;
         }
 
-        boolean lowSpeedMode = RobotState.getInstance().lowSpeedModeEnabled();
+        PathConstraints constraints =
+                getPathConstraints(RobotState.getInstance().lowSpeedModeEnabled());
+        this.setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, constraints, Robot.defaultPeriodSecs, 13);
+
+        executeSetpoint();
+    }
+
+    private static PathConstraints getPathConstraints(boolean lowSpeedMode) {
         LinearAcceleration accelerationConstrain =
                 lowSpeedMode ? ACCELERATION_SOFT_CONSTRAIN_LOW : ACCELERATION_SOFT_CONSTRAIN;
         LinearVelocity velocityConstrain =
                 lowSpeedMode ? MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW : MOVEMENT_VELOCITY_SOFT_CONSTRAIN;
-        PathConstraints constraints = new PathConstraints(
+        return new PathConstraints(
                 velocityConstrain,
                 accelerationConstrain,
                 ANGULAR_VELOCITY_SOFT_CONSTRAIN,
                 ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
-        this.setpoint = setpointGenerator.generateSetpoint(setpoint, speeds, constraints, Robot.defaultPeriodSecs, 13);
-
-        executeSetpoint();
     }
 
     @Override

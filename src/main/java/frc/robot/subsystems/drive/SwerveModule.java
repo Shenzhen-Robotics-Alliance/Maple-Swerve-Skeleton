@@ -15,7 +15,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Force;
+import edu.wpi.first.units.measure.Torque;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -33,7 +36,7 @@ public class SwerveModule {
     private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
     private final Alert configurationFailed;
-    private final Alert driveMotorHardwareFault, steerMotorHardwareFault, steerEncoderHardwareFault;
+    private final Alert moduleHardwareDisconnected;
 
     public SwerveModule(ModuleIO io, String name) {
         this.io = io;
@@ -41,15 +44,9 @@ public class SwerveModule {
         this.configurationFailed = AlertsManager.create(
                 "Module-" + name + " configuration failed. Reboot robot after fixing connection.",
                 Alert.AlertType.kError);
-        this.driveMotorHardwareFault =
-                AlertsManager.create("Module-" + name + " drive motor hardware fault detected", Alert.AlertType.kError);
-        this.steerMotorHardwareFault =
-                AlertsManager.create("Module-" + name + " steer motor hardware fault detected", Alert.AlertType.kError);
-        this.steerEncoderHardwareFault = AlertsManager.create(
-                "Module-" + name + " Steer Encoder Hardware Fault Detected", Alert.AlertType.kError);
-        this.driveMotorHardwareFault.set(false);
-        this.steerMotorHardwareFault.set(false);
-        this.steerEncoderHardwareFault.set(false);
+        this.moduleHardwareDisconnected = AlertsManager.create(
+                "Module-" + name + " hardware configured but currently disconnected", Alert.AlertType.kError);
+        this.moduleHardwareDisconnected.set(false);
 
         setPoint = new SwerveModuleState();
         io.setDriveBrake(true);
@@ -65,11 +62,15 @@ public class SwerveModule {
         updateOdometryPositions();
         if (DriverStation.isDisabled()) stop();
 
-        configurationFailed.set(inputs.configurationFailed);
-        if (inputs.configurationFailed) return;
-        this.driveMotorHardwareFault.set(!inputs.driveMotorConnected);
-        this.steerMotorHardwareFault.set(!inputs.steerMotorConnected);
-        this.steerEncoderHardwareFault.set(!inputs.steerEncoderConnected);
+        configurationFailed.set(inputs.driveMotorConfigurationFailed
+                || inputs.steerMotorConfigurationFailed
+                || inputs.steerEncoderConfigurationFailed);
+        if (configurationFailed.get())
+            // if there is a configuration failure, we don't care if its currently connected
+            this.moduleHardwareDisconnected.set(false);
+        else
+            this.moduleHardwareDisconnected.set(
+                    !inputs.driveMotorConnected || !inputs.steerMotorConnected || !inputs.steerEncoderConnected);
     }
 
     private void updateOdometryPositions() {

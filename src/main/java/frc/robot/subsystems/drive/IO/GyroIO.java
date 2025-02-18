@@ -5,6 +5,7 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.constants.DriveTrainConstants;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface GyroIO {
@@ -14,7 +15,7 @@ public interface GyroIO {
 
         public boolean connected = false;
         public Rotation2d yawPosition = new Rotation2d();
-        public Rotation2d[] odometryYawPositions = new Rotation2d[] {};
+        public Rotation2d[] odometryYawPositions = new Rotation2d[DriveTrainConstants.ODOMETRY_CACHE_CAPACITY];
         public double yawVelocityRadPerSec = 0.0;
     }
 

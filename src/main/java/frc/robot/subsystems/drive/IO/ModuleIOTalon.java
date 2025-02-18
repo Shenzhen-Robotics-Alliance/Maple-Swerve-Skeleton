@@ -5,14 +5,12 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
@@ -24,10 +22,10 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.SwerveModule;
-import java.util.Queue;
 
 public class ModuleIOTalon implements ModuleIO {
     private final String name;
@@ -42,14 +40,14 @@ public class ModuleIOTalon implements ModuleIO {
 
     // Inputs from drive motor
     private final StatusSignal<Angle> driveRotterPosition;
-    private final Queue<Angle> driveRotterPositionRotations;
+    private final OdometryThread.OdometryInput driveRotterPositionRotations;
     private final StatusSignal<AngularVelocity> driveRotterVelocity;
     private final StatusSignal<Voltage> driveAppliedVoltage;
     private final StatusSignal<Current> driveMotorCurrentDrawn;
 
     // Inputs from turn motor
     private final StatusSignal<Angle> steerAbsolutePosition;
-    private final Queue<Angle> steerAbsolutePositionCache;
+    private final OdometryThread.OdometryInput steerAbsolutePositionCache;
     private final StatusSignal<AngularVelocity> steerFinalMechanismVelocity;
     private final StatusSignal<Voltage> steerAppliedVoltage;
     private final StatusSignal<Current> steerMotorCurrentDrawn;
@@ -59,7 +57,9 @@ public class ModuleIOTalon implements ModuleIO {
     private final Debouncer steerConnectedDebounce = new Debouncer(0.5);
     private final Debouncer steerEncoderConnectedDebounce = new Debouncer(0.5);
 
-    private final boolean configurationOK;
+    private final boolean driveConfigurationOK, steerConfigurationOK, canCoderConfigurationOK;
+
+    private static final double timeOutSeconds = 0.2;
 
     public ModuleIOTalon(
             SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> moduleConstants,
@@ -71,51 +71,52 @@ public class ModuleIOTalon implements ModuleIO {
         cancoder = new CANcoder(moduleConstants.EncoderId, TunerConstants.DrivetrainConstants.CANBusName);
 
         // Configure drive motor
-        var driveConfig = moduleConstants.DriveMotorInitialConfigs;
-        driveConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        driveConfig.Slot0 = moduleConstants.DriveMotorGains;
-        driveConfig
-                .CurrentLimits
+        var driveCurrentLimit = new CurrentLimitsConfigs()
                 .withStatorCurrentLimitEnable(true)
                 .withStatorCurrentLimit(DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT)
                 .withSupplyCurrentLimitEnable(true)
                 .withSupplyCurrentLimit(DRIVE_OVER_CURRENT_PROTECTION)
                 .withSupplyCurrentLowerTime(DRIVE_OVERHEAT_PROTECTION_TIME)
                 .withSupplyCurrentLowerLimit(DRIVE_OVERHEAT_PROTECTION_CURRENT);
-
-        driveConfig.MotorOutput.Inverted = moduleConstants.DriveMotorInverted
-                ? InvertedValue.Clockwise_Positive
-                : InvertedValue.CounterClockwise_Positive;
+        var driveGains = moduleConstants.DriveMotorGains;
+        var driveOutput = new MotorOutputConfigs()
+                .withInverted(
+                        moduleConstants.DriveMotorInverted
+                                ? InvertedValue.Clockwise_Positive
+                                : InvertedValue.CounterClockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake);
+        driveConfigurationOK =
+                tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveCurrentLimit, timeOutSeconds))
+                        && tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveGains, timeOutSeconds))
+                        && tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveOutput, timeOutSeconds));
 
         // Configure turn motor
-        var steerConfig = new TalonFXConfiguration();
-        steerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        steerConfig.Slot0 = moduleConstants.SteerMotorGains;
-        steerConfig.Feedback.FeedbackRemoteSensorID = moduleConstants.EncoderId;
-        steerConfig.Feedback.FeedbackSensorSource = switch (moduleConstants.FeedbackSource) {
-            case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
-            case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
-            case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;};
-        steerConfig.Feedback.RotorToSensorRatio = moduleConstants.SteerMotorGearRatio;
-        steerConfig.CurrentLimits.withStatorCurrentLimitEnable(true).withStatorCurrentLimit(STEER_CURRENT_LIMIT);
-        steerConfig.ClosedLoopGeneral.ContinuousWrap = true;
-        steerConfig.MotorOutput.Inverted = moduleConstants.SteerMotorInverted
-                ? InvertedValue.Clockwise_Positive
-                : InvertedValue.CounterClockwise_Positive;
+        var steerOutput = new MotorOutputConfigs()
+                .withNeutralMode(NeutralModeValue.Brake)
+                .withInverted(
+                        moduleConstants.SteerMotorInverted
+                                ? InvertedValue.Clockwise_Positive
+                                : InvertedValue.CounterClockwise_Positive);
+        var steerGains = moduleConstants.SteerMotorGains;
+        var steerFeedBack = new FeedbackConfigs()
+                .withFeedbackRemoteSensorID(moduleConstants.EncoderId)
+                .withRotorToSensorRatio(moduleConstants.SteerMotorGearRatio)
+                .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+        var steerCloseLoop = new ClosedLoopGeneralConfigs();
+        steerCloseLoop.ContinuousWrap = true;
+        steerConfigurationOK = tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerOutput, timeOutSeconds))
+                && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerGains, timeOutSeconds))
+                && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerFeedBack, timeOutSeconds))
+                && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerCloseLoop, timeOutSeconds));
 
         // Configure CANCoder
-        var cancoderConfig = moduleConstants.EncoderInitialConfigs;
-        cancoderConfig.MagnetSensor.MagnetOffset = moduleConstants.EncoderOffset;
-        cancoderConfig.MagnetSensor.SensorDirection = moduleConstants.EncoderInverted
-                ? SensorDirectionValue.Clockwise_Positive
-                : SensorDirectionValue.CounterClockwise_Positive;
-
-        // Send configuration to hardware
-        final double timeOutSeconds = 0.2;
-        configurationOK = tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, timeOutSeconds))
-                && tryUntilOk(5, () -> driveTalon.setPosition(0.0, timeOutSeconds))
-                && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerConfig, timeOutSeconds))
-                && tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig, timeOutSeconds));
+        var cancoderConfig = new MagnetSensorConfigs()
+                .withMagnetOffset(moduleConstants.EncoderOffset)
+                .withSensorDirection(
+                        moduleConstants.EncoderInverted
+                                ? SensorDirectionValue.Clockwise_Positive
+                                : SensorDirectionValue.CounterClockwise_Positive);
+        canCoderConfigurationOK = tryUntilOk(5, () -> cancoder.getConfigurator().apply(cancoderConfig, timeOutSeconds));
 
         // Create drive status signals
         driveRotterPosition = driveTalon.getPosition();
@@ -146,7 +147,9 @@ public class ModuleIOTalon implements ModuleIO {
 
     @Override
     public void updateInputs(ModuleIOInputs inputs) {
-        inputs.configurationFailed = !configurationOK;
+        inputs.driveMotorConfigurationFailed = !driveConfigurationOK;
+        inputs.steerMotorConfigurationFailed = !steerConfigurationOK;
+        inputs.steerEncoderConfigurationFailed = !canCoderConfigurationOK;
 
         // Refresh all signals
         var driveStatus = BaseStatusSignal.refreshAll(
@@ -159,28 +162,23 @@ public class ModuleIOTalon implements ModuleIO {
         inputs.steerEncoderConnected = steerEncoderConnectedDebounce.calculate(steerEncoderStatus.isOK());
 
         // Fetch high-frequency drive encoder inputs
-        inputs.odometryDriveWheelRevolutions = driveRotterPositionRotations.stream()
-                .mapToDouble(value -> value.in(Rotations) / DRIVE_GEAR_RATIO)
-                .toArray();
-        driveRotterPositionRotations.clear();
+        driveRotterPositionRotations.writeToDoubleInput(
+                inputs.odometryDriveWheelRevolutions, rotterPosition -> rotterPosition / DRIVE_GEAR_RATIO);
 
         // Fetch high-frequency drive encoder inputs
-        inputs.odometrySteerPositions =
-                steerAbsolutePositionCache.stream().map(Rotation2d::new).toArray(Rotation2d[]::new);
-        steerAbsolutePositionCache.clear();
+        steerAbsolutePositionCache.writeToInput(inputs.odometrySteerPositions, Rotation2d::fromRotations);
 
         // Fetch low frequency position and velocity signals
-        inputs.driveWheelFinalRevolutions = driveRotterPosition.getValue().in(Revolutions) / DRIVE_GEAR_RATIO;
-        inputs.driveWheelFinalVelocityRevolutionsPerSec =
-                driveRotterVelocity.getValue().in(RotationsPerSecond) / DRIVE_GEAR_RATIO;
-        inputs.steerFacing = new Rotation2d(steerAbsolutePosition.getValue());
-        inputs.steerVelocityRadPerSec = steerFinalMechanismVelocity.getValue().in(RadiansPerSecond);
+        inputs.driveWheelFinalRevolutions = driveRotterPosition.getValueAsDouble() / DRIVE_GEAR_RATIO;
+        inputs.driveWheelFinalVelocityRevolutionsPerSec = driveRotterVelocity.getValueAsDouble() / DRIVE_GEAR_RATIO;
+        inputs.steerFacing = Rotation2d.fromRotations(steerAbsolutePosition.getValueAsDouble());
+        inputs.steerVelocityRadPerSec = Units.rotationsToRadians(steerFinalMechanismVelocity.getValueAsDouble());
 
         // Fetch applied voltage and current
-        inputs.driveMotorAppliedVolts = driveAppliedVoltage.getValue().in(Volts);
-        inputs.driveMotorCurrentAmps = driveMotorCurrentDrawn.getValue().in(Amps);
-        inputs.steerMotorAppliedVolts = steerAppliedVoltage.getValue().in(Volts);
-        inputs.steerMotorCurrentAmps = steerMotorCurrentDrawn.getValue().in(Amps);
+        inputs.driveMotorAppliedVolts = driveAppliedVoltage.getValueAsDouble();
+        inputs.driveMotorCurrentAmps = driveMotorCurrentDrawn.getValueAsDouble();
+        inputs.steerMotorAppliedVolts = steerAppliedVoltage.getValueAsDouble();
+        inputs.steerMotorCurrentAmps = steerMotorCurrentDrawn.getValueAsDouble();
     }
 
     boolean driveBrakeEnabled = true;
