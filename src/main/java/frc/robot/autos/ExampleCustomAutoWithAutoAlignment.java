@@ -25,7 +25,7 @@ public class ExampleCustomAutoWithAutoAlignment implements Auto {
                         Rotation2d.fromDegrees(-120),
                         OptionalInt.of(20),
                         OptionalInt.of(11),
-                        OptionalInt.of(0),
+                        new Integer[] {1},
                         DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS)
                 .asProxy());
         return sequence;

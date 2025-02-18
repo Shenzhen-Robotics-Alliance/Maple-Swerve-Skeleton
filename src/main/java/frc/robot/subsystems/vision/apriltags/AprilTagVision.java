@@ -107,7 +107,7 @@ public class AprilTagVision extends SubsystemBase {
                 multiTagPoseEstimator::disableFocusMode);
     }
 
-    public Command focusOnTarget(OptionalInt tagId, OptionalInt cameraToFocusId) {
+    public Command focusOnTarget(OptionalInt tagId, Integer... cameraToFocusId) {
         return startEnd(
                 () -> multiTagPoseEstimator.setFocusMode(tagId, cameraToFocusId),
                 multiTagPoseEstimator::disableFocusMode);

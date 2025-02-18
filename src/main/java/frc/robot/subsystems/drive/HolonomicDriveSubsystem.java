@@ -1,10 +1,6 @@
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Seconds;
-import static frc.robot.constants.DriveControlLoops.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -12,7 +8,8 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -22,8 +19,12 @@ import frc.robot.constants.DriveTrainConstants;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.LocalADStarAK;
 import frc.robot.utils.PPRobotConfigPrinter;
+import frc.robot.utils.PPWarmUp;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
+
+import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.constants.DriveControlLoops.*;
 
 public interface HolonomicDriveSubsystem extends Subsystem {
     /**
@@ -150,7 +151,8 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         Alert pathPlannerWarmUpInProgressAlert =
                 AlertsManager.create("PathPlanner Warm-Up in progress", Alert.AlertType.kWarning);
         pathPlannerWarmUpInProgressAlert.set(true);
-        PathfindingCommand.warmupCommand()
+        PPWarmUp.pathFindingWarmup()
+                .andThen(PPWarmUp.choreoWarmUp())
                 .finallyDo(() -> pathPlannerWarmUpInProgressAlert.set(false))
                 .until(DriverStation::isEnabled)
                 .schedule();

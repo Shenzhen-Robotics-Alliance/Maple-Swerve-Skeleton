@@ -27,9 +27,9 @@ public class AutoAlignment {
             Pose2d roughTarget,
             Pose2d preciseTarget,
             Rotation2d preciseApproachDirection,
+            Optional<Translation2d> faceToTargetDuringRoughApproach,
             OptionalInt tagIdToFocus,
-            OptionalInt cameraToFocus,
-            Optional<Translation2d> faceToTargetDuringRoughApproach) {}
+            Integer... cameraToFocus) {}
     /**
      * creates a precise auto-alignment command NOTE: AutoBuilder must be configured! the command has two steps: 1.
      * path-find to the target pose, roughly 2. accurate auto alignment
@@ -66,7 +66,7 @@ public class AutoAlignment {
             Rotation2d preciseTargetApproachDirection,
             OptionalInt tagIdToFocusAtBlue,
             OptionalInt tagIdToFocusAtRed,
-            OptionalInt cameraIdToFocus,
+            Integer[] cameraIdToFocus,
             AutoAlignmentConfigurations config,
             Command... toScheduleAtPreciseAlignment) {
         return Commands.deferredProxy(() -> followPathAndAutoAlignStatic(
@@ -77,9 +77,9 @@ public class AutoAlignment {
                         PathUtils.getEndingPose(path),
                         FieldMirroringUtils.toCurrentAlliancePose(preciseTargetAtBlue),
                         preciseTargetApproachDirection,
+                        Optional.empty(),
                         FieldMirroringUtils.isSidePresentedAsRed() ? tagIdToFocusAtRed : tagIdToFocusAtBlue,
-                        cameraIdToFocus,
-                        Optional.empty()),
+                        cameraIdToFocus),
                 config,
                 toScheduleAtPreciseAlignment));
     }

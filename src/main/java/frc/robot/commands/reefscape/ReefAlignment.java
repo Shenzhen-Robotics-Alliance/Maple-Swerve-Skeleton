@@ -48,9 +48,10 @@ public class ReefAlignment {
                     roughApproachPose(),
                     preciseAlignmentPose(),
                     facing(),
+                    Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),
                     OptionalInt.of(tagId),
-                    OptionalInt.of(rightSide ? 0 : 1), // right side uses lefter cam
-                    Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)));
+                    rightSide ? 0 : 1,
+                    rightSide ? 2 : 3);
         }
     }
 
