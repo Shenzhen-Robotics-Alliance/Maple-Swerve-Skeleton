@@ -14,15 +14,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.DriveTrainConstants;
+import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 
 public class PPWarmUp {
-    public static Command pathFindingWarmup() {
+    public static Command pathFindingWarmup(HolonomicDriveSubsystem driveSubsystem) {
         return new PathfindingCommand(
                         new Pose2d(2, 7, Rotation2d.k180deg),
                         new PathConstraints(4, 8, 4, 8),
                         () -> new Pose2d(5, 1, Rotation2d.kZero),
-                        ChassisSpeeds::new,
-                        (speeds, feedforwards) -> {},
+                        driveSubsystem::getMeasuredChassisSpeedsRobotRelative,
+                        driveSubsystem::runRobotCentricSpeedsWithFeedforwards,
                         new PPHolonomicDriveController(
                                 new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                         new RobotConfig(
@@ -30,12 +32,12 @@ public class PPWarmUp {
                                 6.8,
                                 new ModuleConfig(
                                         0.048, 5.0, 1.2, DCMotor.getKrakenX60(1).withReduction(6.14), 60.0, 1),
-                                0.55))
-                .andThen(Commands.print("[PathPlanner] PathfindingCommand finished warmup"))
-                .ignoringDisable(true);
+                                DriveTrainConstants.MODULE_TRANSLATIONS))
+                .repeatedly()
+                .withTimeout(10);
     }
 
-    public static Command choreoWarmUp() {
+    public static Command choreoWarmUp(HolonomicDriveSubsystem driveSubsystem) {
         PathPlannerPath path;
         try {
             path = PathPlannerPath.fromChoreoTrajectory("place first");
@@ -46,7 +48,7 @@ public class PPWarmUp {
                         path,
                         () -> new Pose2d(5, 1, Rotation2d.kZero),
                         ChassisSpeeds::new,
-                        (chassisSpeeds, feedforwards) -> {},
+                        driveSubsystem::runRobotCentricSpeedsWithFeedforwards,
                         new PPHolonomicDriveController(
                                 new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
                         new RobotConfig(
@@ -54,9 +56,9 @@ public class PPWarmUp {
                                 6.8,
                                 new ModuleConfig(
                                         0.048, 5.0, 1.2, DCMotor.getKrakenX60(1).withReduction(6.14), 60.0, 1),
-                                0.55),
+                                DriveTrainConstants.MODULE_TRANSLATIONS),
                         () -> false)
-                .andThen(Commands.print("[PathPlanner] Choreo Path Follower finished warmup"))
-                .ignoringDisable(true);
+                .repeatedly()
+                .withTimeout(10);
     }
 }

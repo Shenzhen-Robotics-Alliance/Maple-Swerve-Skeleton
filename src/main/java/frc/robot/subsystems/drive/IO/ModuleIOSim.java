@@ -15,6 +15,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.SwerveModule;
@@ -101,8 +102,8 @@ public class ModuleIOSim implements ModuleIO {
         else steerController.reset();
 
         // Feed voltage to motor simulation
-        driveMotor.requestVoltage(Volts.of(driveAppliedVolts));
-        steerMotor.requestVoltage(Volts.of(steerAppliedVolts));
+        driveMotor.requestVoltage(Volts.of(DriverStation.isEnabled() ? driveAppliedVolts : 0.0));
+        steerMotor.requestVoltage(Volts.of(DriverStation.isEnabled() ? steerAppliedVolts : 0.0));
     }
 
     private void calculateDriveControlLoops() {
