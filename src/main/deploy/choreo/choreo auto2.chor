@@ -22,12 +22,12 @@
   "poses":{
    "station":{
     "x":{
-     "exp":"1.5 m",
-     "val":1.5
+     "exp":"1.16 m",
+     "val":1.16
     },
     "y":{
-     "exp":"7.2 m",
-     "val":7.2
+     "exp":"7.04 m",
+     "val":7.04
     },
     "heading":{
      "exp":"-0.94 rad",
