@@ -1,27 +1,68 @@
 {
   "hubs": [
     {
-      "x": 303,
-      "y": 184,
-      "width": 1101,
-      "height": 650,
+      "x": 0,
+      "y": 0,
+      "width": 1706,
+      "height": 1018,
       "state": {
         "sidebar": {
-          "width": 300,
+          "width": 342,
           "expanded": [
+            "/AdvantageKit",
             "/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering",
             "/AdvantageKit/RealOutputs/Vision/AprilTags",
-            "/AdvantageKit",
+            "/SmartDashboard",
+            "/SmartDashboard/Intake",
+            "/AdvantageKit/Arm/absoluteEncoderAngle",
             "/AdvantageKit/RealOutputs",
-            "/AdvantageKit/Drive",
+            "/AdvantageKit/RealOutputs/SuperStructure/measuredMechanismPoses/2",
+            "/AdvantageKit/RealOutputs/SuperStructure/measuredMechanismPoses/2/translation",
+            "/AdvantageKit/RealOutputs/SuperStructure/measuredMechanismPoses/2/rotation",
+            "/AdvantageKit/RealOutputs/SuperStructure/measuredMechanismPoses/2/rotation/q",
+            "/AdvantageKit/Elevator",
+            "/ReplayOutputs",
+            "/ReplayOutputs/Elevator",
+            "/RealOutputs/SuperStructure",
+            "/ReplayOutputs/SuperStructure",
+            "/ReplayOutputs/LoggedRobot",
+            "/Drive/OdometryThread/MeasurementTimeStamps",
             "/AdvantageKit/RealOutputs/RobotState",
+            "/AdvantageKit/RealOutputs/SuperStructure",
+            "/AdvantageKit/Drive/OdometryThread",
+            "/AdvantageKit/RealOutputs/FieldSimulation",
+            "/AdvantageKit/RealOutputs/Elevator/PID",
+            "/AdvantageKit/Arm",
+            "/AdvantageKit/RealOutputs/Arm/PID",
+            "/AdvantageKit/RealOutputs/Sim",
+            "/AdvantageKit/RealOutputs/FieldSimulation/Coral/6",
+            "/AdvantageKit/RealOutputs/FieldSimulation/Coral/6/translation",
+            "/AdvantageKit/RealOutputs/FieldSimulation/Coral/6/rotation",
+            "/AdvantageKit/RealOutputs/FieldSimulation/Coral/5/translation",
+            "/AdvantageKit/RealOutputs/FieldSimulation/Coral/0",
+            "/AdvantageKit/RealOutputs/FieldSimulation/Coral/0/translation",
+            "/AdvantageKit/RealOutputs/Reef",
+            "/AdvantageKit/RealOutputs/Reef/RobotToSelectedBranchTag",
             "/AdvantageKit/RealOutputs/SwerveStates",
-            "/AdvantageKit/RealOutputs/ModuleFeedforwards",
-            "/AdvantageKit/RealOutputs/Vision"
+            "/RealOutputs/Vision/AprilTags",
+            "/RealOutputs/Vision/AprilTags/Filtering",
+            "/RealOutputs/SwerveStates",
+            "/RealOutputs/Elevator/PID",
+            "/RealOutputs/Arm/PID",
+            "/Arm",
+            "/RealOutputs/RobotState",
+            "/RealOutputs/SwerveSetpoint",
+            "/RealOutputs/SwerveSetpoint/executedSpeedsWithRotationalOverride",
+            "/RealOutputs/SwerveSetpoint/executedSpeedsWithRotationalOverrideConstrained",
+            "/Drive",
+            "/RealOutputs/LoggedRobot",
+            "/PowerDistribution",
+            "/DriverStation",
+            "/SystemStats"
           ]
         },
         "tabs": {
-          "selected": 3,
+          "selected": 4,
           "tabs": [
             {
               "type": 0,
@@ -32,23 +73,330 @@
               "controlsHeight": 0
             },
             {
+              "type": 3,
+              "title": "Overview",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/RobotState/PrimaryEstimatorPoseWith3dRot",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "WCP CC"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperStructure/measuredMechanismPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "/RealOutputs/CoralInRobot",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "variant": "Coral"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "5mksczgiclyud8rihcbi5bv3ld4ujof7",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  -11.734501886941919,
+                  2.5349125838870825,
+                  -0.9484207538574128
+                ],
+                "cameraTarget": [
+                  0,
+                  0.5,
+                  0
+                ]
+              },
+              "controlsHeight": 200
+            },
+            {
+              "type": 3,
+              "title": "Details",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/RobotState/PrimaryEstimatorPoseWith3dRot",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "WCP CC"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperStructure/measuredMechanismPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "swerveStates",
+                    "logKey": "/RealOutputs/SwerveStates/SetpointsOptimized",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/RobotState/PrimaryEstimatorPoseWith3dRot",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "model": "WCP CC"
+                    }
+                  },
+                  {
+                    "type": "component",
+                    "logKey": "/RealOutputs/SuperStructure/profileCurrentStatePoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/RobotState/ControlLoopPoseWithLookAhead",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "model": "Drivetrain Only",
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/InvalidPoseEstimations",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "Drivetrain Only",
+                      "color": "#ff0000"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "model": "Drivetrain Only",
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "aprilTag",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions/",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "family": "36h11"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/RobotState/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "gamePiece",
+                    "logKey": "/RealOutputs/CoralInRobot",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "variant": "Coral"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "origin": "blue"
+              },
+              "controllerUUID": "xsrx25f4oj63akofvijnzfcfcqyd3see",
+              "renderer": {
+                "cameraIndex": -1,
+                "orbitFov": 50,
+                "cameraPosition": [
+                  -9.590372470183198,
+                  4.26773490179805,
+                  -3.45652098275664
+                ],
+                "cameraTarget": [
+                  -2.408651126453302,
+                  -3.8850863762523122,
+                  4.040437317059565
+                ]
+              },
+              "controlsHeight": 317
+            },
+            {
+              "type": 2,
+              "title": "Odometry",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "robot",
+                    "logKey": "/RealOutputs/FieldSimulation/RobotPosition",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "trajectory",
+                    "logKey": "/RealOutputs/RobotState/Trajectory",
+                    "logType": "Pose2d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ffff00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/RobotState/ControlLoopPoseWithLookAhead",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "/RealOutputs/Vision/AprilTags/Filtering/InvalidPoseEstimations",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000"
+                    }
+                  }
+                ],
+                "game": "2025 Field (Welded)",
+                "bumpers": "auto",
+                "origin": "blue",
+                "orientation": 0,
+                "size": 27
+              },
+              "controllerUUID": "anw5m27x7wj05rpq3nf89yc6jkkys5zn",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
               "type": 1,
-              "title": "Line Graph",
+              "title": "Power",
               "controller": {
                 "leftSources": [
                   {
-                    "type": "stepped",
-                    "logKey": "NT:/AdvantageKit/SystemStats/BatteryVoltage",
+                    "type": "smooth",
+                    "logKey": "/PowerDistribution/Voltage",
                     "logType": "Number",
                     "visible": true,
                     "options": {
                       "color": "#2b66a2",
                       "size": "normal"
                     }
+                  },
+                  {
+                    "type": "stepped",
+                    "logKey": "/SystemStats/BrownoutVoltage",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "verybold"
+                    }
                   }
                 ],
-                "rightSources": [],
-                "discreteSources": [],
+                "rightSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/PowerDistribution/TotalCurrent",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/SystemStats/BrownedOut",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/DriverStation/Enabled",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b"
+                    }
+                  }
+                ],
                 "leftLockedRange": null,
                 "rightLockedRange": null,
                 "leftUnitConversion": {
@@ -62,223 +410,293 @@
                 "leftFilter": 0,
                 "rightFilter": 0
               },
-              "controllerUUID": "1b84oybzga7a84rknj8mftush1lrcx7h",
+              "controllerUUID": "az7q4y1v0gk793o3pt2ob2hppq0v40gj",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Elevator",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/RealOutputs/Elevator/Current State Position (Meters)",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/RealOutputs/Elevator/Measured Height (Meters)",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/RealOutputs/Elevator/PID/Requested Output Volts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Elevator/MotorSupplyCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "bold"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/DriverStation/Enabled",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Elevator/At Reference",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "lxrvc6kyheglrzbq8viyrj03vwypd7zh",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 1,
+              "title": "Arm",
+              "controller": {
+                "leftSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/RealOutputs/Arm/Current State Position(Degrees)",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/RealOutputs/Arm/MeasuredAngle (Degrees)",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#e5b31b",
+                      "size": "normal"
+                    }
+                  }
+                ],
+                "rightSources": [
+                  {
+                    "type": "smooth",
+                    "logKey": "/RealOutputs/Arm/PID/Requested Output Volts",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#3b875a",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "smooth",
+                    "logKey": "/Arm/motorSupplyCurrentAmps",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#af2437",
+                      "size": "bold"
+                    }
+                  }
+                ],
+                "discreteSources": [
+                  {
+                    "type": "stripes",
+                    "logKey": "/DriverStation/Enabled",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#80588e"
+                    }
+                  },
+                  {
+                    "type": "stripes",
+                    "logKey": "/RealOutputs/Arm/At Reference",
+                    "logType": "Boolean",
+                    "visible": true,
+                    "options": {
+                      "color": "#e48b32"
+                    }
+                  }
+                ],
+                "leftLockedRange": null,
+                "rightLockedRange": null,
+                "leftUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "rightUnitConversion": {
+                  "type": null,
+                  "factor": 1
+                },
+                "leftFilter": 0,
+                "rightFilter": 0
+              },
+              "controllerUUID": "hcht1nowz75qr14swrx17hzdwp11iork",
+              "renderer": null,
+              "controlsHeight": 200
+            },
+            {
+              "type": 8,
+              "title": "Pilot Inputs",
+              "controller": [
+                "Xbox Controller (White)",
+                "Xbox Controller (Blue)",
+                "None",
+                "None",
+                "None",
+                "None"
+              ],
+              "controllerUUID": "q3go9xpdcayaavyugx299vzsvhgx8tw3",
+              "renderer": null,
+              "controlsHeight": 85
+            },
+            {
+              "type": 9,
+              "title": "Swerve",
+              "controller": {
+                "sources": [
+                  {
+                    "type": "rotation",
+                    "logKey": "/RealOutputs/RobotState/PrimaryEstimatorPose/rotation",
+                    "logType": "Rotation2d",
+                    "visible": true,
+                    "options": {}
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/SwerveStates/Measured",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff0000",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "states",
+                    "logKey": "/RealOutputs/SwerveStates/SetpointsOptimized",
+                    "logType": "SwerveModuleState[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "arrangement": "0,1,2,3"
+                    }
+                  },
+                  {
+                    "type": "chassisSpeeds",
+                    "logKey": "/RealOutputs/SwerveSetpoint/executedSpeedsWithRotationalOverrideConstrained",
+                    "logType": "ChassisSpeeds",
+                    "visible": true,
+                    "options": {
+                      "color": "#0000ff"
+                    }
+                  }
+                ],
+                "maxSpeed": 5,
+                "sizeX": 0.65,
+                "sizeY": 0.65,
+                "orientation": 3
+              },
+              "controllerUUID": "wt57akqhkpp2voh8l0ficsqjdybhpuax",
               "renderer": null,
               "controlsHeight": 200
             },
             {
               "type": 6,
-              "title": "Statistics",
+              "title": "Performance",
               "controller": {
                 "sources": [
                   {
                     "type": "independent",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/LoggedRobot/FullCycleMS",
+                    "logKey": "/RealOutputs/LoggedRobot/GCTimeMS",
                     "logType": "Number",
                     "visible": true,
                     "options": {
-                      "color": "#2b66a2"
+                      "color": "#af2437"
                     }
                   },
                   {
                     "type": "independent",
-                    "logKey": "NT:/AdvantageKit/Drive/OdometryThread/MeasurementTimeStamps/length",
+                    "logKey": "/Drive/OdometryThread/OdometryTicksCountInPreviousRobotPeriod",
                     "logType": "Number",
                     "visible": true,
                     "options": {
                       "color": "#e5b31b"
                     }
+                  },
+                  {
+                    "type": "independent",
+                    "logKey": "/RealOutputs/LoggedRobot/FullCycleMS",
+                    "logType": "Number",
+                    "visible": true,
+                    "options": {
+                      "color": "#2b66a2"
+                    }
                   }
                 ],
                 "timeRange": "live-10",
                 "rangeMin": 0,
-                "rangeMax": 10,
+                "rangeMax": 40,
                 "stepSize": 1
               },
-              "controllerUUID": "thbympkubtoqiv53bm3yp29p8ip23w1f",
-              "renderer": null,
-              "controlsHeight": 200
-            },
-            {
-              "type": 3,
-              "title": "3D Field",
-              "controller": {
-                "sources": [
-                  {
-                    "type": "robot",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/PrimaryEstimatorPose",
-                    "logType": "Pose2d",
-                    "visible": true,
-                    "options": {
-                      "model": "Crab Bot"
-                    }
-                  },
-                  {
-                    "type": "vision",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#00ff00",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "swerveStates",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff0000",
-                      "arrangement": "0,1,2,3"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/VisionSensitivePose",
-                    "logType": "Pose2d",
-                    "visible": true,
-                    "options": {
-                      "model": "Crab Bot",
-                      "color": "#00ffff"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "model": "Crab Bot",
-                      "color": "#00ff00"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/InvalidPoseEstimations",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "model": "Crab Bot",
-                      "color": "#ff0000"
-                    }
-                  },
-                  {
-                    "type": "aprilTag",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/AprilTagsObservedPositions/",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "family": "36h11"
-                    }
-                  },
-                  {
-                    "type": "trajectory",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/Trajectory",
-                    "logType": "Pose2d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff00ff",
-                      "size": "normal"
-                    }
-                  }
-                ],
-                "game": "2025 Field",
-                "origin": "blue"
-              },
-              "controllerUUID": "60uyqpz2z7r8o9lcejaywbmbil8vbkh4",
-              "renderer": {
-                "cameraIndex": -1,
-                "orbitFov": 50,
-                "cameraPosition": [
-                  -10.625847468439025,
-                  14.156259517370202,
-                  -1.2707399465102145
-                ],
-                "cameraTarget": [
-                  -0.8677060157037558,
-                  -0.7828111422142031,
-                  0.8402121750499534
-                ]
-              },
-              "controlsHeight": 200
-            },
-            {
-              "type": 2,
-              "title": "Odometry",
-              "controller": {
-                "sources": [
-                  {
-                    "type": "robot",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/PrimaryEstimatorPose",
-                    "logType": "Pose2d",
-                    "visible": true,
-                    "options": {}
-                  },
-                  {
-                    "type": "swerveStates",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/SwerveStates/Measured",
-                    "logType": "SwerveModuleState[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff0000",
-                      "arrangement": "0,1,2,3"
-                    }
-                  },
-                  {
-                    "type": "vision",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/VisibleFieldTargets",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#00ff00",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/VisionSensitivePose",
-                    "logType": "Pose2d",
-                    "visible": true,
-                    "options": {
-                      "color": "#00ffff"
-                    }
-                  },
-                  {
-                    "type": "trajectory",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/RobotState/Trajectory",
-                    "logType": "Pose2d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff00ff",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/AdvantageKit/RealOutputs/Vision/AprilTags/Filtering/ValidPoseEstimationsSingleTags",
-                    "logType": "Pose3d[]",
-                    "visible": true,
-                    "options": {
-                      "color": "#00ff00"
-                    }
-                  }
-                ],
-                "game": "2025 Field",
-                "bumpers": "auto",
-                "origin": "blue",
-                "orientation": 0,
-                "size": 30
-              },
-              "controllerUUID": "kungcz9vmur12e93xux9i0whtebjiqu7",
+              "controllerUUID": "4a5znt57aubc88x217cqosyr43h5b062",
               "renderer": null,
               "controlsHeight": 200
             },
             {
               "type": 5,
               "title": "Console",
-              "controller": "NT:/AdvantageKit/RealOutputs/Console",
-              "controllerUUID": "ict1tk2ym1lrdxvjkgoq6obac69hyjqd",
+              "controller": "/RealOutputs/Console",
+              "controllerUUID": "slf8hj57yti6mp7f8ju0rog7xhe0i3er",
               "renderer": {
                 "highlight": false
               },
@@ -290,5 +708,5 @@
     }
   ],
   "satellites": [],
-  "version": "4.1.2"
+  "version": "4.1.4"
 }
