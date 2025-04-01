@@ -15,16 +15,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Force;
-import edu.wpi.first.units.measure.Torque;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.subsystems.drive.IO.ModuleIO;
 import frc.robot.subsystems.drive.IO.ModuleIOInputsAutoLogged;
 import frc.robot.utils.AlertsManager;
+import org.ironmaple.utils.mathutils.SwerveStateProjection;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModule {
@@ -60,7 +57,6 @@ public class SwerveModule {
 
     public void modulePeriodic() {
         updateOdometryPositions();
-        if (DriverStation.isDisabled()) stop();
 
         configurationFailed.set(inputs.driveMotorConfigurationFailed
                 || inputs.steerMotorConfigurationFailed
@@ -68,9 +64,7 @@ public class SwerveModule {
         if (configurationFailed.get())
             // if there is a configuration failure, we don't care if its currently connected
             this.moduleHardwareDisconnected.set(false);
-        else
-            this.moduleHardwareDisconnected.set(
-                    !inputs.driveMotorConnected || !inputs.steerMotorConnected || !inputs.steerEncoderConnected);
+        else this.moduleHardwareDisconnected.set(!inputs.hardwareCurrentlyConnected);
     }
 
     private void updateOdometryPositions() {
@@ -97,8 +91,8 @@ public class SwerveModule {
             SwerveModuleState newSetpoint, Force robotRelativeFeedforwardForceX, Force robotRelativeFeedforwardForceY) {
         newSetpoint = SwerveModuleState.optimize(newSetpoint, getSteerFacing());
 
-        double desiredMotorVelocityRadPerSec =
-                newSetpoint.speedMetersPerSecond / WHEEL_RADIUS.in(Meters) * DRIVE_GEAR_RATIO;
+        double speedMPSProjected = SwerveStateProjection.project(newSetpoint, getSteerFacing());
+        double desiredMotorVelocityRadPerSec = speedMPSProjected / WHEEL_RADIUS.in(Meters) * DRIVE_GEAR_RATIO;
         Translation2d force2d = new Translation2d(
                 robotRelativeFeedforwardForceX.in(Newtons), robotRelativeFeedforwardForceY.in(Newtons));
         // project force to swerve heading
@@ -106,9 +100,9 @@ public class SwerveModule {
                 force2d.getNorm() * force2d.getAngle().minus(getSteerFacing()).getCos();
         double wheelFeedforwardTorque = moduleFeedforwardForceNewtons * WHEEL_RADIUS.in(Meters);
         double motorFeedforwardTorque = wheelFeedforwardTorque / DRIVE_GEAR_RATIO;
-        if (!USE_TORQUE_FEEDFORWARD) motorFeedforwardTorque = 0;
-        io.requestDriveVelocityControl(
-                RadiansPerSecond.of(desiredMotorVelocityRadPerSec), NewtonMeters.of(motorFeedforwardTorque));
+        double motorFeedforwardVoltage = DRIVE_MOTOR_MODEL.getVoltage(motorFeedforwardTorque, 0);
+        if (!USE_TORQUE_FEEDFORWARD) motorFeedforwardVoltage = 0;
+        io.requestDriveVelocityControl(desiredMotorVelocityRadPerSec, motorFeedforwardVoltage);
         Logger.recordOutput("ModuleFeedforwards/" + name + "/Wheel FF Torque (N*M)", wheelFeedforwardTorque);
         io.requestSteerPositionControl(newSetpoint.angle);
 
@@ -116,8 +110,8 @@ public class SwerveModule {
     }
 
     public void stop() {
-        io.requestDriveOpenLoop(Volts.zero());
-        io.requestSteerOpenLoop(Volts.zero());
+        io.requestDriveOpenLoop(0.0);
+        io.requestSteerOpenLoop(0.0);
     }
 
     private boolean brakeEnabled = true;
@@ -167,10 +161,6 @@ public class SwerveModule {
         return odometryPositions;
     }
 
-    public boolean hasHardwareFaults() {
-        return !(inputs.driveMotorConnected && inputs.steerMotorConnected && inputs.steerEncoderConnected);
-    }
-
     public double getTotalSupplyCurrentAmps() {
         // From the Conservation of Energy, we know:
         // supply current * battery voltage = stator current * applied volts
@@ -183,23 +173,9 @@ public class SwerveModule {
         return driveMotorSupplyCurrentAmps + steerMotorSupplyCurrentAmps;
     }
 
-    public void runVoltageCharacterization(Rotation2d steerFacing, Voltage driveVoltageOut) {
+    public void runVoltageCharacterization(Rotation2d steerFacing, double driveVoltageOut) {
         setMotorBrake(true);
         io.requestSteerPositionControl(steerFacing);
         io.requestDriveOpenLoop(driveVoltageOut);
-    }
-
-    public void runCurrentCharacterization(Rotation2d steerFacing, Current driveCurrentOut) {
-        setMotorBrake(true);
-        io.requestSteerPositionControl(steerFacing);
-        io.requestDriveOpenLoop(driveCurrentOut);
-    }
-
-    public static Voltage calculateFeedforwardVoltage(Torque feedforwardTorque) {
-        return Volts.of(DRIVE_MOTOR_MODEL.getVoltage(feedforwardTorque.in(NewtonMeters), 0));
-    }
-
-    public static Current calculateFeedforwardCurrent(Torque feedforwardTorque) {
-        return Amps.of(DRIVE_MOTOR_MODEL.getCurrent(feedforwardTorque.in(NewtonMeters)));
     }
 }

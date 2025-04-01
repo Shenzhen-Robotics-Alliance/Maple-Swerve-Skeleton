@@ -8,6 +8,7 @@ package frc.robot;
 // the root directory of this project.
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.constants.DriveControlLoops.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 import static frc.robot.constants.VisionConstants.*;
 
@@ -23,16 +24,19 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.constants.DriveControlLoops;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.vision.apriltags.MapleMultiTagPoseEstimator;
 import frc.robot.utils.AlertsManager;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotState {
     private final Alert visionNoResultAlert = AlertsManager.create("Vision No Result", Alert.AlertType.kInfo);
     private double previousVisionResultTimeStamp = 0;
+    public double visionObservationRate = 0.0;
 
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer;
     private final Matrix<N3, N1> primaryEstimatorOdometryStdDevs;
@@ -49,8 +53,16 @@ public class RobotState {
     private Pose2d visionSensitivePose = new Pose2d();
     private ChassisSpeeds measuredSpeedsRobotRelative = new ChassisSpeeds();
 
-    private boolean visionSensitiveModeOn = false;
     private boolean lowSpeedModeEnabled = false;
+
+    public enum NavigationMode {
+        SENSOR_LESS_ODOMETRY,
+        VISION_FUSED_ODOMETRY,
+        VISION_GUIDED
+    }
+
+    private NavigationMode navigationMode = NavigationMode.VISION_FUSED_ODOMETRY;
+    private static final Subsystem lock = new Subsystem() {};
 
     private RobotState() {
         this.poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_DURATION.in(Seconds));
@@ -123,7 +135,7 @@ public class RobotState {
         visionSensitivePose = addVisionObservationToEstimator(
                 observation, sample.get(), visionSensitivePose, visionSensitiveEstimatorOdometryStdDevs);
 
-        previousVisionResultTimeStamp = observation.timestamp();
+        previousVisionResultTimeStamp = Timer.getTimestamp();
     }
 
     private Pose2d addVisionObservationToEstimator(
@@ -182,7 +194,11 @@ public class RobotState {
     }
 
     public Pose2d getPose() {
-        return visionSensitiveModeOn ? getVisionPose() : getPrimaryEstimatorPose();
+        return switch (navigationMode) {
+            case SENSOR_LESS_ODOMETRY -> getSensorLessOdometryPose();
+            case VISION_FUSED_ODOMETRY -> getPrimaryEstimatorPose();
+            case VISION_GUIDED -> getVisionPose();
+        };
     }
 
     public ChassisSpeeds getRobotRelativeSpeeds() {
@@ -196,20 +212,35 @@ public class RobotState {
     public Pose2d getPoseWithLookAhead() {
         Pose2d currentPose = getPose();
         ChassisSpeeds speeds = getRobotRelativeSpeeds();
+        double translationalLookaheadTimeSeconds =
+                switch (navigationMode) {
+                    case SENSOR_LESS_ODOMETRY -> TRANSLATIONAL_LOOKAHEAD_TIME_SENSOR_LESS.in(Seconds);
+                    case VISION_FUSED_ODOMETRY, VISION_GUIDED -> TRANSLATIONAL_LOOKAHEAD_TIME_VISION.in(Seconds);
+                };
+        double rotationalLookaheadTimeSeconds =
+                switch (navigationMode) {
+                    case SENSOR_LESS_ODOMETRY -> ROTATIONAL_LOOKAHEAD_TIME_SENSOR_LESS.in(Seconds);
+                    case VISION_FUSED_ODOMETRY, VISION_GUIDED -> ROTATIONAL_LOOKAHEAD_TIME_VISION.in(Seconds);
+                };
         Twist2d lookAhead = new Twist2d(
-                speeds.vxMetersPerSecond * DriveControlLoops.TRANSLATIONAL_LOOKAHEAD_TIME,
-                speeds.vyMetersPerSecond * DriveControlLoops.TRANSLATIONAL_LOOKAHEAD_TIME,
-                speeds.omegaRadiansPerSecond * DriveControlLoops.ROTATIONAL_LOOKAHEAD_TIME);
+                speeds.vxMetersPerSecond * translationalLookaheadTimeSeconds,
+                speeds.vyMetersPerSecond * translationalLookaheadTimeSeconds,
+                speeds.omegaRadiansPerSecond * rotationalLookaheadTimeSeconds);
 
         return currentPose.exp(lookAhead);
     }
 
-    public void mergeVisionOdometryToPrimaryOdometry() {
-        this.primaryEstimatorPose = this.visionSensitivePose;
+    public void mergeVisionOdometry() {
+        resetPose(visionSensitivePose);
     }
 
-    public void setVisionSensitiveMode(boolean visionSensitiveModeOn) {
-        this.visionSensitiveModeOn = visionSensitiveModeOn;
+    public Command withNavigationMode(NavigationMode mode) {
+        return lock.startEnd(
+                () -> {
+                    if (mode != NavigationMode.VISION_GUIDED) mergeVisionOdometry();
+                    this.navigationMode = mode;
+                },
+                () -> this.navigationMode = NavigationMode.VISION_FUSED_ODOMETRY);
     }
 
     public void setLowSpeedMode(boolean lowSpeedModeEnabled) {
@@ -226,6 +257,11 @@ public class RobotState {
         if (visionNoResultAlert.get())
             visionNoResultAlert.setText(
                     String.format("No vision pose estimation for %.2f Seconds", timeNotVisionResultSeconds));
+        Logger.recordOutput("Vision Observation Rate", visionObservationRate);
+    }
+
+    public double visionObservationRate() {
+        return visionObservationRate;
     }
 
     public record OdometryObservation(

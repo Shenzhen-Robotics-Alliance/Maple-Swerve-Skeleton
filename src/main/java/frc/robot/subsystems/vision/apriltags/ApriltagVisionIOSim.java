@@ -34,7 +34,7 @@ public class ApriltagVisionIOSim extends AprilTagVisionIOReal {
     }
 
     @Override
-    public void updateInputs(VisionInputs inputs) {
+    public void updateInputs(CameraInputs... inputs) {
         visionSystemSim.update(robotActualPoseInSimulationSupplier.get());
         super.updateInputs(inputs);
     }

@@ -6,10 +6,6 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Torque;
-import edu.wpi.first.units.measure.Voltage;
 import frc.robot.constants.DriveTrainConstants;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -19,10 +15,8 @@ public interface ModuleIO {
         public boolean driveMotorConfigurationFailed = false;
         public boolean steerMotorConfigurationFailed = false;
         public boolean steerEncoderConfigurationFailed = false;
-        public boolean driveMotorConnected = false;
-        public boolean steerMotorConnected = false;
-        public boolean steerEncoderConnected = false;
 
+        public boolean hardwareCurrentlyConnected = false;
         public double driveWheelFinalRevolutions = 0.0;
         public double driveWheelFinalVelocityRevolutionsPerSec = 0.0;
         public double driveMotorAppliedVolts = 0.0;
@@ -45,38 +39,24 @@ public interface ModuleIO {
     /**
      * Run the drive motor at a specified voltage open-loop control
      *
-     * @param output the desired voltage output, from -12v to 12v
+     * @param outputVolts the desired voltage output, from -12v to 12v
      */
-    default void requestDriveOpenLoop(Voltage output) {}
-
-    /**
-     * Run the drive motor at a specified current open-loop control
-     *
-     * @param output the desired current output
-     */
-    default void requestDriveOpenLoop(Current output) {}
+    default void requestDriveOpenLoop(double outputVolts) {}
 
     /**
      * Run the steer motor at a specified voltage open-loop control
      *
-     * @param output the desired voltage output, from -12v to 12v
+     * @param outputVolts the desired voltage output, from -12v to 12v
      */
-    default void requestSteerOpenLoop(Voltage output) {}
-
-    /**
-     * Run the steer motor at a specified current open-loop control
-     *
-     * @param output the desired current output
-     */
-    default void requestSteerOpenLoop(Current output) {}
+    default void requestSteerOpenLoop(double outputVolts) {}
 
     /**
      * Runs a velocity close-loop control on the drive motor
      *
-     * @param desiredMotorVelocity the desired angular velocity of the motor, in radians / second
-     * @param feedforwardMotorTorque torque feedforward to add to the motor output
+     * @param desiredMotorVelocityRadPerSec the desired angular velocity of the motor, in radians / second
+     * @param feedforwardMotorVoltage additional feed-forward voltage to add to the motor output
      */
-    default void requestDriveVelocityControl(AngularVelocity desiredMotorVelocity, Torque feedforwardMotorTorque) {}
+    default void requestDriveVelocityControl(double desiredMotorVelocityRadPerSec, double feedforwardMotorVoltage) {}
 
     /**
      * Runs a position close-loop control on the steer motor

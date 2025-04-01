@@ -12,6 +12,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
+import frc.robot.Robot;
+import frc.robot.RobotState;
 import frc.robot.utils.CustomMaths.Statistics;
 import java.util.*;
 import org.littletonrobotics.junction.Logger;
@@ -19,9 +21,6 @@ import org.littletonrobotics.junction.Logger;
 public class MapleMultiTagPoseEstimator {
     private OptionalInt tagToFocus;
     private List<Integer> cameraToFocus;
-    public static final boolean LOG_DETAILED_FILTERING_DATA = true;
-    // Robot.CURRENT_ROBOT_MODE != RobotMode.REAL;
-
     private final AprilTagFieldLayout fieldLayout;
     private final VisionResultsFilter filter;
     private final List<PhotonCameraProperties> camerasProperties;
@@ -56,8 +55,7 @@ public class MapleMultiTagPoseEstimator {
             observedAprilTagsPoses = new ArrayList<>(),
             observedVisionTargetPoseInFieldLayout = new ArrayList<>();
 
-    private void fetchRobotPose3dEstimationsFromCameraInputs(
-            AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose) {
+    private void fetchRobotPose3dEstimationsFromCameraInputs(AprilTagVisionIO.CameraInputs[] cameraInputs) {
         robotPose3dObservationsMultiTag.clear();
         robotPose3dObservationsSingleTag.clear();
         observedAprilTagsPoses.clear();
@@ -68,29 +66,26 @@ public class MapleMultiTagPoseEstimator {
 
         for (int i = 0; i < cameraInputs.length; i++)
             if (cameraInputs[i].newPipeLineResultAvailable)
-                fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i), currentOdometryPose);
+                fetchSingleCameraInputs(cameraInputs[i], camerasProperties.get(i));
     }
 
     private void fetchSingleCameraInputs(
-            AprilTagVisionIO.CameraInputs cameraInput,
-            PhotonCameraProperties cameraProperty,
-            Pose2d currentOdometryPose) {
+            AprilTagVisionIO.CameraInputs cameraInput, PhotonCameraProperties cameraProperty) {
 
-        calculateVisibleTagsPosesForLog(cameraInput, cameraProperty, currentOdometryPose);
+        calculateVisibleTagsPosesForLog(cameraInput, cameraProperty);
 
         /* add multi-solvepnp result if present */
-        Optional<Pose3d> multiSolvePNPPoseEstimation = calculateRobotPose3dFromMultiSolvePNPResult(
-                cameraProperty.robotToCamera, cameraInput.bestFieldToCamera);
-        multiSolvePNPPoseEstimation.ifPresent(robotPose3dObservationsMultiTag::add);
+        if (cameraInput.fieldToCameraResultPresent)
+            robotPose3dObservationsMultiTag.add(calculateRobotPose3dFromMultiSolvePNPResult(
+                    cameraProperty.robotToCamera, cameraInput.bestFieldToCamera));
 
-        for (int i = 0; i < cameraInput.currentTargetsCount; i++)
-            calculateRobotPose3dFromSingleObservation(
-                            cameraInput.cameraID,
-                            cameraInput.fiducialMarksID[i],
-                            cameraProperty.robotToCamera,
-                            cameraInput.bestCameraToTargets[i],
-                            cameraInput.tagAmbiguities[i])
-                    .ifPresent(robotPose3dObservationsSingleTag::add);
+        calculateRobotPose3dFromSingleObservation(
+                        cameraInput.cameraID,
+                        cameraInput.bestTargetTagID,
+                        cameraProperty.robotToCamera,
+                        cameraInput.bestTargetCameraToTarget,
+                        cameraInput.bestTargetAmbiguity)
+                .ifPresent(robotPose3dObservationsSingleTag::add);
     }
 
     private Pose3d calculateObservedAprilTagTargetPose(
@@ -108,10 +103,9 @@ public class MapleMultiTagPoseEstimator {
                 .transformBy(robotToCamera.inverse()));
     }
 
-    private Optional<Pose3d> calculateRobotPose3dFromMultiSolvePNPResult(
-            Transform3d robotToCamera, Optional<Transform3d> bestFieldToCamera) {
-        return bestFieldToCamera.map(
-                fieldToCamera -> new Pose3d().transformBy(fieldToCamera).transformBy(robotToCamera.inverse()));
+    private Pose3d calculateRobotPose3dFromMultiSolvePNPResult(
+            Transform3d robotToCamera, Transform3d bestFieldToCamera) {
+        return new Pose3d().transformBy(bestFieldToCamera).transformBy(robotToCamera.inverse());
     }
 
     private boolean shouldDiscardTagObservation(
@@ -148,24 +142,20 @@ public class MapleMultiTagPoseEstimator {
     }
 
     private void calculateVisibleTagsPosesForLog(
-            AprilTagVisionIO.CameraInputs cameraInput,
-            PhotonCameraProperties cameraProperty,
-            Pose2d currentOdometryPose) {
-        if (!LOG_DETAILED_FILTERING_DATA) return;
-        for (int i = 0; i < cameraInput.fiducialMarksID.length; i++) {
-            if (shouldDiscardTagObservation(
-                    cameraInput.cameraID,
-                    cameraInput.fiducialMarksID[i],
-                    cameraProperty.robotToCamera,
-                    cameraInput.bestCameraToTargets[i],
-                    cameraInput.tagAmbiguities[i])) continue;
+            AprilTagVisionIO.CameraInputs cameraInput, PhotonCameraProperties cameraProperty) {
+        if (!Robot.LOG_DETAILS) return;
+        if (shouldDiscardTagObservation(
+                cameraInput.cameraID,
+                cameraInput.bestTargetTagID,
+                cameraProperty.robotToCamera,
+                cameraInput.bestTargetCameraToTarget,
+                cameraInput.bestTargetAmbiguity)) return;
 
-            fieldLayout
-                    .getTagPose(cameraInput.fiducialMarksID[i])
-                    .ifPresent(observedVisionTargetPoseInFieldLayout::add);
-            observedAprilTagsPoses.add(calculateObservedAprilTagTargetPose(
-                    cameraInput.bestCameraToTargets[i], cameraProperty.robotToCamera, currentOdometryPose));
-        }
+        fieldLayout.getTagPose(cameraInput.bestTargetTagID).ifPresent(observedVisionTargetPoseInFieldLayout::add);
+        observedAprilTagsPoses.add(calculateObservedAprilTagTargetPose(
+                cameraInput.bestTargetCameraToTarget,
+                cameraProperty.robotToCamera,
+                RobotState.getInstance().getVisionPose()));
     }
 
     private final List<Pose3d> validRobotPoseEstimationsMultiTag = new ArrayList<>(),
@@ -192,18 +182,18 @@ public class MapleMultiTagPoseEstimator {
      * @return (optionally) the best guess of the robot pose and the standard error, if there are valid targets
      */
     public Optional<VisionObservation> estimateRobotPose(
-            AprilTagVisionIO.CameraInputs[] cameraInputs, Pose2d currentOdometryPose, double timeStampSeconds) {
+            AprilTagVisionIO.CameraInputs[] cameraInputs, double timeStampSeconds) {
         if (cameraInputs.length != camerasProperties.size())
             throw new IllegalStateException("camera inputs length"
                     + cameraInputs.length
                     + " does not match cameras properties length: "
                     + camerasProperties.size());
 
-        fetchRobotPose3dEstimationsFromCameraInputs(cameraInputs, currentOdometryPose);
+        fetchRobotPose3dEstimationsFromCameraInputs(cameraInputs);
 
         applyFilteringToRawRobotPose3dEstimations();
 
-        if (LOG_DETAILED_FILTERING_DATA) logFilteringData();
+        if (Robot.LOG_DETAILS) logFilteringData();
 
         return getEstimationResultFromValidObservations(timeStampSeconds);
     }
@@ -281,7 +271,7 @@ public class MapleMultiTagPoseEstimator {
     private void logFilteringData() {
         Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Filtering/CurrentFilterImplementation", filter.getFilterImplementationName());
-        if (!LOG_DETAILED_FILTERING_DATA) return;
+        if (!Robot.LOG_DETAILS) return;
 
         /* these are the detailed filtering data, logging them on RobotRIO1.0 is a bad idea, if you want them, replay the log */
         Logger.recordOutput(
@@ -299,6 +289,10 @@ public class MapleMultiTagPoseEstimator {
         Logger.recordOutput(
                 APRIL_TAGS_VISION_PATH + "Filtering/AprilTagsObservedPositions/",
                 observedAprilTagsPoses.toArray(Pose3d[]::new));
+    }
+
+    public int validPoseEstimationsCount() {
+        return validRobotPoseEstimationsMultiTag.size() + validRobotPoseEstimationsSingleTag.size();
     }
 
     public record VisionObservation(Pose2d visionPose, Matrix<N3, N1> stdDevs, double timestamp) {

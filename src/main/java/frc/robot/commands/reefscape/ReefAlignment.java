@@ -1,39 +1,44 @@
 package frc.robot.commands.reefscape;
 
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.constants.DriveControlLoops.*;
 import static frc.robot.constants.ReefConstants.*;
 
 import com.pathplanner.lib.path.PathPlannerPath;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.DriverMap;
 import frc.robot.RobotContainer;
+import frc.robot.RobotState;
 import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.constants.DriveControlLoops;
+import frc.robot.constants.VisionConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.subsystems.led.LEDAnimation;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Supplier;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
 public class ReefAlignment {
-    private static final Translation2d REEF_CENTER_BLUE = new Translation2d(4.5, 4);
+    public static final Translation2d REEF_CENTER_BLUE = new Translation2d(4.5, 4);
+
+    public enum Side {
+        LEFT,
+        RIGHT,
+        CENTER
+    }
 
     public record BranchTarget(
             Rotation2d facing,
             Translation2d roughApproachPosition,
             Translation2d preciseAlignmentPosition,
             int tagId,
-            boolean rightSide) {
+            Side side) {
 
         public Pose2d roughApproachPose() {
             return new Pose2d(roughApproachPosition, facing);
@@ -50,8 +55,37 @@ public class ReefAlignment {
                     facing(),
                     Optional.of(FieldMirroringUtils.toCurrentAllianceTranslation(REEF_CENTER_BLUE)),
                     OptionalInt.of(tagId),
-                    rightSide ? 0 : 1,
-                    rightSide ? 2 : 3);
+                    switch (side) {
+                        case LEFT -> new Integer[] {1, 3};
+                        case RIGHT -> new Integer[] {0, 2};
+                        case CENTER -> new Integer[] {};
+                    });
+        }
+
+        public static BranchTarget measured(int tagID, Side side, Distance distanceToTag, Distance biasFromCenter) {
+            Pose2d tagPose =
+                    VisionConstants.fieldLayout.getTagPose(tagID).orElseThrow().toPose2d();
+            double biasFromCenterFactor =
+                    switch (side) {
+                        case LEFT -> -1.0;
+                        case RIGHT -> 1.0;
+                        case CENTER -> 0.0;
+                    };
+            Twist2d tagToTarget =
+                    new Twist2d(distanceToTag.in(Meters), biasFromCenterFactor * biasFromCenter.in(Meters), 0);
+            Twist2d tagToRoughTarget = new Twist2d(
+                    ROUGH_APPROACHT_POSE_TO_TARGET_DISTANCE.in(Meters),
+                    biasFromCenterFactor * ROUGH_APPROACH_POSE_TO_TARGET_MARGIN.in(Meters),
+                    0);
+            Translation2d targetPosition = tagPose.exp(tagToTarget).getTranslation();
+            Translation2d roughTargetPosition = tagPose.exp(tagToRoughTarget).getTranslation();
+
+            return new BranchTarget(
+                    tagPose.getRotation().rotateBy(Rotation2d.k180deg),
+                    roughTargetPosition,
+                    targetPosition,
+                    tagID,
+                    side);
         }
     }
 
@@ -59,30 +93,66 @@ public class ReefAlignment {
     private static int selectedReefPartId = 0;
     private static final Subsystem lock = new Subsystem() {};
 
-    public static BranchTarget getReefAlignmentTarget(boolean rightSide) {
-        int branchIndex = getBranchIndexFromReefPartId(rightSide);
+    public static BranchTarget getSelectedReefAlignmentTarget(Side side) {
+        int branchIndex = getBranchIndexFromReefPartId(selectedReefPartId, side);
         return FieldMirroringUtils.isSidePresentedAsRed()
                 ? REEF_ALIGNMENT_POSITIONS_RED[branchIndex]
                 : REEF_ALIGNMENT_POSITIONS_BLUE[branchIndex];
     }
 
-    private static int getBranchIndexFromReefPartId(boolean rightSide) {
-        int branchIndex = selectedReefPartId * 2;
-        boolean isUpperSide = // selectedReefPartId == 2 || selectedReefPartId == 3 || selectedReefPartId == 4;
-                false;
-        if (rightSide ^ isUpperSide) branchIndex++;
+    public static BranchTarget getNearestReefAlignmentTarget(Translation2d robotPosition, Side side) {
+        int index = getNearestReefAlignmentTargetId(robotPosition, side);
+        return FieldMirroringUtils.isSidePresentedAsRed()
+                ? REEF_ALIGNMENT_POSITIONS_RED[index]
+                : REEF_ALIGNMENT_POSITIONS_BLUE[index];
+    }
+
+    public static int getNearestReefAlignmentTargetId(Translation2d robotPosition, Side side) {
+        int minDistanceTargetId = -1;
+        double minDistance = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < REEF_ALIGNMENT_POSITIONS_BLUE.length; i++) {
+            BranchTarget target = FieldMirroringUtils.isSidePresentedAsRed()
+                    ? REEF_ALIGNMENT_POSITIONS_RED[i]
+                    : REEF_ALIGNMENT_POSITIONS_BLUE[i];
+            Pose3d tagPose = VisionConstants.fieldLayout
+                    .getTagPose(target.tagId)
+                    .orElse(new Pose3d(0, 0, -100, new Rotation3d()));
+            double robotToTargetDistance =
+                    tagPose.toPose2d().getTranslation().minus(robotPosition).getNorm();
+            if (robotToTargetDistance > minDistance || side != target.side) continue;
+            minDistance = robotToTargetDistance;
+            minDistanceTargetId = i;
+        }
+        return minDistanceTargetId;
+    }
+
+    private static int getBranchIndexFromReefPartId(int reefPartId, Side side) {
+        int branchIndex = reefPartId * 2;
+        branchIndex += switch (side) {
+            case LEFT -> 0;
+            case RIGHT -> 1;
+            case CENTER -> 24;};
         return branchIndex;
     }
 
+    private static boolean[] reef = new boolean[12];
+
     public static boolean[] displaySelectedBranch() {
-        boolean[] reef = new boolean[12];
         Arrays.fill(reef, false);
-        switch (selectedSide) {
-            case LEFT -> reef[getBranchIndexFromReefPartId(false)] = true;
-            case RIGHT -> reef[getBranchIndexFromReefPartId(true)] = true;
-            case NOT_SELECTED -> reef[getBranchIndexFromReefPartId(false)] =
-                    reef[getBranchIndexFromReefPartId(true)] = true;
-        }
+        if (selectedSide == Side.CENTER || selectedSide == Side.LEFT)
+            reef[getBranchIndexFromReefPartId(selectedReefPartId, Side.LEFT)] = true;
+        if (selectedSide == Side.CENTER || selectedSide == Side.RIGHT)
+            reef[getBranchIndexFromReefPartId(selectedReefPartId, Side.RIGHT)] = true;
+        return reef;
+    }
+
+    public static boolean[] displayNearestBranch() {
+        Arrays.fill(reef, false);
+        Translation2d robotPosition = RobotState.getInstance().getVisionPose().getTranslation();
+        if (selectedSide == Side.CENTER || selectedSide == Side.LEFT)
+            reef[getNearestReefAlignmentTargetId(robotPosition, Side.LEFT)] = true;
+        if (selectedSide == Side.CENTER || selectedSide == Side.RIGHT)
+            reef[getNearestReefAlignmentTargetId(robotPosition, Side.RIGHT)] = true;
         return reef;
     }
 
@@ -137,7 +207,7 @@ public class ReefAlignment {
     }
 
     public static Command followPathAndAlign(
-            RobotContainer robot, PathPlannerPath path, int targetId, Command toRunAtPreciseAlignment) {
+            RobotContainer robot, PathPlannerPath path, int targetId, Command... toScheduleBeforePreciseAlignment) {
         return Commands.deferredProxy(() -> {
             BranchTarget branchTarget = (FieldMirroringUtils.isSidePresentedAsRed()
                             ? REEF_ALIGNMENT_POSITIONS_RED
@@ -146,66 +216,87 @@ public class ReefAlignment {
             return AutoAlignment.followPathAndAutoAlignStatic(
                             robot.drive,
                             robot.aprilTagVision,
+                            robot.ledStatusLight,
                             path,
                             branchTarget.autoAlignmentTarget(),
                             DriveControlLoops.REEF_ALIGNMENT_CONFIG_AUTONOMOUS,
-                            preciseAlignmentLight(robot.ledStatusLight),
-                            toRunAtPreciseAlignment)
+                            toScheduleBeforePreciseAlignment)
                     .beforeStarting(() -> {
                         selectedReefPartId = targetId / 2;
-                        selectedSide = targetId % 2 == 0 ? SelectedSide.LEFT : SelectedSide.RIGHT;
+                        selectedSide = targetId % 2 == 0 ? Side.LEFT : Side.RIGHT;
                     })
-                    .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
-                    .finallyDo(() -> alignmentComplete(robot.ledStatusLight, robot.driver)
-                            .schedule());
+                    .finallyDo(() -> selectedSide = Side.CENTER);
         });
     }
 
-    public static Command alignmentToBranch(
+    public static Command alignmentToSelectedBranch(
             HolonomicDriveSubsystem drive,
             AprilTagVision aprilTagVision,
             LEDStatusLight statusLight,
-            DriverMap driver,
-            boolean rightSide,
-            Supplier<Command> toRunAtPreciseAlignment) {
-        return Commands.deferredProxy(() -> AutoAlignment.pathFindAndAutoAlign(
+            Side side,
+            AutoAlignment.AutoAlignmentConfigurations config,
+            Command... toScheduleAtPreciseAlignment) {
+        return Commands.deferredProxy(() -> pathFindAndAlignToBranchStatic(
                         drive,
                         aprilTagVision,
-                        ReefAlignment.getReefAlignmentTarget(rightSide).autoAlignmentTarget(),
-                        roughAlignmentLight(statusLight),
-                        preciseAlignmentLight(statusLight).alongWith(toRunAtPreciseAlignment.get()),
-                        DriveControlLoops.REEF_ALIGNMENT_CONFIG))
-                .beforeStarting(() -> selectedSide = rightSide ? SelectedSide.RIGHT : SelectedSide.LEFT)
-                .finallyDo(() -> selectedSide = SelectedSide.NOT_SELECTED)
-                .finallyDo((interrupted) -> {
-                    if (!interrupted) alignmentComplete(statusLight, driver).schedule();
-                });
+                        statusLight,
+                        getSelectedReefAlignmentTarget(side),
+                        config,
+                        toScheduleAtPreciseAlignment))
+                .withName("[Reef Alignment] Align to branch " + getBranchIndexFromReefPartId(selectedReefPartId, side))
+                .beforeStarting(() -> selectedSide = side)
+                .finallyDo(() -> selectedSide = Side.CENTER);
     }
 
-    private enum SelectedSide {
-        LEFT,
-        RIGHT,
-        NOT_SELECTED
+    public static Command alignToNearestBranch(
+            HolonomicDriveSubsystem drive,
+            AprilTagVision aprilTagVision,
+            LEDStatusLight statusLight,
+            Side side,
+            AutoAlignment.AutoAlignmentConfigurations config,
+            Command... toScheduleAtPreciseAlignment) {
+        return Commands.deferredProxy(() -> pathFindAndAlignToBranchStatic(
+                drive,
+                aprilTagVision,
+                statusLight,
+                getNearestReefAlignmentTarget(
+                        RobotState.getInstance().getVisionPose().getTranslation(), side),
+                config,
+                toScheduleAtPreciseAlignment));
     }
 
-    private static SelectedSide selectedSide = SelectedSide.NOT_SELECTED;
+    private static Command pathFindAndAlignToBranchStatic(
+            HolonomicDriveSubsystem drive,
+            AprilTagVision aprilTagVision,
+            LEDStatusLight statusLight,
+            BranchTarget branch,
+            AutoAlignment.AutoAlignmentConfigurations config,
+            Command... toScheduleAtPreciseAlignment) {
+        return AutoAlignment.pathFindAndAutoAlignStatic(
+                        drive,
+                        aprilTagVision,
+                        statusLight,
+                        branch.autoAlignmentTarget(),
+                        config,
+                        toScheduleAtPreciseAlignment)
+                .withName("[Reef Alignment] Align to branch");
+    }
+
+    private static Side selectedSide = Side.CENTER;
 
     public static void updateDashboard() {
         Logger.recordOutput("Reef/SelectedBranch", ReefAlignment.displaySelectedBranch());
-    }
-
-    private static Command roughAlignmentLight(LEDStatusLight statusLight) {
-        return statusLight.playAnimation(new LEDAnimation.Rainbow(), 1).repeatedly();
-    }
-
-    private static Command preciseAlignmentLight(LEDStatusLight statusLight) {
-        return statusLight.playAnimationPeriodically(new LEDAnimation.Charging(Color.kHotPink), 3);
-    }
-
-    private static Command alignmentComplete(LEDStatusLight statusLight, DriverMap driver) {
-        return statusLight
-                .playAnimation(new LEDAnimation.ShowColor(Color.kGreen), 0.5)
-                // .alongWith(driver.rumbleLeftRight(0.25))
-                .ignoringDisable(true);
+        Logger.recordOutput("Reef/NearestBranch", ReefAlignment.displayNearestBranch());
+        int nearestBranchTagID = getNearestReefAlignmentTarget(
+                        RobotState.getInstance().getVisionPose().getTranslation(), Side.CENTER)
+                .tagId;
+        Optional<Pose3d> tagPose3d = VisionConstants.fieldLayout.getTagPose(nearestBranchTagID);
+        if (tagPose3d.isEmpty()) return;
+        Pose2d tagRawPose = tagPose3d.get().toPose2d();
+        Pose2d tagPose =
+                new Pose2d(tagRawPose.getTranslation(), tagRawPose.getRotation().rotateBy(Rotation2d.k180deg));
+        Logger.recordOutput(
+                "Reef/RobotToNearestBranchTag",
+                RobotState.getInstance().getVisionPose().log(tagPose));
     }
 }

@@ -12,12 +12,10 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -30,7 +28,6 @@ import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
-import frc.robot.subsystems.led.LEDAnimation;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.vision.apriltags.AprilTagVision;
 import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
@@ -48,6 +45,7 @@ import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.ironmaple.utils.mathutils.MapleCommonMath;
+import org.littletonrobotics.conduit.ConduitApi;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggedPowerDistribution;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -97,10 +95,8 @@ public class RobotContainer {
 
                 /* CTRE Chassis: */
                 drive = new SwerveDrive(
-                        Objects.equals(TunerConstants.kCANBus.getName(), "rio")
-                                ? SwerveDrive.DriveType.CTRE_ON_RIO
-                                : SwerveDrive.DriveType.CTRE_ON_CANIVORE,
-                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
+                        SwerveDrive.DriveType.CTRE_TIME_SYNCHRONIZED,
+                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants, false),
                         new CanBusIOReal(TunerConstants.kCANBus),
                         new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
                         new ModuleIOTalon(TunerConstants.FrontRight, "FrontRight"),
@@ -229,7 +225,6 @@ public class RobotContainer {
         autoSendableChooser.addOption(
                 "Example Pathplanner GUI Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
         autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
-        autoSendableChooser.addOption("Example Auto Alignment", new ExampleCustomAutoWithAutoAlignment());
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
@@ -301,6 +296,10 @@ public class RobotContainer {
                 .schedule();
     }
 
+    public Command autoAlign(ReefAlignment.Side side, AutoAlignment.AutoAlignmentConfigurations autoAlignmentConfig) {
+        return ReefAlignment.alignToNearestBranch(drive, aprilTagVision, ledStatusLight, side, autoAlignmentConfig);
+    }
+
     /**
      * Use this method to define your button->command mappings. Buttons can be created by instantiating a
      * {@link GenericHID} or one of its subclasses ({@link Joystick} or {@link XboxController}), and then passing it to
@@ -309,10 +308,18 @@ public class RobotContainer {
     public void configureButtonBindings() {
         SmartDashboard.putData(
                 "Enable Motor Brake",
-                Commands.runOnce(() -> setMotorBrake(true)).ignoringDisable(true));
+                Commands.runOnce(() -> setMotorBrake(true))
+                        .onlyIf(DriverStation::isDisabled)
+                        .beforeStarting(Commands.print("unlocking motor brakes..."))
+                        .andThen(Commands.print("motor brakes unlocked!"))
+                        .ignoringDisable(true));
         SmartDashboard.putData(
                 "Disable Motor Brake",
-                Commands.runOnce(() -> setMotorBrake(true)).ignoringDisable(false));
+                Commands.runOnce(() -> setMotorBrake(false))
+                        .onlyIf(DriverStation::isDisabled)
+                        .beforeStarting(Commands.print("locking motor brakes..."))
+                        .andThen(Commands.print("motor brakes locked!"))
+                        .ignoringDisable(true));
 
         /* joystick drive command */
         final MapleJoystickDriveInput driveInput = driver.getDriveInput();
@@ -320,7 +327,7 @@ public class RobotContainer {
                 // driver.getController().getHID()::getPOV;
                 () -> -1;
         final JoystickDrive joystickDrive = new JoystickDrive(driveInput, () -> true, pov, drive);
-        drive.setDefaultCommand(joystickDrive);
+        drive.setDefaultCommand(joystickDrive.ignoringDisable(true));
         JoystickDrive.instance = Optional.of(joystickDrive);
 
         /* reset gyro heading manually (in case the vision does not work) */
@@ -335,38 +342,26 @@ public class RobotContainer {
         /* lock chassis with x-formation */
         driver.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
 
-        /* TODO: aim at target and drive example, delete it for your project */
-        Command exampleFaceTargetWhileDriving = JoystickDriveAndAimAtTarget.driveAndAimAtTarget(
-                driveInput,
-                drive,
-                () -> FieldMirroringUtils.toCurrentAllianceTranslation(new Translation2d(3.17, 4.15)),
-                null,
-                0.75,
-                false);
-        // driver.faceToTargetButton().whileTrue(FaceCoralStation.faceCoralStation(drive, driveInput));
-
         /* auto alignment example, delete it for your project */
         driver.autoAlignmentButtonLeft()
-                .whileTrue(ReefAlignment.alignmentToBranch(
-                        drive, aprilTagVision, ledStatusLight, driver, false, Commands::none));
+                .whileTrue(autoAlign(ReefAlignment.Side.LEFT, DriveControlLoops.REEF_ALIGNMENT_CONFIG));
         driver.autoAlignmentButtonRight()
-                .whileTrue(ReefAlignment.alignmentToBranch(
-                        drive, aprilTagVision, ledStatusLight, driver, true, Commands::none));
+                .whileTrue(autoAlign(ReefAlignment.Side.RIGHT, DriveControlLoops.REEF_ALIGNMENT_CONFIG));
 
-        //        new Trigger(() -> operator.getRightX() > 0.5).whileTrue(ReefAlignment.previousTargetButton(0.3));
-        //        new Trigger(() -> operator.getRightX() < -0.5).whileTrue(ReefAlignment.nextTargetButton(0.3));
-        //        driver.povUp().onTrue(ReefAlignment.selectReefPartButton(3));
-        //        driver.povDown().onTrue(ReefAlignment.selectReefPartButton(0));
-        //        driver.povLeft().whileTrue(ReefAlignment.lefterTargetButton(0.3));
-        //        driver.povRight().whileTrue(ReefAlignment.righterTargetButton(0.3));
-        operator.y().onTrue(ReefAlignment.selectReefPartButton(3));
-        operator.a().onTrue(ReefAlignment.selectReefPartButton(0));
-        operator.x().whileTrue(ReefAlignment.lefterTargetButton(0.3));
-        operator.b().whileTrue(ReefAlignment.righterTargetButton(0.3));
+        driver.faceToTargetButton()
+                .and(driver.autoAlignmentButtonLeft().negate())
+                .and(driver.autoAlignmentButtonRight().negate())
+                .whileTrue(JoystickDriveAndAimAtTarget.driveAndAimAtTarget(
+                        driveInput,
+                        drive,
+                        () -> FieldMirroringUtils.toCurrentAllianceTranslation(ReefAlignment.REEF_CENTER_BLUE),
+                        null,
+                        JoystickConfigs.DEFAULT_TRANSLATIONAL_SENSITIVITY,
+                        false));
     }
 
     public void configureLEDEffects() {
-        ledStatusLight.setDefaultCommand(ledStatusLight.showEnableDisableState());
+        ledStatusLight.setDefaultCommand(ledStatusLight.showRobotState());
     }
 
     /**
@@ -400,6 +395,8 @@ public class RobotContainer {
     private final Alert autoPlacementIncorrect = AlertsManager.create(
             "Expected Autonomous robot placement position does not match reality, IS THE SELECTED AUTO CORRECT?",
             Alert.AlertType.kWarning);
+    private final Alert lowBattery =
+            AlertsManager.create("Battery voltage 12.0, please keep it above 12.5V", Alert.AlertType.kInfo);
     private static final double AUTO_PLACEMENT_TOLERANCE_METERS = 0.25;
     private static final double AUTO_PLACEMENT_TOLERANCE_DEGREES = 5;
 
@@ -419,26 +416,25 @@ public class RobotContainer {
         Transform2d difference = autoStartingPose.minus(currentPose);
         boolean autoPlacementIncorrectDetected = difference.getTranslation().getNorm() > AUTO_PLACEMENT_TOLERANCE_METERS
                 || Math.abs(difference.getRotation().getDegrees()) > AUTO_PLACEMENT_TOLERANCE_DEGREES;
-        autoPlacementIncorrect.set(autoPlacementIncorrectDetected && DriverStation.isDisabled());
+        // autoPlacementIncorrect.set(autoPlacementIncorrectDetected && DriverStation.isDisabled());
+        autoPlacementIncorrect.set(false);
+
+        double voltage = ConduitApi.getInstance().getPDPVoltage();
+        lowBattery.setText(String.format(
+                "Battery voltage: %.1fV, please try to keep it above 12.5V before going on field", voltage));
+        lowBattery.set(DriverStation.isDisabled() && voltage < 12.5);
 
         AlertsManager.updateLEDAndLog(ledStatusLight);
     }
 
-    private boolean motorBrakeEnabled = false;
+    public static boolean motorBrakeEnabled = false;
 
     public void setMotorBrake(boolean brakeModeEnabled) {
-        if (DriverStation.isEnabled()) return;
-        if (this.motorBrakeEnabled == brakeModeEnabled) return;
+        if (motorBrakeEnabled == brakeModeEnabled) return;
 
+        System.out.println("Set motor brake: " + brakeModeEnabled);
         drive.setMotorBrake(brakeModeEnabled);
-        // TODO: set motor brake mode for other subsystems
-        if (brakeModeEnabled)
-            ledStatusLight
-                    .playAnimationPeriodically(new LEDAnimation.Breathe(Color.kWhite), 0.5)
-                    .ignoringDisable(true)
-                    .schedule();
-        else ledStatusLight.showEnableDisableState().schedule();
 
-        this.motorBrakeEnabled = brakeModeEnabled;
+        motorBrakeEnabled = brakeModeEnabled;
     }
 }

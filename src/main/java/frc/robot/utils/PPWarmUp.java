@@ -14,6 +14,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.commands.drive.AutoAlignment;
 import frc.robot.constants.DriveTrainConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 
@@ -34,13 +35,13 @@ public class PPWarmUp {
                                         0.048, 5.0, 1.2, DCMotor.getKrakenX60(1).withReduction(6.14), 60.0, 1),
                                 DriveTrainConstants.MODULE_TRANSLATIONS))
                 .repeatedly()
-                .withTimeout(10);
+                .withTimeout(8);
     }
 
     public static Command choreoWarmUp(HolonomicDriveSubsystem driveSubsystem) {
         PathPlannerPath path;
         try {
-            path = PathPlannerPath.fromChoreoTrajectory("place first");
+            path = PathPlannerPath.fromChoreoTrajectory("place preload");
         } catch (Exception e) {
             return Commands.none();
         }
@@ -59,6 +60,17 @@ public class PPWarmUp {
                                 DriveTrainConstants.MODULE_TRANSLATIONS),
                         () -> false)
                 .repeatedly()
-                .withTimeout(10);
+                .withTimeout(5);
+    }
+
+    public static Command alignmentWarmUp() {
+        return Commands.run(() -> AutoAlignment.getPreciseAlignmentPath(
+                        new ChassisSpeeds(),
+                        new Pose2d(3, 3, new Rotation2d()),
+                        new Pose2d(5, 4, new Rotation2d()),
+                        new Rotation2d(),
+                        AutoAlignment.AutoAlignmentConfigurations.DEFAULT_CONFIG))
+                .ignoringDisable(true)
+                .withTimeout(6);
     }
 }

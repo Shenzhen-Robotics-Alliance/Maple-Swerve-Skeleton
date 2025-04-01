@@ -3,6 +3,7 @@ package frc.robot.commands.reefscape;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.drive.JoystickDriveAndAimAtTarget;
+import frc.robot.constants.JoystickConfigs;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.MapleJoystickDriveInput;
 import org.ironmaple.utils.FieldMirroringUtils;
@@ -19,7 +20,7 @@ public class FaceCoralStation {
                     return FieldMirroringUtils.toCurrentAllianceRotation(
                             lefterStationCloser ? Rotation2d.fromDegrees(-53) : Rotation2d.fromDegrees(53));
                 },
-                0.5,
+                JoystickConfigs.DEFAULT_TRANSLATIONAL_SENSITIVITY,
                 false);
     }
 }

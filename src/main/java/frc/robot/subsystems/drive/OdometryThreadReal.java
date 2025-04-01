@@ -54,11 +54,11 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
     private void refreshSignalsAndBlockThread() {
         switch (driveType) {
             case GENERIC -> MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
-            case CTRE_ON_RIO -> {
+            case CTRE -> {
                 MapleTimeUtils.delay(1.0 / ODOMETRY_FREQUENCY);
                 BaseStatusSignal.refreshAll(statusSignals);
             }
-            case CTRE_ON_CANIVORE -> BaseStatusSignal.waitForAll(ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
+            case CTRE_TIME_SYNCHRONIZED -> BaseStatusSignal.waitForAll(ODOMETRY_WAIT_TIMEOUT_SECONDS, statusSignals);
         }
     }
 
@@ -76,6 +76,7 @@ public class OdometryThreadReal extends Thread implements OdometryThread {
         inputs.odometryTicksCountInPreviousRobotPeriod = timeStampsQueue.size();
         for (int i = 0; i < ODOMETRY_CACHE_CAPACITY; i++)
             inputs.measurementTimeStamps[i] = Objects.requireNonNullElse(timeStampsQueue.poll(), 0.0);
+        timeStampsQueue.clear();
     }
 
     @Override

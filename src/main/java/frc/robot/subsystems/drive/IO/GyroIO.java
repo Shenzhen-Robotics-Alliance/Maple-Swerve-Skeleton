@@ -17,6 +17,8 @@ public interface GyroIO {
         public Rotation2d yawPosition = new Rotation2d();
         public Rotation2d[] odometryYawPositions = new Rotation2d[DriveTrainConstants.ODOMETRY_CACHE_CAPACITY];
         public double yawVelocityRadPerSec = 0.0;
+        public double pitchRad = 0.0;
+        public double rollRad = 0.0;
     }
 
     void updateInputs(GyroIOInputs inputs);

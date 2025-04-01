@@ -14,28 +14,28 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Robot;
 import frc.robot.RobotState;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.ChassisHeadingController;
+import frc.robot.utils.CustomMaths.TipOverDetection;
 import frc.robot.utils.MapleTimeUtils;
 import java.util.Arrays;
 import java.util.Optional;
@@ -47,8 +47,8 @@ import org.littletonrobotics.junction.Logger;
 public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsystem {
     public enum DriveType {
         GENERIC,
-        CTRE_ON_RIO,
-        CTRE_ON_CANIVORE
+        CTRE,
+        CTRE_TIME_SYNCHRONIZED
     }
 
     private final GyroIO gyroIO;
@@ -67,12 +67,18 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
             "Gyro configuration failed! Reboot robot after fixing connection.", Alert.AlertType.kError);
     private final Alert canBusHighUtilization =
             AlertsManager.create("Drivetrain CanBus high utilization!", Alert.AlertType.kError);
-    private final Debouncer batteryBrownoutDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
     private final Alert batteryBrownoutAlert =
             AlertsManager.create("Battery brownout detected!", Alert.AlertType.kError);
     private final Debouncer drivetrainOverCurrentDebouncer = new Debouncer(0.2, Debouncer.DebounceType.kBoth);
     private final Alert drivetrainOverCurrentAlert =
             AlertsManager.create("Drivetrain over current detected! Current: ", Alert.AlertType.kError);
+
+    private final Debouncer batteryBrownoutDebouncer = new Debouncer(0.5, Debouncer.DebounceType.kFalling);
+    private final Debouncer robotTippingDebouncer = new Debouncer(0.25, Debouncer.DebounceType.kBoth);
+
+    private boolean robotTipping = false;
+    private static final Angle TIP_OVER_THRESHOLD = Degrees.of(2.4);
+    public Trigger driveTrainTipping = new Trigger(() -> robotTipping);
 
     private final SwerveSetpointGenerator setpointGenerator;
     private SwerveSetpoint setpoint;
@@ -151,12 +157,28 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         Logger.recordOutput(
                 "RobotState/PrimaryEstimatorPose", RobotState.getInstance().getPrimaryEstimatorPose());
         Logger.recordOutput(
+                "RobotState/PrimaryEstimatorPoseWith3dRot",
+                new Pose3d(
+                        new Translation3d(RobotState.getInstance()
+                                .getPrimaryEstimatorPose()
+                                .getTranslation()),
+                        getDriveTrain3dOrientation()));
+        Logger.recordOutput(
                 "RobotState/VisionSensitivePose", RobotState.getInstance().getVisionPose());
         Logger.recordOutput(
                 "RobotState/ControlLoopPose", RobotState.getInstance().getPose());
         Logger.recordOutput(
                 "RobotState/ControlLoopPoseWithLookAhead",
                 RobotState.getInstance().getPoseWithLookAhead());
+
+        robotTipping = robotTippingDebouncer.calculate(
+                TipOverDetection.getTippingAngleRad(getDriveTrain3dOrientation()) > TIP_OVER_THRESHOLD.in(Radians));
+        Logger.recordOutput(
+                "RobotState/TippingAngleDeg",
+                Math.toDegrees(TipOverDetection.getTippingAngleRad(getDriveTrain3dOrientation())));
+
+        if (DriverStation.isDisabled())
+            this.setpoint = new SwerveSetpoint(new ChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
     }
 
     private void fetchOdometryInputs() {
@@ -199,6 +221,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
 
     @Override
     public void runRobotCentricChassisSpeeds(ChassisSpeeds speeds) {
+        Logger.recordOutput("SwerveSetpoint/desiredSpeeds", speeds);
         if (!ENABLE_SOFTWARE_CONSTRAIN) {
             runRobotCentricSpeedsWithFeedforwards(speeds, DriveFeedforwards.zeros(4));
             return;
@@ -212,33 +235,50 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     }
 
     private static PathConstraints getPathConstraints(boolean lowSpeedMode) {
-        LinearAcceleration accelerationConstrain =
-                lowSpeedMode ? ACCELERATION_SOFT_CONSTRAIN_LOW : ACCELERATION_SOFT_CONSTRAIN;
-        LinearVelocity velocityConstrain =
-                lowSpeedMode ? MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW : MOVEMENT_VELOCITY_SOFT_CONSTRAIN;
+        double accelerationConstrain = lowSpeedMode
+                ? ACCELERATION_SOFT_CONSTRAIN_LOW.in(MetersPerSecondPerSecond)
+                : ACCELERATION_SOFT_CONSTRAIN.in(MetersPerSecondPerSecond);
+        double velocityConstrain = lowSpeedMode
+                ? MOVEMENT_VELOCITY_SOFT_CONSTRAIN_LOW.in(MetersPerSecond)
+                : MOVEMENT_VELOCITY_SOFT_CONSTRAIN.in(MetersPerSecond);
+        double angularVelocityConstrain = lowSpeedMode
+                ? ANGULAR_VELOCITY_SOFT_CONSTRAIN_LOW.in(RadiansPerSecond)
+                : ANGULAR_VELOCITY_SOFT_CONSTRAIN.in(RadiansPerSecond);
+        double angularAccelerationConstrain = lowSpeedMode
+                ? ANGULAR_ACCELERATION_SOFT_CONSTRAIN_LOW.in(RadiansPerSecondPerSecond)
+                : ANGULAR_ACCELERATION_SOFT_CONSTRAIN.in(RadiansPerSecondPerSecond);
         return new PathConstraints(
-                velocityConstrain,
-                accelerationConstrain,
-                ANGULAR_VELOCITY_SOFT_CONSTRAIN,
-                ANGULAR_ACCELERATION_SOFT_CONSTRAIN);
+                velocityConstrain, accelerationConstrain, angularVelocityConstrain, angularAccelerationConstrain);
     }
 
     @Override
     public void runRobotCentricSpeedsWithFeedforwards(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
+        if (Robot.LOG_DETAILS) Logger.recordOutput("SwerveSetpoint/desiredSpeeds", speeds);
         this.setpoint = new SwerveSetpoint(speeds, getModuleStates(), feedforwards);
         executeSetpoint();
     }
 
+    private SwerveSetpoint constrainSetpoint(SwerveSetpoint setpoint) {
+        ChassisSpeeds speeds = HolonomicDriveSubsystem.constrainSpeeds(setpoint.robotRelativeSpeeds());
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpoint.moduleStates(), CHASSIS_MAX_VELOCITY);
+        return new SwerveSetpoint(speeds, setpoint.moduleStates(), setpoint.feedforwards());
+    }
+
     private void executeSetpoint() {
-        OptionalDouble angularVelocityOverride =
-                ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
+        setpoint = constrainSetpoint(setpoint);
+        if (Robot.LOG_DETAILS)
+            Logger.recordOutput("SwerveSetpoint/currentSwerveSpeeds", setpoint.robotRelativeSpeeds());
         ChassisSpeeds speeds = setpoint.robotRelativeSpeeds();
 
-        if (angularVelocityOverride.isPresent()) {
+        OptionalDouble angularVelocityOverride =
+                ChassisHeadingController.getInstance().calculate(getMeasuredChassisSpeedsFieldRelative(), getPose());
+        if (angularVelocityOverride.isPresent())
             speeds = new ChassisSpeeds(
                     speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, angularVelocityOverride.getAsDouble());
-            speeds = ChassisSpeeds.discretize(speeds, Robot.defaultPeriodSecs);
-        }
+        if (Robot.LOG_DETAILS) Logger.recordOutput("SwerveSetpoint/executedSpeedsWithRotationalOverride", speeds);
+        speeds = HolonomicDriveSubsystem.constrainSpeeds(speeds);
+        if (Robot.LOG_DETAILS)
+            Logger.recordOutput("SwerveSetpoint/executedSpeedsWithRotationalOverrideConstrained", speeds);
 
         SwerveModuleState[] setPointStates = DRIVE_KINEMATICS.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setPointStates, CHASSIS_MAX_VELOCITY);
@@ -375,6 +415,11 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
         return canBusInputs.utilization;
     }
 
+    public Rotation3d getDriveTrain3dOrientation() {
+        return new Rotation3d(
+                gyroInputs.rollRad, gyroInputs.pitchRad, getFacing().getRadians());
+    }
+
     @AutoLogOutput(key = "DrivetrainTotalCurrentAmps")
     public double getDriveTrainTotalCurrentAmps() {
         return Arrays.stream(swerveModules)
@@ -385,11 +430,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     private void runCharacterization(Voltage voltage) {
         SwerveModuleState[] moduleStates = DRIVE_KINEMATICS.toSwerveModuleStates(new ChassisSpeeds(0, 0, 1));
         for (int i = 0; i < swerveModules.length; i++)
-            switch (TunerConstants.FrontLeft.DriveMotorClosedLoopOutput) {
-                case Voltage -> swerveModules[i].runVoltageCharacterization(moduleStates[i].angle, voltage);
-                case TorqueCurrentFOC -> swerveModules[i].runCurrentCharacterization(
-                        moduleStates[i].angle, Amps.of(voltage.in(Volts)));
-            }
+            swerveModules[i].runVoltageCharacterization(moduleStates[i].angle, voltage.in(Volts));
     }
 
     private final SysIdRoutine sysId = new SysIdRoutine(

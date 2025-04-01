@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision.apriltags;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static frc.robot.constants.VisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose3d;

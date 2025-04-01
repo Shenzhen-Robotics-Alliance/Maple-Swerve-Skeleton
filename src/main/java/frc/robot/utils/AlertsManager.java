@@ -51,7 +51,7 @@ public class AlertsManager {
     private static Command getFlashLEDForErrorCommand(LEDStatusLight statusLight) {
         if (flashLEDForError == null)
             flashLEDForError = statusLight
-                    .playAnimationPeriodically(new LEDAnimation.Breathe(Color.kRed), 2)
+                    .playAnimationPeriodically(new LEDAnimation.Breathe(() -> Color.kRed), 2)
                     .until(() -> !hasAlertType(Alert.AlertType.kError))
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
                     .ignoringDisable(true);
@@ -67,7 +67,7 @@ public class AlertsManager {
     private static Command getFlashLEDForWarningCommand(LEDStatusLight statusLight) {
         if (flashLEDForWarning == null)
             flashLEDForWarning = statusLight
-                    .playAnimationPeriodically(new LEDAnimation.Breathe(Color.kOrange), 0.5)
+                    .playAnimationPeriodically(new LEDAnimation.Breathe(() -> Color.kOrange), 0.5)
                     .until(() -> !hasAlertType(Alert.AlertType.kWarning))
                     .until(() -> hasAlertType(Alert.AlertType.kError))
                     .until(DriverStation::isEnabled)

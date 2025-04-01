@@ -111,11 +111,6 @@ public interface DriverMap extends Subsystem {
         }
 
         @Override
-        public Trigger faceToTargetButton() {
-            return xboxController.leftBumper();
-        }
-
-        @Override
         public CommandGenericHID getController() {
             return xboxController;
         }
@@ -145,6 +140,11 @@ public interface DriverMap extends Subsystem {
         public DoubleSupplier rotationalAxisY() {
             return xboxController::getRightY;
         }
+
+        @Override
+        public Trigger faceToTargetButton() {
+            return xboxController.rightStick();
+        }
     }
 
     class RightHandedXbox extends DriverXbox {
@@ -170,6 +170,11 @@ public interface DriverMap extends Subsystem {
         @Override
         public DoubleSupplier rotationalAxisY() {
             return xboxController::getLeftY;
+        }
+
+        @Override
+        public Trigger faceToTargetButton() {
+            return xboxController.leftStick();
         }
     }
 
@@ -221,11 +226,6 @@ public interface DriverMap extends Subsystem {
         }
 
         @Override
-        public Trigger faceToTargetButton() {
-            return ps5Controller.L1();
-        }
-
-        @Override
         public CommandGenericHID getController() {
             return ps5Controller;
         }
@@ -256,6 +256,11 @@ public interface DriverMap extends Subsystem {
         public DoubleSupplier rotationalAxisY() {
             return ps5Controller::getRightY;
         }
+
+        @Override
+        public Trigger faceToTargetButton() {
+            return ps5Controller.R3();
+        }
     }
 
     final class RightHandedPS5 extends DriverPS5 {
@@ -282,6 +287,11 @@ public interface DriverMap extends Subsystem {
         @Override
         public DoubleSupplier rotationalAxisY() {
             return ps5Controller::getLeftY;
+        }
+
+        @Override
+        public Trigger faceToTargetButton() {
+            return ps5Controller.L3();
         }
     }
 }

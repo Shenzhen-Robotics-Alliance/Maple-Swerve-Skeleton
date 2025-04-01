@@ -5,10 +5,14 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.SignalLogger;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.constants.ReefConstants;
 import frc.robot.constants.RobotMode;
+import frc.robot.constants.VisionConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -17,8 +21,20 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
+    public enum RobotName {
+        // Team 5516 dev bot
+        TEAM_5516_DEVBOT_HYDROXIDE_I,
+        // Team 5516 comp bot
+        TEAM_5516_COMPBOT_HYDROXIDE_II,
+        // Team 6706 comp bot
+        TEAM_6706_COMPBOT
+    }
+
+    public static final double defaultPeriodSecs = 0.02;
+    public static final boolean LOG_DETAILS = true; // isSimulation();
     private static final RobotMode JAVA_SIM_MODE = RobotMode.SIM;
     public static final RobotMode CURRENT_ROBOT_MODE = isReal() ? RobotMode.REAL : JAVA_SIM_MODE;
+    public static final RobotName CURRENT_ROBOT = RobotName.TEAM_5516_COMPBOT_HYDROXIDE_II;
     private Command autonomousCommand;
     private RobotContainer robotContainer;
 
@@ -72,6 +88,12 @@ public class Robot extends LoggedRobot {
 
         // Start AdvantageKit logger
         Logger.start();
+
+        // Performance Optimization
+        ReefConstants.loadStatic();
+        SignalLogger.enableAutoLogging(false);
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+        AprilTagFieldLayout.loadField(VisionConstants.CURRENT_FIELD);
     }
 
     /** This function is called periodically during all modes. */

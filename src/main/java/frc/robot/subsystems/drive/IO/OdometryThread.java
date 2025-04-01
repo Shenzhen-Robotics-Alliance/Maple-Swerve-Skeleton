@@ -43,6 +43,7 @@ public interface OdometryThread {
         public <T> void writeToInput(T[] input, Function<Double, T> mapper) {
             for (int i = 0; i < input.length; i++)
                 input[i] = mapper.apply(Objects.requireNonNullElse(queue.poll(), 0.0));
+            queue.clear();
         }
     }
 

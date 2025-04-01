@@ -11,7 +11,9 @@ import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -23,9 +25,11 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.SwerveModule;
 
 public class ModuleIOTalon implements ModuleIO {
     private final String name;
@@ -53,9 +57,7 @@ public class ModuleIOTalon implements ModuleIO {
     private final StatusSignal<Current> steerMotorCurrentDrawn;
 
     // Connection debouncers
-    private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
-    private final Debouncer steerConnectedDebounce = new Debouncer(0.5);
-    private final Debouncer steerEncoderConnectedDebounce = new Debouncer(0.5);
+    private final Debouncer hardwareConnectedDebounce = new Debouncer(0.5);
 
     private final boolean driveConfigurationOK, steerConfigurationOK, canCoderConfigurationOK;
 
@@ -97,6 +99,11 @@ public class ModuleIOTalon implements ModuleIO {
                         moduleConstants.SteerMotorInverted
                                 ? InvertedValue.Clockwise_Positive
                                 : InvertedValue.CounterClockwise_Positive);
+        var steerCurrentLimit = new CurrentLimitsConfigs()
+                .withStatorCurrentLimitEnable(true)
+                .withStatorCurrentLimit(STEER_CURRENT_LIMIT)
+                .withSupplyCurrentLimitEnable(true)
+                .withSupplyCurrentLimit(10.0);
         var steerGains = moduleConstants.SteerMotorGains;
         var steerFeedBack = new FeedbackConfigs()
                 .withFeedbackRemoteSensorID(moduleConstants.EncoderId)
@@ -105,6 +112,7 @@ public class ModuleIOTalon implements ModuleIO {
         var steerCloseLoop = new ClosedLoopGeneralConfigs();
         steerCloseLoop.ContinuousWrap = true;
         steerConfigurationOK = tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerOutput, timeOutSeconds))
+                && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerCurrentLimit, timeOutSeconds))
                 && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerGains, timeOutSeconds))
                 && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerFeedBack, timeOutSeconds))
                 && tryUntilOk(5, () -> steerTalon.getConfigurator().apply(steerCloseLoop, timeOutSeconds));
@@ -152,14 +160,17 @@ public class ModuleIOTalon implements ModuleIO {
         inputs.steerEncoderConfigurationFailed = !canCoderConfigurationOK;
 
         // Refresh all signals
-        var driveStatus = BaseStatusSignal.refreshAll(
-                driveRotterPosition, driveRotterVelocity, driveAppliedVoltage, driveMotorCurrentDrawn);
-        var steerStatus = BaseStatusSignal.refreshAll(
-                steerAbsolutePosition, steerFinalMechanismVelocity, steerAppliedVoltage, steerMotorCurrentDrawn);
-        var steerEncoderStatus = BaseStatusSignal.refreshAll(steerAbsolutePosition);
-        inputs.driveMotorConnected = driveConnectedDebounce.calculate(driveStatus.isOK());
-        inputs.steerMotorConnected = steerConnectedDebounce.calculate(steerStatus.isOK());
-        inputs.steerEncoderConnected = steerEncoderConnectedDebounce.calculate(steerEncoderStatus.isOK());
+        var statusCode = BaseStatusSignal.refreshAll(
+                driveRotterPosition,
+                driveRotterVelocity,
+                driveAppliedVoltage,
+                driveMotorCurrentDrawn,
+                steerAbsolutePosition,
+                steerFinalMechanismVelocity,
+                steerAppliedVoltage,
+                steerMotorCurrentDrawn,
+                steerAbsolutePosition);
+        inputs.hardwareCurrentlyConnected = hardwareConnectedDebounce.calculate(statusCode.isOK());
 
         // Fetch high-frequency drive encoder inputs
         driveRotterPositionRotations.writeToDoubleInput(
@@ -199,44 +210,34 @@ public class ModuleIOTalon implements ModuleIO {
         this.steerBrakeEnabled = enableSteerBrake;
     }
 
+    private final VoltageOut voltageOut = new VoltageOut(0.0);
+
     @Override
-    public void requestDriveOpenLoop(Voltage output) {
-        driveTalon.setControl(new VoltageOut(output));
+    public void requestDriveOpenLoop(double outputVolts) {
+        driveTalon.setControl(voltageOut.withOutput(outputVolts));
     }
 
     @Override
-    public void requestDriveOpenLoop(Current output) {
-        driveTalon.setControl(new TorqueCurrentFOC(output));
+    public void requestSteerOpenLoop(double outputVolts) {
+        steerTalon.setControl(voltageOut.withOutput(outputVolts));
     }
 
-    @Override
-    public void requestSteerOpenLoop(Voltage output) {
-        steerTalon.setControl(new VoltageOut(output));
-    }
+    private final VelocityVoltage velocityVoltage = new VelocityVoltage(0.0);
 
     @Override
-    public void requestSteerOpenLoop(Current output) {
-        steerTalon.setControl(new TorqueCurrentFOC(output));
+    public void requestDriveVelocityControl(double desiredMotorVelocityRadPerSec, double feedforwardMotorVoltage) {
+        driveTalon.setControl(velocityVoltage
+                .withVelocity(Units.radiansToRotations(desiredMotorVelocityRadPerSec))
+                .withFeedForward(feedforwardMotorVoltage)
+                .withUpdateFreqHz(100.0));
     }
 
-    @Override
-    public void requestDriveVelocityControl(AngularVelocity desiredMotorVelocity, Torque feedforwardMotorTorque) {
-        driveTalon.setControl(
-                switch (moduleConstants.DriveMotorClosedLoopOutput) {
-                    case Voltage -> new VelocityVoltage(desiredMotorVelocity)
-                            .withFeedForward(SwerveModule.calculateFeedforwardVoltage(feedforwardMotorTorque));
-                    case TorqueCurrentFOC -> new VelocityTorqueCurrentFOC(desiredMotorVelocity)
-                            .withFeedForward(SwerveModule.calculateFeedforwardCurrent(feedforwardMotorTorque));
-                });
-    }
+    private final PositionVoltage positionVoltage = new PositionVoltage(0.0);
 
     @Override
     public void requestSteerPositionControl(Rotation2d desiredSteerAbsoluteFacing) {
-        double steerPosition = desiredSteerAbsoluteFacing.getRotations();
-        steerTalon.setControl(
-                switch (moduleConstants.SteerMotorClosedLoopOutput) {
-                    case Voltage -> new PositionVoltage(steerPosition);
-                    case TorqueCurrentFOC -> new PositionTorqueCurrentFOC(steerPosition);
-                });
+        steerTalon.setControl(positionVoltage
+                .withPosition(desiredSteerAbsoluteFacing.getRotations())
+                .withUpdateFreqHz(200.0));
     }
 }

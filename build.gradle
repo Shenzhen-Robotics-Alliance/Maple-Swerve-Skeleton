@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.3.1"
+    id "edu.wpi.first.GradleRIO" version "2025.3.2"
     id "com.peterabeles.gversion" version "1.10"
     id("com.diffplug.spotless") version "7.0.0.BETA4"
 }
@@ -31,7 +31,7 @@ deploy {
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
                     // Memory Optimization
                     // https://www.chiefdelphi.com/t/2024-wpilib-feedback/464322/141
-                    final MAX_JAVA_HEAP_SIZE_MB = 100
+                    final MAX_JAVA_HEAP_SIZE_MB = 150
                     jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
 
                     // Set the minimum heap size to the maximum heap size to avoid resizing
@@ -45,19 +45,12 @@ deploy {
                     jvmArgs.add("-XX:+HeapDumpOnOutOfMemoryError")
                     jvmArgs.add("-XX:HeapDumpPath=/U/frc-usercode.hprof")
                     // Enable VisualVM connection
-                    jvmArgs.add("-Dcom.sun.management.jmxremote=true")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
-                    jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
-                    jvmArgs.add("-Djava.rmi.server.hostname=172.22.11.2")
-
-                    //                jvmArgs.add("-Dcom.sun.management.jmxremote=true")
-                    //                jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
-                    //                jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
-                    //                jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
-                    //                jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
-                    //                jvmArgs.add("-Djava.rmi.server.hostname=10.55.16.2") // Replace TE.AM with team number
+                    //                    jvmArgs.add("-Dcom.sun.management.jmxremote=true")
+                    //                    jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
+                    //                    jvmArgs.add("-Dcom.sun.management.jmxremote.local.only=false")
+                    //                    jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
+                    //                    jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
+                    //                    jvmArgs.add("-Djava.rmi.server.hostname=10.55.16.2")
                 }
 
                 // Static files artifact

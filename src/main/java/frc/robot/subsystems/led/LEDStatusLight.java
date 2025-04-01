@@ -3,36 +3,39 @@ package frc.robot.subsystems.led;
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+import frc.robot.RobotContainer;
+import frc.robot.RobotState;
 import java.util.Arrays;
 import org.littletonrobotics.junction.Logger;
 
 public class LEDStatusLight extends SubsystemBase {
-    private static final int DASHBOARD_DISPLAY_LENGTH = 20;
+    private static final int DASHBOARD_DISPLAY_LENGTH = 8;
     private static AddressableLED led = null;
     private final Color[] ledColors;
     private final Color[] dashboardColors;
     private final String[] dashboardColorsHex;
     private final AddressableLEDBuffer buffer;
-    private final AddressableLEDBufferView view1, view2;
+    private final AddressableLEDBufferView[] views;
+    private final boolean[] viewsReversed;
 
-    public LEDStatusLight(int port, int length, boolean reverseView1, boolean reverseView2) {
-        // make sure length is even
-        length = length / 2 * 2;
-        this.ledColors = new Color[length / 2 - 1];
+    public LEDStatusLight(int port, int lengthOfEachSide, boolean... viewsReversed) {
+        if (Robot.isSimulation()) Arrays.fill(viewsReversed, true);
+        this.viewsReversed = viewsReversed;
+
+        int length = lengthOfEachSide * viewsReversed.length;
+
+        this.ledColors = new Color[lengthOfEachSide];
         this.dashboardColors = new Color[DASHBOARD_DISPLAY_LENGTH];
         this.dashboardColorsHex = new String[DASHBOARD_DISPLAY_LENGTH];
         Arrays.fill(ledColors, new Color());
         Arrays.fill(dashboardColors, new Color());
         this.buffer = new AddressableLEDBuffer(length);
 
-        AddressableLEDBufferView view1 = buffer.createView(0, length / 2);
-        AddressableLEDBufferView view2 = buffer.createView(length / 2 + 1, length - 1);
-        if (reverseView1) view1 = view1.reversed();
-        if (reverseView2) view2 = view2.reversed();
-        this.view1 = view1;
-        this.view2 = view2;
+        views = new AddressableLEDBufferView[viewsReversed.length];
+        for (int i = 0; i < viewsReversed.length; i++)
+            views[i] = buffer.createView(i * lengthOfEachSide, lengthOfEachSide);
 
         if (led != null) led.close();
         led = new AddressableLED(port);
@@ -43,14 +46,12 @@ public class LEDStatusLight extends SubsystemBase {
 
     @Override
     public void periodic() {
-        for (int i = 0; i < ledColors.length; i++) {
-            view1.setLED(i, ledColors[i]);
-            view2.setLED(i, ledColors[i]);
-        }
-
+        for (int led = 0; led < viewsReversed.length; led++)
+            for (int i = 0; i < ledColors.length; i++)
+                views[led].setLED(viewsReversed[led] ? ledColors.length - i - 1 : i, ledColors[i]);
         led.setData(buffer);
         for (int i = 0; i < DASHBOARD_DISPLAY_LENGTH; i++) dashboardColorsHex[i] = dashboardColors[i].toHexString();
-        Logger.recordOutput("Status Light", dashboardColorsHex);
+        if (Robot.LOG_DETAILS) Logger.recordOutput("Status Light", dashboardColorsHex);
     }
 
     public Command playAnimation(LEDAnimation animation, double timeSeconds) {
@@ -74,13 +75,23 @@ public class LEDStatusLight extends SubsystemBase {
         return this.playAnimation(animation, timeSeconds).repeatedly().ignoringDisable(true);
     }
 
-    public Command showEnableDisableState() {
-        return new ConditionalCommand(
-                        playAnimation(new LEDAnimation.SlideBackAndForth(new Color(0, 200, 255)), 5)
-                                .until(RobotState::isDisabled),
-                        playAnimation(new LEDAnimation.Breathe(new Color(0, 200, 255)), 3)
-                                .until(RobotState::isEnabled),
-                        RobotState::isEnabled)
+    public Command showRobotState() {
+        return defer(() -> {
+                    if (DriverStation.isEnabled())
+                        return playAnimation(
+                                        new LEDAnimation.SlideBackAndForth(
+                                                () -> RobotState.getInstance().visionObservationRate() > 0.25
+                                                        ? new Color(0, 200, 255)
+                                                        : new Color(255, 255, 255)),
+                                        2.5)
+                                .until(DriverStation::isDisabled);
+                    return playAnimation(
+                                    new LEDAnimation.Breathe(() -> RobotContainer.motorBrakeEnabled
+                                            ? new Color(0, 200, 255)
+                                            : new Color(255, 255, 255)),
+                                    3)
+                            .until(DriverStation::isEnabled);
+                })
                 .repeatedly()
                 .ignoringDisable(true);
     }

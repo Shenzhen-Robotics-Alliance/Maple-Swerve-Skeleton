@@ -2,6 +2,7 @@ package frc.robot.subsystems.led;
 
 import edu.wpi.first.wpilibj.util.Color;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public sealed interface LEDAnimation {
     /**
@@ -17,9 +18,9 @@ public sealed interface LEDAnimation {
     }
 
     final class Breathe implements LEDAnimation {
-        private final Color color;
+        private final Supplier<Color> color;
 
-        public Breathe(Color color) {
+        public Breathe(Supplier<Color> color) {
             this.color = color;
         }
 
@@ -27,25 +28,26 @@ public sealed interface LEDAnimation {
         public void play(Color[] colors, double t) {
             final double brightness = oscillate(t + 0.25);
             for (int i = 0; i < colors.length; i++)
-                colors[i] = new Color(color.red * brightness, color.green * brightness, color.blue * brightness);
+                colors[i] = new Color(
+                        color.get().red * brightness, color.get().green * brightness, color.get().blue * brightness);
         }
     }
 
     final class ShowColor implements LEDAnimation {
-        private final Color color;
+        private final Supplier<Color> color;
 
-        public ShowColor(Color color) {
+        public ShowColor(Supplier<Color> color) {
             this.color = color;
         }
 
         @Override
         public void play(Color[] colors, double t) {
-            Arrays.fill(colors, color);
+            Arrays.fill(colors, color.get());
         }
     }
 
     final class SlideBackAndForth extends Slide {
-        public SlideBackAndForth(Color color) {
+        public SlideBackAndForth(Supplier<Color> color) {
             super(color);
         }
 
@@ -56,9 +58,9 @@ public sealed interface LEDAnimation {
     }
 
     sealed class Slide implements LEDAnimation {
-        private final Color color;
+        private final Supplier<Color> color;
 
-        public Slide(Color color) {
+        public Slide(Supplier<Color> color) {
             this.color = color;
         }
 
@@ -70,13 +72,13 @@ public sealed interface LEDAnimation {
 
         private void playSlideForward(Color[] colors, double t) {
             for (int i = 0; i < colors.length; i++) {
-                colors[i] = i < t * colors.length ? color : new Color();
+                colors[i] = i < t * colors.length ? color.get() : new Color();
             }
         }
 
         private void playSlideBackwards(Color[] colors, double t) {
             for (int i = 0; i < colors.length; i++) {
-                colors[i] = i > t * colors.length ? color : new Color();
+                colors[i] = i > t * colors.length ? color.get() : new Color();
             }
         }
     }
@@ -91,8 +93,9 @@ public sealed interface LEDAnimation {
         @Override
         public void play(Color[] colors, double t) {
             for (int i = 0; i < colors.length; i++) {
+                double brightness = 0.5 + 0.5 * t;
                 colors[i] = i < t * colors.length
-                        ? new Color(color.red * t + 0.2, color.green * t + 0.2, color.blue * t + 0.2)
+                        ? new Color(color.red * brightness, color.green * brightness, color.blue * brightness)
                         : new Color();
             }
         }

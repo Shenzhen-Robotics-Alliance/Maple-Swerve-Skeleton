@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision.apriltags;
 
 import java.util.List;
+import java.util.Optional;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 
@@ -15,13 +16,15 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
     }
 
     @Override
-    public void updateInputs(VisionInputs inputs) {
-        if (inputs.camerasAmount != cameras.length)
+    public void updateInputs(CameraInputs... inputs) {
+        if (inputs.length != cameras.length)
             throw new IllegalStateException(
-                    "inputs camera amount (" + inputs.camerasAmount + ") does not match actual cameras amount");
+                    "inputs camera amount (" + inputs.length + ") does not match actual cameras amount");
 
-        for (int i = 0; i < cameras.length; i++) updateCameraInput(cameras[i], inputs.camerasInputs[i]);
+        for (int i = 0; i < cameras.length; i++) updateCameraInput(cameras[i], inputs[i]);
     }
+
+    private Optional<PhotonPipelineResult> cachedResult = Optional.empty();
 
     private void updateCameraInput(PhotonCamera camera, CameraInputs cameraInput) {
         if (!camera.isConnected()) {
@@ -30,8 +33,14 @@ public class AprilTagVisionIOReal implements AprilTagVisionIO {
         }
 
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
-        if (results.isEmpty()) cameraInput.markAsConnectedButNoResult();
-        else cameraInput.readFromPhotonPipeLine(results.get(results.size() - 1));
+        if (results.isEmpty()) {
+            cameraInput.markAsConnectedButNoResult();
+            cachedResult.ifPresent(cameraInput::readFromPhotonPipeLine);
+            cachedResult = Optional.empty();
+        } else {
+            cameraInput.readFromPhotonPipeLine(results.get(0));
+            cachedResult = results.size() > 1 ? Optional.of(results.get(1)) : Optional.empty();
+        }
     }
 
     @Override

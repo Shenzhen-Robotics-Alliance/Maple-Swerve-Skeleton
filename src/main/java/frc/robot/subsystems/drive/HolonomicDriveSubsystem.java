@@ -1,18 +1,19 @@
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.constants.DriveControlLoops.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -134,9 +135,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
                 this::setPose,
                 this::getMeasuredChassisSpeedsRobotRelative,
                 this::runRobotCentricSpeedsWithFeedforwards,
-                new PPHolonomicDriveController(
-                        CHASSIS_TRANSLATION_CLOSE_LOOP.toPathPlannerPIDConstants(),
-                        CHASSIS_ROTATION_CLOSE_LOOP.toPathPlannerPIDConstants()),
+                new MapleHolonomicDriveController(CHASSIS_TRANSLATION_CLOSE_LOOP, CHASSIS_ROTATION_CLOSE_LOOP),
                 robotConfig,
                 FieldMirroringUtils::isSidePresentedAsRed,
                 this);
@@ -154,6 +153,7 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         pathPlannerWarmUpInProgressAlert.set(true);
         PPWarmUp.pathFindingWarmup(this)
                 .andThen(PPWarmUp.choreoWarmUp(this))
+                .alongWith(PPWarmUp.alignmentWarmUp())
                 .finallyDo(() -> pathPlannerWarmUpInProgressAlert.set(false))
                 .andThen(Commands.print("[PathPlanner] PathfindingCommand finished warmup"))
                 .until(DriverStation::isEnabled)
@@ -166,5 +166,17 @@ public interface HolonomicDriveSubsystem extends Subsystem {
         return Math.abs(chassisSpeeds.omegaRadiansPerSecond) < Math.toRadians(5)
                 && Math.abs(chassisSpeeds.vxMetersPerSecond) < 0.05
                 && Math.abs(chassisSpeeds.vyMetersPerSecond) < 0.05;
+    }
+
+    static ChassisSpeeds constrainSpeeds(ChassisSpeeds speeds) {
+        Translation2d translationalSpeedMPS = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+        if (translationalSpeedMPS.getNorm() > MOVEMENT_VELOCITY_SOFT_CONSTRAIN.in(MetersPerSecond))
+            translationalSpeedMPS = new Translation2d(
+                    MOVEMENT_VELOCITY_SOFT_CONSTRAIN.in(MetersPerSecond), translationalSpeedMPS.getAngle());
+        double angularVelocityRadPerSec = MathUtil.clamp(
+                speeds.omegaRadiansPerSecond,
+                -ANGULAR_VELOCITY_SOFT_CONSTRAIN.in(RadiansPerSecond),
+                ANGULAR_VELOCITY_SOFT_CONSTRAIN.in(RadiansPerSecond));
+        return new ChassisSpeeds(translationalSpeedMPS.getX(), translationalSpeedMPS.getY(), angularVelocityRadPerSec);
     }
 }
