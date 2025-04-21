@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static frc.robot.constants.DriveTrainConstants.ODOMETRY_FREQUENCY;
 import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -15,6 +14,8 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import frc.robot.subsystems.drive.DriveTrainConfigs;
+
 import java.util.Objects;
 
 /** IO implementation for Pigeon2 */
@@ -49,7 +50,7 @@ public class GyroIOPigeon2 implements GyroIO {
                 : OdometryThread.registerInput(() -> yaw.refresh().getValueAsDouble());
 
         BaseStatusSignal.setUpdateFrequencyForAll(100.0, pitch, roll, yawVelocity);
-        BaseStatusSignal.setUpdateFrequencyForAll(ODOMETRY_FREQUENCY, yaw);
+        BaseStatusSignal.setUpdateFrequencyForAll(DriveTrainConfigs.ODOMETRY_FREQUENCY, yaw);
         pigeon.optimizeBusUtilization();
     }
 

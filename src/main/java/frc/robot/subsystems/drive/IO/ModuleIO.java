@@ -6,8 +6,9 @@
 package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.constants.DriveTrainConstants;
 import org.littletonrobotics.junction.AutoLog;
+
+import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
 
 public interface ModuleIO {
     @AutoLog
@@ -27,8 +28,8 @@ public interface ModuleIO {
         public double steerMotorAppliedVolts = 0.0;
         public double steerMotorCurrentAmps = 0.0;
 
-        public double[] odometryDriveWheelRevolutions = new double[DriveTrainConstants.ODOMETRY_CACHE_CAPACITY];
-        public Rotation2d[] odometrySteerPositions = new Rotation2d[DriveTrainConstants.ODOMETRY_CACHE_CAPACITY];
+        public double[] odometryDriveWheelRevolutions = new double[ODOMETRY_CACHE_CAPACITY];
+        public Rotation2d[] odometrySteerPositions = new Rotation2d[ODOMETRY_CACHE_CAPACITY];
     }
 
     /** Updates the inputs */

@@ -8,7 +8,7 @@ package frc.robot;
 // the root directory of this project.
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.constants.DriveTrainConstants.*;
+import static frc.robot.subsystems.drive.DriveTrainConstants.*;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;

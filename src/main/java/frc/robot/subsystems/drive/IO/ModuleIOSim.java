@@ -6,14 +6,15 @@
 package frc.robot.subsystems.drive.IO;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.constants.DriveTrainConstants.DRIVE_GEAR_RATIO;
+import static frc.robot.subsystems.drive.DriveTrainConstants.DRIVE_GEAR_RATIO;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.constants.DriveTrainConstants;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.DriveTrainConstants;
+
 import java.util.Arrays;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;

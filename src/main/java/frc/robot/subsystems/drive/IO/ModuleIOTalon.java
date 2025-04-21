@@ -5,7 +5,8 @@
 
 package frc.robot.subsystems.drive.IO;
 
-import static frc.robot.constants.DriveTrainConstants.*;
+import static frc.robot.subsystems.drive.DriveTrainConstants.*;
+import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
 import static frc.robot.utils.PhoenixUtil.tryUntilOk;
 
 import com.ctre.phoenix6.BaseStatusSignal;

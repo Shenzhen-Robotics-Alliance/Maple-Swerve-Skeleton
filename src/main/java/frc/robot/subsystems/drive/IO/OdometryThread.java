@@ -1,13 +1,12 @@
 package frc.robot.subsystems.drive.IO;
 
-import static frc.robot.constants.DriveTrainConstants.ODOMETRY_CACHE_CAPACITY;
-import static frc.robot.constants.DriveTrainConstants.SIMULATION_TICKS_IN_1_PERIOD;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utils.MapleTimeUtils;
+
+import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
 
 import java.util.ArrayList;
 import java.util.List;
