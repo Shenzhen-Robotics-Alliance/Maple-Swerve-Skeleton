@@ -78,6 +78,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     private SwerveSetpoint setpoint;
 
     public SwerveDrive(
+            OdometryThread odometryThread,
             GyroIO gyroIO,
             CanBusIO canBusIO,
             ModuleIO frontLeftModuleIO,
@@ -85,6 +86,7 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
             ModuleIO backLeftModuleIO,
             ModuleIO backRightModuleIO) {
         super("Drive");
+        this.odometryThread = odometryThread;
         this.gyroIO = gyroIO;
         this.canBusIO = canBusIO;
         this.canBusInputs = new CanBusIO.CanBusInputs();
@@ -96,7 +98,6 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
             new SwerveModule(backRightModuleIO, "BackRight"),
         };
 
-        this.odometryThread = OdometryThread.createInstance(type);
         this.odometryThreadInputs = new OdometryThreadInputsAutoLogged();
         this.odometryThread.start();
 

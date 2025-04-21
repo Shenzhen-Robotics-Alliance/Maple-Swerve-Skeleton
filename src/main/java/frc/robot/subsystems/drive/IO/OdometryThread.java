@@ -6,13 +6,16 @@ import static frc.robot.constants.DriveTrainConstants.SIMULATION_TICKS_IN_1_PERI
 import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Robot;
-import frc.robot.subsystems.drive.OdometryThreadReal;
-import frc.robot.subsystems.drive.SwerveDrive;
+import frc.robot.generated.TunerConstants;
+import frc.robot.utils.MapleTimeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import org.littletonrobotics.junction.AutoLog;
@@ -61,17 +64,6 @@ public interface OdometryThread {
         return odometryInput;
     }
 
-    static OdometryThread createInstance(SwerveDrive.DriveType type) {
-        return switch (Robot.CURRENT_ROBOT_MODE) {
-            case REAL -> new OdometryThreadReal(
-                    type,
-                    registeredInputs.toArray(new OdometryInput[0]),
-                    registeredStatusSignals.toArray(new BaseStatusSignal[0]));
-            case SIM -> new OdometryThreadSim();
-            case REPLAY -> inputs -> {};
-        };
-    }
-
     @AutoLog
     class OdometryThreadInputs {
         public int odometryTicksCountInPreviousRobotPeriod = 0;
@@ -86,7 +78,7 @@ public interface OdometryThread {
 
     default void unlockOdometry() {}
 
-    final class OdometryThreadSim implements OdometryThread {
+    public static final class OdometryThreadSim implements OdometryThread {
         @Override
         public void updateInputs(OdometryThreadInputs inputs) {
             inputs.odometryTicksCountInPreviousRobotPeriod = SIMULATION_TICKS_IN_1_PERIOD;
@@ -94,6 +86,77 @@ public interface OdometryThread {
                     iterationPeriodSeconds = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD;
             for (int i = 0; i < SIMULATION_TICKS_IN_1_PERIOD; i++)
                 inputs.measurementTimeStamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds;
+        }
+    }
+
+    public static final class OdometryThreadReal extends Thread implements OdometryThread {
+        private final OdometryInput[] odometryDoubleInputs;
+        private final BaseStatusSignal[] statusSignals;
+        private final Queue<Double> timeStampsQueue;
+        private final Lock lock = new ReentrantLock();
+
+        public OdometryThreadReal() {
+            this.timeStampsQueue = new ArrayBlockingQueue<>(ODOMETRY_CACHE_CAPACITY);
+            this.odometryDoubleInputs = OdometryThread.registeredInputs.toArray(OdometryInput[]::new);
+            this.statusSignals = OdometryThread.registeredStatusSignals.toArray(BaseStatusSignal[]::new);
+
+            setName("OdometryThread");
+            setDaemon(true);
+        }
+
+        @Override
+        public synchronized void start() {
+            if (odometryDoubleInputs.length > 0) super.start();
+        }
+
+        @Override
+        public void run() {
+            while (true) odometryPeriodic();
+        }
+
+        private void odometryPeriodic() {
+            refreshSignalsAndBlockThread();
+
+            lock.lock();
+            timeStampsQueue.offer(estimateAverageTimeStamps());
+            for (OdometryInput odometryInput : odometryDoubleInputs) odometryInput.cacheInputToQueue();
+            lock.unlock();
+        }
+
+        private void refreshSignalsAndBlockThread() {
+            if (TunerConstants.kCANBus.isNetworkFD())
+                BaseStatusSignal.waitForAll(0.02, statusSignals);
+            else {
+                MapleTimeUtils.delay(1.0 / 300.0);
+                BaseStatusSignal.refreshAll(statusSignals);
+            }
+        }
+
+        private double estimateAverageTimeStamps() {
+            double currentTime = Timer.getFPGATimestamp(), totalLatency = 0;
+            for (BaseStatusSignal signal : statusSignals)
+                totalLatency += signal.getTimestamp().getLatency();
+
+            if (statusSignals.length == 0) return currentTime;
+            return currentTime - totalLatency / statusSignals.length;
+        }
+
+        @Override
+        public void updateInputs(OdometryThreadInputs inputs) {
+            inputs.odometryTicksCountInPreviousRobotPeriod = timeStampsQueue.size();
+            for (int i = 0; i < ODOMETRY_CACHE_CAPACITY; i++)
+                inputs.measurementTimeStamps[i] = Objects.requireNonNullElse(timeStampsQueue.poll(), 0.0);
+            timeStampsQueue.clear();
+        }
+
+        @Override
+        public void lockOdometry() {
+            lock.lock();
+        }
+
+        @Override
+        public void unlockOdometry() {
+            lock.unlock();
         }
     }
 }

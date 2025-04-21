@@ -11,6 +11,8 @@ import frc.robot.generated.TunerConstants;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 
 /**
  * stores the constants and PID configs for chassis because we want an all-real simulation for the chassis, the numbers
@@ -27,7 +29,7 @@ public class DriveTrainConstants {
 
     public static final DCMotor STEER_MOTOR_MODEL = DCMotor.getFalcon500(1);
 
-    /** numbers imported from {@link TunerConstants} TODO: for REV chassis, replace them with actual numbers */
+    /** numbers imported from {@link TunerConstants} */
     public static final Distance WHEEL_RADIUS = Meters.of(TunerConstants.FrontLeft.WheelRadius);
 
     public static final double DRIVE_GEAR_RATIO = TunerConstants.FrontLeft.DriveMotorGearRatio;
@@ -99,6 +101,22 @@ public class DriveTrainConstants {
             / 12.0);
 
     public static final Supplier<GyroSimulation> gyroSimulationFactory = COTS.ofPigeon2();
+    public static final DriveTrainSimulationConfig mapleSimDriveTrainConfig = DriveTrainSimulationConfig.Default()
+                                .withRobotMass(DriveTrainConstants.ROBOT_MASS)
+                                .withBumperSize(DriveTrainConstants.BUMPER_LENGTH, DriveTrainConstants.BUMPER_WIDTH)
+                                .withTrackLengthTrackWidth(
+                                        DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
+                                .withSwerveModule(new SwerveModuleSimulationConfig(
+                                        DriveTrainConstants.DRIVE_MOTOR_MODEL,
+                                        DriveTrainConstants.STEER_MOTOR_MODEL,
+                                        DriveTrainConstants.DRIVE_GEAR_RATIO,
+                                        DriveTrainConstants.STEER_GEAR_RATIO,
+                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
+                                        DriveTrainConstants.STEER_FRICTION_VOLTAGE,
+                                        DriveTrainConstants.WHEEL_RADIUS,
+                                        DriveTrainConstants.STEER_INERTIA,
+                                        DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION))
+                                .withGyro(DriveTrainConstants.gyroSimulationFactory);
 
     /* dead configs, don't change them */
     public static final int ODOMETRY_CACHE_CAPACITY = 10;

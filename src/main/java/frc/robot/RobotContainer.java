@@ -26,6 +26,7 @@ import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
+import frc.robot.subsystems.drive.IO.OdometryThread.OdometryThreadSim;
 import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.MapleJoystickDriveInput;
@@ -79,9 +80,8 @@ public class RobotContainer {
 
                 powerDistribution = LoggedPowerDistribution.getInstance(0, PowerDistribution.ModuleType.kCTRE);
 
-                /* CTRE Chassis: */
                 drive = new SwerveDrive(
-                        SwerveDrive.DriveType.CTRE_TIME_SYNCHRONIZED,
+                        new OdometryThread.OdometryThreadReal(),
                         new GyroIOPigeon2(TunerConstants.DrivetrainConstants, false),
                         new CanBusIOReal(TunerConstants.kCANBus),
                         new ModuleIOTalon(TunerConstants.FrontLeft, "FrontLeft"),
@@ -94,23 +94,8 @@ public class RobotContainer {
                 SimulatedArena.overrideSimulationTimings(
                         Seconds.of(Robot.defaultPeriodSecs), DriveTrainConstants.SIMULATION_TICKS_IN_1_PERIOD);
                 this.driveSimulation = new SwerveDriveSimulation(
-                        DriveTrainSimulationConfig.Default()
-                                .withRobotMass(DriveTrainConstants.ROBOT_MASS)
-                                .withBumperSize(DriveTrainConstants.BUMPER_LENGTH, DriveTrainConstants.BUMPER_WIDTH)
-                                .withTrackLengthTrackWidth(
-                                        DriveTrainConstants.TRACK_LENGTH, DriveTrainConstants.TRACK_WIDTH)
-                                .withSwerveModule(new SwerveModuleSimulationConfig(
-                                        DriveTrainConstants.DRIVE_MOTOR_MODEL,
-                                        DriveTrainConstants.STEER_MOTOR_MODEL,
-                                        DriveTrainConstants.DRIVE_GEAR_RATIO,
-                                        DriveTrainConstants.STEER_GEAR_RATIO,
-                                        DriveTrainConstants.DRIVE_FRICTION_VOLTAGE,
-                                        DriveTrainConstants.STEER_FRICTION_VOLTAGE,
-                                        DriveTrainConstants.WHEEL_RADIUS,
-                                        DriveTrainConstants.STEER_INERTIA,
-                                        DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION))
-                                .withGyro(DriveTrainConstants.gyroSimulationFactory),
-                        new Pose2d(3, 3, new Rotation2d()));
+                        DriveTrainConstants.mapleSimDriveTrainConfig,
+                        new Pose2d(0, 0, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 powerDistribution = LoggedPowerDistribution.getInstance();
@@ -121,7 +106,7 @@ public class RobotContainer {
                         backRight = new ModuleIOSim(driveSimulation.getModules()[3]);
                 final GyroIOSim gyroIOSim = new GyroIOSim(driveSimulation.getGyroSimulation());
                 drive = new SwerveDrive(
-                        SwerveDrive.DriveType.GENERIC,
+                        new OdometryThreadSim(),
                         gyroIOSim,
                         (canBusInputs) -> {},
                         frontLeft,
@@ -138,7 +123,7 @@ public class RobotContainer {
                 powerDistribution = LoggedPowerDistribution.getInstance();
                 // Replayed robot, disable IO implementations
                 drive = new SwerveDrive(
-                        SwerveDrive.DriveType.GENERIC,
+                        (odometryInputs) -> {},
                         (canBusInputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {},
