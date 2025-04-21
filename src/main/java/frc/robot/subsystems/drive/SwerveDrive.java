@@ -6,7 +6,6 @@
 package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.constants.DriveControlLoops.*;
 import static frc.robot.constants.DriveTrainConstants.*;
 
 import com.pathplanner.lib.path.PathConstraints;
@@ -34,9 +33,9 @@ import frc.robot.Robot;
 import frc.robot.RobotState;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.utils.AlertsManager;
-import frc.robot.utils.ChassisHeadingController;
-import frc.robot.utils.CustomMaths.TipOverDetection;
 import frc.robot.utils.MapleTimeUtils;
+import frc.robot.utils.TipOverDetection;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -45,11 +44,6 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsystem {
-    public enum DriveType {
-        GENERIC,
-        CTRE,
-        CTRE_TIME_SYNCHRONIZED
-    }
 
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs;
@@ -84,7 +78,6 @@ public class SwerveDrive extends SubsystemBase implements HolonomicDriveSubsyste
     private SwerveSetpoint setpoint;
 
     public SwerveDrive(
-            DriveType type,
             GyroIO gyroIO,
             CanBusIO canBusIO,
             ModuleIO frontLeftModuleIO,

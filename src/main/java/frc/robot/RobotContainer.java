@@ -22,18 +22,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
-import frc.robot.commands.drive.*;
-import frc.robot.commands.reefscape.ReefAlignment;
 import frc.robot.constants.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
 import frc.robot.subsystems.led.LEDStatusLight;
-import frc.robot.subsystems.vision.apriltags.AprilTagVision;
-import frc.robot.subsystems.vision.apriltags.AprilTagVisionIOReal;
-import frc.robot.subsystems.vision.apriltags.ApriltagVisionIOSim;
-import frc.robot.subsystems.vision.apriltags.PhotonCameraProperties;
-import frc.robot.utils.AIRobotInSimulation2024;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.*;
@@ -62,7 +55,6 @@ public class RobotContainer {
     public final LoggedPowerDistribution powerDistribution;
     // Subsystems
     public final SwerveDrive drive;
-    public final AprilTagVision aprilTagVision;
     public final LEDStatusLight ledStatusLight;
 
     // Controller
@@ -80,12 +72,6 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        final List<PhotonCameraProperties> camerasProperties =
-                // PhotonCameraProperties.loadCamerasPropertiesFromConfig("5516-2024-OffSeason-Vision"); //
-                // loads camera properties from
-                // deploy/PhotonCamerasProperties/5516-2024-OffSeason-Vision.xml
-                VisionConstants.photonVisionCameras; // load configs stored directly in VisionConstants.java
-
         switch (Robot.CURRENT_ROBOT_MODE) {
             case REAL -> {
                 // Real robot, instantiate hardware IO implementations
@@ -102,18 +88,6 @@ public class RobotContainer {
                         new ModuleIOTalon(TunerConstants.FrontRight, "FrontRight"),
                         new ModuleIOTalon(TunerConstants.BackLeft, "BackLeft"),
                         new ModuleIOTalon(TunerConstants.BackRight, "BackRight"));
-
-                /* REV Chassis */
-                //                drive = new SwerveDrive(
-                //                        SwerveDrive.DriveType.CTRE_ON_CANIVORE,
-                //                        new GyroIOPigeon2(TunerConstants.DrivetrainConstants),
-                //                        new ModuleIOSpark(0),
-                //                        new ModuleIOSpark(1),
-                //                        new ModuleIOSpark(2),
-                //                        new ModuleIOSpark(3)
-                //                );
-
-                aprilTagVision = new AprilTagVision(new AprilTagVisionIOReal(camerasProperties), camerasProperties);
             }
 
             case SIM -> {
@@ -155,15 +129,7 @@ public class RobotContainer {
                         backLeft,
                         backRight);
 
-                aprilTagVision = new AprilTagVision(
-                        new ApriltagVisionIOSim(
-                                camerasProperties,
-                                VisionConstants.fieldLayout,
-                                driveSimulation::getSimulatedDriveTrainPose),
-                        camerasProperties);
-
                 SimulatedArena.getInstance().resetFieldForAuto();
-                AIRobotInSimulation2024.startOpponentRobotSimulations();
             }
 
             default -> {
@@ -179,8 +145,6 @@ public class RobotContainer {
                         (inputs) -> {},
                         (inputs) -> {},
                         (inputs) -> {});
-
-                aprilTagVision = new AprilTagVision((inputs) -> {}, camerasProperties);
             }
         }
 
@@ -213,18 +177,6 @@ public class RobotContainer {
     private LoggedDashboardChooser<Auto> buildAutoChooser() {
         final LoggedDashboardChooser<Auto> autoSendableChooser = new LoggedDashboardChooser<>("Select Auto");
         autoSendableChooser.addDefaultOption("None", Auto.none());
-        autoSendableChooser.addOption(
-                "Example Custom Auto With PathPlanner Trajectories",
-                new ExampleCustomAutoWithPathPlannerTrajectories());
-        autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories (Left)",
-                new ExampleCustomAutoWithChoreoTrajectories2(false));
-        autoSendableChooser.addOption(
-                "Example Custom Auto With Choreo Trajectories (Right)",
-                new ExampleCustomAutoWithChoreoTrajectories2(true));
-        autoSendableChooser.addOption(
-                "Example Pathplanner GUI Auto", new PathPlannerAutoWrapper("Example Auto PathPlanner"));
-        autoSendableChooser.addOption("Example Face To Target", new ExampleFaceToTarget());
         // TODO: add your autos here
 
         SmartDashboard.putData("Select Auto", autoSendableChooser.getSendableChooser());
@@ -287,17 +239,6 @@ public class RobotContainer {
             driveSimulation.setSimulationWorldPose(startingPose.plus(placementError));
             SimulatedArena.getInstance().resetFieldForAuto();
         }
-
-        aprilTagVision
-                .focusOnTarget(-1, -1)
-                .withTimeout(0.1)
-                .alongWith(Commands.runOnce(() -> drive.setPose(startingPose), drive))
-                .ignoringDisable(true)
-                .schedule();
-    }
-
-    public Command autoAlign(ReefAlignment.Side side, AutoAlignment.AutoAlignmentConfigurations autoAlignmentConfig) {
-        return ReefAlignment.alignToNearestBranch(drive, aprilTagVision, ledStatusLight, side, autoAlignmentConfig);
     }
 
     /**
@@ -341,23 +282,6 @@ public class RobotContainer {
 
         /* lock chassis with x-formation */
         driver.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
-
-        /* auto alignment example, delete it for your project */
-        driver.autoAlignmentButtonLeft()
-                .whileTrue(autoAlign(ReefAlignment.Side.LEFT, DriveControlLoops.REEF_ALIGNMENT_CONFIG));
-        driver.autoAlignmentButtonRight()
-                .whileTrue(autoAlign(ReefAlignment.Side.RIGHT, DriveControlLoops.REEF_ALIGNMENT_CONFIG));
-
-        driver.faceToTargetButton()
-                .and(driver.autoAlignmentButtonLeft().negate())
-                .and(driver.autoAlignmentButtonRight().negate())
-                .whileTrue(JoystickDriveAndAimAtTarget.driveAndAimAtTarget(
-                        driveInput,
-                        drive,
-                        () -> FieldMirroringUtils.toCurrentAllianceTranslation(ReefAlignment.REEF_CENTER_BLUE),
-                        null,
-                        JoystickConfigs.DEFAULT_TRANSLATIONAL_SENSITIVITY,
-                        false));
     }
 
     public void configureLEDEffects() {
@@ -382,23 +306,14 @@ public class RobotContainer {
 
         SimulatedArena.getInstance().simulationPeriodic();
         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput("FieldSimulation/OpponentRobotPositions", AIRobotInSimulation2024.getOpponentRobotPoses());
-        Logger.recordOutput(
-                "FieldSimulation/AlliancePartnerRobotPositions",
-                AIRobotInSimulation2024.getAlliancePartnerRobotPoses());
         Logger.recordOutput(
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     }
 
-    private final Alert autoPlacementIncorrect = AlertsManager.create(
-            "Expected Autonomous robot placement position does not match reality, IS THE SELECTED AUTO CORRECT?",
-            Alert.AlertType.kWarning);
     private final Alert lowBattery =
             AlertsManager.create("Battery voltage 12.0, please keep it above 12.5V", Alert.AlertType.kInfo);
-    private static final double AUTO_PLACEMENT_TOLERANCE_METERS = 0.25;
-    private static final double AUTO_PLACEMENT_TOLERANCE_DEGREES = 5;
 
     public void updateTelemetryAndLED() {
         field.setRobotPose(
@@ -407,17 +322,6 @@ public class RobotContainer {
                         : drive.getPose());
         if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
             field.getObject("Odometry").setPose(drive.getPose());
-
-        ReefAlignment.updateDashboard();
-
-        Pose2d autoStartingPose =
-                FieldMirroringUtils.toCurrentAlliancePose(previouslySelectedAuto.getStartingPoseAtBlueAlliance());
-        Pose2d currentPose = RobotState.getInstance().getVisionPose();
-        Transform2d difference = autoStartingPose.minus(currentPose);
-        boolean autoPlacementIncorrectDetected = difference.getTranslation().getNorm() > AUTO_PLACEMENT_TOLERANCE_METERS
-                || Math.abs(difference.getRotation().getDegrees()) > AUTO_PLACEMENT_TOLERANCE_DEGREES;
-        // autoPlacementIncorrect.set(autoPlacementIncorrectDetected && DriverStation.isDisabled());
-        autoPlacementIncorrect.set(false);
 
         double voltage = ConduitApi.getInstance().getPDPVoltage();
         lowBattery.setText(String.format(

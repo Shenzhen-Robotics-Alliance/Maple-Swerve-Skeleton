@@ -1,4 +1,4 @@
-package frc.robot.utils.CustomMaths;
+package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
