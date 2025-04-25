@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.autos.*;
-import frc.robot.constants.*;
+import frc.robot.commands.SwerveSubsystem;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.drive.IO.*;
@@ -31,12 +31,9 @@ import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.utils.AlertsManager;
 import frc.robot.utils.MapleJoystickDriveInput;
 import java.util.*;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
-import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.ironmaple.utils.mathutils.MapleCommonMath;
 import org.littletonrobotics.conduit.ConduitApi;
@@ -92,10 +89,9 @@ public class RobotContainer {
 
             case SIM -> {
                 SimulatedArena.overrideSimulationTimings(
-                        Seconds.of(Robot.defaultPeriodSecs), DriveTrainConstants.SIMULATION_TICKS_IN_1_PERIOD);
+                        Seconds.of(Robot.defaultPeriodSecs), DriveTrainConfigs.SIMULATION_TICKS_IN_1_PERIOD);
                 this.driveSimulation = new SwerveDriveSimulation(
-                        DriveTrainConstants.mapleSimDriveTrainConfig,
-                        new Pose2d(0, 0, new Rotation2d()));
+                        DriveTrainConstants.mapleSimDriveTrainConfig, new Pose2d(0, 0, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 powerDistribution = LoggedPowerDistribution.getInstance();
@@ -135,7 +131,7 @@ public class RobotContainer {
 
         this.ledStatusLight = new LEDStatusLight(0, 155, true, false);
 
-        this.drive.configHolonomicPathPlannerAutoBuilder(field);
+        SwerveSubsystem.configurePathPlannerLogging(field);
 
         SmartDashboard.putData("Select Test", testChooser = buildTestsChooser());
         autoChooser = buildAutoChooser();
@@ -249,24 +245,15 @@ public class RobotContainer {
 
         /* joystick drive command */
         final MapleJoystickDriveInput driveInput = driver.getDriveInput();
-        IntSupplier pov =
-                // driver.getController().getHID()::getPOV;
-                () -> -1;
-        final JoystickDrive joystickDrive = new JoystickDrive(driveInput, () -> true, pov, drive);
-        drive.setDefaultCommand(joystickDrive.ignoringDisable(true));
-        JoystickDrive.instance = Optional.of(joystickDrive);
+        // TODO: joystick drive code over here
 
         /* reset gyro heading manually (in case the vision does not work) */
         driver.resetOdometryButton()
-                .onTrue(Commands.runOnce(
-                                () -> drive.setPose(new Pose2d(
-                                        drive.getPose().getTranslation(),
-                                        FieldMirroringUtils.getCurrentAllianceDriverStationFacing())),
-                                drive)
+                .onTrue(Commands.runOnce(RobotState.getInstance()::resetGyro, drive)
                         .ignoringDisable(true));
 
         /* lock chassis with x-formation */
-        driver.lockChassisWithXFormatButton().whileTrue(drive.lockChassisWithXFormation());
+        driver.lockChassisWithXFormatButton().whileTrue(drive.lockWithXFormation());
     }
 
     public void configureLEDEffects() {
@@ -302,11 +289,11 @@ public class RobotContainer {
 
     public void updateTelemetryAndLED() {
         field.setRobotPose(
-                Robot.CURRENT_ROBOT_MODE == RobotMode.SIM
+                Robot.CURRENT_ROBOT_MODE == Robot.RobotMode.SIM
                         ? driveSimulation.getSimulatedDriveTrainPose()
-                        : drive.getPose());
-        if (Robot.CURRENT_ROBOT_MODE == RobotMode.SIM)
-            field.getObject("Odometry").setPose(drive.getPose());
+                        : RobotState.getInstance().getPrimaryEstimatorPose());
+        if (Robot.CURRENT_ROBOT_MODE == Robot.RobotMode.SIM)
+            field.getObject("Odometry").setPose(RobotState.getInstance().getPrimaryEstimatorPose());
 
         double voltage = ConduitApi.getInstance().getPDPVoltage();
         lowBattery.setText(String.format(

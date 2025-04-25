@@ -1,10 +1,10 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
-
-import static edu.wpi.first.units.Units.*;
 
 public class VisionConstants {
     public static final Distance PRIMARY_ESTIMATOR_ODOMETRY_TRANSLATIONAL_STANDARD_ERROR = Centimeters.of(5);

@@ -2,7 +2,10 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.units.measure.Time;
 import frc.robot.generated.TunerConstants;
 
 public class DriveTrainConfigs {
@@ -24,5 +27,11 @@ public class DriveTrainConfigs {
             RotationsPerSecond.of(2.0),
             RotationsPerSecondPerSecond.of(2.0));
 
-    public static final 
+    public static final PPHolonomicDriveController PP_DRIVE_CONTROLLER =
+            new PPHolonomicDriveController(new PIDConstants(5.0), new PIDConstants(5.0));
+
+    public static final Time TRANSLATIONAL_LOOKAHEAD_TIME_SENSOR_LESS = Milliseconds.of(20);
+    public static final Time ROTATIONAL_LOOKAHEAD_TIME_SENSOR_LESS = Milliseconds.of(20);
+    public static final Time TRANSLATIONAL_LOOKAHEAD_TIME_VISION = Milliseconds.of(40);
+    public static final Time ROTATIONAL_LOOKAHEAD_TIME_VISION = Milliseconds.of(40);
 }

@@ -8,12 +8,14 @@ package frc.robot;
 // the root directory of this project.
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
 import static frc.robot.subsystems.drive.DriveTrainConstants.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import com.pathplanner.lib.util.DriveFeedforwards;
+import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -26,9 +28,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.utils.AlertsManager;
-import java.util.NoSuchElementException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import org.ironmaple.utils.FieldMirroringUtils;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotState {
@@ -49,7 +52,10 @@ public class RobotState {
     private Pose2d odometryPoseSensorLess = new Pose2d();
     private Pose2d primaryEstimatorPose = new Pose2d();
     private Pose2d visionSensitivePose = new Pose2d();
-    private ChassisSpeeds measuredSpeedsRobotRelative = new ChassisSpeeds();
+
+    private SwerveModuleState[] measuredStates = new SwerveModuleState[4];
+    private OptionalDouble gyroYawVelocityRadPerSec = OptionalDouble.empty();
+    public SwerveSetpoint setpoint;
 
     private boolean lowSpeedModeEnabled = false;
 
@@ -63,6 +69,9 @@ public class RobotState {
     private static final Subsystem lock = new Subsystem() {};
 
     private RobotState() {
+        Arrays.fill(measuredStates, new SwerveModuleState());
+        this.setpoint = new SwerveSetpoint(new ChassisSpeeds(), measuredStates, DriveFeedforwards.zeros(4));
+
         this.poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_DURATION.in(Seconds));
 
         this.primaryEstimatorOdometryStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
@@ -90,10 +99,8 @@ public class RobotState {
 
     public void addChassisSpeedsObservation(
             SwerveModuleState[] measuredModuleStates, OptionalDouble gyroYawVelocityRadPerSec) {
-        ChassisSpeeds wheelSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(measuredModuleStates);
-        double angularVelocityRadPerSec = gyroYawVelocityRadPerSec.orElse(wheelSpeeds.omegaRadiansPerSecond);
-        this.measuredSpeedsRobotRelative = new ChassisSpeeds(
-                wheelSpeeds.vxMetersPerSecond, wheelSpeeds.vyMetersPerSecond, angularVelocityRadPerSec);
+        this.measuredStates = measuredModuleStates;
+        this.gyroYawVelocityRadPerSec = gyroYawVelocityRadPerSec;
     }
 
     public void addOdometryObservation(OdometryObservation observation) {
@@ -115,65 +122,66 @@ public class RobotState {
         visionSensitivePose = visionSensitivePose.exp(finalTwist);
     }
 
-//    public void addVisionObservation(MapleMultiTagPoseEstimator.VisionObservation observation) {
-//        // If measurement is old enough to be outside the pose buffer's time-span, skip.
-//        try {
-//            if (poseBuffer.getInternalBuffer().lastKey() - POSE_BUFFER_DURATION.in(Seconds) > observation.timestamp())
-//                return;
-//        } catch (NoSuchElementException ex) {
-//            return;
-//        }
-//
-//        // Get odometry based pose at timestamp
-//        var sample = poseBuffer.getSample(observation.timestamp());
-//        if (sample.isEmpty()) return;
-//
-//        primaryEstimatorPose = addVisionObservationToEstimator(
-//                observation, sample.get(), primaryEstimatorPose, primaryEstimatorOdometryStdDevs);
-//        visionSensitivePose = addVisionObservationToEstimator(
-//                observation, sample.get(), visionSensitivePose, visionSensitiveEstimatorOdometryStdDevs);
-//
-//        previousVisionResultTimeStamp = Timer.getTimestamp();
-//    }
-//
-//    private Pose2d addVisionObservationToEstimator(
-//            MapleMultiTagPoseEstimator.VisionObservation observation,
-//            Pose2d odometryPoseSample,
-//            Pose2d estimatorPose,
-//            Matrix<N3, N1> estimatorOdometryStdDevs) {
-//        // sample --> odometryPose transform and backwards of that
-//        var sampleToOdometryTransform = new Transform2d(odometryPoseSample, odometryPoseSensorLess);
-//        var odometryToSampleTransform = new Transform2d(odometryPoseSensorLess, odometryPoseSample);
-//        // get old estimate by applying odometryToSample Transform
-//        Pose2d estimateAtTime = estimatorPose.plus(odometryToSampleTransform);
-//
-//        // Calculate 3 x 3 vision matrix
-//        var r = new double[3];
-//        for (int i = 0; i < 3; ++i)
-//            r[i] = observation.stdDevs().get(i, 0) * observation.stdDevs().get(i, 0);
-//
-//        // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
-//        // and C = I. See wpimath/algorithms.md.
-//        Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
-//        for (int row = 0; row < 3; ++row) {
-//            double stdDev = estimatorOdometryStdDevs.get(row, 0);
-//            if (stdDev == 0.0) visionK.set(row, row, 0.0);
-//            else visionK.set(row, row, stdDev / (stdDev + Math.sqrt(stdDev * r[row])));
-//        }
-//        // difference between estimate and vision pose
-//        Transform2d transform = new Transform2d(estimateAtTime, observation.visionPose());
-//        // scale transform by visionK
-//        var kTimesTransform = visionK.times(VecBuilder.fill(
-//                transform.getX(), transform.getY(), transform.getRotation().getRadians()));
-//        Transform2d scaledTransform = new Transform2d(
-//                kTimesTransform.get(0, 0),
-//                kTimesTransform.get(1, 0),
-//                Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
-//
-//        // Recalculate current estimate by applying scaled transform to old estimate
-//        // then replaying odometry data
-//        return estimateAtTime.plus(scaledTransform).plus(sampleToOdometryTransform);
-//    }
+    //    public void addVisionObservation(MapleMultiTagPoseEstimator.VisionObservation observation) {
+    //        // If measurement is old enough to be outside the pose buffer's time-span, skip.
+    //        try {
+    //            if (poseBuffer.getInternalBuffer().lastKey() - POSE_BUFFER_DURATION.in(Seconds) >
+    // observation.timestamp())
+    //                return;
+    //        } catch (NoSuchElementException ex) {
+    //            return;
+    //        }
+    //
+    //        // Get odometry based pose at timestamp
+    //        var sample = poseBuffer.getSample(observation.timestamp());
+    //        if (sample.isEmpty()) return;
+    //
+    //        primaryEstimatorPose = addVisionObservationToEstimator(
+    //                observation, sample.get(), primaryEstimatorPose, primaryEstimatorOdometryStdDevs);
+    //        visionSensitivePose = addVisionObservationToEstimator(
+    //                observation, sample.get(), visionSensitivePose, visionSensitiveEstimatorOdometryStdDevs);
+    //
+    //        previousVisionResultTimeStamp = Timer.getTimestamp();
+    //    }
+    //
+    //    private Pose2d addVisionObservationToEstimator(
+    //            MapleMultiTagPoseEstimator.VisionObservation observation,
+    //            Pose2d odometryPoseSample,
+    //            Pose2d estimatorPose,
+    //            Matrix<N3, N1> estimatorOdometryStdDevs) {
+    //        // sample --> odometryPose transform and backwards of that
+    //        var sampleToOdometryTransform = new Transform2d(odometryPoseSample, odometryPoseSensorLess);
+    //        var odometryToSampleTransform = new Transform2d(odometryPoseSensorLess, odometryPoseSample);
+    //        // get old estimate by applying odometryToSample Transform
+    //        Pose2d estimateAtTime = estimatorPose.plus(odometryToSampleTransform);
+    //
+    //        // Calculate 3 x 3 vision matrix
+    //        var r = new double[3];
+    //        for (int i = 0; i < 3; ++i)
+    //            r[i] = observation.stdDevs().get(i, 0) * observation.stdDevs().get(i, 0);
+    //
+    //        // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
+    //        // and C = I. See wpimath/algorithms.md.
+    //        Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
+    //        for (int row = 0; row < 3; ++row) {
+    //            double stdDev = estimatorOdometryStdDevs.get(row, 0);
+    //            if (stdDev == 0.0) visionK.set(row, row, 0.0);
+    //            else visionK.set(row, row, stdDev / (stdDev + Math.sqrt(stdDev * r[row])));
+    //        }
+    //        // difference between estimate and vision pose
+    //        Transform2d transform = new Transform2d(estimateAtTime, observation.visionPose());
+    //        // scale transform by visionK
+    //        var kTimesTransform = visionK.times(VecBuilder.fill(
+    //                transform.getX(), transform.getY(), transform.getRotation().getRadians()));
+    //        Transform2d scaledTransform = new Transform2d(
+    //                kTimesTransform.get(0, 0),
+    //                kTimesTransform.get(1, 0),
+    //                Rotation2d.fromRadians(kTimesTransform.get(2, 0)));
+    //
+    //        // Recalculate current estimate by applying scaled transform to old estimate
+    //        // then replaying odometry data
+    //        return estimateAtTime.plus(scaledTransform).plus(sampleToOdometryTransform);
+    //    }
 
     public Rotation2d getRotation() {
         return primaryEstimatorPose.getRotation();
@@ -199,8 +207,15 @@ public class RobotState {
         };
     }
 
+    public SwerveModuleState[] getMeasuredStates() {
+        return measuredStates;
+    }
+
     public ChassisSpeeds getRobotRelativeSpeeds() {
-        return measuredSpeedsRobotRelative;
+        ChassisSpeeds robotRelativeSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(measuredStates);
+        robotRelativeSpeeds.omegaRadiansPerSecond =
+                gyroYawVelocityRadPerSec.orElse(robotRelativeSpeeds.omegaRadiansPerSecond);
+        return robotRelativeSpeeds;
     }
 
     public ChassisSpeeds getFieldRelativeSpeeds() {
@@ -270,5 +285,9 @@ public class RobotState {
     public static RobotState getInstance() {
         if (instance == null) instance = new RobotState();
         return instance;
+    }
+
+    public void resetGyro() {
+        resetPose(new Pose2d(getPose().getTranslation(), FieldMirroringUtils.getCurrentAllianceDriverStationFacing()));
     }
 }
