@@ -6,7 +6,6 @@ package frc.robot.subsystems.drive.IO;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.drive.DriveTrainConfigs;
-
 import org.littletonrobotics.junction.AutoLog;
 
 public interface GyroIO {

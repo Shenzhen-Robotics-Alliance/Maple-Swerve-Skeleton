@@ -14,7 +14,6 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.DriveTrainConstants;
-
 import java.util.Arrays;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;

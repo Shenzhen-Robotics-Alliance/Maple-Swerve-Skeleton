@@ -1,13 +1,12 @@
 package frc.robot.subsystems.drive.IO;
 
+import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Robot;
 import frc.robot.generated.TunerConstants;
 import frc.robot.utils.MapleTimeUtils;
-
-import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -123,8 +122,7 @@ public interface OdometryThread {
         }
 
         private void refreshSignalsAndBlockThread() {
-            if (TunerConstants.kCANBus.isNetworkFD())
-                BaseStatusSignal.waitForAll(0.02, statusSignals);
+            if (TunerConstants.kCANBus.isNetworkFD()) BaseStatusSignal.waitForAll(0.02, statusSignals);
             else {
                 MapleTimeUtils.delay(1.0 / 300.0);
                 BaseStatusSignal.refreshAll(statusSignals);

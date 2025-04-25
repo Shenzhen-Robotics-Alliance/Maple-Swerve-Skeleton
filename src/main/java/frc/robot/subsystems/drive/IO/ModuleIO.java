@@ -5,10 +5,10 @@
 
 package frc.robot.subsystems.drive.IO;
 
+import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
-
-import static frc.robot.subsystems.drive.DriveTrainConfigs.*;
 
 public interface ModuleIO {
     @AutoLog
