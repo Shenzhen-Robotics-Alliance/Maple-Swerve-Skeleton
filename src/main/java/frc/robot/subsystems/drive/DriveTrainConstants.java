@@ -2,17 +2,23 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.*;
 import frc.robot.generated.TunerConstants;
+
+import java.io.IOException;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
+import org.json.simple.parser.ParseException;
 
 /**
  * stores the constants and PID configs for chassis because we want an all-real simulation for the chassis, the numbers
@@ -117,4 +123,20 @@ public class DriveTrainConstants {
                                         DriveTrainConstants.STEER_INERTIA,
                                         DriveTrainConstants.WHEEL_COEFFICIENT_OF_FRICTION))
                                 .withGyro(DriveTrainConstants.gyroSimulationFactory);
+
+    private static RobotConfig pathPlannerRobotConfig = null;
+    public static RobotConfig pathplannerRobotConfig() {
+        if (pathPlannerRobotConfig != null) return pathPlannerRobotConfig;
+        try {
+            pathPlannerRobotConfig = RobotConfig.fromGUISettings();
+        } catch (Exception e) {
+            System.out.println("Error while loading PathPlanner Robot Config");
+            ModuleConfig moduleConfig = new ModuleConfig(WHEEL_RADIUS, TunerConstants.kSpeedAt12Volts, WHEEL_COEFFICIENT_OF_FRICTION, DRIVE_MOTOR_MODEL, DRIVE_GEAR_RATIO, DRIVE_ANTI_SLIP_TORQUE_CURRENT_LIMIT, 1);
+            pathPlannerRobotConfig = new RobotConfig(ROBOT_MASS, ROBOT_MOI, moduleConfig, MODULE_TRANSLATIONS);
+        }
+
+        return pathPlannerRobotConfig;
+    }
+
+    public static SwerveSetpointGenerator setpointGenerator = new SwerveSetpointGenerator(pathplannerRobotConfig(), STEER_MOTOR_MODEL.freeSpeedRadPerSec / STEER_GEAR_RATIO * 0.5);
 }
